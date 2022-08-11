@@ -69,21 +69,20 @@ const columns: GridColDef[] = [
     ...columnsDefaultProps,
     field: "ab_target",
     headerName: "Target antigen",
-    flex: 1,
     hide: true,
   },
   {
     ...columnsDefaultProps,
     field: "target_species",
     headerName: "Target species",
-    flex: 1,
     hide: true,
   },
   {
     ...columnsDefaultProps,
     field: "target_ant_spec",
-    headerName: "Target antigen & species",
+    headerName: "Target antigen",
     renderCell: RenderTargetAntigenAndSpecies,
+    flex: 1.5,
   },
   {
     ...columnsDefaultProps,
@@ -95,7 +94,12 @@ const columns: GridColDef[] = [
     ...columnsDefaultProps,
     field: "clonality",
     headerName: "Clonality",
-    flex: 1,
+  },
+  {
+    ...columnsDefaultProps,
+    field: "reference",
+    headerName: "Reference",
+    flex: 1.5,
   },
   {
     ...columnsDefaultProps,
@@ -112,14 +116,14 @@ const columns: GridColDef[] = [
   {
     ...columnsDefaultProps,
     field: "host",
-    headerName: "Host",
+    headerName: "Host organism",
     flex: 1,
   },
   {
     ...columnsDefaultProps,
     field: "vendor",
-    headerName: "Vendor",
-    flex: 1,
+    headerName: "Link to Vendor",
+    flex: 2,
   },
   {
     ...columnsDefaultProps,
