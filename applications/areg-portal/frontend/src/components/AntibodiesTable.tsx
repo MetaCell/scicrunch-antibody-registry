@@ -67,6 +67,7 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
 const columnsDefaultProps = {
   flex: 1,
   renderCell: RenderCellContent,
+  headerClassName: "custom-header",
 };
 
 const columns: GridColDef[] = [
@@ -142,12 +143,13 @@ const columns: GridColDef[] = [
     ...columnsDefaultProps,
     field: "host",
     headerName: "Host organism",
+    flex: 1.5,
   },
   {
     ...columnsDefaultProps,
     field: "vendor",
     headerName: "Link to Vendor",
-    flex: 2,
+    flex: 1.5,
   },
   {
     ...columnsDefaultProps,
@@ -172,24 +174,42 @@ function AntibodiesTable() {
   return (
     <Box sx={{ height: "80vh" }}>
       <Box
-        sx={(theme) => ({
+        sx={{
           display: "flex",
           height: "100%",
-          "& .MuiDataGrid-columnHeadersInner": {
-            backgroundColor: theme.palette.grey[50],
-          },
-          "& .MuiDataGrid-columnHeaderTitle": {
-            color: theme.palette.grey[500],
-            fontWeight: 600,
-            fontSize: "0.875rem",
-          },
-        })}
+        }}
       >
         <Box sx={{ flexGrow: 1 }}>
           <DataGrid
             sx={(theme) => ({
               "& .MuiDataGrid-row:hover": {
                 backgroundColor: "grey.50",
+              },
+              "& .MuiDataGrid-columnHeadersInner": {
+                backgroundColor: "grey.50",
+              },
+              "& .MuiDataGrid-columnHeaderTitle": {
+                color: "grey.500",
+                fontWeight: 600,
+                fontSize: "0.875rem",
+              },
+              " .MuiDataGrid-columnSeparator": {
+                display: "none",
+              },
+              "& .custom-header": {
+                borderRight: "0.063rem solid",
+                borderColor: "grey.200",
+              },
+              "& .MuiCheckbox-root svg": {
+                width: "1.25rem",
+                height: "1.25rem",
+                backgroundColor: "common.white",
+                border: "0.063rem solid",
+                borderColor: "grey.300",
+                borderRadius: "0.375rem",
+              },
+              "& .MuiCheckbox-root svg path": {
+                display: "none",
               },
             })}
             disableColumnMenu
