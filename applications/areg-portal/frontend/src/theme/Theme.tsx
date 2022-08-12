@@ -9,6 +9,7 @@ declare module "@mui/material/styles" {
 const theme = createTheme({
   palette: {
     grey: {
+      A100: "#FCFCFD",
       50: "#F9FAFB",
       100: "#F2F4F7",
       200: "#EAECF0",
@@ -19,6 +20,7 @@ const theme = createTheme({
       700: "#344054",
       800: "#1D2939",
       900: "#101828",
+      A200: "#F9F9FB",
     },
     primary: {
       main: "#2173F2",

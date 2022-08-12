@@ -1,44 +1,72 @@
 import React, { useEffect, useState } from "react";
 //MUI
-import {
-  DataGrid,
-  GridToolbar,
-  GridColDef,
-  GridRenderCellParams,
-  GridAlignment,
-} from "@mui/x-data-grid";
-import { Typography, Box } from "@mui/material";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import { Typography, Box, Link } from "@mui/material";
 
 //project imports
 import { getAntibodies } from "../services/AntibodiesService";
 
+const StyledBadge = (props) => {
+  if (props.field === "vendor") {
+    return (
+      <Box bgcolor="primary.light" px={0.5} py={0.25} borderRadius="0.25rem">
+        <Link component="button" underline="none">
+          {props.children}
+        </Link>
+      </Box>
+    );
+  } else if (props.field === "clonality") {
+    return (
+      <Box bgcolor="grey.A200" px={1} py={0.25} borderRadius="1rem">
+        {props.children}
+      </Box>
+    );
+  } else return <Box>{props.children}</Box>;
+};
+
 const RenderNameAndId = (props: GridRenderCellParams<String>) => {
   return (
     <Box>
-      <Typography variant="body2" align="left">
+      <Typography
+        variant="body2"
+        align="left"
+        color="grey.700"
+        fontWeight={500}
+      >
         {props.row.ab_name}
       </Typography>
-      <Typography variant="caption" align="left" component="div">
+      <Typography
+        variant="caption"
+        align="left"
+        component="div"
+        color="grey.500"
+      >
         {props.row.ab_id}
       </Typography>
     </Box>
   );
 };
 
-const RenderTargetAntigenAndSpecies = (props: GridRenderCellParams<String>) => {
+const RenderCellContent = (props: GridRenderCellParams<String>) => {
   return (
-    <Box>
-      <Typography variant="body2">
-        {props.row.ab_target} {props.row.target_species}
+    <StyledBadge {...props}>
+      <Typography
+        variant="caption"
+        align="left"
+        color={props.field === "vendor" ? "primary.main" : "grey.500"}
+        component="div"
+      >
+        {props.field === "target_ant_spec"
+          ? `${props.row.ab_target} ${props.row.target_species}`
+          : props.value}
       </Typography>
-    </Box>
+    </StyledBadge>
   );
 };
 
 const columnsDefaultProps = {
   flex: 1,
-  headerAlign: "center" as GridAlignment,
-  align: "center" as GridAlignment,
+  renderCell: RenderCellContent,
 };
 
 const columns: GridColDef[] = [
@@ -46,14 +74,12 @@ const columns: GridColDef[] = [
     ...columnsDefaultProps,
     field: "ab_name",
     headerName: "Name",
-    flex: 1,
     hide: true,
   },
   {
     ...columnsDefaultProps,
     field: "ab_id",
     headerName: "ID",
-    flex: 1,
     hide: true,
   },
   {
@@ -81,7 +107,6 @@ const columns: GridColDef[] = [
     ...columnsDefaultProps,
     field: "target_ant_spec",
     headerName: "Target antigen",
-    renderCell: RenderTargetAntigenAndSpecies,
     flex: 1.5,
   },
   {
@@ -106,18 +131,17 @@ const columns: GridColDef[] = [
     field: "comments",
     headerName: "Comments",
     flex: 3,
+    align: "left",
   },
   {
     ...columnsDefaultProps,
     field: "clone_id",
     headerName: "Clone ID",
-    flex: 1,
   },
   {
     ...columnsDefaultProps,
     field: "host",
     headerName: "Host organism",
-    flex: 1,
   },
   {
     ...columnsDefaultProps,
@@ -129,7 +153,6 @@ const columns: GridColDef[] = [
     ...columnsDefaultProps,
     field: "catalog_num",
     headerName: "Cat Num",
-    flex: 1,
   },
 ];
 
@@ -155,17 +178,27 @@ function AntibodiesTable() {
           "& .MuiDataGrid-columnHeadersInner": {
             backgroundColor: theme.palette.grey[50],
           },
+          "& .MuiDataGrid-columnHeaderTitle": {
+            color: theme.palette.grey[500],
+            fontWeight: 600,
+            fontSize: "0.875rem",
+          },
         })}
       >
         <Box sx={{ flexGrow: 1 }}>
           <DataGrid
+            sx={(theme) => ({
+              "& .MuiDataGrid-row:hover": {
+                backgroundColor: "grey.50",
+              },
+            })}
+            disableColumnMenu
             rows={antibodiesList}
             columns={columns}
             pageSize={20}
             rowsPerPageOptions={[20]}
             checkboxSelection
             disableSelectionOnClick
-            components={{ Toolbar: GridToolbar }}
             getRowHeight={() => "auto"}
           />
         </Box>
