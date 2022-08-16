@@ -70,6 +70,37 @@ const columnsDefaultProps = {
   headerClassName: "custom-header",
 };
 
+const dataGridStyles = {
+  "& .MuiDataGrid-row:hover": {
+    backgroundColor: "grey.50",
+  },
+  "& .MuiDataGrid-columnHeadersInner": {
+    backgroundColor: "grey.50",
+  },
+  "& .MuiDataGrid-columnHeaderTitle": {
+    color: "grey.500",
+    fontWeight: 600,
+    fontSize: "0.875rem",
+  },
+  " .MuiDataGrid-columnSeparator": {
+    display: "none",
+  },
+  "& .custom-header": {
+    borderRight: "0.063rem solid",
+    borderColor: "grey.200",
+  },
+  "& .MuiCheckbox-root svg": {
+    width: "1.25rem",
+    height: "1.25rem",
+    backgroundColor: "common.white",
+    border: "0.063rem solid",
+    borderColor: "grey.300",
+    borderRadius: "0.375rem",
+  },
+  "& .MuiCheckbox-root svg path": {
+    display: "none",
+  },
+};
 const columns: GridColDef[] = [
   {
     ...columnsDefaultProps,
@@ -181,37 +212,7 @@ function AntibodiesTable() {
       >
         <Box sx={{ flexGrow: 1 }}>
           <DataGrid
-            sx={(theme) => ({
-              "& .MuiDataGrid-row:hover": {
-                backgroundColor: "grey.50",
-              },
-              "& .MuiDataGrid-columnHeadersInner": {
-                backgroundColor: "grey.50",
-              },
-              "& .MuiDataGrid-columnHeaderTitle": {
-                color: "grey.500",
-                fontWeight: 600,
-                fontSize: "0.875rem",
-              },
-              " .MuiDataGrid-columnSeparator": {
-                display: "none",
-              },
-              "& .custom-header": {
-                borderRight: "0.063rem solid",
-                borderColor: "grey.200",
-              },
-              "& .MuiCheckbox-root svg": {
-                width: "1.25rem",
-                height: "1.25rem",
-                backgroundColor: "common.white",
-                border: "0.063rem solid",
-                borderColor: "grey.300",
-                borderRadius: "0.375rem",
-              },
-              "& .MuiCheckbox-root svg path": {
-                display: "none",
-              },
-            })}
+            sx={dataGridStyles}
             disableColumnMenu
             rows={antibodiesList}
             columns={columns}

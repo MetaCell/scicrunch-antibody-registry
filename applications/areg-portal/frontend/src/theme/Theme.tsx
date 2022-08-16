@@ -43,6 +43,11 @@ const theme = createTheme({
       fontWeight: 600,
       fontSize: "1.875rem",
     },
+    h6: {
+      fontFamily: "'proxima-nova', 'sans-serif'",
+      fontWeight: 600,
+      fontSize: "0.875rem",
+    },
     subtitle1: {
       fontSize: "0.875rem",
     },
