@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Tab, Tabs } from "@mui/material";
+import { Box, Button, Stack, Tab, Tabs } from "@mui/material";
 import { HouseIcon, SendIcon, FilteringIcon, SettingsIcon } from "../icons";
 
 const TableToolbar = () => {
@@ -15,7 +15,7 @@ const TableToolbar = () => {
         width: "100%",
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "start",
+        alignItems: "center",
       }}
     >
       <Tabs
@@ -40,22 +40,22 @@ const TableToolbar = () => {
           label="My Submissions"
         />
       </Tabs>
-      <Box>
+      <Stack direction="row" spacing={3}>
         <Button
           variant="text"
           startIcon={<FilteringIcon />}
-          sx={{ color: "grey.500", fontWeight: 600 }}
+          sx={{ color: "grey.500", fontWeight: 600, px: 1.75, py: 0.75 }}
         >
           Filter
         </Button>
         <Button
           variant="text"
           startIcon={<SettingsIcon />}
-          sx={{ color: "grey.500", fontWeight: 600 }}
+          sx={{ color: "grey.500", fontWeight: 600, px: 1.75, py: 0.75 }}
         >
-          Table Settings
+          Table settings
         </Button>
-      </Box>
+      </Stack>
     </Box>
   );
 };

@@ -14,7 +14,7 @@ const Main = () => (
     <CssBaseline />
     <Navbar />
     <Container maxWidth="xl" sx={{ my: 1 }}>
-      <Stack direction="column" spacing={1.5} mb={1.5}>
+      <Stack direction="column" spacing={1.5} mb={2}>
         <HomeHeader />
         <TableToolbar />
       </Stack>

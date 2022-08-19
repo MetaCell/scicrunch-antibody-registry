@@ -5,13 +5,7 @@ import { AddAntibodyIcon, DownloadIcon } from "../icons";
 
 const HomeHeader = () => {
   return (
-    <Box
-      height="4.125rem"
-      mb={2}
-      mt={5}
-      display="flex"
-      justifyContent="space-between"
-    >
+    <Box height="4.125rem" mt={5} display="flex" justifyContent="space-between">
       <Box width="23.75rem">
         <Grid container columnSpacing={1.5} rowSpacing={1}>
           <Grid item>
