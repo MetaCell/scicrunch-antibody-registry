@@ -4,7 +4,7 @@ import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { Typography, Box, Link } from "@mui/material";
 
 //project imports
-import { getAntibodies } from "../services/AntibodiesService";
+import { getAntibodies } from "../../services/AntibodiesService";
 
 const StyledBadge = (props) => {
   if (props.field === "vendor") {

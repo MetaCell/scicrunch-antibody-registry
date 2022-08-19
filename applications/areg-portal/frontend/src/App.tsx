@@ -1,19 +1,23 @@
 import React from "react";
 import "./styles/style.less";
-import { Container, CssBaseline } from "@mui/material";
+import { Container, CssBaseline, Stack } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 
 import theme from "./theme/Theme";
-import AntibodiesTable from "./components/AntibodiesTable";
+import AntibodiesTable from "./components/Home/AntibodiesTable";
 import Navbar from "./components/NavBar/Navbar";
-import TableHeader from "./components/TableHeader";
+import HomeHeader from "./components/Home/HomeHeader";
+import TableToolbar from "./components/Home/TableToolbar";
 
 const Main = () => (
   <ThemeProvider theme={theme}>
     <CssBaseline />
     <Navbar />
     <Container maxWidth="xl" sx={{ my: 1 }}>
-      <TableHeader />
+      <Stack direction="column" spacing={1.5} mb={1.5}>
+        <HomeHeader />
+        <TableToolbar />
+      </Stack>
       <AntibodiesTable />
     </Container>
   </ThemeProvider>
