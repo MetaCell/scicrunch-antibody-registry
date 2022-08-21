@@ -130,3 +130,120 @@ export const SettingsIcon = (props: SvgIconProps) => (
     />
   </SvgIcon>
 );
+
+export const CheckedIcon = (props: SvgIconProps) => (
+  <SvgIcon
+    sx={{ height: "1.25rem", width: "1.25rem" }}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect x="0.5" y="0.5" width="19" height="19" rx="5.5" fill="#DFEBF8" />
+    <path
+      d="M14.6666 6.5L8.24992 12.9167L5.33325 10"
+      stroke="#2173F2"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+    <rect x="0.5" y="0.5" width="19" height="19" rx="5.5" stroke="#2173F2" />
+  </SvgIcon>
+);
+
+export const UncheckedIcon = (props: SvgIconProps) => (
+  <SvgIcon
+    sx={{ height: "1.25rem", width: "1.25rem" }}
+    viewBox="0 0 20 20"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect x="0.5" y="0.5" width="19" height="19" rx="5.5" fill="white" />
+    <rect x="0.5" y="0.5" width="19" height="19" rx="5.5" stroke="#D0D5DD" />
+  </SvgIcon>
+);
+
+export const FilteredColumnIcon = (props: SvgIconProps) => (
+  <SvgIcon
+    sx={{ width: "1.1rem", height: "1.1rem" }}
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g clip-path="url(#clip0_801_17210)">
+      <path
+        d="M4 8H12M2 4H14M6 12H10"
+        stroke="#667085"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle
+        cx="13"
+        cy="3"
+        r="3.75"
+        fill="#2173F2"
+        stroke="#F9FAFB"
+        strokeWidth="1.5"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_801_17210">
+        <rect width="16" height="16" fill="white" />
+      </clipPath>
+    </defs>
+  </SvgIcon>
+);
+
+export const SortingIcon = (props: SvgIconProps) => (
+  <SvgIcon
+    sx={{ height: "0.75rem", width: "0.5rem " }}
+    viewBox="0 0 8 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M0.666748 7.99984L4.00008 11.3332L7.33341 7.99984"
+      fill="#98A2B3"
+    />
+    <path
+      d="M0.666748 3.99984L4.00008 0.666504L7.33341 3.99984"
+      fill="#98A2B3"
+    />
+  </SvgIcon>
+);
+
+export const AscSortedIcon = (props: SvgIconProps) => (
+  <SvgIcon
+    sx={{ height: "0.75rem", width: "0.5rem " }}
+    viewBox="0 0 8 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M0.666748 7.99984L4.00008 11.3332L7.33341 7.99984"
+      fill="#98A2B3"
+    />
+    <path
+      d="M0.666748 3.99984L4.00008 0.666504L7.33341 3.99984"
+      // TODO: change fill color with the right one
+      fill="#475467"
+    />
+  </SvgIcon>
+);
+
+export const DescSortedIcon = (props: SvgIconProps) => (
+  <SvgIcon
+    sx={{ height: "0.75rem", width: "0.5rem " }}
+    viewBox="0 0 8 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M0.666748 7.99984L4.00008 11.3332L7.33341 7.99984"
+      // TODO: change fill color with the right one
+      fill="#475467"
+    />
+    <path
+      d="M0.666748 3.99984L4.00008 0.666504L7.33341 3.99984"
+      fill="#98A2B3"
+    />
+  </SvgIcon>
+);

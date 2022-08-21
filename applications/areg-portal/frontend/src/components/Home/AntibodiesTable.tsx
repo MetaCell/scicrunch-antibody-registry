@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from "react";
 //MUI
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
-import { Typography, Box, Link } from "@mui/material";
+import { Typography, Box, Link, Checkbox } from "@mui/material";
 
 //project imports
 import { getAntibodies } from "../../services/AntibodiesService";
+import {
+  AscSortedIcon,
+  DescSortedIcon,
+  FilteredColumnIcon,
+  SortingIcon,
+  CheckedIcon,
+  UncheckedIcon,
+} from "../icons";
 
 const StyledBadge = (props) => {
   if (props.field === "vendor") {
@@ -22,6 +30,16 @@ const StyledBadge = (props) => {
       </Box>
     );
   } else return <Box>{props.children}</Box>;
+};
+//TODO figure out how to customize CheckBox
+const StyledCheckBox = (props) => {
+  return (
+    <Checkbox
+      {...props}
+      checkedIcon={<CheckedIcon />}
+      icon={<UncheckedIcon />}
+    />
+  );
 };
 
 const RenderNameAndId = (props: GridRenderCellParams<String>) => {
@@ -64,6 +82,16 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
   );
 };
 
+const getValue = (props) => {
+  let cellValue = "";
+  props.field === "ab_name_id"
+    ? (cellValue = `${props.row.ab_name || ""} ${props.row.ab_id || ""}`)
+    : (cellValue = `${props.row.ab_target || ""} ${
+        props.row.target_species || ""
+      }`);
+  return cellValue;
+};
+
 const columnsDefaultProps = {
   flex: 1,
   renderCell: RenderCellContent,
@@ -100,6 +128,13 @@ const dataGridStyles = {
   "& .MuiCheckbox-root svg path": {
     display: "none",
   },
+  "& .MuiCheckbox-root.Mui-checked svg": {
+    backgroundColor: "transparent",
+    borderColor: "primary.main",
+  },
+  "& .MuiDataGrid-iconButtonContainer": {
+    visibility: "visible",
+  },
 };
 const columns: GridColDef[] = [
   {
@@ -120,6 +155,7 @@ const columns: GridColDef[] = [
     headerName: "Name & ID",
     flex: 2,
     renderCell: RenderNameAndId,
+    valueGetter: getValue,
     headerAlign: "left",
     align: "left",
   },
@@ -140,6 +176,7 @@ const columns: GridColDef[] = [
     field: "target_ant_spec",
     headerName: "Target antigen",
     flex: 1.5,
+    valueGetter: getValue,
   },
   {
     ...columnsDefaultProps,
@@ -221,6 +258,13 @@ function AntibodiesTable() {
           disableColumnMenu
           disableSelectionOnClick
           getRowHeight={() => "auto"}
+          components={{
+            //BaseCheckbox: StyledCheckBox,
+            ColumnFilteredIcon: FilteredColumnIcon,
+            ColumnUnsortedIcon: SortingIcon,
+            ColumnSortedAscendingIcon: AscSortedIcon,
+            ColumnSortedDescendingIcon: DescSortedIcon,
+          }}
         />
       </Box>
     </Box>
