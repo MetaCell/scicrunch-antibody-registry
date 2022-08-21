@@ -203,26 +203,25 @@ function AntibodiesTable() {
   useEffect(fetchAntibodies, []);
 
   return (
-    <Box sx={{ height: "80vh" }}>
-      <Box
-        sx={{
-          display: "flex",
-          height: "100%",
-        }}
-      >
-        <Box sx={{ flexGrow: 1 }}>
-          <DataGrid
-            sx={dataGridStyles}
-            disableColumnMenu
-            rows={antibodiesList}
-            columns={columns}
-            pageSize={20}
-            rowsPerPageOptions={[20]}
-            checkboxSelection
-            disableSelectionOnClick
-            getRowHeight={() => "auto"}
-          />
-        </Box>
+    <Box
+      sx={{
+        display: "flex",
+        height: "100%",
+      }}
+    >
+      <Box sx={{ flexGrow: 1 }}>
+        <DataGrid
+          sx={dataGridStyles}
+          rows={antibodiesList}
+          columns={columns}
+          pageSize={20}
+          rowsPerPageOptions={[20]}
+          autoHeight
+          checkboxSelection
+          disableColumnMenu
+          disableSelectionOnClick
+          getRowHeight={() => "auto"}
+        />
       </Box>
     </Box>
   );

@@ -11,12 +11,13 @@ const TableToolbar = () => {
 
   return (
     <Box
-      sx={{
+      sx={(theme) => ({
         width: "100%",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-      }}
+        borderBottom: `1px solid ${theme.palette.grey[200]}`,
+      })}
     >
       <Tabs
         value={value}
