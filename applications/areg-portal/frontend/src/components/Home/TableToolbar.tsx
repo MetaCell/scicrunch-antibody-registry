@@ -1,8 +1,10 @@
 import React from "react";
 import { Box, Button, Stack, Tab, Tabs } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { HouseIcon, SendIcon, FilteringIcon, SettingsIcon } from "../icons";
 
 const TableToolbar = () => {
+  const theme = useTheme();
   const [value, setValue] = React.useState("one");
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
@@ -24,19 +26,37 @@ const TableToolbar = () => {
         onChange={handleChange}
         textColor="primary"
         indicatorColor="primary"
-        sx={{ height: "3.5rem", alignItems: "end" }}
+        sx={{
+          alignItems: "end",
+        }}
       >
         <Tab
-          sx={{ p: 0, mr: 1.75 }}
+          sx={{ p: 0, mr: 1.75, color: "grey.500", minHeight: "56px" }}
           value="one"
-          icon={<HouseIcon />}
+          icon={
+            <HouseIcon
+              stroke={
+                value == "one"
+                  ? theme.palette.primary.main
+                  : theme.palette.grey[400]
+              }
+            />
+          }
           iconPosition="start"
           label="All Results"
         />
         <Tab
-          sx={{ px: 0 }}
+          sx={{ p: 0, color: "grey.500", minHeight: "56px" }}
           value="two"
-          icon={<SendIcon />}
+          icon={
+            <SendIcon
+              stroke={
+                value == "two"
+                  ? theme.palette.primary.main
+                  : theme.palette.grey[400]
+              }
+            />
+          }
           iconPosition="start"
           label="My Submissions"
         />
