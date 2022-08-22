@@ -31,7 +31,6 @@ const StyledBadge = (props) => {
     );
   } else return <Box>{props.children}</Box>;
 };
-//TODO figure out how to customize CheckBox
 const StyledCheckBox = (props) => {
   return (
     <Checkbox
@@ -117,7 +116,7 @@ const dataGridStyles = {
     borderRight: "0.063rem solid",
     borderColor: "grey.200",
   },
-  "& .MuiCheckbox-root svg": {
+  "& .MuiCheckbox-root.MuiCheckbox-indeterminate svg": {
     width: "1.25rem",
     height: "1.25rem",
     backgroundColor: "common.white",
@@ -125,12 +124,8 @@ const dataGridStyles = {
     borderColor: "grey.300",
     borderRadius: "0.375rem",
   },
-  "& .MuiCheckbox-root svg path": {
+  "& .MuiCheckbox-root.MuiCheckbox-indeterminate svg path": {
     display: "none",
-  },
-  "& .MuiCheckbox-root.Mui-checked svg": {
-    backgroundColor: "transparent",
-    borderColor: "primary.main",
   },
   "& .MuiDataGrid-iconButtonContainer": {
     visibility: "visible",
@@ -259,7 +254,7 @@ function AntibodiesTable() {
           disableSelectionOnClick
           getRowHeight={() => "auto"}
           components={{
-            //BaseCheckbox: StyledCheckBox,
+            BaseCheckbox: StyledCheckBox,
             ColumnFilteredIcon: FilteredColumnIcon,
             ColumnUnsortedIcon: SortingIcon,
             ColumnSortedAscendingIcon: AscSortedIcon,
