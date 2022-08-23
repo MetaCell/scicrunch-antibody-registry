@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Box, Button, Stack, Tab, Tabs } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import {
@@ -14,15 +14,6 @@ import StyledButton from "../StyledButton";
 const TableToolbar = () => {
   const theme = useTheme();
   const [value, setValue] = useState("one");
-  const [scrolling, setScrolling] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.addEventListener("scroll", () =>
-        setScrolling(window.scrollY > 100)
-      );
-    }
-  }, []);
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -95,12 +86,7 @@ const TableToolbar = () => {
             Table settings
           </Button>
         </Stack>
-        <Stack
-          direction="row"
-          spacing={1.5}
-          ml={1.5}
-          display={!scrolling ? "none" : "inherit"}
-        >
+        <Stack direction="row" spacing={1.5} ml={1.5} display="none">
           <StyledButton disabled>
             <Box
               sx={{

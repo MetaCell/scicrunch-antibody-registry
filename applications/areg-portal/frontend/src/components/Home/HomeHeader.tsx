@@ -1,27 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { AppBar, Box, Container, Grid, Stack, Typography } from "@mui/material";
 import StyledButton from "../StyledButton";
 import { AddAntibodyIcon, DownloadIcon } from "../icons";
 import TableToolbar from "./TableToolbar";
 
 const HomeHeader = () => {
-  const [scrolling, setScrolling] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.addEventListener("scroll", () =>
-        setScrolling(window.scrollY > 100)
-      );
-    }
-  }, []);
-
   return (
     <Box>
       <AppBar elevation={0} sx={{ top: "4.5rem" }}>
         <Container maxWidth="xl">
           <Stack direction="column" spacing={1.5} mb={2}>
             <Box
-              display={scrolling ? "none" : "flex"}
+              display="flex"
               height="4.125rem"
               mt={6}
               justifyContent="space-between"
@@ -107,7 +97,7 @@ const HomeHeader = () => {
           </Stack>
         </Container>
       </AppBar>
-      <Box sx={{ height: !scrolling ? "12.5rem" : "5.3rem" }} component="div" />
+      <Box sx={{ height: "12.5rem" }} component="div" />
     </Box>
   );
 };
