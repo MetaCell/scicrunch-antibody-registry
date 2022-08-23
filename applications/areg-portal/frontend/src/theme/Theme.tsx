@@ -51,6 +51,10 @@ const theme = createTheme({
     subtitle1: {
       fontSize: "0.875rem",
     },
+    subtitle2: {
+      fontSize: "1rem",
+      fontWeight: 600,
+    },
   },
   components: {
     MuiAppBar: {
@@ -80,6 +84,14 @@ const theme = createTheme({
         root: {
           borderRadius: "8px !important",
           textDecoration: "none",
+        },
+      },
+    },
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          fontWeight: 400,
+          fontSize: "1rem",
         },
       },
     },

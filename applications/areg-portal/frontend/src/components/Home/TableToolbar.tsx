@@ -10,13 +10,24 @@ import {
   DownloadIcon,
 } from "../icons";
 import StyledButton from "../StyledButton";
+import FilterModal from "./FilterModal";
+import { DataGrid } from "@mui/x-data-grid";
 
 const TableToolbar = () => {
   const theme = useTheme();
   const [value, setValue] = useState("one");
+  const [openFilterModal, setOpenFilterModal] = useState(false);
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
+  };
+
+  const handleOpenFilterModal = (event: React.SyntheticEvent) => {
+    setOpenFilterModal(true);
+  };
+
+  const handleCloseFilterModal = (event: React.SyntheticEvent) => {
+    setOpenFilterModal(false);
   };
 
   return (
@@ -74,10 +85,21 @@ const TableToolbar = () => {
           <Button
             variant="text"
             startIcon={<FilteringIcon />}
-            sx={{ color: "grey.500", fontWeight: 600, px: 1.75, py: 0.75 }}
+            sx={{
+              color: "grey.500",
+              fontWeight: 600,
+              px: 1.75,
+              py: 0.75,
+            }}
+            onClick={handleOpenFilterModal}
           >
             Filter
           </Button>
+          <FilterModal
+            open={openFilterModal}
+            onClose={handleCloseFilterModal}
+          />
+
           <Button
             variant="text"
             startIcon={<SettingsIcon />}
