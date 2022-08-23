@@ -97,7 +97,7 @@ const columnsDefaultProps = {
   headerClassName: "custom-header",
 };
 
-const dataGridStyles = {
+const dataGridStyles = (theme) => ({
   "& .MuiDataGrid-row:hover": {
     backgroundColor: "grey.50",
   },
@@ -130,7 +130,22 @@ const dataGridStyles = {
   "& .MuiDataGrid-iconButtonContainer": {
     visibility: "visible",
   },
-};
+  "& .MuiDataGrid-columnHeaders": {
+    position: "sticky",
+    // Replace background colour if necessary
+    //backgroundColor: theme.palette.background.paper,
+    // Display header above grid data, but below any popups
+    zIndex: theme.zIndex.mobileStepper - 1,
+  },
+  "& .MuiDataGrid-virtualScroller": {
+    // Undo the margins that were added to push the rows below the previously fixed header
+    marginTop: "0 !important",
+  },
+  "& .MuiDataGrid-main": {
+    // Not sure why it is hidden by default, but it prevented the header from sticking
+    overflow: "visible",
+  },
+});
 const columns: GridColDef[] = [
   {
     ...columnsDefaultProps,
