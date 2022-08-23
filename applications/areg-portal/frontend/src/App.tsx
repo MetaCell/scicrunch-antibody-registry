@@ -7,7 +7,6 @@ import theme from "./theme/Theme";
 import AntibodiesTable from "./components/Home/AntibodiesTable";
 import Navbar from "./components/NavBar/Navbar";
 import HomeHeader from "./components/Home/HomeHeader";
-import TableToolbar from "./components/Home/TableToolbar";
 
 const Main = () => (
   <ThemeProvider theme={theme}>

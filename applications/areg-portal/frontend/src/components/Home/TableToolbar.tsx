@@ -1,17 +1,8 @@
 import React, { useState } from "react";
 import { Box, Button, Stack, Tab, Tabs } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import {
-  HouseIcon,
-  SendIcon,
-  FilteringIcon,
-  SettingsIcon,
-  AddAntibodyIcon,
-  DownloadIcon,
-} from "../icons";
-import StyledButton from "../StyledButton";
+import { HouseIcon, SendIcon, FilteringIcon, SettingsIcon } from "../icons";
 import FilterModal from "./FilterModal";
-import { DataGrid } from "@mui/x-data-grid";
 
 const TableToolbar = () => {
   const theme = useTheme();
@@ -107,46 +98,6 @@ const TableToolbar = () => {
           >
             Table settings
           </Button>
-        </Stack>
-        <Stack direction="row" spacing={1.5} ml={1.5} display="none">
-          <StyledButton disabled>
-            <Box
-              sx={{
-                minWidth: "1.25rem",
-                maxHeight: "1.25rem",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                mr: 1,
-              }}
-            >
-              <DownloadIcon
-                sx={{
-                  width: "1.25rem",
-                }}
-              />
-            </Box>
-            Download selection
-          </StyledButton>
-          <StyledButton bgPrimary>
-            <Box
-              sx={{
-                minWidth: "1.25rem",
-                maxHeight: "1.25rem",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                mr: 1,
-              }}
-            >
-              <AddAntibodyIcon
-                sx={{
-                  width: "0.9rem",
-                }}
-              />
-            </Box>
-            Submit an antibody
-          </StyledButton>
         </Stack>
       </Box>
     </Box>

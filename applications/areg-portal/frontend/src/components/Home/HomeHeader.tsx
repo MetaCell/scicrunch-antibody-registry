@@ -1,6 +1,13 @@
 import React from "react";
-import { AppBar, Box, Container, Grid, Stack, Typography } from "@mui/material";
-import StyledButton from "../StyledButton";
+import {
+  AppBar,
+  Box,
+  Button,
+  Container,
+  Grid,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { AddAntibodyIcon, DownloadIcon } from "../icons";
 import TableToolbar from "./TableToolbar";
 
@@ -9,14 +16,9 @@ const HomeHeader = () => {
     <Box>
       <AppBar elevation={0} sx={{ top: "4.5rem" }}>
         <Container maxWidth="xl">
-          <Stack direction="column" spacing={1.5} mb={2}>
-            <Box
-              display="flex"
-              height="4.125rem"
-              mt={6}
-              justifyContent="space-between"
-            >
-              <Box width="23.75rem">
+          <Stack direction="column" spacing={1.5} mb={1} width="100%">
+            <Box display="flex" mt={6} justifyContent="space-between">
+              <Box>
                 <Grid container columnSpacing={1.5} rowSpacing={1}>
                   <Grid item>
                     <Typography variant="h1" color="grey.700" align="left">
@@ -52,7 +54,7 @@ const HomeHeader = () => {
               </Box>
               <Box>
                 <Stack direction="row" spacing={1.5}>
-                  <StyledButton disabled>
+                  <Button disabled variant="contained" color="secondary">
                     <Box
                       sx={{
                         minWidth: "1.25rem",
@@ -70,8 +72,8 @@ const HomeHeader = () => {
                       />
                     </Box>
                     Download selection
-                  </StyledButton>
-                  <StyledButton bgPrimary>
+                  </Button>
+                  <Button variant="contained" color="primary">
                     <Box
                       sx={{
                         minWidth: "1.25rem",
@@ -89,7 +91,7 @@ const HomeHeader = () => {
                       />
                     </Box>
                     Submit an antibody
-                  </StyledButton>
+                  </Button>
                 </Stack>
               </Box>
             </Box>
