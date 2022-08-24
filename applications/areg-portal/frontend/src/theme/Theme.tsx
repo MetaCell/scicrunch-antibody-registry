@@ -1,5 +1,7 @@
-import { useMediaQuery } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
+import { vars } from "./variables";
+
+const { primaryFont, whiteColor, primaryColor, btnBorderColor, shadow } = vars;
 
 declare module "@mui/material/styles" {
   interface Theme {}
@@ -34,10 +36,10 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: "'proxima-nova', 'sans-serif'",
+    fontFamily: primaryFont,
     fontSize: 16,
     h1: {
-      fontFamily: "'proxima-nova', 'sans-serif'",
+      fontFamily: primaryFont,
       fontWeight: 600,
       fontSize: "1.875rem",
     },
@@ -46,18 +48,42 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: `
+        * {
+          font-family: ${primaryFont}
+        }
+      `
+    },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: "#fff",
+          backgroundColor: whiteColor,
         },
       },
     },
-
     MuiButton: {
       styleOverrides: {
         root: {
           textTransform: "none",
+          boxShadow: 'none'
+        },
+
+        containedSecondary: {
+          background: whiteColor,
+          border: `0.0625rem solid ${btnBorderColor}`,
+          boxShadow: shadow,
+          borderRadius: '0.5rem',
+          color: primaryColor,
+          fontWeight: 600,
+          fontSize: '1rem',
+          lineHeight: '1.5rem',
+
+          '&:hover': {
+            background: whiteColor,
+            boxShadow: shadow,
+            color: primaryColor,
+          },
         },
       },
     },
