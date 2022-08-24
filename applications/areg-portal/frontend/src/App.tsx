@@ -12,12 +12,12 @@ const App = () => {
   return (
     <BrowserRouter>
       <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Navbar />
-      <Switch>
-        <Route exact path="/" component={Home} />
-        <Route exact path="/about" component={About} />
-      </Switch>
+        <CssBaseline />
+        <Navbar />
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <Route exact path="/about" component={About} />
+        </Switch>
       </ThemeProvider>
     </BrowserRouter>
   )
