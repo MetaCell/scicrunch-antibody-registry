@@ -221,7 +221,7 @@ const columns: GridColDef[] = [
   },
 ];
 
-function AntibodiesTable() {
+const AntibodiesTable = () => {
   const [antibodiesList, setAntibodiesList] = useState([]);
 
   const fetchAntibodies = () => {
@@ -236,19 +236,18 @@ function AntibodiesTable() {
 
   return (
     <Box
-      sx={{
-        height: "80vh",
-      }}
+     
     >
-      <Box sx={{ flexGrow: 1, height: "100%" }}>
+      <Box sx={{ flexGrow: 1, height: "90vh" }}>
         <DataGrid
           sx={dataGridStyles}
           rows={antibodiesList}
           columns={columns}
-          pageSize={20}
+          pageSize={10}
           rowsPerPageOptions={[20]}
           checkboxSelection
           disableColumnMenu
+          
           disableSelectionOnClick
           getRowHeight={() => "auto"}
           components={{
