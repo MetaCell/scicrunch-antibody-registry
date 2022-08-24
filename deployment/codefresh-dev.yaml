@@ -135,6 +135,21 @@ steps:
     type: parallel
     stage: build
     steps:
+      accounts:
+        type: build
+        stage: build
+        tag: '${{CF_BUILD_ID}}'
+        dockerfile: Dockerfile
+        registry: '${{CODEFRESH_REGISTRY}}'
+        buildkit: true
+        build_arguments:
+        - TAG=${{CF_BUILD_ID}}
+        - DOMAIN=${{DOMAIN}}
+        - NOCACHE=${{CF_BUILD_ID}}
+        - REGISTRY=${{REGISTRY}}/areg/
+        image_name: areg/accounts
+        title: Accounts
+        working_directory: ./cloud-harness/applications/accounts
       common:
         type: build
         stage: build
@@ -248,6 +263,14 @@ steps:
         type: push
         title: Cloudharness django
         candidate: '${{REGISTRY}}/areg/cloudharness-django:${{CF_BUILD_ID}}'
+        tags:
+        - '${{DEPLOYMENT_PUBLISH_TAG}}'
+        registry: '${{REGISTRY_PUBLISH_URL}}'
+      publish_accounts:
+        stage: publish
+        type: push
+        title: Accounts
+        candidate: '${{REGISTRY}}/areg/accounts:${{CF_BUILD_ID}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
