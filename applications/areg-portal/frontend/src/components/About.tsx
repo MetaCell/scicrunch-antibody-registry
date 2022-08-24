@@ -151,7 +151,10 @@ const About = () => {
     arrows: false,
     infinite: true,
     speed: 500,
-    slidesToScroll: 1
+    slidesToScroll: 1,
+    swipeToSlide: true,
+    slidesToShow: 3,
+    cssEase: "linear"
   };
   const partners = 10;
   const history = useHistory();
