@@ -2,7 +2,9 @@ version: '1.0'
 stages:
 - prepare
 - build
+- unittest
 - deploy
+- qa
 - publish
 steps:
   main_clone:
@@ -31,9 +33,8 @@ steps:
     working_directory: .
     commands:
     - bash cloud-harness/install.sh
-    - harness-deployment /home/user/ucsd-antibody-registry/cloud-harness /home/user/ucsd-antibody-registry/.
-      -t ${{CF_BUILD_ID}} -d ${{DOMAIN}} -r ${{REGISTRY}} -rs ${{REGISTRY_SECRET}}
-      -n ${{NAMESPACE}} -e dev -i accounts -i common -i events -i areg-portal
+    - harness-deployment cloud-harness . -t ${{CF_BUILD_ID}} -d ${{DOMAIN}} -r ${{REGISTRY}}
+      -rs ${{REGISTRY_SECRET}} -n ${{NAMESPACE}} -e dev -i areg-portal
   prepare_deployment_view:
     commands:
     - helm template ./deployment/helm --debug -n ${{NAMESPACE}}
@@ -57,15 +58,9 @@ steps:
         buildkit: true
         build_arguments:
         - TAG=${{CF_BUILD_ID}}
-        - NAMESPACE=${{NAMESPACE}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
-        - CLOUDHARNESS_FLASK=${{REGISTRY}}/areg/cloudharness-flask:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_FRONTEND_BUILD=${{REGISTRY}}/areg/cloudharness-frontend-build:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_DJANGO=${{REGISTRY}}/areg/cloudharness-django:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_BASE_DEBIAN=${{REGISTRY}}/areg/cloudharness-base-debian:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_BASE=${{REGISTRY}}/areg/cloudharness-base:${{CF_BUILD_ID}}
         image_name: areg/cloudharness-base
         title: Cloudharness base
         working_directory: ./cloud-harness
@@ -78,15 +73,9 @@ steps:
         buildkit: true
         build_arguments:
         - TAG=${{CF_BUILD_ID}}
-        - NAMESPACE=${{NAMESPACE}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
-        - CLOUDHARNESS_FLASK=${{REGISTRY}}/areg/cloudharness-flask:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_FRONTEND_BUILD=${{REGISTRY}}/areg/cloudharness-frontend-build:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_DJANGO=${{REGISTRY}}/areg/cloudharness-django:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_BASE_DEBIAN=${{REGISTRY}}/areg/cloudharness-base-debian:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_BASE=${{REGISTRY}}/areg/cloudharness-base:${{CF_BUILD_ID}}
         image_name: areg/cloudharness-frontend-build
         title: Cloudharness frontend build
         working_directory: ./cloud-harness
@@ -99,15 +88,9 @@ steps:
         buildkit: true
         build_arguments:
         - TAG=${{CF_BUILD_ID}}
-        - NAMESPACE=${{NAMESPACE}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
-        - CLOUDHARNESS_FLASK=${{REGISTRY}}/areg/cloudharness-flask:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_FRONTEND_BUILD=${{REGISTRY}}/areg/cloudharness-frontend-build:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_DJANGO=${{REGISTRY}}/areg/cloudharness-django:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_BASE_DEBIAN=${{REGISTRY}}/areg/cloudharness-base-debian:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_BASE=${{REGISTRY}}/areg/cloudharness-base:${{CF_BUILD_ID}}
         image_name: areg/cloudharness-base-debian
         title: Cloudharness base debian
         working_directory: ./cloud-harness
@@ -125,14 +108,9 @@ steps:
         buildkit: true
         build_arguments:
         - TAG=${{CF_BUILD_ID}}
-        - NAMESPACE=${{NAMESPACE}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
-        - CLOUDHARNESS_FLASK=${{REGISTRY}}/areg/cloudharness-flask:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_FRONTEND_BUILD=${{REGISTRY}}/areg/cloudharness-frontend-build:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_DJANGO=${{REGISTRY}}/areg/cloudharness-django:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_BASE_DEBIAN=${{REGISTRY}}/areg/cloudharness-base-debian:${{CF_BUILD_ID}}
         - CLOUDHARNESS_BASE=${{REGISTRY}}/areg/cloudharness-base:${{CF_BUILD_ID}}
         image_name: areg/cloudharness-flask
         title: Cloudharness flask
@@ -146,15 +124,10 @@ steps:
         buildkit: true
         build_arguments:
         - TAG=${{CF_BUILD_ID}}
-        - NAMESPACE=${{NAMESPACE}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
-        - CLOUDHARNESS_FLASK=${{REGISTRY}}/areg/cloudharness-flask:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_FRONTEND_BUILD=${{REGISTRY}}/areg/cloudharness-frontend-build:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_DJANGO=${{REGISTRY}}/areg/cloudharness-django:${{CF_BUILD_ID}}
         - CLOUDHARNESS_BASE_DEBIAN=${{REGISTRY}}/areg/cloudharness-base-debian:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_BASE=${{REGISTRY}}/areg/cloudharness-base:${{CF_BUILD_ID}}
         image_name: areg/cloudharness-django
         title: Cloudharness django
         working_directory: ./cloud-harness/infrastructure/common-images/cloudharness-django
@@ -162,22 +135,6 @@ steps:
     type: parallel
     stage: build
     steps:
-      accounts:
-        type: build
-        stage: build
-        tag: '${{CF_BUILD_ID}}'
-        dockerfile: Dockerfile
-        registry: '${{CODEFRESH_REGISTRY}}'
-        buildkit: true
-        build_arguments:
-        - TAG=${{CF_BUILD_ID}}
-        - NAMESPACE=${{NAMESPACE}}
-        - DOMAIN=${{DOMAIN}}
-        - NOCACHE=${{CF_BUILD_ID}}
-        - REGISTRY=${{REGISTRY}}/areg/
-        image_name: areg/accounts
-        title: Accounts
-        working_directory: ./cloud-harness/applications/accounts
       common:
         type: build
         stage: build
@@ -187,7 +144,6 @@ steps:
         buildkit: true
         build_arguments:
         - TAG=${{CF_BUILD_ID}}
-        - NAMESPACE=${{NAMESPACE}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
@@ -204,7 +160,6 @@ steps:
         buildkit: true
         build_arguments:
         - TAG=${{CF_BUILD_ID}}
-        - NAMESPACE=${{NAMESPACE}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
@@ -220,7 +175,6 @@ steps:
         buildkit: true
         build_arguments:
         - TAG=${{CF_BUILD_ID}}
-        - NAMESPACE=${{NAMESPACE}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
@@ -231,18 +185,28 @@ steps:
         working_directory: ./applications/areg-portal
   deployment:
     stage: deploy
-    image: codefresh/cfstep-helm:3.6.2
+    type: helm
+    working_directory: ./${{CF_REPO_NAME}}
     title: Installing chart
-    environment:
-    - CHART_REF=./deployment/helm
-    - RELEASE_NAME=${{NAMESPACE}}
-    - KUBE_CONTEXT=${{CLUSTER_NAME}}
-    - NAMESPACE=${{NAMESPACE}}
-    - CHART_VERSION=${{DEPLOYMENT_PUBLISH_TAG}}
-    - HELM_REPO_USE_HTTP=false
-    - HELM_REPO_CONTEXT_PATH=
-    - TIMEOUT=600s
-    - VALUESFILE_values=./deployment/helm/values.yaml
+    arguments:
+      helm_version: 3.6.2
+      chart_name: deployment/helm
+      release_name: '${{NAMESPACE}}'
+      kube_context: '${{CLUSTER_NAME}}'
+      namespace: '${{NAMESPACE}}'
+      chart_version: '${{CF_BUILD_ID}}'
+      cmd_ps: --wait --timeout 600s
+      custom_value_files:
+      - ./deployment/helm/values.yaml
+      custom_values: []
+  approval:
+    type: pending-approval
+    stage: publish
+    title: Approve build
+    description: Approve build release and tagging
+    timeout:
+      duration: 168
+      finalState: denied
   publish:
     type: parallel
     stage: publish
@@ -287,14 +251,6 @@ steps:
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
-      publish_accounts:
-        stage: publish
-        type: push
-        title: Accounts
-        candidate: '${{REGISTRY}}/areg/accounts:${{CF_BUILD_ID}}'
-        tags:
-        - '${{DEPLOYMENT_PUBLISH_TAG}}'
-        registry: '${{REGISTRY_PUBLISH_URL}}'
       publish_common:
         stage: publish
         type: push
@@ -319,3 +275,8 @@ steps:
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
+    when:
+      condition:
+        all:
+          whenVarExists: includes("${{DEPLOYMENT_PUBLISH_TAG}}", "{{DEPLOYMENT_PUBLISH_TAG}}")
+            == false
