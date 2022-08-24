@@ -1,22 +1,26 @@
 import React from "react";
 import "./styles/style.less";
-import { Container, CssBaseline } from "@mui/material";
+import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-
 import theme from "./theme/Theme";
-import AntibodiesTable from "./components/AntibodiesTable";
 import Navbar from "./components/NavBar/Navbar";
-import TableHeader from "./components/TableHeader";
+import About from "./components/About";
+import Home from "./components/Home";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 
-const Main = () => (
-  <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <Navbar />
-    <Container maxWidth="xl" sx={{ my: 1 }}>
-      <TableHeader />
-      <AntibodiesTable />
-    </Container>
-  </ThemeProvider>
-);
+const App = () => {
+  return (
+    <BrowserRouter>
+      <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Navbar />
+      <Switch>
+        <Route exact path="/" component={Home} />
+        <Route exact path="/about" component={About} />
+      </Switch>
+      </ThemeProvider>
+    </BrowserRouter>
+  )
+};
 
-export default Main;
+export default App;
