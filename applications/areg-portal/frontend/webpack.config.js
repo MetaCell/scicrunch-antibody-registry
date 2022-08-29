@@ -25,7 +25,7 @@ module.exports = function webpacking(envVariables) {
   console.log("####################");
 
   const { mode } = env;
-  const devtool = env.mode === "source-map";
+  const devtool = "source-map";
 
   const output = {
     path: path.resolve(__dirname, "dist"),
