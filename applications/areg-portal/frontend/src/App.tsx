@@ -6,7 +6,8 @@ import theme from "./theme/Theme";
 import Navbar from "./components/NavBar/Navbar";
 import About from "./components/About";
 import Home from "./components/Home";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import AntibodyDetail from "./components/AntibodyDetail";
+import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import Submit from "./components/Submit";
 
 const App = () => {
@@ -19,6 +20,10 @@ const App = () => {
           <Route exact path="/" component={Home} />
           <Route exact path="/about" component={About} />
           <Route path="/submit" component={Submit} />
+          <Route path="/login" >
+            <Redirect to="/" />
+          </Route>
+          <Route path="/:antibody_id" component={AntibodyDetail} />
         </Switch>
       </ThemeProvider>
     </BrowserRouter>

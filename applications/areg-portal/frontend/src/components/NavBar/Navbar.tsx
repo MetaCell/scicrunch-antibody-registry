@@ -74,7 +74,7 @@ const Navbar = () => {
                     }}
                   />
                 </IconButton>
-                <Button sx={{ px: 1.75, py: 1 }}>Log in / Register</Button>
+                <Button onClick={() => window.location.href = "/login"}>Log in / Register</Button>
               </Stack>
             </Box>
           </Toolbar>

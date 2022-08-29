@@ -94,23 +94,15 @@ const HomeHeader = () => {
                       </Box>
                     Download selection
                     </Button>
-                    <Button variant="contained" color="primary">
-                      <Box
-                        sx={{
-                          minWidth: "1.25rem",
-                          maxHeight: "1.25rem",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          mr: 1,
-                        }}
-                      >
-                        <AddAntibodyIcon
-                          sx={{
-                            width: "0.9rem",
-                          }}
-                        />
-                      </Box>
+                    <Button variant="contained" color="primary" startIcon={<AddAntibodyIcon
+                      sx={{
+                        width: "0.9rem",
+                      }}
+                      
+                    />}
+                    onClick={() => window.location.href = "/submit"}
+                    >
+                      
                     Submit an antibody
                     </Button>
                   </Stack>
