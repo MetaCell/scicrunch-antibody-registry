@@ -200,7 +200,7 @@ const About = () => {
             <img src='./assets/logo-dark.svg' alt="LOGO" />
             About the Antibody Registry
           </Typography>
-          <img src='./assets/ipad.png' alt="" />
+          <img src='./assets/ipad.webp' alt="" />
         </Container>
       </Box>
       <Box className={classes.mainContent}>
@@ -277,7 +277,7 @@ const About = () => {
                 </Typography>
               </Grid>
               <Grid item md={7}>
-                <img src='./assets/trace.svg' alt="TRACE" />
+                <img src='./assets/trace.webp' alt="TRACE" />
               </Grid>
             </Grid>
           </Box>
@@ -304,7 +304,7 @@ const About = () => {
             Ready to get started?
           </Typography>
           <Button variant="contained" color='secondary' onClick={navigate}>Search for antibodies</Button>
-          <img src="./assets/ipad.png" alt="" />
+          <img src="./assets/ipad.webp" alt="" />
         </Container>
       </Box>
       <Box className={classes.footer}>
