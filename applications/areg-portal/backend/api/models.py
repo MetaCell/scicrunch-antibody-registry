@@ -1,11 +1,12 @@
+from django.core.validators import MinLengthValidator
 from django.db import models
 
 from areg_portal.settings import ANTIBODY_ID_MAX_LEN, CATALOG_NUMBER_MAX_LEN, VENDOR_MAX_LEN, \
-    ANTIGEN_SPECIES_MAX_LEN, ANTIGEN_ID_MAX_LEN, ANTIGEN_DESCRIPTION_MAX_LEN, ANTIGEN_SUBREGION_MAX_LEN, \
-    ANTIGEN_MODIFICATION_MAX_LEN, ANTIGEN_EPITOPE_MAX_LEN, ANTIBODY_SOURCE_ORGANISM_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
+    ANTIGEN_ID_MAX_LEN, ANTIGEN_DESCRIPTION_MAX_LEN, ANTIGEN_SUBREGION_MAX_LEN, \
+    ANTIGEN_EPITOPE_MAX_LEN, ANTIBODY_SOURCE_ORGANISM_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
     ANTIBODY_COMMERCIAL_TYPE_MAX_LEN, ANTIBODY_CLONE_ID_MAX_LEN, ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN, \
     ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, ANTIBODY_PRODUCT_FORM_MAX_LEN, ANTIBODY_CITATION_MAX_LEN, \
-    ANTIBODY_STATUS_MAX_LEN
+    ANTIBODY_STATUS_MAX_LEN, ANTIBODY_UID_MAX_LEN
 
 
 class AntibodyCommercialType(models.TextChoices):
@@ -55,101 +56,76 @@ class STATUS(models.TextChoices):
     QUEUE = 'Q', 'QUEUE'
 
 
-class CatalogAlternative(models.Model):
-    number = models.CharField(max_length=CATALOG_NUMBER_MAX_LEN)
-
-    def __str__(self):
-        return self.number
-
-
-class Catalog(models.Model):
-    number = models.CharField(max_length=CATALOG_NUMBER_MAX_LEN, unique=True)
-    alternatives = models.ManyToManyField(CatalogAlternative, blank=True)
-
-    def __str__(self):
-        return self.number
-
-
 class Vendor(models.Model):
-    name = models.CharField(max_length=VENDOR_MAX_LEN)
-    url = models.URLField()
-
-    def __str__(self):
-        return self.name
-
-
-class AntigenSpecie(models.Model):
-    name = models.CharField(max_length=ANTIGEN_SPECIES_MAX_LEN)
-
-    def __str__(self):
-        return self.name
-
-
-class AntigenModification(models.Model):
-    name = models.CharField(max_length=ANTIGEN_MODIFICATION_MAX_LEN)
+    id = models.AutoField(db_column='vendor_id', null=False, primary_key=True)
+    name = models.CharField(max_length=VENDOR_MAX_LEN, db_column='vendor')
 
     def __str__(self):
         return self.name
 
 
 class Antigen(models.Model):
-    entrez_id = models.CharField(max_length=ANTIGEN_ID_MAX_LEN, unique=True)
-    uniprot_id = models.CharField(max_length=ANTIGEN_ID_MAX_LEN, unique=True)
-    description = models.CharField(max_length=ANTIGEN_DESCRIPTION_MAX_LEN)
-    species = models.ManyToManyField(AntigenSpecie, blank=True)
-    subregion = models.CharField(max_length=ANTIGEN_SUBREGION_MAX_LEN, blank=True)
-    modifications = models.ManyToManyField(AntigenModification, blank=True)
-    epitope = models.CharField(max_length=ANTIGEN_EPITOPE_MAX_LEN, blank=True)
+    symbol = models.CharField(unique=True, max_length=ANTIGEN_DESCRIPTION_MAX_LEN, db_column='ab_target')
+    species = models.TextField(db_column='target_species')
+    entrez_id = models.CharField(unique=True, max_length=ANTIGEN_ID_MAX_LEN, db_column='ab_target_entrez_gid')
+    subregion = models.CharField(max_length=ANTIGEN_SUBREGION_MAX_LEN, db_column='target_subregion')
+    modifications = models.TextField(db_column='target_modification')
+    epitope = models.CharField(max_length=ANTIGEN_EPITOPE_MAX_LEN)
+    uniprot_id = models.CharField(unique=True, max_length=ANTIGEN_ID_MAX_LEN)
 
     def __str__(self):
         return self.entrez_id
 
 
 class Antibody(models.Model):
-    uid = models.CharField(max_length=ANTIBODY_ID_MAX_LEN, unique=True, null=False)
-    name = models.TextField()
-    accession = models.CharField(max_length=ANTIBODY_ID_MAX_LEN)
+    ab_name = models.TextField()
+    ab_id = models.CharField(unique=True, max_length=ANTIBODY_ID_MAX_LEN, validators=[MinLengthValidator(1)])
+    accession = models.CharField(max_length=ANTIBODY_ID_MAX_LEN, validators=[MinLengthValidator(1)])
+    ix = models.AutoField(unique=True, null=False, primary_key=True)
+    uid = models.CharField(unique=True, max_length=ANTIBODY_UID_MAX_LEN, validators=[MinLengthValidator(1)])
     commercial_type = models.CharField(
         max_length=ANTIBODY_COMMERCIAL_TYPE_MAX_LEN,
         choices=AntibodyCommercialType.choices,
         default=AntibodyCommercialType.OTHER,
     )
-    catalog_id = models.ForeignKey(Catalog, on_delete=models.RESTRICT, null=False)
-    vendor_id = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=False)
-    antigen_id = models.ForeignKey(Antigen, on_delete=models.RESTRICT, null=False)
+    catalog_num = models.CharField(max_length=CATALOG_NUMBER_MAX_LEN, null=False)
+    cat_alt = models.TextField()
+    vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
+    url = models.URLField(null=False)
+    antigen = models.ForeignKey(Antigen, on_delete=models.RESTRICT)
     source_organism = models.CharField(max_length=ANTIBODY_SOURCE_ORGANISM_MAX_LEN)
     clonality = models.CharField(
         max_length=ANTIBODY_CLONALITY_MAX_LEN,
         choices=AntibodyClonality.choices,
         default=AntibodyClonality.UNKNOWN,
     )
-    clone_id = models.CharField(max_length=ANTIBODY_CLONE_ID_MAX_LEN, blank=True)
-    isotype = models.CharField(
+    clone_id = models.CharField(max_length=ANTIBODY_CLONE_ID_MAX_LEN)
+    product_isotype = models.CharField(
         max_length=ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN,
         choices=ProductIsotype.choices,
-        blank=True
     )
-    conjugate = models.CharField(max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, blank=True)
-    form = models.CharField(
+    product_conjugate = models.CharField(max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN)
+    defining_citation = models.CharField(max_length=ANTIBODY_CITATION_MAX_LEN)
+    product_form = models.CharField(
         max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN,
         choices=ProductForm.choices,
-        blank=True
     )
-    citation = models.CharField(max_length=ANTIBODY_CITATION_MAX_LEN, null=False)
-    disc_date = models.DateTimeField(null=True, blank=True)
-
-    comments = models.TextField(blank=True)
-    feedback = models.TextField(blank=True)
-    curator_comment = models.TextField(blank=True)
-
+    comments = models.TextField()
+    feedback = models.TextField()
+    curator_comment = models.TextField()
+    disc_date = models.DateTimeField(null=True)
     status = models.CharField(
         max_length=ANTIBODY_STATUS_MAX_LEN,
         choices=STATUS.choices,
         default=STATUS.QUEUE
     )
-
-    date_modified = models.DateTimeField(auto_now=True)
-    date_published = models.DateTimeField(auto_now_add=True)
+    insert_time = models.DateTimeField(auto_now_add=True)
+    curate_time = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.uid
+
+    # class Meta:
+    #     constraints = [
+    #         models.UniqueConstraint(fields=['vendor', 'catalog_num'], name='unique_catalog_num_per_vendor')
+    #     ]
