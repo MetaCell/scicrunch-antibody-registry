@@ -43,7 +43,7 @@ const HomeHeader = () => {
                   <Grid container columnSpacing={1.5} rowSpacing={1}>
                     <Grid item>
                       <Typography variant="h1" color="grey.700" align="left">
-                      Antibody Registry
+                      Antibody Registry <sub>beta</sub>
                       </Typography>
                     </Grid>
                     <Grid item display="flex" alignItems="center">

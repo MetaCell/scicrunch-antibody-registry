@@ -8,6 +8,7 @@ import {
   IconButton,
   Stack,
   Toolbar,
+  Link
 } from "@mui/material";
 import Searchbar from "./Searchbar";
 import NavLinks from "./NavLinks";
@@ -34,7 +35,8 @@ const Navbar = () => {
               }}
             >
               <Stack direction="row" spacing={2}>
-                <Box component="img" src="./assets/logo.svg" />
+                <Link href="/"><img src="./assets/logo.svg" title="Antibody Registry" /></Link>
+                
                 <Divider
                   orientation="vertical"
                   flexItem
