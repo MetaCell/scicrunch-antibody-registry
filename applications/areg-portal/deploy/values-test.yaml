@@ -1,0 +1,14 @@
+harness:
+  accounts:
+    roles:
+    - areg_portal:administrator
+    - areg_portal:manager
+    users:
+    - username: admin
+      email: admin@testuser.com
+      clientRoles:
+      - areg_portal:administrator
+    - username: manager
+      email: manager@testuser.com
+      clientRoles:
+      - areg_portal:manager
