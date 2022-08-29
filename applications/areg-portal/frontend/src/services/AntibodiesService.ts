@@ -12,7 +12,7 @@ interface AntibodiesObj {
   clone_id: string;
   host: string;
   vendor: string;
-  catalog_num: string;
+  catalog_num?;
 }
 
 export function getAntibodies(): Promise<AntibodiesObj[]> {

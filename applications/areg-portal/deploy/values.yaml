@@ -13,23 +13,23 @@ harness:
     path: /api/ready
   dependencies:
     build:
-      - cloudharness-frontend-build
-      - cloudharness-django
+    - cloudharness-frontend-build
+    - cloudharness-django
     hard:
-      - accounts
-      - common
-      - events
+    - common
+    - events
+    - accounts
   use_services:
-    - name: common
+  - name: common
   uri_role_mapping:
-    - uri: /admin/*
-      roles:
-        - areg_portal:areg_portal-administrator
-        - areg_portal:areg_portal-manager
-        - areg_portal:areg_portal-user
-      require-any-role: true
-    - uri: /
-      white-listed: true
+  - uri: /admin/*
+    roles:
+    - areg_portal:areg_portal-administrator
+    - areg_portal:areg_portal-manager
+    - areg_portal:areg_portal-user
+    require-any-role: true
+  - uri: /
+    white-listed: true
   database:
     auto: true
     type: postgres

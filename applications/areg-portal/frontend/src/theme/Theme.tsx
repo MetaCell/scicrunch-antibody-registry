@@ -1,5 +1,7 @@
-import { useMediaQuery } from "@mui/material";
-import { createTheme } from "@mui/material/styles";
+import { createTheme, darken } from "@mui/material/styles";
+import { vars } from "./variables";
+
+const { primaryFont, whiteColor, primaryColor, btnBorderColor, shadow } = vars;
 
 declare module "@mui/material/styles" {
   interface Theme {}
@@ -9,6 +11,7 @@ declare module "@mui/material/styles" {
 const theme = createTheme({
   palette: {
     grey: {
+      A100: "#FCFCFD",
       50: "#F9FAFB",
       100: "#F2F4F7",
       200: "#EAECF0",
@@ -19,6 +22,7 @@ const theme = createTheme({
       700: "#344054",
       800: "#1D2939",
       900: "#101828",
+      A200: "#F9F9FB",
     },
     primary: {
       main: "#2173F2",
@@ -34,31 +38,92 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: "'proxima-nova', 'sans-serif'",
+    fontFamily: primaryFont,
     fontSize: 16,
     h1: {
-      fontFamily: "'proxima-nova', 'sans-serif'",
+      fontFamily: primaryFont,
       fontWeight: 600,
       fontSize: "1.875rem",
+    },
+    h6: {
+      fontFamily: "'proxima-nova', 'sans-serif'",
+      fontWeight: 600,
+      fontSize: "0.875rem",
     },
     subtitle1: {
       fontSize: "0.875rem",
     },
+    subtitle2: {
+      fontSize: "1rem",
+      fontWeight: 600,
+    },
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: `
+        * {
+          font-family: ${primaryFont}
+        }
+      `
+    },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: "#fff",
+          backgroundColor: whiteColor,
         },
       },
     },
-
     MuiButton: {
       styleOverrides: {
         root: {
           textTransform: "none",
+          boxShadow: 'none'
         },
+
+        containedSecondary: {
+          background: whiteColor,
+          border: `0.0625rem solid ${btnBorderColor}`,
+          boxShadow: shadow,
+          borderRadius: '0.5rem',
+          color: primaryColor,
+          fontWeight: 600,
+          fontSize: '1rem',
+          lineHeight: '1.5rem',
+
+          '&:hover': {
+            background: whiteColor,
+            boxShadow: shadow,
+            color: primaryColor,
+          },
+        },
+        contained: ({ ownerState, theme }) => ({
+          borderRadius: "0.375rem",
+          fontWeight: 600,
+          padding: `${theme.spacing(0.6)} ${theme.spacing(2)}`,
+          boxShadow: "0px 1px 2px rgba(16, 24, 40, 0.05)",
+          ...(ownerState.color === "primary" && {
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.common.white,
+            boxShadow:
+              "0px 1px 2px rgba(16, 24, 40, 0.05),inset 0px -2px 0px rgba(0, 0, 0, 0.25)",
+            "&:hover": {
+              backgroundColor: darken(theme.palette.primary.main, 0.2),
+              boxShadow:
+                "0px 1px 2px rgba(16, 24, 40, 0.05),inset 0px -2px 0px rgba(0, 0, 0, 0.25)",
+            },
+          }),
+          ...(ownerState.color === "secondary" && {
+            backgroundColor: theme.palette.common.white,
+            color: theme.palette.grey[700],
+            border: `1px solid ${theme.palette.grey[300]}`,
+            "&.Mui-disabled": {
+              color: theme.palette.grey[300],
+              borderColor: theme.palette.grey[200],
+              backgroundColor: theme.palette.common.white,
+              boxShadow: "0px 1px 2px rgba(16, 24, 40, 0.05)",
+            },
+          }),
+        }),
       },
     },
     MuiTab: {
@@ -72,6 +137,15 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: "8px !important",
+          textDecoration: "none",
+        },
+      },
+    },
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          fontWeight: 400,
+          fontSize: "1rem",
         },
       },
     },
