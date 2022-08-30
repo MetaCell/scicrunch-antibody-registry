@@ -1,3 +1,4 @@
+import { ThemeContext } from "@emotion/react";
 import { createTheme, darken } from "@mui/material/styles";
 import { vars } from "./variables";
 
@@ -45,6 +46,11 @@ const theme = createTheme({
       fontWeight: 600,
       fontSize: "1.875rem",
     },
+    h5: {
+      fontFamily: "'proxima-nova', 'sans-serif'",
+      fontWeight: 500,
+      fontSize: "0.875rem",
+    },
     h6: {
       fontFamily: "'proxima-nova', 'sans-serif'",
       fontWeight: 600,
@@ -64,7 +70,7 @@ const theme = createTheme({
         * {
           font-family: ${primaryFont}
         }
-      `
+      `,
     },
     MuiAppBar: {
       styleOverrides: {
@@ -77,20 +83,20 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: "none",
-          boxShadow: 'none'
+          boxShadow: "none",
         },
 
         containedSecondary: {
           background: whiteColor,
           border: `0.0625rem solid ${btnBorderColor}`,
           boxShadow: shadow,
-          borderRadius: '0.5rem',
+          borderRadius: "0.5rem",
           color: primaryColor,
           fontWeight: 600,
-          fontSize: '1rem',
-          lineHeight: '1.5rem',
+          fontSize: "1rem",
+          lineHeight: "1.5rem",
 
-          '&:hover': {
+          "&:hover": {
             background: whiteColor,
             boxShadow: shadow,
             color: primaryColor,
@@ -147,6 +153,20 @@ const theme = createTheme({
           fontWeight: 400,
           fontSize: "1rem",
         },
+      },
+    },
+    MuiMenu: {
+      styleOverrides: {
+        list: {
+          padding: 0,
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          padding: theme.spacing(1.5, 2),
+        }),
       },
     },
   },

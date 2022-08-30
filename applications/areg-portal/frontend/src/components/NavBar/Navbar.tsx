@@ -5,14 +5,13 @@ import {
   Button,
   Container,
   Divider,
-  IconButton,
   Stack,
   Toolbar,
-  Link
+  Link,
 } from "@mui/material";
 import Searchbar from "./Searchbar";
 import NavLinks from "./NavLinks";
-import { HelpIcon } from "../icons";
+import HelpMenu from "./HelpMenu";
 
 const Navbar = () => {
   return (
@@ -35,8 +34,10 @@ const Navbar = () => {
               }}
             >
               <Stack direction="row" spacing={2}>
-                <Link href="/"><img src="./assets/logo.svg" title="Antibody Registry" /></Link>
-                
+                <Link href="/">
+                  <img src="./assets/logo.svg" title="Antibody Registry" />
+                </Link>
+
                 <Divider
                   orientation="vertical"
                   flexItem
@@ -58,23 +59,10 @@ const Navbar = () => {
               }}
             >
               <Stack direction="row" spacing={1.5}>
-                <IconButton
-                  disableRipple
-                  sx={{
-                    p: 1.25,
-                  }}
-                >
-                  <HelpIcon
-                    sx={{
-                      width: "1.25rem",
-                      heigth: "1.25rem",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  />
-                </IconButton>
-                <Button onClick={() => window.location.href = "/login"}>Log in / Register</Button>
+                <HelpMenu />
+                <Button onClick={() => (window.location.href = "/login")}>
+                  Log in / Register
+                </Button>
               </Stack>
             </Box>
           </Toolbar>
