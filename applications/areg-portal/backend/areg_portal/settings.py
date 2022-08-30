@@ -150,9 +150,9 @@ KC_CLIENT_NAME = PROJECT_NAME.lower()
 # areg_portal specific roles
 
 # Default KC roles
-KC_ADMIN_ROLE = f"{KC_CLIENT_NAME}-administrator"  # admin user
-KC_MANAGER_ROLE = f"{KC_CLIENT_NAME}-manager"  # manager user
-KC_USER_ROLE = f"{KC_CLIENT_NAME}-user"  # customer user
+KC_ADMIN_ROLE = f"administrator"  # admin user
+KC_MANAGER_ROLE = f"manager"  # manager user
+KC_USER_ROLE = f"user"  # customer user
 KC_ALL_ROLES = [
     KC_ADMIN_ROLE,
     KC_MANAGER_ROLE,

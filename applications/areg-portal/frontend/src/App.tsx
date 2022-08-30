@@ -23,7 +23,7 @@ const App = () => {
           <Route path="/login" >
             <Redirect to="/" />
           </Route>
-          <Route path="/:antibody_id" component={AntibodyDetail} />
+          <Route path="/:antibody_id(AB_.*)" component={AntibodyDetail} />
         </Switch>
       </ThemeProvider>
     </BrowserRouter>

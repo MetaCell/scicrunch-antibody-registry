@@ -24,11 +24,13 @@ harness:
   uri_role_mapping:
   - uri: /admin/*
     roles:
+    - administrator
     - areg_portal:administrator
     - areg_portal:manager
     require-any-role: true
   - uri: /submit
     roles:
+    - administrator
     - areg_portal:administrator
     - areg_portal:manager
     - areg_portal:user
