@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+from api.models import Antibody, Antigen, Vendor
+
+admin.site.register(Antibody)
+admin.site.register(Antigen)
+admin.site.register(Vendor)
