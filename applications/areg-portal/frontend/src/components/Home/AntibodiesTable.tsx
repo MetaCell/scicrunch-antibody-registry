@@ -125,6 +125,15 @@ const columnsDefaultProps = {
 };
 
 const dataGridStyles = {
+  "&.MuiDataGrid-root": {
+    border: "0px",
+  },
+  "& .MuiDataGrid-main": {
+    border: "0.063rem solid",
+    borderColor: "grey.200",
+    borderTopLeftRadius: "8px",
+    borderTopRightRadius: "8px",
+  },
   "& .MuiDataGrid-row:hover": {
     backgroundColor: "grey.50",
   },

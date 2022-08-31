@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import {
   AppBar,
@@ -9,9 +9,10 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { AddAntibodyIcon, DownloadIcon } from "../icons";
 import TableToolbar from "./TableToolbar";
-import { Troubleshoot } from "@mui/icons-material";
+
 interface Props {
   /**
    * Injected by the documentation to work in an iframe.
@@ -29,6 +30,7 @@ const HideOnScroll = (props: Props) => {
 };
 
 const HomeHeader = (props) => {
+  const theme = useTheme();
   const { activeSelection, handleExport } = props;
   return (
     <Box>
@@ -76,25 +78,19 @@ const HomeHeader = (props) => {
                     <Button
                       disabled={activeSelection ? false : true}
                       variant="contained"
-                      color="secondary"
+                      color="info"
                       onClick={() => handleExport({})}
-                    >
-                      <Box
-                        sx={{
-                          minWidth: "1.25rem",
-                          maxHeight: "1.25rem",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          mr: 1,
-                        }}
-                      >
+                      startIcon={
                         <DownloadIcon
-                          sx={{
-                            width: "1.25rem",
-                          }}
+                          stroke={
+                            activeSelection
+                              ? theme.palette.grey[700]
+                              : theme.palette.grey[300]
+                          }
+                          fontSize="small"
                         />
-                      </Box>
+                      }
+                    >
                       Download selection
                     </Button>
                     <Button

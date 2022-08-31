@@ -58,7 +58,6 @@ export const DownloadIcon = (props: SvgIconProps) => (
   <SvgIcon fontSize="small" viewBox="0 0 20 20" {...props}>
     <path
       d="M6.66699 9.99984L10.0003 13.3332M10.0003 13.3332L13.3337 9.99984M10.0003 13.3332V6.6665M18.3337 9.99984C18.3337 14.6022 14.6027 18.3332 10.0003 18.3332C5.39795 18.3332 1.66699 14.6022 1.66699 9.99984C1.66699 5.39746 5.39795 1.6665 10.0003 1.6665C14.6027 1.6665 18.3337 5.39746 18.3337 9.99984Z"
-      stroke="#D0D5DD"
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"

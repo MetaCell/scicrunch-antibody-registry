@@ -118,7 +118,7 @@ const theme = createTheme({
                 "0px 1px 2px rgba(16, 24, 40, 0.05),inset 0px -2px 0px rgba(0, 0, 0, 0.25)",
             },
           }),
-          ...(ownerState.color === "secondary" && {
+          ...(ownerState.color === "info" && {
             backgroundColor: theme.palette.common.white,
             color: theme.palette.grey[700],
             border: `1px solid ${theme.palette.grey[300]}`,
