@@ -1,5 +1,5 @@
-import React from "react";
-import useScrollTrigger from '@mui/material/useScrollTrigger';
+import React, { useState } from "react";
+import useScrollTrigger from "@mui/material/useScrollTrigger";
 import {
   AppBar,
   Box,
@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { AddAntibodyIcon, DownloadIcon } from "../icons";
 import TableToolbar from "./TableToolbar";
+import { Troubleshoot } from "@mui/icons-material";
 interface Props {
   /**
    * Injected by the documentation to work in an iframe.
@@ -23,15 +24,12 @@ const HideOnScroll = (props: Props) => {
   const { children } = props;
 
   const trigger = useScrollTrigger();
-  
-  return (
-    <Box display={trigger ? "none" : "block"}>
-      {children}
-    </Box>
-  );
-}
 
-const HomeHeader = () => {
+  return <Box display={trigger ? "none" : "block"}>{children}</Box>;
+};
+
+const HomeHeader = (props) => {
+  const { activeSelection, handleExport } = props;
   return (
     <Box>
       <AppBar elevation={0} sx={{ top: "4.5rem" }}>
@@ -43,7 +41,7 @@ const HomeHeader = () => {
                   <Grid container columnSpacing={1.5} rowSpacing={1}>
                     <Grid item>
                       <Typography variant="h1" color="grey.700" align="left">
-                      Antibody Registry <sub>beta</sub>
+                        Antibody Registry <sub>beta</sub>
                       </Typography>
                     </Grid>
                     <Grid item display="flex" alignItems="center">
@@ -58,7 +56,7 @@ const HomeHeader = () => {
                           color="common.white"
                           align="left"
                         >
-                        2,512,817 records
+                          2,512,817 records
                         </Typography>
                       </Box>
                     </Grid>
@@ -68,14 +66,19 @@ const HomeHeader = () => {
                         color="grey.400"
                         align="left"
                       >
-                      Last Updated: Friday, 15th July
+                        Last Updated: Friday, 15th July
                       </Typography>
                     </Grid>
                   </Grid>
                 </Box>
                 <Box>
                   <Stack direction="row" spacing={1.5}>
-                    <Button disabled variant="contained" color="secondary">
+                    <Button
+                      disabled={activeSelection ? false : true}
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => handleExport({})}
+                    >
                       <Box
                         sx={{
                           minWidth: "1.25rem",
@@ -92,18 +95,21 @@ const HomeHeader = () => {
                           }}
                         />
                       </Box>
-                    Download selection
+                      Download selection
                     </Button>
-                    <Button variant="contained" color="primary" startIcon={<AddAntibodyIcon
-                      sx={{
-                        width: "0.9rem",
-                      }}
-                      
-                    />}
-                    onClick={() => window.location.href = "/submit"}
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      startIcon={
+                        <AddAntibodyIcon
+                          sx={{
+                            width: "0.9rem",
+                          }}
+                        />
+                      }
+                      onClick={() => (window.location.href = "/submit")}
                     >
-                      
-                    Submit an antibody
+                      Submit an antibody
                     </Button>
                   </Stack>
                 </Box>

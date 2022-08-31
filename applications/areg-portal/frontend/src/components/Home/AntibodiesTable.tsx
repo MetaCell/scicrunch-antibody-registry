@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 //MUI
-import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  useGridApiContext,
+  GridColDef,
+  GridRenderCellParams,
+  GridCsvExportOptions,
+} from "@mui/x-data-grid";
 import { Typography, Box, Link, Checkbox } from "@mui/material";
 
 //project imports
@@ -13,6 +19,7 @@ import {
   CheckedIcon,
   UncheckedIcon,
 } from "../icons";
+import HomeHeader from "./HomeHeader";
 
 const StyledBadge = (props) => {
   if (props.field === "vendor") {
@@ -38,6 +45,26 @@ const StyledCheckBox = (props) => {
       checkedIcon={<CheckedIcon />}
       icon={<UncheckedIcon />}
     />
+  );
+};
+
+const CustomToolbar = () => {
+  const [activeSelection, setActiveSelection] = useState(true);
+
+  const apiRef = useGridApiContext();
+  const selectedRows = apiRef.current.getSelectedRows();
+
+  const handleExport = (options: GridCsvExportOptions) =>
+    apiRef.current.exportDataAsCsv(options);
+
+  useEffect(() => {
+    selectedRows.size === 0
+      ? setActiveSelection(false)
+      : setActiveSelection(true);
+  }, [selectedRows]);
+
+  return (
+    <HomeHeader activeSelection={activeSelection} handleExport={handleExport} />
   );
 };
 
@@ -235,9 +262,7 @@ const AntibodiesTable = () => {
   useEffect(fetchAntibodies, []);
 
   return (
-    <Box
-     
-    >
+    <Box>
       <Box sx={{ flexGrow: 1, height: "90vh" }}>
         <DataGrid
           sx={dataGridStyles}
@@ -247,7 +272,6 @@ const AntibodiesTable = () => {
           rowsPerPageOptions={[20]}
           checkboxSelection
           disableColumnMenu
-          
           disableSelectionOnClick
           getRowHeight={() => "auto"}
           components={{
@@ -256,11 +280,12 @@ const AntibodiesTable = () => {
             ColumnUnsortedIcon: SortingIcon,
             ColumnSortedAscendingIcon: AscSortedIcon,
             ColumnSortedDescendingIcon: DescSortedIcon,
+            Toolbar: CustomToolbar,
           }}
         />
       </Box>
     </Box>
   );
-}
+};
 
 export default AntibodiesTable;
