@@ -6,6 +6,7 @@ import {
   GridColDef,
   GridRenderCellParams,
   GridCsvExportOptions,
+  GridFilterPanel,
 } from "@mui/x-data-grid";
 import { Typography, Box, Link, Checkbox } from "@mui/material";
 
@@ -18,6 +19,7 @@ import {
   SortingIcon,
   CheckedIcon,
   UncheckedIcon,
+  FilterIcon,
 } from "../icons";
 import HomeHeader from "./HomeHeader";
 
@@ -57,6 +59,8 @@ const CustomToolbar = () => {
   const handleExport = (options: GridCsvExportOptions) =>
     apiRef.current.exportDataAsCsv(options);
 
+  const showFilterMenu = () => apiRef.current.showFilterPanel();
+
   useEffect(() => {
     selectedRows.size === 0
       ? setActiveSelection(false)
@@ -64,9 +68,69 @@ const CustomToolbar = () => {
   }, [selectedRows]);
 
   return (
-    <HomeHeader activeSelection={activeSelection} handleExport={handleExport} />
+    <HomeHeader
+      activeSelection={activeSelection}
+      handleExport={handleExport}
+      showFilterMenu={showFilterMenu}
+    />
   );
 };
+
+// const CustomFilterPanel = React.forwardRef<
+//   HTMLUListElement,
+//   GridColumnMenuProps
+// >(function GridColumnMenu(props: GridColumnMenuProps, ref) {
+//   const { hideMenu, currentColumn } = props;
+//   const apiRef = useGridApiContext();
+
+//   const getDefaultItem = React.useCallback((): GridFilterItem | null => {
+//     return {
+//       columnField: currentColumn.field,
+//       //chequear esto
+//       operatorValue: currentColumn.filterOperators![0].value,
+//       id: Math.round(Math.random() * 1e5),
+//     };
+//   }, []);
+
+//   const item = getDefaultItem();
+
+//   const applyFilter = React.useCallback(
+//     (item: GridFilterItem) => {
+//       apiRef.current.upsertFilterItem(item);
+//     },
+//     [apiRef]
+//   );
+
+//   const deleteFilter = React.useCallback(
+//     (item: GridFilterItem) => {
+//       const shouldCloseFilterPanel = true;
+//       apiRef.current.deleteFilterItem(item);
+//       if (shouldCloseFilterPanel) {
+//         apiRef.current.hideFilterPanel();
+//       }
+//     },
+//     [apiRef]
+//   );
+
+//   const applyFilterLinkOperator = React.useCallback(
+//     (operator: GridLinkOperator) => {
+//       apiRef.current.setFilterLinkOperator(operator);
+//     },
+//     [apiRef]
+//   );
+
+//   return (
+//     <>
+//       <GridFilterForm
+//         item={item}
+//         deleteFilter={deleteFilter}
+//         hasMultipleFilters={false}
+//         applyMultiFilterOperatorChanges={applyFilterLinkOperator}
+//         applyFilterChanges={applyFilter}
+//       />
+//     </>
+//   );
+// });
 
 const RenderNameAndId = (props: GridRenderCellParams<String>) => {
   return (
@@ -280,7 +344,7 @@ const AntibodiesTable = () => {
           pageSize={10}
           rowsPerPageOptions={[20]}
           checkboxSelection
-          disableColumnMenu
+          //disableColumnMenu
           disableSelectionOnClick
           getRowHeight={() => "auto"}
           components={{
@@ -290,6 +354,8 @@ const AntibodiesTable = () => {
             ColumnSortedAscendingIcon: AscSortedIcon,
             ColumnSortedDescendingIcon: DescSortedIcon,
             Toolbar: CustomToolbar,
+            ColumnMenu: GridFilterPanel,
+            ColumnMenuIcon: FilterIcon,
           }}
         />
       </Box>

@@ -122,6 +122,9 @@ const theme = createTheme({
             backgroundColor: theme.palette.common.white,
             color: theme.palette.grey[700],
             border: `1px solid ${theme.palette.grey[300]}`,
+            "&:hover": {
+              backgroundColor: theme.palette.common.white,
+            },
             "&.Mui-disabled": {
               color: theme.palette.grey[300],
               borderColor: theme.palette.grey[200],

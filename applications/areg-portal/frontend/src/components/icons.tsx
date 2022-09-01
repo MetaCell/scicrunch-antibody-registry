@@ -301,3 +301,15 @@ export const InfoIcon = (props: SvgIconProps) => (
     />
   </SvgIcon>
 );
+
+export const FilterIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="-3 -2.5 21 15" fill="none" fontSize="small">
+    <path
+      d="M3 5H11M1 1H13M5 9H9"
+      stroke="#667085"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </SvgIcon>
+);
