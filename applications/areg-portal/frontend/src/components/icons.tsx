@@ -313,3 +313,28 @@ export const FilterIcon = (props: SvgIconProps) => (
     />
   </SvgIcon>
 );
+
+export const SortByIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="-5 -5 24 24" fill="none" fontSize="small">
+    <path
+      d="M10.3333 1.66699V12.3337M10.3333 12.3337L7.66667 9.66699M10.3333 12.3337L13 9.66699M3.66667 12.3337V1.66699M3.66667 1.66699L1 4.33366M3.66667 1.66699L6.33333 4.33366"
+      stroke="#667085"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </SvgIcon>
+);
+
+export const ViewLayoutIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="-5 -5 23 23" fill="none" fontSize="small">
+    <path
+      d="M1 5H13M5 5L5 13M4.2 1H9.8C10.9201 1 11.4802 1 11.908 1.21799C12.2843 1.40973 12.5903 1.71569 12.782 2.09202C13 2.51984 13 3.0799 13 4.2V9.8C13 10.9201 13 11.4802 12.782 11.908C12.5903 12.2843 12.2843 12.5903 11.908 12.782C11.4802 13 10.9201 13 9.8 13H4.2C3.07989 13 2.51984 13 2.09202 12.782C1.71569 12.5903 1.40973 12.2843 1.21799 11.908C1 11.4802 1 10.9201 1 9.8V4.2C1 3.07989 1 2.51984 1.21799 2.09202C1.40973 1.71569 1.71569 1.40973 2.09202 1.21799C2.51984 1 3.0799 1 4.2 1Z"
+      stroke="#667085"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+  </SvgIcon>
+);
