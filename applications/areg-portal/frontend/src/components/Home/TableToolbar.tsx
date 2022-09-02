@@ -2,27 +2,17 @@ import React, { useState } from "react";
 import { Box, Button, Stack, Tab, Tabs } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { HouseIcon, SendIcon, FilteringIcon, SettingsIcon } from "../icons";
-import FilterModal from "./FilterModal";
 import TableSettingsMenu from "./TableSettingsMenu";
 
 const TableToolbar = ({ showFilterMenu, setFilterButtonEl }) => {
   const theme = useTheme();
   const [value, setValue] = useState("one");
-  const [openFilterModal, setOpenFilterModal] = useState(false);
   const [anchorSettingsMenu, setAnchorSettingsMenu] =
     React.useState<null | HTMLElement>(null);
   const openSettingsMenu = Boolean(anchorSettingsMenu);
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
-  };
-
-  const handleOpenFilterModal = (event: React.SyntheticEvent) => {
-    setOpenFilterModal(true);
-  };
-
-  const handleCloseFilterModal = (event: React.SyntheticEvent) => {
-    setOpenFilterModal(false);
   };
 
   const handleOpenSettingsMenu = (
@@ -97,11 +87,6 @@ const TableToolbar = ({ showFilterMenu, setFilterButtonEl }) => {
           >
             Filter
           </Button>
-          <FilterModal
-            open={openFilterModal}
-            onClose={handleCloseFilterModal}
-          />
-
           <Button
             id="settings-button"
             aria-controls={openSettingsMenu ? "settings-menu" : undefined}

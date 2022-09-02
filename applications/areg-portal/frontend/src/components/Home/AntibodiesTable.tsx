@@ -336,6 +336,86 @@ const AntibodiesTable = () => {
 
   useEffect(fetchAntibodies, []);
 
+  const compProps = {
+    panel: {
+      anchorEl: filterButtonEl,
+      placement: "bottom-end",
+    },
+    toolbar: { setFilterButtonEl: setFilterButtonEl },
+    filterPanel: {
+      filterFormProps: {
+        columnInputProps: {
+          variant: "outlined",
+          size: "small",
+          sx: { mr: 1 },
+        },
+        operatorInputProps: {
+          variant: "outlined",
+          size: "small",
+          sx: { mr: 1 },
+        },
+        valueInputProps: {
+          InputComponentProps: {
+            variant: "outlined",
+            size: "small",
+          },
+        },
+      },
+      sx: {
+        "& .MuiDataGrid-filterForm": {
+          "& .MuiFormControl-root": {
+            "& legend": {
+              display: "none",
+            },
+            "& fieldset": {
+              top: 0,
+            },
+            "& .MuiFormLabel-root": {
+              display: "none",
+            },
+          },
+        },
+      },
+    },
+    columnMenu: {
+      filterFormProps: {
+        columnInputProps: {
+          variant: "outlined",
+          size: "small",
+          sx: { mr: 1 },
+        },
+        operatorInputProps: {
+          variant: "outlined",
+          size: "small",
+          sx: { mr: 1 },
+        },
+        valueInputProps: {
+          InputComponentProps: {
+            variant: "outlined",
+            size: "small",
+          },
+        },
+      },
+      sx: {
+        "& .MuiDataGrid-panelContent": {
+          "& .MuiDataGrid-filterForm": {
+            "& .MuiFormControl-root": {
+              "& legend": {
+                display: "none",
+              },
+              "& fieldset": {
+                top: 0,
+              },
+              "& .MuiFormLabel-root": {
+                display: "none",
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
   return (
     <Box>
       <Box sx={{ flexGrow: 1, height: "90vh" }}>
@@ -359,13 +439,7 @@ const AntibodiesTable = () => {
             ColumnMenu: GridFilterPanel,
             ColumnMenuIcon: FilterIcon,
           }}
-          componentsProps={{
-            panel: {
-              anchorEl: filterButtonEl,
-              placement: "bottom-end",
-            },
-            toolbar: { setFilterButtonEl: setFilterButtonEl },
-          }}
+          componentsProps={compProps}
         />
       </Box>
     </Box>
