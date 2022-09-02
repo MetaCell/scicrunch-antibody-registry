@@ -5,7 +5,7 @@ import { HouseIcon, SendIcon, FilteringIcon, SettingsIcon } from "../icons";
 import FilterModal from "./FilterModal";
 import TableSettingsMenu from "./TableSettingsMenu";
 
-const TableToolbar = ({ showFilterMenu }) => {
+const TableToolbar = ({ showFilterMenu, setFilterButtonEl }) => {
   const theme = useTheme();
   const [value, setValue] = useState("one");
   const [openFilterModal, setOpenFilterModal] = useState(false);
@@ -93,6 +93,7 @@ const TableToolbar = ({ showFilterMenu }) => {
               py: 0.75,
             }}
             onClick={showFilterMenu}
+            ref={setFilterButtonEl}
           >
             Filter
           </Button>

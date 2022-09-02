@@ -50,7 +50,7 @@ const StyledCheckBox = (props) => {
   );
 };
 
-const CustomToolbar = () => {
+const CustomToolbar = ({ setFilterButtonEl }) => {
   const [activeSelection, setActiveSelection] = useState(true);
 
   const apiRef = useGridApiContext();
@@ -72,6 +72,7 @@ const CustomToolbar = () => {
       activeSelection={activeSelection}
       handleExport={handleExport}
       showFilterMenu={showFilterMenu}
+      setFilterButtonEl={setFilterButtonEl}
     />
   );
 };
@@ -323,6 +324,7 @@ const columns: GridColDef[] = [
 
 const AntibodiesTable = () => {
   const [antibodiesList, setAntibodiesList] = useState([]);
+  const [filterButtonEl, setFilterButtonEl] = React.useState(null);
 
   const fetchAntibodies = () => {
     getAntibodies()
@@ -356,6 +358,13 @@ const AntibodiesTable = () => {
             Toolbar: CustomToolbar,
             ColumnMenu: GridFilterPanel,
             ColumnMenuIcon: FilterIcon,
+          }}
+          componentsProps={{
+            panel: {
+              anchorEl: filterButtonEl,
+              placement: "bottom-end",
+            },
+            toolbar: { setFilterButtonEl: setFilterButtonEl },
           }}
         />
       </Box>
