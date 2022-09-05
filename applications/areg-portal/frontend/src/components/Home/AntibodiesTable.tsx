@@ -38,7 +38,9 @@ const StyledBadge = (props) => {
         {props.children}
       </Box>
     );
-  } else {return <Box>{props.children}</Box>;}
+  } else {
+    return <Box>{props.children}</Box>;
+  }
 };
 const StyledCheckBox = (props) => {
   return (
@@ -122,8 +124,8 @@ const getValue = (props) => {
   props.field === "ab_name_id"
     ? (cellValue = `${props.row.ab_name || ""} ${props.row.ab_id || ""}`)
     : (cellValue = `${props.row.ab_target || ""} ${
-      props.row.target_species || ""
-    }`);
+        props.row.target_species || ""
+      }`);
   return cellValue;
 };
 
@@ -292,7 +294,6 @@ const AntibodiesTable = () => {
       },
     },
     toolbar: { setPanelAnchorEl },
-
     filterPanel: {
       filterFormProps: {
         columnInputProps: {
@@ -329,39 +330,10 @@ const AntibodiesTable = () => {
       },
     },
     columnMenu: {
-      filterFormProps: {
-        columnInputProps: {
-          variant: "outlined",
-          size: "small",
-          sx: { mr: 1 },
-        },
-        operatorInputProps: {
-          variant: "outlined",
-          size: "small",
-          sx: { mr: 1 },
-        },
-        valueInputProps: {
-          InputComponentProps: {
-            variant: "outlined",
-            size: "small",
-          },
-        },
-      },
       sx: {
-        "& .MuiDataGrid-panelContent": {
-          "& .MuiDataGrid-filterForm": {
-            "& .MuiFormControl-root": {
-              "& legend": {
-                display: "none",
-              },
-              "& fieldset": {
-                top: 0,
-              },
-              "& .MuiFormLabel-root": {
-                display: "none",
-              },
-            },
-          },
+        "& .MuiMenuItem-root": {
+          fontSize: "0.875rem",
+          color: "grey.500",
         },
       },
     },
@@ -379,7 +351,7 @@ const AntibodiesTable = () => {
           checkboxSelection
           disableSelectionOnClick
           getRowHeight={() => "auto"}
-          onMenuClose={(e) => setFilterButtonEl(e.target)}
+          onMenuClose={(e) => setPanelAnchorEl(e.target)}
           components={{
             BaseCheckbox: StyledCheckBox,
             ColumnFilteredIcon: FilteredColumnIcon,
