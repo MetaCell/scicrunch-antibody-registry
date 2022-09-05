@@ -13,6 +13,8 @@ from django.core.asgi import get_asgi_application
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Path, Request
 from fastapi.security import HTTPBasicCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
+
+from areg_portal.controllers import antibody_controller, search_controller
 from openapi.models import AddUpdateAntibody, Antibody, FilterRequest
 from starlette.middleware.cors import CORSMiddleware
 
@@ -106,7 +108,7 @@ def get_antibodies(
 @prefix_router.post('/antibodies', response_model=None, tags=['antibody'])
 def create_antibody(body: AddUpdateAntibody) -> None:
     """
-    Create a Antibody
+    Create an Antibody
     """
     return antibody_controller.create_antibody(
         body=body,
@@ -169,7 +171,7 @@ def update_antibody(
 )
 def delete_antibody(antibody_id: str = Path(..., alias='antibodyId')) -> None:
     """
-    Delete a Antibody
+    Delete an Antibody
     """
     return antibody_controller.delete_antibody(
         antibody_id=antibody_id,
