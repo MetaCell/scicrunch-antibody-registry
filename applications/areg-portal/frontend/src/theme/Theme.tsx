@@ -85,7 +85,10 @@ const theme = createTheme({
           textTransform: "none",
           boxShadow: "none",
         },
-
+        textInfo: ({ theme }) => ({
+          color: theme.palette.grey[500],
+          fontWeight: "600",
+        }),
         containedSecondary: {
           background: whiteColor,
           border: `0.0625rem solid ${btnBorderColor}`,

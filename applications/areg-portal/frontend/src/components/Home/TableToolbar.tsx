@@ -1,24 +1,15 @@
 import React, { useState } from "react";
 import { Box, Button, Stack, Tab, Tabs } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { HouseIcon, SendIcon, FilteringIcon, SettingsIcon } from "../icons";
-import TableSettingsMenu from "./TableSettingsMenu";
+import { GridToolbarColumnsButton } from "@mui/x-data-grid";
+import { HouseIcon, SendIcon, FilteringIcon } from "../icons";
 
-const TableToolbar = ({ showFilterMenu, setFilterButtonEl }) => {
+const TableToolbar = ({ showFilterMenu, setPanelAnchorEl }) => {
   const theme = useTheme();
   const [value, setValue] = useState("one");
-  const [anchorSettingsMenu, setAnchorSettingsMenu] =
-    React.useState<null | HTMLElement>(null);
-  const openSettingsMenu = Boolean(anchorSettingsMenu);
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
-  };
-
-  const handleOpenSettingsMenu = (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    setAnchorSettingsMenu(event.currentTarget);
   };
 
   return (
@@ -83,26 +74,14 @@ const TableToolbar = ({ showFilterMenu, setFilterButtonEl }) => {
               py: 0.75,
             }}
             onClick={showFilterMenu}
-            ref={setFilterButtonEl}
+            ref={setPanelAnchorEl}
           >
             Filter
           </Button>
-          <Button
-            id="settings-button"
-            aria-controls={openSettingsMenu ? "settings-menu" : undefined}
-            aria-haspopup="true"
-            aria-expanded={openSettingsMenu ? "true" : undefined}
-            variant="text"
-            startIcon={<SettingsIcon />}
-            sx={{ color: "grey.500", fontWeight: 600, px: 1.75, py: 0.75 }}
-            onClick={handleOpenSettingsMenu}
-          >
-            Table settings
-          </Button>
-          <TableSettingsMenu
-            anchorEl={anchorSettingsMenu}
-            setAnchorEl={setAnchorSettingsMenu}
-            open={openSettingsMenu}
+          <GridToolbarColumnsButton
+            ref={setPanelAnchorEl}
+            size="medium"
+            color="info"
           />
         </Stack>
       </Box>

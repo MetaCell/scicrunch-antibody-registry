@@ -19,6 +19,7 @@ import {
   CheckedIcon,
   UncheckedIcon,
   FilterIcon,
+  SettingsIcon,
 } from "../icons";
 import HomeHeader from "./HomeHeader";
 
@@ -49,7 +50,7 @@ const StyledCheckBox = (props) => {
   );
 };
 
-const CustomToolbar = ({ setFilterButtonEl }) => {
+const CustomToolbar = ({ setPanelAnchorEl }) => {
   const [activeSelection, setActiveSelection] = useState(true);
 
   const apiRef = useGridApiContext();
@@ -71,7 +72,7 @@ const CustomToolbar = ({ setFilterButtonEl }) => {
       activeSelection={activeSelection}
       handleExport={handleExport}
       showFilterMenu={showFilterMenu}
-      setFilterButtonEl={setFilterButtonEl}
+      setPanelAnchorEl={setPanelAnchorEl}
     />
   );
 };
@@ -267,7 +268,7 @@ const columns: GridColDef[] = [
 
 const AntibodiesTable = () => {
   const [antibodiesList, setAntibodiesList] = useState([]);
-  const [filterButtonEl, setFilterButtonEl] = React.useState(null);
+  const [panelAnchorEl, setPanelAnchorEl] = React.useState(null);
 
   const fetchAntibodies = () => {
     getAntibodies()
@@ -281,10 +282,17 @@ const AntibodiesTable = () => {
 
   const compProps = {
     panel: {
-      anchorEl: filterButtonEl,
+      anchorEl: panelAnchorEl,
       placement: "bottom-end",
+      sx: {
+        "& .MuiTypography-body1": {
+          fontSize: "0.875rem",
+          color: "grey.500",
+        },
+      },
     },
-    toolbar: { setFilterButtonEl: setFilterButtonEl },
+    toolbar: { setPanelAnchorEl },
+
     filterPanel: {
       filterFormProps: {
         columnInputProps: {
@@ -380,8 +388,12 @@ const AntibodiesTable = () => {
             ColumnSortedDescendingIcon: DescSortedIcon,
             Toolbar: CustomToolbar,
             ColumnMenuIcon: FilterIcon,
+            ColumnSelectorIcon: SettingsIcon,
           }}
           componentsProps={compProps}
+          localeText={{
+            toolbarColumns: "Table settings",
+          }}
         />
       </Box>
     </Box>

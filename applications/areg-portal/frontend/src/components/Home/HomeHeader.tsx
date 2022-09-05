@@ -31,7 +31,7 @@ const HideOnScroll = (props: Props) => {
 
 const HomeHeader = (props) => {
   const theme = useTheme();
-  const { activeSelection, handleExport, showFilterMenu, setFilterButtonEl } =
+  const { activeSelection, handleExport, showFilterMenu, setPanelAnchorEl } =
     props;
   return (
     <Box>
@@ -114,7 +114,7 @@ const HomeHeader = (props) => {
             </HideOnScroll>
             <TableToolbar
               showFilterMenu={showFilterMenu}
-              setFilterButtonEl={setFilterButtonEl}
+              setPanelAnchorEl={setPanelAnchorEl}
             />
           </Stack>
         </Container>
