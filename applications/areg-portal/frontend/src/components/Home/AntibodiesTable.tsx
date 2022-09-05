@@ -371,6 +371,7 @@ const AntibodiesTable = () => {
           checkboxSelection
           disableSelectionOnClick
           getRowHeight={() => "auto"}
+          onMenuClose={(e) => setFilterButtonEl(e.target)}
           components={{
             BaseCheckbox: StyledCheckBox,
             ColumnFilteredIcon: FilteredColumnIcon,
