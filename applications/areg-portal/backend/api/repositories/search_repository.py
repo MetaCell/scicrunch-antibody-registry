@@ -1,6 +1,6 @@
 from typing import List
 
-from openapi.models import Antibody, FilterRequest
+from openapi.models import Antibody
 
 
 def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Antibody]:
