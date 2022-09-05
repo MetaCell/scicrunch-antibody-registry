@@ -14,7 +14,6 @@ from fastapi import APIRouter, Depends, FastAPI, HTTPException, Path, Request
 from fastapi.security import HTTPBasicCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 
-from areg_portal.controllers import antibody_controller, search_controller
 from openapi.models import AddUpdateAntibody, Antibody, FilterRequest
 from starlette.middleware.cors import CORSMiddleware
 

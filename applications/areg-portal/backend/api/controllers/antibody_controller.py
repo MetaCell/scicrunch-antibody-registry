@@ -1,6 +1,6 @@
 from typing import List
 
-from areg_portal.services import antibody_service
+from api.services import antibody_service
 from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO
 

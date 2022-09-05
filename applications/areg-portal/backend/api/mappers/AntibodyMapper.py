@@ -1,6 +1,6 @@
 from api.models import Antibody
 from openapi.models import Antibody as AntibodyDTO
-from areg_portal.mappers.IMapper import IDAOMapper
+from api.mappers.IMapper import IDAOMapper
 
 
 class AntibodyMapper(IDAOMapper):
