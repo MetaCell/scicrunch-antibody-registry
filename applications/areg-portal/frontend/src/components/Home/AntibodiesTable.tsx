@@ -77,62 +77,6 @@ const CustomToolbar = ({ setFilterButtonEl }) => {
   );
 };
 
-// const CustomFilterPanel = React.forwardRef<
-//   HTMLUListElement,
-//   GridColumnMenuProps
-// >(function GridColumnMenu(props: GridColumnMenuProps, ref) {
-//   const { hideMenu, currentColumn } = props;
-//   const apiRef = useGridApiContext();
-
-//   const getDefaultItem = React.useCallback((): GridFilterItem | null => {
-//     return {
-//       columnField: currentColumn.field,
-//       //chequear esto
-//       operatorValue: currentColumn.filterOperators![0].value,
-//       id: Math.round(Math.random() * 1e5),
-//     };
-//   }, []);
-
-//   const item = getDefaultItem();
-
-//   const applyFilter = React.useCallback(
-//     (item: GridFilterItem) => {
-//       apiRef.current.upsertFilterItem(item);
-//     },
-//     [apiRef]
-//   );
-
-//   const deleteFilter = React.useCallback(
-//     (item: GridFilterItem) => {
-//       const shouldCloseFilterPanel = true;
-//       apiRef.current.deleteFilterItem(item);
-//       if (shouldCloseFilterPanel) {
-//         apiRef.current.hideFilterPanel();
-//       }
-//     },
-//     [apiRef]
-//   );
-
-//   const applyFilterLinkOperator = React.useCallback(
-//     (operator: GridLinkOperator) => {
-//       apiRef.current.setFilterLinkOperator(operator);
-//     },
-//     [apiRef]
-//   );
-
-//   return (
-//     <>
-//       <GridFilterForm
-//         item={item}
-//         deleteFilter={deleteFilter}
-//         hasMultipleFilters={false}
-//         applyMultiFilterOperatorChanges={applyFilterLinkOperator}
-//         applyFilterChanges={applyFilter}
-//       />
-//     </>
-//   );
-// });
-
 const RenderNameAndId = (props: GridRenderCellParams<String>) => {
   return (
     <Box>
@@ -426,7 +370,6 @@ const AntibodiesTable = () => {
           pageSize={10}
           rowsPerPageOptions={[20]}
           checkboxSelection
-          //disableColumnMenu
           disableSelectionOnClick
           getRowHeight={() => "auto"}
           components={{
