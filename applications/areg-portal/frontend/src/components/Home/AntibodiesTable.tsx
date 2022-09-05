@@ -6,7 +6,6 @@ import {
   GridColDef,
   GridRenderCellParams,
   GridCsvExportOptions,
-  GridFilterPanel,
 } from "@mui/x-data-grid";
 import { Typography, Box, Link, Checkbox } from "@mui/material";
 
@@ -38,7 +37,7 @@ const StyledBadge = (props) => {
         {props.children}
       </Box>
     );
-  } else return <Box>{props.children}</Box>;
+  } else {return <Box>{props.children}</Box>;}
 };
 const StyledCheckBox = (props) => {
   return (
@@ -122,8 +121,8 @@ const getValue = (props) => {
   props.field === "ab_name_id"
     ? (cellValue = `${props.row.ab_name || ""} ${props.row.ab_id || ""}`)
     : (cellValue = `${props.row.ab_target || ""} ${
-        props.row.target_species || ""
-      }`);
+      props.row.target_species || ""
+    }`);
   return cellValue;
 };
 
@@ -379,7 +378,6 @@ const AntibodiesTable = () => {
             ColumnSortedAscendingIcon: AscSortedIcon,
             ColumnSortedDescendingIcon: DescSortedIcon,
             Toolbar: CustomToolbar,
-            ColumnMenu: GridFilterPanel,
             ColumnMenuIcon: FilterIcon,
           }}
           componentsProps={compProps}
