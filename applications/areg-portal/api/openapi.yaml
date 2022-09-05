@@ -1,77 +1,479 @@
-openapi: 3.0.0
+---
+openapi: 3.0.2
 info:
-  description: areg-portal
-  version: 0.1.0
-  title: areg-portal
-  contact:
-    email: cloudharness@metacell.us
-  license:
-    name: UNLICENSED
-tags:
-- name: test
+  title: Copy of areg-portal
+  version: 1.0.0
+  description: Antibody Registry API
 paths:
-  /ping:
+  /antibodies:
+    summary: Path used to manage the list of antibodies.
+    description: "The REST endpoint/path used to list and create zero or more `Antibody`\
+      \ entities.  This path contains a `GET` and `POST` operation to perform the\
+      \ list and create tasks, respectively."
     get:
-      summary: Test the application is up
-      operationId: ping
       tags:
-      - test
+      - antibody
+      parameters:
+      - name: page
+        description: "Represents the page requested, considering the size parameter"
+        schema:
+          type: integer
+        in: query
+      - name: size
+        description: Corresponds to the cardinality of antibodies requested
+        schema:
+          type: integer
+        in: query
       responses:
-        '500':
-          description: This shouldn't happen
-        '200':
-          description: What we want
+        "200":
           content:
             application/json:
               schema:
-                type: string
-      security: []
-  /live:
-    get:
-      summary: Test if application is healthy
-      operationId: live
+                type: array
+                items:
+                  $ref: '#/components/schemas/Antibody'
+          description: Successful response - returns an array of `Antibody` entities.
+      operationId: getAntibodies
+      summary: List Antibodies
+      description: Gets a list of `Antibody` entities.
+    post:
+      requestBody:
+        description: A new `Antibody` to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddUpdateAntibody'
+        required: true
       tags:
-      - test
+      - antibody
       responses:
-        '500':
-          description: Application is not healthy
-        '200':
-          description: Healthy
+        "201":
+          description: Successful response.
+      operationId: createAntibody
+      summary: Create a Antibody
+      description: Creates a new instance of a `Antibody`.
+  /antibodies/{antibodyId}:
+    summary: Path used to manage a single Antibody.
+    description: "The REST endpoint/path used to get, update, and delete single instances\
+      \ of an `Antibody`.  This path contains `GET`, `PUT`, and `DELETE` operations\
+      \ used to perform the get, update, and delete tasks, respectively."
+    get:
+      tags:
+      - antibody
+      responses:
+        "200":
           content:
             application/json:
               schema:
-                type: string
-      security: []
-  /ready:
-    get:
-      summary: Test if application is ready
-      operationId: ready
+                $ref: '#/components/schemas/Antibody'
+          description: Successful response - returns a single `Antibody`.
+      operationId: getAntibody
+      summary: Get a Antibody
+      description: Gets the details of a single instance of a `Antibody`.
+    put:
+      requestBody:
+        description: Updated `Antibody` information.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddUpdateAntibody'
+        required: true
       tags:
-      - test
+      - antibody
       responses:
-        '500':
-          description: Application is not ready
-        '200':
-          description: Ready
+        "202":
+          description: Successful response.
+      operationId: updateAntibody
+      summary: Update a Antibody
+      description: Updates an existing `Antibody`.
+    delete:
+      tags:
+      - antibody
+      responses:
+        "204":
+          description: Successful response.
+      operationId: deleteAntibody
+      summary: Delete a Antibody
+      description: Deletes an existing `Antibody`.
+    parameters:
+    - name: antibodyId
+      description: A unique identifier for a `Antibody`.
+      schema:
+        type: string
+      in: path
+      required: true
+  /antibodies/search:
+    summary: Path used to search on antibodies.
+    description: "The REST endpoint/path used to search and filter on `Antibody` entities.\
+      \  This path contains a `GET` and `POST` operation to perform the search and\
+      \ filter tasks, respectively."
+    get:
+      tags:
+      - search
+      parameters:
+      - name: page
+        description: "Represents the page requested, considering the size parameter"
+        schema:
+          type: integer
+        in: query
+      - name: size
+        description: Corresponds to the cardinality of antibodies requested
+        schema:
+          type: integer
+        in: query
+      - name: search
+        description: The string to use for full text search on Antibodies
+        schema:
+          type: string
+        in: query
+      responses:
+        "200":
           content:
             application/json:
               schema:
-                type: string
-      security: []
-servers:
-- url: /api
+                type: array
+                items:
+                  $ref: '#/components/schemas/Antibody'
+          description: Successful response - returns an array of `Antibody` entities.
+      operationId: ftsAntibodies
+      summary: Full text search on Antibodies
+      description: Gets a list of `Antibody` entities related with the search query
+    post:
+      requestBody:
+        description: A new `FilterRequest` to be used on the antibodies search.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+        required: true
+      tags:
+      - search
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Antibody'
+          description: Successful response - returns an array of `Antibody` entities.
+      operationId: filterAntibodies
+      summary: Search on Antibodies with custom filters
+      description: Gets a list of `Antibody` entities related with the body parameters
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      x-bearerInfoFunc: cloudharness.auth.decode_token
   schemas:
-    Valid:
+    FilterRequest:
+      description: The search request body that allows filtering combinations over
+        multiple columns
       type: object
       properties:
-        response:
+        contains:
+          description: "Array of key-value pairs, where key represents the column\
+            \ and value the string that should be contained"
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        equals:
+          description: "Array of key-value pairs, where key represents the column\
+            \ and value the string that should be equalled to"
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        starts_with:
+          description: "Array of key-value pairs, where key represents the column\
+            \ and value the string that should be starting with"
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        ends_with:
+          description: "Array of key-value pairs, where key represents the column\
+            \ and value the string that should be ending with"
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        sort_on:
+          description: |-
+            Array of key-value pairs, where key represents the column and value the string ascending or descending
+
+            Order in the array, matches with the order of sorting filters, index 0 will be used to sort first
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        page:
+          description: "Represents the page requested, considering the size parameter"
+          type: integer
+        size:
+          description: Corresponds to the cardinality of antibodies requested
+          type: integer
+        search:
+          description: The string to use to search for Antibodies
           type: string
-security:
-- bearerAuth: []
+    KeyValuePair:
+      description: Utility type to represent a key-value object
+      required:
+      - key
+      - value
+      type: object
+      properties:
+        key:
+          description: String representation of the key
+          type: string
+        value:
+          description: String representation of the value
+          type: string
+    Antibody:
+      description: The data type associated with the antibody resource
+      required:
+      - ab_id
+      - insert_time
+      - curate_time
+      type: object
+      properties:
+        accession:
+          description: |
+            Thus value is the same as the Antibody identifier for newly added antibodies, different if antibody records have been consolidated or are not unique.
+          type: string
+        ab_id:
+          description: Antibody identifier
+          type: string
+        cat_alt:
+          description: "The alternative catalog numbers for this product, delimited\
+            \ by comma, e.g., 9101S, 9101P, 9191L"
+          type: string
+        ab_target_entrez_gid:
+          description: Gene identifier for the gene that is associated with the protein
+            target
+          type: string
+        target_subregion:
+          description: The subregion of the target protein that the epitope is contained
+            in
+          type: string
+        target_modification:
+          description: Any modification to the target protein
+          type: string
+        insert_time:
+          format: date-time
+          description: Unix time stamp when the row was inserted.
+          type: string
+        curate_time:
+          description: Unix time stamp when the row was last updated
+          type: string
+        disc_date:
+          description: The date on which the antibody product was found to be discontinued
+          type: string
+        status:
+          description: |
+            Can include: curated, rejected, queue
+          enum:
+          - Curated
+          - Rejected
+          - Queue
+          type: string
+        feedback:
+          description: Feedback to the submitted stored here
+          type: string
+        curator_comment:
+          description: |
+            Curator comment about this reagent
+          type: string
+        source_organism:
+          description: |
+            The organism that the antibody was raised in; common antibodies are raised in goat, rabbit or mouse. Synthetic or bacterial origins can be noted for recombinant antibodies.
+          type: string
+        target_species:
+          description: The species associated with the antigen molecule.
+          type: string
+        vendor:
+          description: |
+            The name of the company or laboratory for company antibodies.
+            The principal investigator name for personal/other antibodies.
+          type: string
+        catalog_num:
+          description: |-
+            For company antibodies, the catalog number of the antibody.
+            For personal/other antibodies, an identifier unique to the antibody.
+          type: string
+        clonality:
+          description: "Can include the following options: Unknown, Cocktail, Control,\
+            \ Isotype Control, Monoclonal, Monoclonal Secondary, Polyclonal, Polyclonal\
+            \ Secondary, Oligoclonal, Recombinant, Recombinant Monoclonal, Recombinant\
+            \ Monoclonal Secondary, Recombinant Polyclonal, Recombinant Polyclonal\
+            \ Secondary"
+          enum:
+          - Unknown
+          - Cocktail
+          - Control
+          - IsotypeControl
+          - Monoclonal
+          - MonoclonalSecondary
+          - Polyclonal
+          - PolyclonalSecondary
+          - Oligoclonal
+          - Recombinant
+          - RecombinantMonoclonal
+          - RecombinantMonoclonalSecondary
+          - RecombinantPolyclonal
+          - RecombinantPolyclonalSecondary
+          type: string
+        clone_id:
+          description: "The identifier given by the manufacturer or creator of monoclonal\
+            \ antibodies, typically associated with the cell line name."
+          type: string
+        product_isotype:
+          description: "Can include the following: IgG, IgY, IgA, IgM as well as the\
+            \ IgG subtypes"
+          type: string
+        product_conjugate:
+          description: "The molecule that the antibody is conjugated to. This is generally\
+            \ used for secondary antibodies but the field is not restricted as there\
+            \ can be various tags on primary antibodies as well. \n"
+          type: string
+        product_form:
+          description: "The formulation of the antibody product. Can include: Lyophilized,\
+            \ Affinity purified, Liquid"
+          enum:
+          - Lyophilized
+          - AffinityPurified
+          - Liquid
+          type: string
+        uniprot_id:
+          description: |
+            Protein identifier from UNIPROT
+          type: string
+        epitope:
+          description: The AA sequence that the antibody reagent binds to
+          type: string
+        comments:
+          description: A free text comment.
+          type: string
+        commercial_type:
+          description: "Can include the following: commercial, non-profit, personal,\
+            \ other"
+          enum:
+          - commercial
+          - non-profit
+          - personal
+          - other
+          type: string
+        ab_target:
+          description: The symbol of the antigen molecule that the antibody was raised
+            against.
+          type: string
+        ab_name:
+          description: Name provided by the company or the investigator; this does
+            not need to be unique.
+          type: string
+        defining_citation:
+          description: 'The manuscript that describes the creation of the antibody. '
+          type: string
+        url:
+          description: Link to more information about the antibody. For personal antibodies
+            this usually lists the the principal investigator's lab website or university
+            affiliation.
+          type: string
+    AddUpdateAntibody:
+      description: The common fields between all REST operations for the antibody
+        resource.
+      required:
+      - catalog_num
+      - url
+      - commercial_type
+      type: object
+      properties:
+        source_organism:
+          description: |
+            The organism that the antibody was raised in; common antibodies are raised in goat, rabbit or mouse. Synthetic or bacterial origins can be noted for recombinant antibodies.
+          type: string
+        target_species:
+          description: The species associated with the antigen molecule.
+          type: string
+        vendor:
+          description: |
+            The name of the company or laboratory for company antibodies.
+            The principal investigator name for personal/other antibodies.
+          type: string
+        catalog_num:
+          description: |-
+            For company antibodies, the catalog number of the antibody.
+            For personal/other antibodies, an identifier unique to the antibody.
+          type: string
+        clonality:
+          description: "Can include the following options: Unknown, Cocktail, Control,\
+            \ Isotype Control, Monoclonal, Monoclonal Secondary, Polyclonal, Polyclonal\
+            \ Secondary, Oligoclonal, Recombinant, Recombinant Monoclonal, Recombinant\
+            \ Monoclonal Secondary, Recombinant Polyclonal, Recombinant Polyclonal\
+            \ Secondary"
+          enum:
+          - Unknown
+          - Cocktail
+          - Control
+          - IsotypeControl
+          - Monoclonal
+          - MonoclonalSecondary
+          - Polyclonal
+          - PolyclonalSecondary
+          - Oligoclonal
+          - Recombinant
+          - RecombinantMonoclonal
+          - RecombinantMonoclonalSecondary
+          - RecombinantPolyclonal
+          - RecombinantPolyclonalSecondary
+          type: string
+        clone_id:
+          description: "The identifier given by the manufacturer or creator of monoclonal\
+            \ antibodies, typically associated with the cell line name."
+          type: string
+        product_isotype:
+          description: "Can include the following: IgG, IgY, IgA, IgM as well as the\
+            \ IgG subtypes"
+          type: string
+        product_conjugate:
+          description: "The molecule that the antibody is conjugated to. This is generally\
+            \ used for secondary antibodies but the field is not restricted as there\
+            \ can be various tags on primary antibodies as well. \n"
+          type: string
+        product_form:
+          description: "The formulation of the antibody product. Can include: Lyophilized,\
+            \ Affinity purified, Liquid"
+          enum:
+          - Lyophilized
+          - AffinityPurified
+          - Liquid
+          type: string
+        uniprot_id:
+          description: |
+            Protein identifier from UNIPROT
+          type: string
+        epitope:
+          description: The AA sequence that the antibody reagent binds to
+          type: string
+        comments:
+          description: A free text comment.
+          type: string
+        commercial_type:
+          description: "Can include the following: commercial, non-profit, personal,\
+            \ other"
+          enum:
+          - commercial
+          - non-profit
+          - personal
+          - other
+          type: string
+        ab_target:
+          description: The symbol of the antigen molecule that the antibody was raised
+            against.
+          type: string
+        ab_name:
+          description: Name provided by the company or the investigator; this does
+            not need to be unique.
+          type: string
+        defining_citation:
+          description: 'The manuscript that describes the creation of the antibody. '
+          type: string
+        url:
+          description: Link to more information about the antibody. For personal antibodies
+            this usually lists the the principal investigator's lab website or university
+            affiliation.
+          type: string
+servers:
+  - url: /api
