@@ -204,7 +204,7 @@ const columns: GridColDef[] = [
   {
     ...columnsDefaultProps,
     field: "ab_target",
-    headerName: "Target antigen",
+    headerName: "Target antigen (excl. species)",
     hide: true,
   },
   {
@@ -270,7 +270,7 @@ const columns: GridColDef[] = [
 
 const AntibodiesTable = () => {
   const [antibodiesList, setAntibodiesList] = useState([]);
-  const [panelAnchorEl, setPanelAnchorEl] = React.useState(null);
+  // const [panelAnchorEl, setPanelAnchorEl] = React.useState(null);
 
   const fetchAntibodies = () => {
     getAntibodies()
@@ -284,8 +284,6 @@ const AntibodiesTable = () => {
 
   const compProps = {
     panel: {
-      anchorEl: panelAnchorEl,
-      placement: "bottom-end",
       sx: {
         "& .MuiTypography-body1": {
           fontSize: "0.875rem",
@@ -293,7 +291,6 @@ const AntibodiesTable = () => {
         },
       },
     },
-    toolbar: { setPanelAnchorEl },
     filterPanel: {
       filterFormProps: {
         columnInputProps: {
@@ -351,7 +348,6 @@ const AntibodiesTable = () => {
           checkboxSelection
           disableSelectionOnClick
           getRowHeight={() => "auto"}
-          onMenuClose={(e) => setPanelAnchorEl(e.target)}
           components={{
             BaseCheckbox: StyledCheckBox,
             ColumnFilteredIcon: FilteredColumnIcon,

@@ -4,7 +4,7 @@ import { useTheme } from "@mui/material/styles";
 import { GridToolbarColumnsButton } from "@mui/x-data-grid";
 import { HouseIcon, SendIcon, FilteringIcon } from "../icons";
 
-const TableToolbar = ({ showFilterMenu, setPanelAnchorEl }) => {
+const TableToolbar = ({ showFilterMenu }) => {
   const theme = useTheme();
   const [value, setValue] = useState("one");
 
@@ -74,15 +74,10 @@ const TableToolbar = ({ showFilterMenu, setPanelAnchorEl }) => {
               py: 0.75,
             }}
             onClick={showFilterMenu}
-            ref={setPanelAnchorEl}
           >
             Filter
           </Button>
-          <GridToolbarColumnsButton
-            ref={setPanelAnchorEl}
-            size="medium"
-            color="info"
-          />
+          <GridToolbarColumnsButton size="medium" color="info" />
         </Stack>
       </Box>
     </Box>
