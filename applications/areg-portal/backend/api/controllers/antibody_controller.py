@@ -5,8 +5,6 @@ from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO
 
 
-# TODO: How to handle the http responses given the return types? @afonsobspinto
-
 def get_antibodies(page: int = 0, size: int = 50) -> List[AntibodyDTO]:
     return antibody_service.get_antibodies(page, size)
 
