@@ -52,7 +52,7 @@ const StyledCheckBox = (props) => {
   );
 };
 
-const CustomToolbar = ({ setPanelAnchorEl }) => {
+const CustomToolbar = () => {
   const [activeSelection, setActiveSelection] = useState(true);
 
   const apiRef = useGridApiContext();
@@ -74,7 +74,6 @@ const CustomToolbar = ({ setPanelAnchorEl }) => {
       activeSelection={activeSelection}
       handleExport={handleExport}
       showFilterMenu={showFilterMenu}
-      setPanelAnchorEl={setPanelAnchorEl}
     />
   );
 };

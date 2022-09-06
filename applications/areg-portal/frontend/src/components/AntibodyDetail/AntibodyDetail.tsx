@@ -1,26 +1,26 @@
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { Box, Container } from "@mui/material";
-import React from "react";
 import { makeStyles } from "@mui/styles";
 import { vars } from "../../theme/variables";
 
-import Header from "../UI/Header";
-
-const {
-  footerBg,
-  whiteColor,
-  sepratorColor,
-  primaryColor,
-  contentBg,
-  contentBorderColor,
-  primaryTextColor,
-  bannerHeadingColor,
-} = vars;
-
-const useStyles = makeStyles(() => ({}));
+import SubHeader from "../UI/SubHeader";
 
 export const AntibodyDetail = () => {
-  const classes = useStyles();
-  return <Header>Antibody detail</Header>;
+  const { antibody_id } = useParams();
+  const [antibody, setAntibody] = useState({
+    id: "",
+  });
+
+  useEffect(
+    () =>
+      setAntibody({
+        id: antibody_id,
+      }),
+    []
+  );
+
+  return <SubHeader>{antibody.id}</SubHeader>;
 };
 
 export default AntibodyDetail;
