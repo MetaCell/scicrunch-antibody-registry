@@ -338,3 +338,16 @@ export const ViewLayoutIcon = (props: SvgIconProps) => (
     />
   </SvgIcon>
 );
+
+export const BackIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="0 0 17 13" fontSize="small">
+    <path
+      d="M1 4.49996H12.25C14.3211 4.49996 16 6.17889 16 8.24996C16 10.321 14.3211 12 12.25 12H8.5M1 4.49996L4.33333 1.16663M1 4.49996L4.33333 7.83329"
+      stroke="#667085"
+      strokeWidth="1.66667"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+  </SvgIcon>
+);
