@@ -348,6 +348,9 @@ const AntibodiesTable = () => {
           checkboxSelection
           disableSelectionOnClick
           getRowHeight={() => "auto"}
+          onRowClick={(params) =>
+            (window.location.href = `/${params.row.ab_id}`)
+          }
           components={{
             BaseCheckbox: StyledCheckBox,
             ColumnFilteredIcon: FilteredColumnIcon,
