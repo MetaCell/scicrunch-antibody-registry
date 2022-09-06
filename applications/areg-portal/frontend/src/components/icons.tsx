@@ -58,7 +58,6 @@ export const DownloadIcon = (props: SvgIconProps) => (
   <SvgIcon fontSize="small" viewBox="0 0 20 20" {...props}>
     <path
       d="M6.66699 9.99984L10.0003 13.3332M10.0003 13.3332L13.3337 9.99984M10.0003 13.3332V6.6665M18.3337 9.99984C18.3337 14.6022 14.6027 18.3332 10.0003 18.3332C5.39795 18.3332 1.66699 14.6022 1.66699 9.99984C1.66699 5.39746 5.39795 1.6665 10.0003 1.6665C14.6027 1.6665 18.3337 5.39746 18.3337 9.99984Z"
-      stroke="#D0D5DD"
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -294,6 +293,43 @@ export const InfoIcon = (props: SvgIconProps) => (
   <SvgIcon viewBox="0 -5.5 28 24" fill="none">
     <path
       d="M7 9.66667V7M7 4.33333H7.00667M4.2 13H9.8C10.9201 13 11.4802 13 11.908 12.782C12.2843 12.5903 12.5903 12.2843 12.782 11.908C13 11.4802 13 10.9201 13 9.8V4.2C13 3.0799 13 2.51984 12.782 2.09202C12.5903 1.71569 12.2843 1.40973 11.908 1.21799C11.4802 1 10.9201 1 9.8 1H4.2C3.0799 1 2.51984 1 2.09202 1.21799C1.71569 1.40973 1.40973 1.71569 1.21799 2.09202C1 2.51984 1 3.0799 1 4.2V9.8C1 10.9201 1 11.4802 1.21799 11.908C1.40973 12.2843 1.71569 12.5903 2.09202 12.782C2.51984 13 3.0799 13 4.2 13Z"
+      stroke="#667085"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+  </SvgIcon>
+);
+
+export const FilterIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="-3 -2.5 21 15" fill="none" fontSize="small">
+    <path
+      d="M3 5H11M1 1H13M5 9H9"
+      stroke="#667085"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </SvgIcon>
+);
+
+export const SortByIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="-5 -5 24 24" fill="none" fontSize="small">
+    <path
+      d="M10.3333 1.66699V12.3337M10.3333 12.3337L7.66667 9.66699M10.3333 12.3337L13 9.66699M3.66667 12.3337V1.66699M3.66667 1.66699L1 4.33366M3.66667 1.66699L6.33333 4.33366"
+      stroke="#667085"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </SvgIcon>
+);
+
+export const ViewLayoutIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="-5 -5 23 23" fill="none" fontSize="small">
+    <path
+      d="M1 5H13M5 5L5 13M4.2 1H9.8C10.9201 1 11.4802 1 11.908 1.21799C12.2843 1.40973 12.5903 1.71569 12.782 2.09202C13 2.51984 13 3.0799 13 4.2V9.8C13 10.9201 13 11.4802 12.782 11.908C12.5903 12.2843 12.2843 12.5903 11.908 12.782C11.4802 13 10.9201 13 9.8 13H4.2C3.07989 13 2.51984 13 2.09202 12.782C1.71569 12.5903 1.40973 12.2843 1.21799 11.908C1 11.4802 1 10.9201 1 9.8V4.2C1 3.07989 1 2.51984 1.21799 2.09202C1.40973 1.71569 1.71569 1.40973 2.09202 1.21799C2.51984 1 3.0799 1 4.2 1Z"
       stroke="#667085"
       strokeWidth="1.5"
       strokeLinecap="round"
