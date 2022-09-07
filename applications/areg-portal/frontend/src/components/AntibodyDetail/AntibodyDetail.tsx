@@ -81,6 +81,12 @@ export const AntibodyDetail = () => {
       borderColor: theme.palette.grey[300],
       borderRadius: theme.shape,
     },
+    popover: {
+      p: 1,
+      backgroundColor: theme.palette.grey[900],
+      color: theme.palette.common.white,
+      fontSize: "1rem",
+    },
   };
   const { antibody_id } = useParams();
 
@@ -106,23 +112,12 @@ export const AntibodyDetail = () => {
   const [anchorCitationPopover, setAnchorCitationPopover] =
     useState<HTMLButtonElement | null>(null);
 
-  const [anchorLinkPopover, setAnchorLinkPopOver] =
-    useState<HTMLButtonElement | null>(null);
-
   const handleClickCitation = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorCitationPopover(event.currentTarget);
   };
 
   const handleCloseCitation = () => {
     setAnchorCitationPopover(null);
-  };
-
-  const handleClickLink = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorLinkPopOver(event.currentTarget);
-  };
-
-  const handleCloseLink = () => {
-    setAnchorLinkPopOver(null);
   };
 
   const open = Boolean(anchorCitationPopover);
@@ -228,11 +223,15 @@ export const AntibodyDetail = () => {
                     anchorEl={anchorCitationPopover}
                     onClose={handleCloseCitation}
                     anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "left",
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    transformOrigin={{
+                      vertical: "center",
+                      horizontal: "center",
                     }}
                   >
-                    <Typography sx={{ p: 2 }}>
+                    <Typography sx={classes.popover}>
                       Citation copied to clipboard
                     </Typography>
                   </Popover>
@@ -288,26 +287,11 @@ export const AntibodyDetail = () => {
                         startIcon={
                           <CopyIcon stroke={theme.palette.grey[700]} />
                         }
-                        onClick={handleClickLink}
                         sx={classes.buttonGrey}
                       >
                         Copy link
                       </Button>
                     </CopyToClipboard>
-                    {/* <Popover
-                      id={id}
-                      open={open}
-                      anchorEl={anchorLinkPopover}
-                      onClose={handleCloseLink}
-                      anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left",
-                      }}
-                    >
-                      <Typography sx={{ p: 2 }}>
-                        Link copied to clipboard
-                      </Typography>
-                    </Popover> */}
                   </Box>
                 </Grid>
               </Grid>
