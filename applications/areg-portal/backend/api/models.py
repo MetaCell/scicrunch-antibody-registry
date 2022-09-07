@@ -100,6 +100,7 @@ class Antibody(models.Model):
         default=AntibodyClonality.UNKNOWN,
     )
     clone_id = models.CharField(max_length=ANTIBODY_CLONE_ID_MAX_LEN)
+    # todo: can be multiple choices
     product_isotype = models.CharField(
         max_length=ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN,
         choices=ProductIsotype.choices,

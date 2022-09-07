@@ -2,7 +2,7 @@
 
 # Setup script for creating a minikube instance and build the needed applications
 
-minikube start --memory 6000 --cpus 4 --disk-size 60g --driver=docker
+minikube start --memory 6000 --cpus 4 --disk-size 60g --kubernetes-version=v1.21.2 --driver=docker
 
 minikube addons enable ingress
 minikube addons enable metrics-server
