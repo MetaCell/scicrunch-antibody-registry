@@ -351,3 +351,10 @@ export const BackIcon = (props: SvgIconProps) => (
     />
   </SvgIcon>
 );
+
+export const StepIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="0 0 17 13" fontSize="small">
+    <rect width="24" height="24" rx="12" fill="#DFEBF8" />
+    <circle cx="12" cy="12" r="4" fill="#2173F2" />
+  </SvgIcon>
+);

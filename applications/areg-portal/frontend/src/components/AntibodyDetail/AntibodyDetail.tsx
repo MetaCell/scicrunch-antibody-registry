@@ -13,6 +13,7 @@ import { getAntibody } from "../../services/AntibodiesService";
 import { useTheme } from "@mui/material/styles";
 
 import SubHeader from "../UI/SubHeader";
+import HistoryStepper from "./HistoryStepper";
 
 export const AntibodyDetail = () => {
   const theme = useTheme();
@@ -77,7 +78,7 @@ export const AntibodyDetail = () => {
       <SubHeader>{antibody.ab_name}</SubHeader>
       <Container maxWidth="lg">
         <Grid container>
-          <Grid item xs={9}>
+          <Grid item xs={8}>
             <Stack spacing={3} sx={classes.card}>
               <Box
                 display="flex"
@@ -190,18 +191,8 @@ export const AntibodyDetail = () => {
               </Grid>
             </Stack>
           </Grid>
-          <Grid item xs={3} sx={classes.card}>
-            <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="flex-start"
-              sx={classes.header}
-            >
-              <Typography variant="h6">Record History</Typography>
-              <Typography variant="caption">
-                All history information about this record
-              </Typography>
-            </Box>
+          <Grid item xs={4} sx={classes.card}>
+            <HistoryStepper classes={classes} antibody={antibody} />
           </Grid>
         </Grid>
       </Container>

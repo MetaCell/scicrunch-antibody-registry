@@ -269,7 +269,6 @@ const columns: GridColDef[] = [
 
 const AntibodiesTable = () => {
   const [antibodiesList, setAntibodiesList] = useState([]);
-  // const [panelAnchorEl, setPanelAnchorEl] = React.useState(null);
 
   const fetchAntibodies = () => {
     getAntibodies()
