@@ -14,6 +14,7 @@ import { useTheme } from "@mui/material/styles";
 
 import SubHeader from "../UI/SubHeader";
 import HistoryStepper from "./HistoryStepper";
+import { CopyIcon, ExternalLinkIcon } from "../icons";
 
 export const AntibodyDetail = () => {
   const theme = useTheme();
@@ -45,6 +46,38 @@ export const AntibodyDetail = () => {
       "& .MuiTypography-caption": {
         color: theme.palette.grey[500],
       },
+    },
+    buttonText: {
+      color: theme.palette.primary.dark,
+    },
+    buttonGrey: {
+      color: theme.palette.grey[700],
+      padding: theme.spacing(1, 2),
+    },
+    inputBox: {
+      backgroundColor: theme.palette.grey[50],
+    },
+    input: {
+      flexGrow: 2,
+      display: "flex",
+      alignItems: "center",
+      padding: theme.spacing(0, 1),
+      backgroundColor: theme.palette.grey[50],
+      borderRight: "solid 1px",
+      borderColor: theme.palette.grey[300],
+      borderLeft: "solid 1px white",
+      borderTopLeftRadius: "8px",
+      borderBottomLeftRadius: "8px",
+      "& .MuiTypography-root": {
+        fontSize: "1rem",
+        fontWeight: 400,
+        color: theme.palette.grey[500],
+      },
+    },
+    group: {
+      border: "solid 1px",
+      borderColor: theme.palette.grey[300],
+      borderRadius: theme.shape,
     },
   };
   const { antibody_id } = useParams();
@@ -147,7 +180,12 @@ export const AntibodyDetail = () => {
                   <Typography variant="subtitle2">
                     {antibody.proper_citation}
                   </Typography>
-                  <Button variant="text" size="small">
+                  <Button
+                    variant="text"
+                    size="small"
+                    startIcon={<CopyIcon stroke={theme.palette.primary.dark} />}
+                    sx={classes.buttonText}
+                  >
                     Copy citation
                   </Button>
                 </Grid>
@@ -170,7 +208,14 @@ export const AntibodyDetail = () => {
                 </Grid>
                 <Grid item xs={8}>
                   <Typography variant="subtitle2">{antibody.vendor}</Typography>
-                  <Button variant="text" size="small">
+                  <Button
+                    variant="text"
+                    size="small"
+                    sx={classes.buttonText}
+                    endIcon={
+                      <ExternalLinkIcon stroke={theme.palette.primary.dark} />
+                    }
+                  >
                     Open in vendor website
                   </Button>
                 </Grid>
@@ -181,12 +226,21 @@ export const AntibodyDetail = () => {
                   <Typography variant="subtitle1">Share</Typography>
                 </Grid>
                 <Grid item xs={8}>
-                  <Typography variant="subtitle2">
-                    {window.location.href}
-                  </Typography>
-                  <Button variant="text" size="small">
-                    Copylink
-                  </Button>
+                  <Box display="flex" sx={classes.group}>
+                    <Box sx={classes.input}>
+                      <Typography>{window.location.href}</Typography>
+                    </Box>
+
+                    <Button
+                      variant="text"
+                      color="info"
+                      size="small"
+                      startIcon={<CopyIcon stroke={theme.palette.grey[700]} />}
+                      sx={classes.buttonGrey}
+                    >
+                      Copy link
+                    </Button>
+                  </Box>
                 </Grid>
               </Grid>
             </Stack>

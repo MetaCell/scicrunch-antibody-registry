@@ -8,7 +8,6 @@ import {
   Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { StepIcon } from "../icons";
 
 const historySteps = [
   {
@@ -39,12 +38,12 @@ const HistoryStepper = (props) => {
     },
     step: {
       color: theme.palette.primary.main,
-
       "& .MuiStepLabel-label": {
         fontSize: "0.875rem",
+        color: theme.palette.grey[700],
       },
       "& .MuiStepLabel-label.Mui-active": {
-        color: "#0052CC",
+        color: theme.palette.primary.dark,
       },
       "& .MuiTypography-caption": {
         fontSize: "0.875rem",
