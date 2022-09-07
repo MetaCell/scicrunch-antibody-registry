@@ -4,6 +4,7 @@ import {
   Container,
   Divider,
   Grid,
+  Popover,
   Stack,
   Typography,
 } from "@mui/material";
@@ -14,6 +15,7 @@ import { useTheme } from "@mui/material/styles";
 
 import SubHeader from "../UI/SubHeader";
 import HistoryStepper from "./HistoryStepper";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 import { CopyIcon, ExternalLinkIcon } from "../icons";
 
 export const AntibodyDetail = () => {
@@ -81,6 +83,7 @@ export const AntibodyDetail = () => {
     },
   };
   const { antibody_id } = useParams();
+
   const [antibody, setAntibody] = useState({
     id: "",
     ab_name: "",
@@ -94,7 +97,36 @@ export const AntibodyDetail = () => {
     host: "",
     vendor: "",
     catalog_num: 0,
+    url: "",
+    insert_time: "",
+    curate_time: "",
+    disc_date: "",
   });
+
+  const [anchorCitationPopover, setAnchorCitationPopover] =
+    useState<HTMLButtonElement | null>(null);
+
+  const [anchorLinkPopover, setAnchorLinkPopOver] =
+    useState<HTMLButtonElement | null>(null);
+
+  const handleClickCitation = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorCitationPopover(event.currentTarget);
+  };
+
+  const handleCloseCitation = () => {
+    setAnchorCitationPopover(null);
+  };
+
+  const handleClickLink = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorLinkPopOver(event.currentTarget);
+  };
+
+  const handleCloseLink = () => {
+    setAnchorLinkPopOver(null);
+  };
+
+  const open = Boolean(anchorCitationPopover);
+  const id = open ? "simple-popover" : undefined;
 
   const fetchAntibody = (id) => {
     getAntibody(id)
@@ -130,9 +162,6 @@ export const AntibodyDetail = () => {
                     Find all info about this record
                   </Typography>
                 </Box>
-                <Button variant="contained" color="info" size="small">
-                  Submit an edit
-                </Button>
               </Box>
               <Divider />
               <Grid container rowSpacing={1}>
@@ -180,14 +209,33 @@ export const AntibodyDetail = () => {
                   <Typography variant="subtitle2">
                     {antibody.proper_citation}
                   </Typography>
-                  <Button
-                    variant="text"
-                    size="small"
-                    startIcon={<CopyIcon stroke={theme.palette.primary.dark} />}
-                    sx={classes.buttonText}
+                  <CopyToClipboard text={antibody.proper_citation}>
+                    <Button
+                      variant="text"
+                      size="small"
+                      startIcon={
+                        <CopyIcon stroke={theme.palette.primary.dark} />
+                      }
+                      onClick={handleClickCitation}
+                      sx={classes.buttonText}
+                    >
+                      Copy citation
+                    </Button>
+                  </CopyToClipboard>
+                  <Popover
+                    id={id}
+                    open={open}
+                    anchorEl={anchorCitationPopover}
+                    onClose={handleCloseCitation}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "left",
+                    }}
                   >
-                    Copy citation
-                  </Button>
+                    <Typography sx={{ p: 2 }}>
+                      Citation copied to clipboard
+                    </Typography>
+                  </Popover>
                 </Grid>
               </Grid>
               <Divider />
@@ -208,6 +256,7 @@ export const AntibodyDetail = () => {
                 </Grid>
                 <Grid item xs={8}>
                   <Typography variant="subtitle2">{antibody.vendor}</Typography>
+
                   <Button
                     variant="text"
                     size="small"
@@ -215,6 +264,7 @@ export const AntibodyDetail = () => {
                     endIcon={
                       <ExternalLinkIcon stroke={theme.palette.primary.dark} />
                     }
+                    href={`https://${antibody.url}`}
                   >
                     Open in vendor website
                   </Button>
@@ -230,16 +280,34 @@ export const AntibodyDetail = () => {
                     <Box sx={classes.input}>
                       <Typography>{window.location.href}</Typography>
                     </Box>
-
-                    <Button
-                      variant="text"
-                      color="info"
-                      size="small"
-                      startIcon={<CopyIcon stroke={theme.palette.grey[700]} />}
-                      sx={classes.buttonGrey}
+                    <CopyToClipboard text={window.location.href}>
+                      <Button
+                        variant="text"
+                        color="info"
+                        size="small"
+                        startIcon={
+                          <CopyIcon stroke={theme.palette.grey[700]} />
+                        }
+                        onClick={handleClickLink}
+                        sx={classes.buttonGrey}
+                      >
+                        Copy link
+                      </Button>
+                    </CopyToClipboard>
+                    {/* <Popover
+                      id={id}
+                      open={open}
+                      anchorEl={anchorLinkPopover}
+                      onClose={handleCloseLink}
+                      anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: "left",
+                      }}
                     >
-                      Copy link
-                    </Button>
+                      <Typography sx={{ p: 2 }}>
+                        Link copied to clipboard
+                      </Typography>
+                    </Popover> */}
                   </Box>
                 </Grid>
               </Grid>

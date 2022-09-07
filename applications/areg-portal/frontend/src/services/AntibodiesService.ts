@@ -14,6 +14,10 @@ interface AntibodiesObj {
   host: string;
   vendor: string;
   catalog_num?;
+  url: string;
+  insert_time: string;
+  curate_time: string;
+  disc_date: string;
 }
 
 export function getAntibodies(): Promise<AntibodiesObj[]> {
