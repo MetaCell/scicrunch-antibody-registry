@@ -175,6 +175,13 @@ const theme = createTheme({
         }),
       },
     },
+    MuiSvgIcon: {
+      styleOverrides: {
+        root: ({teme}) => ({
+          color: theme.palette.grey[400]
+        }),
+      },
+    }
   },
 });
 

@@ -7,6 +7,7 @@ import Navbar from "./components/NavBar/Navbar";
 import About from "./components/About";
 import Home from "./components/Home";
 import AntibodyDetail from "./components/AntibodyDetail";
+import Support from "./components/Support";
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import Submit from "./components/Submit";
 
@@ -24,6 +25,7 @@ const App = () => {
             <Redirect to="/" />
           </Route>
           <Route path="/:antibody_id(AB_.*)" component={AntibodyDetail} />
+          <Route path="/support" component={Support}/>
         </Switch>
       </ThemeProvider>
     </BrowserRouter>
