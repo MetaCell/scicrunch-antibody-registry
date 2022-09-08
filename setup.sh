@@ -4,8 +4,8 @@
 
 minikube start --profile areg --memory 6000 --cpus 4 --disk-size 60g --driver=docker
 
-minikube addons enable ingress
-minikube addons enable metrics-server
+minikube addons --profile areg enable ingress
+minikube addons --profile areg enable metrics-server
 
 
 kubectl config use-context areg
