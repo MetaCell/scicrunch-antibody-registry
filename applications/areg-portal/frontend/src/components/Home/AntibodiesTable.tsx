@@ -27,7 +27,11 @@ const StyledBadge = (props) => {
   if (props.field === "vendor") {
     return (
       <Box bgcolor="primary.light" px={0.5} py={0.25} borderRadius="0.25rem">
-        <Link component="button" underline="none">
+        <Link
+          underline="none"
+          target="_blank"
+          href={`https://${props.row.url}`}
+        >
           {props.children}
         </Link>
       </Box>
@@ -176,6 +180,9 @@ const dataGridStyles = {
   "& .MuiDataGrid-iconButtonContainer": {
     visibility: "visible",
   },
+  "& .MuiDataGrid-cell": {
+    cursor: "pointer",
+  },
 };
 const columns: GridColDef[] = [
   {
@@ -259,11 +266,18 @@ const columns: GridColDef[] = [
     field: "vendor",
     headerName: "Link to Vendor",
     flex: 1.5,
+    type: "actions",
   },
   {
     ...columnsDefaultProps,
     field: "catalog_num",
     headerName: "Cat Num",
+  },
+  {
+    ...columnsDefaultProps,
+    field: "url",
+    headerName: "Product URL",
+    hide: true,
   },
 ];
 
