@@ -131,13 +131,7 @@ paths:
         in: query
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Antibody'
-          description: Successful response - returns an array of `Antibody` entities.
+          $ref: '#/components/responses/PaginatedAntibodies'
       operationId: ftsAntibodies
       summary: Full text search on Antibodies
       description: Gets a list of `Antibody` entities related with the search query
@@ -217,28 +211,11 @@ components:
       description: The common fields between all REST operations for the antibody
         resource.
       required:
-      - catalog_num
+      - catalogNum
       - url
-      - commercial_type
+      - commercialType
       type: object
       properties:
-        source_organism:
-          description: |
-            The organism that the antibody was raised in; common antibodies are raised in goat, rabbit or mouse. Synthetic or bacterial origins can be noted for recombinant antibodies.
-          type: string
-        target_species:
-          description: The species associated with the antigen molecule.
-          type: string
-        vendor:
-          description: |
-            The name of the company or laboratory for company antibodies.
-            The principal investigator name for personal/other antibodies.
-          type: string
-        catalog_num:
-          description: |-
-            For company antibodies, the catalog number of the antibody.
-            For personal/other antibodies, an identifier unique to the antibody.
-          type: string
         clonality:
           description: "Can include the following options: Unknown, Cocktail, Control,\
             \ Isotype Control, Monoclonal, Monoclonal Secondary, Polyclonal, Polyclonal\
@@ -261,38 +238,35 @@ components:
           - RecombinantPolyclonal
           - RecombinantPolyclonalSecondary
           type: string
-        clone_id:
-          description: "The identifier given by the manufacturer or creator of monoclonal\
-            \ antibodies, typically associated with the cell line name."
-          type: string
-        product_isotype:
-          description: "Can include the following: IgG, IgY, IgA, IgM as well as the\
-            \ IgG subtypes"
-          type: string
-        product_conjugate:
-          description: "The molecule that the antibody is conjugated to. This is generally\
-            \ used for secondary antibodies but the field is not restricted as there\
-            \ can be various tags on primary antibodies as well. \n"
-          type: string
-        product_form:
-          description: "The formulation of the antibody product. Can include: Lyophilized,\
-            \ Affinity purified, Liquid"
-          enum:
-          - Lyophilized
-          - AffinityPurified
-          - Liquid
-          type: string
-        uniprot_id:
-          description: |
-            Protein identifier from UNIPROT
-          type: string
         epitope:
           description: The AA sequence that the antibody reagent binds to
           type: string
         comments:
           description: A free text comment.
           type: string
-        commercial_type:
+        url:
+          description: Link to more information about the antibody. For personal antibodies
+            this usually lists the the principal investigator's lab website or university
+            affiliation.
+          type: string
+        abName:
+          description: Name provided by the company or the investigator; this does
+            not need to be unique.
+          type: string
+        abTarget:
+          description: The symbol of the antigen molecule that the antibody was raised
+            against.
+          type: string
+        catalogNum:
+          description: |-
+            For company antibodies, the catalog number of the antibody.
+            For personal/other antibodies, an identifier unique to the antibody.
+          type: string
+        cloneId:
+          description: "The identifier given by the manufacturer or creator of monoclonal\
+            \ antibodies, typically associated with the cell line name."
+          type: string
+        commercialType:
           description: "Can include the following: commercial, non-profit, personal,\
             \ other"
           enum:
@@ -301,63 +275,55 @@ components:
           - personal
           - other
           type: string
-        ab_target:
-          description: The symbol of the antigen molecule that the antibody was raised
-            against.
-          type: string
-        ab_name:
-          description: Name provided by the company or the investigator; this does
-            not need to be unique.
-          type: string
-        defining_citation:
+        definingCitation:
           description: 'The manuscript that describes the creation of the antibody. '
           type: string
-        url:
-          description: Link to more information about the antibody. For personal antibodies
-            this usually lists the the principal investigator's lab website or university
-            affiliation.
+        productConjugate:
+          description: "The molecule that the antibody is conjugated to. This is generally\
+            \ used for secondary antibodies but the field is not restricted as there\
+            \ can be various tags on primary antibodies as well. \n"
+          type: string
+        productForm:
+          description: "The formulation of the antibody product. Can include: Lyophilized,\
+            \ Affinity purified, Liquid"
+          enum:
+          - Lyophilized
+          - AffinityPurified
+          - Liquid
+          type: string
+        productIsotype:
+          description: "Can include the following: IgG, IgY, IgA, IgM as well as the\
+            \ IgG subtypes"
+          type: string
+        sourceOrganism:
+          description: |
+            The organism that the antibody was raised in; common antibodies are raised in goat, rabbit or mouse. Synthetic or bacterial origins can be noted for recombinant antibodies.
+          type: string
+        targetSpecies:
+          description: The species associated with the antigen molecule.
+          type: string
+        uniprotId:
+          description: |
+            Protein identifier from UNIPROT
+          type: string
+        vendorName:
+          description: |
+            The name of the company or laboratory for company antibodies.
+            The principal investigator name for personal/other antibodies.
           type: string
     Antibody:
       description: The data type associated with the antibody resource
       type: object
       allOf:
       - required:
-        - ab_id
-        - insert_time
-        - curate_time
+        - abId
+        - insertTime
+        - curateTime
         type: object
         properties:
           accession:
             description: |
               Thus value is the same as the Antibody identifier for newly added antibodies, different if antibody records have been consolidated or are not unique.
-            type: string
-          ab_id:
-            description: Antibody identifier
-            type: string
-          cat_alt:
-            description: "The alternative catalog numbers for this product, delimited\
-              \ by comma, e.g., 9101S, 9101P, 9191L"
-            type: string
-          ab_target_entrez_gid:
-            description: Gene identifier for the gene that is associated with the
-              protein target
-            type: string
-          target_subregion:
-            description: The subregion of the target protein that the epitope is contained
-              in
-            type: string
-          target_modification:
-            description: Any modification to the target protein
-            type: string
-          insert_time:
-            format: date-time
-            description: Unix time stamp when the row was inserted.
-            type: string
-          curate_time:
-            description: Unix time stamp when the row was last updated
-            type: string
-          disc_date:
-            description: The date on which the antibody product was found to be discontinued
             type: string
           status:
             description: |
@@ -370,9 +336,39 @@ components:
           feedback:
             description: Feedback to the submitted stored here
             type: string
-          curator_comment:
+          abId:
+            description: Antibody identifier
+            type: string
+          abTargetEntrezGid:
+            description: Gene identifier for the gene that is associated with the
+              protein target
+            type: string
+          catAlt:
+            description: "The alternative catalog numbers for this product, delimited\
+              \ by comma, e.g., 9101S, 9101P, 9191L"
+            type: string
+          curateTime:
+            format: date-time
+            description: Unix time stamp when the row was last updated
+            type: string
+          curatorComment:
             description: |
               Curator comment about this reagent
+            type: string
+          discDate:
+            format: date-time
+            description: The date on which the antibody product was found to be discontinued
+            type: string
+          insertTime:
+            format: date-time
+            description: Unix time stamp when the row was inserted.
+            type: string
+          targetModification:
+            description: Any modification to the target protein
+            type: string
+          targetSubregion:
+            description: The subregion of the target protein that the epitope is contained
+              in
             type: string
       - $ref: '#/components/schemas/AbstractAntibody'
     AddUpdateAntibody:
@@ -399,26 +395,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/KeyValuePair'
-        starts_with:
-          description: "Array of key-value pairs, where key represents the column\
-            \ and value the string that should be starting with"
-          type: array
-          items:
-            $ref: '#/components/schemas/KeyValuePair'
-        ends_with:
-          description: "Array of key-value pairs, where key represents the column\
-            \ and value the string that should be ending with"
-          type: array
-          items:
-            $ref: '#/components/schemas/KeyValuePair'
-        sort_on:
-          description: |-
-            Array of key-value pairs, where key represents the column and value the string ascending or descending
-
-            Order in the array, matches with the order of sorting filters, index 0 will be used to sort first
-          type: array
-          items:
-            $ref: '#/components/schemas/KeyValuePair'
         page:
           description: "Represents the page requested, considering the size parameter"
           type: integer
@@ -428,6 +404,26 @@ components:
         search:
           description: The string to use to search for Antibodies
           type: string
+        endsWith:
+          description: "Array of key-value pairs, where key represents the column\
+            \ and value the string that should be ending with"
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        sortOn:
+          description: |-
+            Array of key-value pairs, where key represents the column and value the string ascending or descending
+
+            Order in the array, matches with the order of sorting filters, index 0 will be used to sort first
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        startsWith:
+          description: "Array of key-value pairs, where key represents the column\
+            \ and value the string that should be starting with"
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
     KeyValuePair:
       description: Utility type to represent a key-value object
       required:
@@ -441,3 +437,29 @@ components:
         value:
           description: String representation of the value
           type: string
+    PaginatedAntibodies:
+      description: ""
+      required:
+      - page
+      - totalElements
+      - items
+      type: object
+      properties:
+        page:
+          description: ""
+          type: number
+        totalElements:
+          description: ""
+          type: integer
+        items:
+          description: ""
+          type: array
+          items:
+            $ref: '#/components/schemas/Antibody'
+  responses:
+    PaginatedAntibodies:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PaginatedAntibodies'
+      description: ""
