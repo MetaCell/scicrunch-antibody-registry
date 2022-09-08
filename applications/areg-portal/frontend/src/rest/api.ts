@@ -639,24 +639,6 @@ export interface FilterRequest {
      */
     'equals'?: Array<KeyValuePair>;
     /**
-     * Array of key-value pairs, where key represents the column and value the string that should be starting with
-     * @type {Array<KeyValuePair>}
-     * @memberof FilterRequest
-     */
-    'starts_with'?: Array<KeyValuePair>;
-    /**
-     * Array of key-value pairs, where key represents the column and value the string that should be ending with
-     * @type {Array<KeyValuePair>}
-     * @memberof FilterRequest
-     */
-    'ends_with'?: Array<KeyValuePair>;
-    /**
-     * Array of key-value pairs, where key represents the column and value the string ascending or descending  Order in the array, matches with the order of sorting filters, index 0 will be used to sort first
-     * @type {Array<KeyValuePair>}
-     * @memberof FilterRequest
-     */
-    'sort_on'?: Array<KeyValuePair>;
-    /**
      * Represents the page requested, considering the size parameter
      * @type {number}
      * @memberof FilterRequest
@@ -674,6 +656,24 @@ export interface FilterRequest {
      * @memberof FilterRequest
      */
     'search'?: string;
+    /**
+     * Array of key-value pairs, where key represents the column and value the string that should be ending with
+     * @type {Array<KeyValuePair>}
+     * @memberof FilterRequest
+     */
+    'endsWith'?: Array<KeyValuePair>;
+    /**
+     * Array of key-value pairs, where key represents the column and value the string ascending or descending  Order in the array, matches with the order of sorting filters, index 0 will be used to sort first
+     * @type {Array<KeyValuePair>}
+     * @memberof FilterRequest
+     */
+    'sortOn'?: Array<KeyValuePair>;
+    /**
+     * Array of key-value pairs, where key represents the column and value the string that should be starting with
+     * @type {Array<KeyValuePair>}
+     * @memberof FilterRequest
+     */
+    'startsWith'?: Array<KeyValuePair>;
 }
 /**
  * Utility type to represent a key-value object

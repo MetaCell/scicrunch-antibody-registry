@@ -395,26 +395,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/KeyValuePair'
-        starts_with:
-          description: "Array of key-value pairs, where key represents the column\
-            \ and value the string that should be starting with"
-          type: array
-          items:
-            $ref: '#/components/schemas/KeyValuePair'
-        ends_with:
-          description: "Array of key-value pairs, where key represents the column\
-            \ and value the string that should be ending with"
-          type: array
-          items:
-            $ref: '#/components/schemas/KeyValuePair'
-        sort_on:
-          description: |-
-            Array of key-value pairs, where key represents the column and value the string ascending or descending
-
-            Order in the array, matches with the order of sorting filters, index 0 will be used to sort first
-          type: array
-          items:
-            $ref: '#/components/schemas/KeyValuePair'
         page:
           description: "Represents the page requested, considering the size parameter"
           type: integer
@@ -424,6 +404,26 @@ components:
         search:
           description: The string to use to search for Antibodies
           type: string
+        endsWith:
+          description: "Array of key-value pairs, where key represents the column\
+            \ and value the string that should be ending with"
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        sortOn:
+          description: |-
+            Array of key-value pairs, where key represents the column and value the string ascending or descending
+
+            Order in the array, matches with the order of sorting filters, index 0 will be used to sort first
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        startsWith:
+          description: "Array of key-value pairs, where key represents the column\
+            \ and value the string that should be starting with"
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
     KeyValuePair:
       description: Utility type to represent a key-value object
       required:
