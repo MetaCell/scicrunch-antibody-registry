@@ -25,7 +25,6 @@ import HomeHeader from "./HomeHeader";
 
 const StyledBadge = (props) => {
   if (props.field === "vendor") {
-    console.log(props.row.url);
     return (
       <Box bgcolor="primary.light" px={0.5} py={0.25} borderRadius="0.25rem">
         <Link
