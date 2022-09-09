@@ -30,9 +30,6 @@ ALLOWED_HOSTS = [
     "*",
 ]
 
-# Will be set by CH
-CSRF_TRUSTED_ORIGINS = []
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -189,8 +186,5 @@ ANTIGEN_EPITOPE_MAX_LEN = 128
 CATALOG_NUMBER_MAX_LEN = 512
 
 VENDOR_MAX_LEN = 512
-
-# Add some specific origins to the CH generated origins
-CSRF_TRUSTED_ORIGINS += ['https://antibodyregistry.org/', 'https://www.antibodyregistry.org/']
 
 DEBUG=True
