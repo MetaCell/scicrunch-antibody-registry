@@ -1,7 +1,9 @@
 import React from "react";
-import { Formik } from "formik";
 
-import { Button, Dialog, TextField } from "@mui/material";
+import { Button, Dialog } from "@mui/material";
+
+import MultiStepForm, { FormStep } from "../UI/MultiStepForm";
+import AbTypeStep from "./AbTypeStep";
 
 const initialValues = {
   abType: "",
@@ -12,27 +14,21 @@ const initialValues = {
 const SubmissionForm = (props) => {
   return (
     <Dialog fullScreen open={props.open} onClose={props.handleClose}>
-      <Formik
+      <MultiStepForm
         initialValues={initialValues}
         onSubmit={(values) => {
           alert(JSON.stringify(values, null, 2));
         }}
       >
-        {(formik) => (
-          <form onSubmit={formik.handleSubmit}>
-            <TextField
-              fullWidth
-              id="abType"
-              name="abType"
-              label="Type of Antibody"
-              value={formik.values.abType}
-              onChange={formik.handleChange}
-            />
-            <Button type="submit">Submit</Button>
-            <Button onClick={props.handleClose}>Close</Button>
-          </form>
-        )}
-      </Formik>
+        <FormStep stepName="abType" onSubmit={() => console.log("step 1")}>
+          <AbTypeStep label="Type of Antibody" name="abType" />
+        </FormStep>
+        <FormStep stepName="abUrl" onSubmit={() => console.log("step 2")}>
+          <AbTypeStep label="URL" name="abUrl" />
+          <AbTypeStep label="CatNum" name="CatNum" />
+        </FormStep>
+      </MultiStepForm>
+      <Button onClick={props.handleClose}>Close</Button>
     </Dialog>
   );
 };
