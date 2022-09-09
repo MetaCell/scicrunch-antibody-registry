@@ -1,28 +1,54 @@
 import React from "react";
 import { FieldConfig, useField, Field } from "formik";
-import { InputLabel } from "@mui/material";
+import {
+  InputLabel,
+  Card,
+  CardActionArea,
+  CardContent,
+  Typography,
+  Radio,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+} from "@mui/material";
 
 interface AbTypeStep extends FieldConfig {
   label: string;
 }
 
+const TypeChoiceCard = ({ children, label }) => {
+  return (
+    <Card sx={{ maxWidth: 345 }}>
+      <CardActionArea>
+        <CardContent>
+          <Typography gutterBottom variant="h5" component="div">
+            {label}
+          </Typography>
+          {children}
+        </CardContent>
+      </CardActionArea>
+    </Card>
+  );
+};
+
 const AbTypeStep = ({ label, ...props }: AbTypeStep) => {
   const [field, meta] = useField(props);
+  console.log(field);
+  console.log(meta);
+  console.log(props);
 
   return (
     <>
-      <InputLabel>
+      <TypeChoiceCard label="Commercial">
         <Field type="radio" {...field} {...props} value="commercial" />
-        Commercial
-      </InputLabel>
-      <InputLabel>
+      </TypeChoiceCard>
+      <TypeChoiceCard label="Personal">
         <Field type="radio" {...field} {...props} value="personal" />
-        Personal
-      </InputLabel>
-      <InputLabel>
+      </TypeChoiceCard>
+      <TypeChoiceCard label="Other">
         <Field type="radio" {...field} {...props} value="other" />
-        Other
-      </InputLabel>
+      </TypeChoiceCard>
     </>
   );
 };
