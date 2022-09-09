@@ -1,12 +1,12 @@
 import React from "react";
 
-import { Button, Dialog } from "@mui/material";
+import { Button, Dialog, TextField } from "@mui/material";
 
 import MultiStepForm, { FormStep } from "../UI/MultiStepForm";
 import AbTypeStep from "./AbTypeStep";
 
 const initialValues = {
-  abType: "",
+  commercialType: "commercial",
   abUrl: "",
   catNum: "",
 };
@@ -20,12 +20,14 @@ const SubmissionForm = (props) => {
           alert(JSON.stringify(values, null, 2));
         }}
       >
-        <FormStep stepName="abType" onSubmit={() => console.log("step 1")}>
-          <AbTypeStep label="Type of Antibody" name="abType" />
+        <FormStep
+          stepName="commercialType"
+          onSubmit={() => console.log("step 1")}
+        >
+          <AbTypeStep label="Type of Antibody" name="commercialType" />
         </FormStep>
         <FormStep stepName="abUrl" onSubmit={() => console.log("step 2")}>
-          <AbTypeStep label="URL" name="abUrl" />
-          <AbTypeStep label="CatNum" name="CatNum" />
+          <TextField fullWidth id="url " label="URL" name="abUrl" />
         </FormStep>
       </MultiStepForm>
       <Button onClick={props.handleClose}>Close</Button>

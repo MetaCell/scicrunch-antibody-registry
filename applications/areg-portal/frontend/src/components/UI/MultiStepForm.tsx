@@ -68,7 +68,7 @@ const MultiStepForm = (props: MultiStepFormProps) => {
   };
 
   return (
-    <Formik initialValues={{}} onSubmit={handleSubmit}>
+    <Formik initialValues={initialValues} onSubmit={handleSubmit}>
       {(formik) => (
         <Form>
           {step}

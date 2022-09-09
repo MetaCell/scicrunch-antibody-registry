@@ -1,6 +1,6 @@
 import React from "react";
-import { FieldConfig, useField } from "formik";
-import { TextField } from "@mui/material";
+import { FieldConfig, useField, Field } from "formik";
+import { InputLabel } from "@mui/material";
 
 interface AbTypeStep extends FieldConfig {
   label: string;
@@ -8,7 +8,23 @@ interface AbTypeStep extends FieldConfig {
 
 const AbTypeStep = ({ label, ...props }: AbTypeStep) => {
   const [field, meta] = useField(props);
-  return <TextField label={label} {...field} {...props} />;
+
+  return (
+    <>
+      <InputLabel>
+        <Field type="radio" {...field} {...props} value="commercial" />
+        Commercial
+      </InputLabel>
+      <InputLabel>
+        <Field type="radio" {...field} {...props} value="personal" />
+        Personal
+      </InputLabel>
+      <InputLabel>
+        <Field type="radio" {...field} {...props} value="other" />
+        Other
+      </InputLabel>
+    </>
+  );
 };
 
 export default AbTypeStep;

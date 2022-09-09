@@ -1,10 +1,13 @@
-import { Antibody, PaginatedAntibodies, AntibodyApi } from "../rest/api"
+import { Antibody, PaginatedAntibodies, AntibodyApi } from "../rest/api";
 import dataJson from "./data.json";
 
 const api = new AntibodyApi();
 
-export async function getAntibodies(page=0, size=10): Promise<PaginatedAntibodies> {
-  return  (await api.getAntibodies(page, size)).data;
+export async function getAntibodies(
+  page = 0,
+  size = 10
+): Promise<PaginatedAntibodies> {
+  return (await api.getAntibodies(page, size)).data;
 }
 
 export function getAntibody(id): Promise<any> {
