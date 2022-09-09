@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 //MUI
-import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  useGridApiContext,
+  GridColDef,
+  GridRenderCellParams,
+  GridCsvExportOptions,
+} from "@mui/x-data-grid";
 import { Typography, Box, Link, Checkbox } from "@mui/material";
 
 //project imports
@@ -12,13 +18,20 @@ import {
   SortingIcon,
   CheckedIcon,
   UncheckedIcon,
+  FilterIcon,
+  SettingsIcon,
 } from "../icons";
+import HomeHeader from "./HomeHeader";
 
 const StyledBadge = (props) => {
   if (props.field === "vendor") {
     return (
       <Box bgcolor="primary.light" px={0.5} py={0.25} borderRadius="0.25rem">
-        <Link component="button" underline="none">
+        <Link
+          underline="none"
+          target="_blank"
+          href={`https://${props.row.url}`}
+        >
           {props.children}
         </Link>
       </Box>
@@ -29,7 +42,9 @@ const StyledBadge = (props) => {
         {props.children}
       </Box>
     );
-  } else return <Box>{props.children}</Box>;
+  } else {
+    return <Box>{props.children}</Box>;
+  }
 };
 const StyledCheckBox = (props) => {
   return (
@@ -37,6 +52,32 @@ const StyledCheckBox = (props) => {
       {...props}
       checkedIcon={<CheckedIcon />}
       icon={<UncheckedIcon />}
+    />
+  );
+};
+
+const CustomToolbar = () => {
+  const [activeSelection, setActiveSelection] = useState(true);
+
+  const apiRef = useGridApiContext();
+  const selectedRows = apiRef.current.getSelectedRows();
+
+  const handleExport = (options: GridCsvExportOptions) =>
+    apiRef.current.exportDataAsCsv(options);
+
+  const showFilterMenu = () => apiRef.current.showFilterPanel();
+
+  useEffect(() => {
+    selectedRows.size === 0
+      ? setActiveSelection(false)
+      : setActiveSelection(true);
+  }, [selectedRows]);
+
+  return (
+    <HomeHeader
+      activeSelection={activeSelection}
+      handleExport={handleExport}
+      showFilterMenu={showFilterMenu}
     />
   );
 };
@@ -98,6 +139,15 @@ const columnsDefaultProps = {
 };
 
 const dataGridStyles = {
+  "&.MuiDataGrid-root": {
+    border: "0px",
+  },
+  "& .MuiDataGrid-main": {
+    border: "0.063rem solid",
+    borderColor: "grey.200",
+    borderTopLeftRadius: "8px",
+    borderTopRightRadius: "8px",
+  },
   "& .MuiDataGrid-row:hover": {
     backgroundColor: "grey.50",
   },
@@ -130,6 +180,9 @@ const dataGridStyles = {
   "& .MuiDataGrid-iconButtonContainer": {
     visibility: "visible",
   },
+  "& .MuiDataGrid-cell": {
+    cursor: "pointer",
+  },
 };
 const columns: GridColDef[] = [
   {
@@ -157,7 +210,7 @@ const columns: GridColDef[] = [
   {
     ...columnsDefaultProps,
     field: "ab_target",
-    headerName: "Target antigen",
+    headerName: "Target antigen (excl. species)",
     hide: true,
   },
   {
@@ -213,11 +266,18 @@ const columns: GridColDef[] = [
     field: "vendor",
     headerName: "Link to Vendor",
     flex: 1.5,
+    type: "actions",
   },
   {
     ...columnsDefaultProps,
     field: "catalog_num",
     headerName: "Cat Num",
+  },
+  {
+    ...columnsDefaultProps,
+    field: "url",
+    headerName: "Product URL",
+    hide: true,
   },
 ];
 
@@ -234,10 +294,62 @@ const AntibodiesTable = () => {
 
   useEffect(fetchAntibodies, []);
 
+  const compProps = {
+    panel: {
+      sx: {
+        "& .MuiTypography-body1": {
+          fontSize: "0.875rem",
+          color: "grey.500",
+        },
+      },
+    },
+    filterPanel: {
+      filterFormProps: {
+        columnInputProps: {
+          variant: "outlined",
+          size: "small",
+          sx: { mr: 1 },
+        },
+        operatorInputProps: {
+          variant: "outlined",
+          size: "small",
+          sx: { mr: 1 },
+        },
+        valueInputProps: {
+          InputComponentProps: {
+            variant: "outlined",
+            size: "small",
+          },
+        },
+      },
+      sx: {
+        "& .MuiDataGrid-filterForm": {
+          "& .MuiFormControl-root": {
+            "& legend": {
+              display: "none",
+            },
+            "& fieldset": {
+              top: 0,
+            },
+            "& .MuiFormLabel-root": {
+              display: "none",
+            },
+          },
+        },
+      },
+    },
+    columnMenu: {
+      sx: {
+        "& .MuiMenuItem-root": {
+          fontSize: "0.875rem",
+          color: "grey.500",
+        },
+      },
+    },
+  };
+
   return (
-    <Box
-     
-    >
+    <Box>
       <Box sx={{ flexGrow: 1, height: "90vh" }}>
         <DataGrid
           sx={dataGridStyles}
@@ -246,21 +358,29 @@ const AntibodiesTable = () => {
           pageSize={10}
           rowsPerPageOptions={[20]}
           checkboxSelection
-          disableColumnMenu
-          
           disableSelectionOnClick
           getRowHeight={() => "auto"}
+          onRowClick={(params) =>
+            (window.location.href = `/${params.row.ab_id}`)
+          }
           components={{
             BaseCheckbox: StyledCheckBox,
             ColumnFilteredIcon: FilteredColumnIcon,
             ColumnUnsortedIcon: SortingIcon,
             ColumnSortedAscendingIcon: AscSortedIcon,
             ColumnSortedDescendingIcon: DescSortedIcon,
+            Toolbar: CustomToolbar,
+            ColumnMenuIcon: FilterIcon,
+            ColumnSelectorIcon: SettingsIcon,
+          }}
+          componentsProps={compProps}
+          localeText={{
+            toolbarColumns: "Table settings",
           }}
         />
       </Box>
     </Box>
   );
-}
+};
 
 export default AntibodiesTable;

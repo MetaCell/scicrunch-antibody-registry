@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://github.com/eosc-kc/keycloak-orcid/releases
+HostUrl=https://objects.githubusercontent.com/github-production-release-asset-2e65be/426926115/04bdbfff-ffa5-4818-bbd1-b3f2230a2c5f?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20220905%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220905T154628Z&X-Amz-Expires=300&X-Amz-Signature=e7799e88c499956fad2b4032671dda32fd25ee6db58e108a70bdbcda77109d39&X-Amz-SignedHeaders=host&actor_id=46561561&key_id=0&repo_id=426926115&response-content-disposition=attachment%3B%20filename%3Dkeycloak-orcid-1.0.0.jar&response-content-type=application%2Foctet-stream
