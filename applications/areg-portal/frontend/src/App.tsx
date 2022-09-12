@@ -9,8 +9,10 @@ import Home from "./components/Home";
 import AntibodyDetail from "./components/AntibodyDetail";
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import Submit from "./components/Submit";
+import { getCurrentUser } from './services/UserService';
 
 const App = () => {
+  getCurrentUser()
   return (
     <BrowserRouter>
       <ThemeProvider theme={theme}>

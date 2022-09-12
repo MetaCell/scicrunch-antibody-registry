@@ -12,8 +12,17 @@ import {
 import Searchbar from "./Searchbar";
 import NavLinks from "./NavLinks";
 import HelpMenu from "./HelpMenu";
+import { useUser, User } from "../../services/UserService"
 
 const Navbar = () => {
+  const user: User = useUser();
+  console.log(user);
+  const login = () => {
+    
+    window.location.href = "/login";
+  }
+    
+  
   return (
     <Box>
       <AppBar elevation={0}>
@@ -60,7 +69,7 @@ const Navbar = () => {
             >
               <Stack direction="row" spacing={1.5}>
                 <HelpMenu />
-                <Button onClick={() => (window.location.href = "/login")}>
+                <Button onClick={login}>
                   Log in / Register
                 </Button>
               </Stack>
