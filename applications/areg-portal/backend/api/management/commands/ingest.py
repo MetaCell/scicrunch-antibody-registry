@@ -6,7 +6,7 @@ import pandas as pd
 from django.core.management.base import BaseCommand
 from django.db import transaction, connection
 
-from api.models import STATUS, CommercialType
+from api.models import STATUS, CommercialType, AntibodyClonality
 
 TRUNCATE_STM = "TRUNCATE TABLE $tableName CASCADE;"
 INSERT_INTO_VALUES_STM = "INSERT INTO $tableName ($columns) VALUES {} ;"
@@ -61,6 +61,7 @@ class Command(BaseCommand):
 
         commercial_type_reverse_map = {value: key for key, value in CommercialType.choices}
         status_reverse_map = {value: key for key, value in STATUS.choices}
+        clonality_reverse_map = {value.lower(): key for key, value in AntibodyClonality.choices}
 
         # Prepare vendor inserts
         df_vendor = pd.read_csv(options['vendor_table_uri'])
@@ -92,8 +93,7 @@ class Command(BaseCommand):
             with connection.cursor() as cursor:
                 # delete tables content (opposite order of insertion)
                 # todo: do we need all the executes or just 1 with cascade?
-                tables_to_delete = ['api_antibody', 'api_antigen', 'api_vendor', 'api_vendordomain',
-                                    'api_antibodytarget']
+                tables_to_delete = ['api_antibody', 'api_antigen', 'api_vendor', 'api_vendordomain']
                 for ttd in tables_to_delete:
                     cursor.execute(TRUNCATE_STM.replace('$tableName', ttd))
 
@@ -118,7 +118,7 @@ class Command(BaseCommand):
                 cursor.execute(DROP_TABLE_STM.replace('$tableName', tmp_table_name))
                 cursor.execute(get_create_table_stm(tmp_table_name, header))
 
-                # Insert raw data
+                # Insert raw data into tmp table
                 for chunk in pd.read_csv(options['antibody_table_uri'], chunksize=10 ** 4, dtype='unicode'):
                     raw_data_insert_stm = get_insert_values_into_table_stm(tmp_table_name, header, len(chunk))
                     # todo: format species string into a more rigid format (csv or semicolon separated values + order)
@@ -126,6 +126,8 @@ class Command(BaseCommand):
                     row_params = []
                     for index, row in chunk.iterrows():
                         row['status'] = status_reverse_map[row['status']]
+                        row['clonality'] = clonality_reverse_map.get(row['clonality'].lower(), 'UNK') if type(
+                            row['clonality']) != float else 'UNK'
                         row_params.extend([clean_empty_value(value) for value in row.values])
                     cursor.execute(raw_data_insert_stm, row_params)
 
@@ -144,17 +146,26 @@ class Command(BaseCommand):
                                      "WHERE api_antigen.ab_target=TMP.ab_target; "
                 cursor.execute(antigen_update_stm)
 
-                # Insert select distinct antibody targets
-                cursor.execute(get_insert_into_table_select_stm('api_antibodytarget',
-                                                                ['target_species', 'target_subregion',
-                                                                 'target_modification', 'epitope', 'antigen_id'],
-                                                                True,
-                                                                ['target_species', 'target_subregion',
-                                                                 'target_modification', 'epitope',
-                                                                 f'api_antigen.id'],
-                                                                f"{tmp_table_name} JOIN api_antigen ON api_antigen.ab_target = {tmp_table_name}.ab_target"))
                 # Insert into antibody
-                # cursor.execute(get_insert_into_table_select_stm('api_antibody', ))
+
+                antibody_stm = f"INSERT INTO api_antibody (ix, ab_name, ab_id, accession, uid, catalog_num, cat_alt, " \
+                               f"vendor_id, url, antigen_id, target_species, target_subregion, target_modification, " \
+                               f"epitope, source_organism, clonality, clone_id, product_isotype, " \
+                               f"product_conjugate, defining_citation, product_form, comments, feedback, " \
+                               f"curator_comment, disc_date, status, insert_time, curate_time)" \
+                               f"SELECT DISTINCT CAST(ix as BIGINT), ab_name, ab_id, ab_id_old, uid, catalog_num, " \
+                               f"cat_alt, CAST(vendor_id as BIGINT), url, api_antigen.id, target_species, " \
+                               f"target_subregion, target_modification, epitope,source_organism, clonality, " \
+                               f"clone_id, product_isotype, product_conjugate, defining_citation, product_form, " \
+                               f"comments, feedback, curator_comment, disc_date, status, " \
+                               f"to_timestamp(cast(insert_time as BIGINT) / 1000000.0), " \
+                               f"to_timestamp(cast(curate_time as BIGINT) / 1000000.0) " \
+                               f"FROM {tmp_table_name}, api_vendor, api_antigen " \
+                               f"WHERE {tmp_table_name}.vendor_id = CAST(api_vendor.id AS text) AND " \
+                               f"{tmp_table_name}.ab_target = api_antigen.ab_target;"
+
+                cursor.execute(antibody_stm)
+
                 # Update vendor domain link
 
         end = timer()
