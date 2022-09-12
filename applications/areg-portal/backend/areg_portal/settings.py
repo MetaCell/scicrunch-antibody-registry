@@ -45,7 +45,6 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    'django.middleware.csrf.CsrfViewMiddleware',
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -187,3 +186,5 @@ ANTIGEN_EPITOPE_MAX_LEN = 128
 CATALOG_NUMBER_MAX_LEN = 512
 
 VENDOR_MAX_LEN = 512
+CSRF_TRUSTED_ORIGINS = ['https://www.areg.local','https://areg.local', 'https://areg.dev.metacell.us','https://areg.stage.metacell.us','https://areg.demo.metacell.us','https://antibodyregistry.org/', 'https://www.antibodyregistry.org/']
+DEBUG=True

@@ -7,8 +7,8 @@ harness:
     - username: admin
       email: admin@testuser.com
       clientRoles:
-      - areg_portal:administrator
+      - administrator
     - username: manager
       email: manager@testuser.com
       clientRoles:
-      - areg_portal:manager
+      - manager

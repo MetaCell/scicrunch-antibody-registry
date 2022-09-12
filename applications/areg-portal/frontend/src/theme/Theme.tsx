@@ -28,6 +28,7 @@ const theme = createTheme({
     primary: {
       main: "#2173F2",
       light: "#DFEBF8",
+      dark: "#0052CC",
     },
   },
   shape: {

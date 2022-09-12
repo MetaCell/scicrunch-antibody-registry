@@ -149,7 +149,7 @@ steps:
         - REGISTRY=${{REGISTRY}}/areg/
         image_name: areg/accounts
         title: Accounts
-        working_directory: ./cloud-harness/applications/accounts
+        working_directory: ./.overrides/applications/accounts
       common:
         type: build
         stage: build
