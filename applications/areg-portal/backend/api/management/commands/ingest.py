@@ -45,9 +45,9 @@ class Command(BaseCommand):
 
         # Prepare vendor domain inserts
         df_vendor_domain = pd.read_csv(options['vendor_domain_table_uri'])
-        df_vendor_domain.drop_duplicates(subset=["domain_name"])
+        df_vendor_domain = df_vendor_domain.drop_duplicates(subset=["domain_name"])
         vendor_domain_insert_stm = get_insert_into_table_stm('api_vendordomain',
-                                                             ['id', 'domain_name', 'vendor_id', 'status'],
+                                                             ['id', 'domain_name', 'vendor_id', 'status', 'link'],
                                                              len(df_vendor_domain))
 
         with transaction.atomic():
@@ -67,17 +67,16 @@ class Command(BaseCommand):
                 cursor.execute(vendor_insert_stm, vendor_params)
 
                 # insert vendors domains
-                # vendor_domain_params = []
-                # for index, row in df_vendor_domain.iterrows():
-                #     vendor_domain_params.extend(
-                #         [row['id'], row['domain_name'], row['vendor_id'],
-                #          status_reverse_map[row['status']]])
-                # cursor.execute(vendor_domain_insert_stm, vendor_domain_params)
-
-                print("Done")
+                vendor_domain_params = []
+                for index, row in df_vendor_domain.iterrows():
+                    # todo: Handle bad references according to https://github.com/MetaCell/scicrunch-antibody-registry/issues/54
+                    vendor_domain_params.extend(
+                        [row['id'], row['domain_name'], row['vendor_id'],
+                         status_reverse_map[row['status']], False])
+                cursor.execute(vendor_domain_insert_stm, vendor_domain_params)
 
                 # Create copy table
                 # Insert data
                 # Insert select distinct antigen
                 # Insert into antibody
-                # (Be aware of the choices options)
+                # Update vendor domain link

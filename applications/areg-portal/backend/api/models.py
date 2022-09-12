@@ -44,8 +44,8 @@ class ProductIsotype(models.TextChoices):
 
 
 class STATUS(models.TextChoices):
-    CURATED = 'C', 'Curated'
-    REJECTED = 'R', 'Rejected'
+    CURATED = 'C', 'CURATED'
+    REJECTED = 'R', 'REJECTED'
     QUEUE = 'Q', 'QUEUE'
 
 
