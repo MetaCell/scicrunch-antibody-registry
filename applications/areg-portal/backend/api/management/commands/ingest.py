@@ -167,6 +167,12 @@ class Command(BaseCommand):
                 cursor.execute(antibody_stm)
 
                 # Update vendor domain link
+                antigen_update_stm = "UPDATE api_vendordomain " \
+                                     "SET link = True " \
+                                     "FROM tmp_table " \
+                                     "WHERE api_vendordomain.vendor_id=CAST(tmp_table.vendor_id as BIGINT) " \
+                                     "AND lower(tmp_table.link) = 'yes'; "
+                cursor.execute(antigen_update_stm)
 
         end = timer()
         logging.info(f"Ingestion finished in {end - start} seconds")
