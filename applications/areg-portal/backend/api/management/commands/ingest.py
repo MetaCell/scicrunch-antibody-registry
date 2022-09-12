@@ -145,7 +145,14 @@ class Command(BaseCommand):
                 cursor.execute(antigen_update_stm)
 
                 # Insert select distinct antibody targets
-
+                cursor.execute(get_insert_into_table_select_stm('api_antibodytarget',
+                                                                ['target_species', 'target_subregion',
+                                                                 'target_modification', 'epitope', 'antigen_id'],
+                                                                True,
+                                                                ['target_species', 'target_subregion',
+                                                                 'target_modification', 'epitope',
+                                                                 f'api_antigen.id'],
+                                                                f"{tmp_table_name} JOIN api_antigen ON api_antigen.ab_target = {tmp_table_name}.ab_target"))
                 # Insert into antibody
                 # cursor.execute(get_insert_into_table_select_stm('api_antibody', ))
                 # Update vendor domain link
