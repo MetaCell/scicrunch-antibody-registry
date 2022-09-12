@@ -1,7 +1,7 @@
 from django.db import models
 
 from areg_portal.settings import ANTIBODY_ID_MAX_LEN, CATALOG_NUMBER_MAX_LEN, VENDOR_MAX_LEN, \
-    ANTIGEN_ID_MAX_LEN, ANTIGEN_DESCRIPTION_MAX_LEN, ANTIGEN_SUBREGION_MAX_LEN, \
+    ANTIGEN_DESCRIPTION_MAX_LEN, ANTIGEN_SUBREGION_MAX_LEN, \
     ANTIGEN_EPITOPE_MAX_LEN, ANTIBODY_SOURCE_ORGANISM_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
     ANTIBODY_CLONE_ID_MAX_LEN, ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN, \
     ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, ANTIBODY_CITATION_MAX_LEN, \
@@ -76,15 +76,25 @@ class VendorDomain(models.Model):
 
 class Antigen(models.Model):
     symbol = models.CharField(unique=True, max_length=ANTIGEN_DESCRIPTION_MAX_LEN, db_column='ab_target')
-    species = models.TextField(db_column='target_species')
-    entrez_id = models.CharField(unique=True, max_length=ANTIGEN_ID_MAX_LEN, db_column='ab_target_entrez_gid')
-    subregion = models.CharField(max_length=ANTIGEN_SUBREGION_MAX_LEN, db_column='target_subregion')
-    modifications = models.TextField(db_column='target_modification')
-    epitope = models.CharField(max_length=ANTIGEN_EPITOPE_MAX_LEN)
-    uniprot_id = models.CharField(unique=True, max_length=ANTIGEN_ID_MAX_LEN)
+    entrez_id = models.TextField(db_column='ab_target_entrez_gid', null=True)
+    uniprot_id = models.TextField(null=True)
 
     def __str__(self):
         return self.entrez_id
+
+
+class AntibodyTarget(models.Model):
+    antigen = models.ForeignKey(Antigen, on_delete=models.RESTRICT)
+    species = models.TextField(db_column='target_species')
+    subregion = models.CharField(max_length=ANTIGEN_SUBREGION_MAX_LEN, db_column='target_subregion')
+    modifications = models.TextField(db_column='target_modification')
+    epitope = models.CharField(max_length=ANTIGEN_EPITOPE_MAX_LEN)
+
+    class Meta:
+        # todo: confirm with https://github.com/MetaCell/scicrunch-antibody-registry/issues/55
+        constraints = [
+            models.UniqueConstraint(fields=['antigen', 'species'], name='unique_antigen_species')
+        ]
 
 
 class Antibody(models.Model):
@@ -98,7 +108,7 @@ class Antibody(models.Model):
     cat_alt = models.TextField()
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
     url = models.URLField(null=False)
-    antigen = models.ForeignKey(Antigen, on_delete=models.RESTRICT)
+    target = models.ForeignKey(AntibodyTarget, on_delete=models.RESTRICT)
     source_organism = models.CharField(max_length=ANTIBODY_SOURCE_ORGANISM_MAX_LEN)
     clonality = models.CharField(
         max_length=ANTIBODY_CLONALITY_MAX_LEN,
