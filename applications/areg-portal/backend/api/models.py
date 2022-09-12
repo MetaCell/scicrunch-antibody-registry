@@ -1,15 +1,14 @@
-from django.core.validators import MinLengthValidator
 from django.db import models
 
 from areg_portal.settings import ANTIBODY_ID_MAX_LEN, CATALOG_NUMBER_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIGEN_ID_MAX_LEN, ANTIGEN_DESCRIPTION_MAX_LEN, ANTIGEN_SUBREGION_MAX_LEN, \
     ANTIGEN_EPITOPE_MAX_LEN, ANTIBODY_SOURCE_ORGANISM_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
-    ANTIBODY_COMMERCIAL_TYPE_MAX_LEN, ANTIBODY_CLONE_ID_MAX_LEN, ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN, \
-    ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, ANTIBODY_PRODUCT_FORM_MAX_LEN, ANTIBODY_CITATION_MAX_LEN, \
-    ANTIBODY_STATUS_MAX_LEN, ANTIBODY_UID_MAX_LEN
+    ANTIBODY_CLONE_ID_MAX_LEN, ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN, \
+    ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, ANTIBODY_CITATION_MAX_LEN, \
+    ANTIBODY_UID_MAX_LEN, VENDOR_NIF_MAX_LEN, VENDOR_COMMERCIAL_TYPE_MAX_LEN, STATUS_MAX_LEN
 
 
-class AntibodyCommercialType(models.TextChoices):
+class CommercialType(models.TextChoices):
     COMMERCIAL = 'CM', 'commercial'
     PERSONAL = 'PS', 'personal'
     NON_PROFIT = 'NP', 'non-profit'
@@ -44,12 +43,6 @@ class ProductIsotype(models.TextChoices):
     IGM = 'IGM', 'IgM'
 
 
-class ProductForm(models.TextChoices):
-    LYOPHILIZED = 'LP', 'Lyophilized'
-    AFFINITY_PURIFIED = 'AP', 'Affinity Purified'
-    LIQUID = 'LQ', 'LIQUID'
-
-
 class STATUS(models.TextChoices):
     CURATED = 'C', 'Curated'
     REJECTED = 'R', 'Rejected'
@@ -57,11 +50,28 @@ class STATUS(models.TextChoices):
 
 
 class Vendor(models.Model):
-    id = models.AutoField(db_column='vendor_id', null=False, primary_key=True)
     name = models.CharField(max_length=VENDOR_MAX_LEN, db_column='vendor')
+    nif_id = models.CharField(max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id')
+    commercial_type = models.CharField(
+        max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
+        choices=CommercialType.choices,
+        default=CommercialType.OTHER,
+    )
+    synonyms = models.TextField()
 
     def __str__(self):
         return self.name
+
+
+class VendorDomain(models.Model):
+    base_url = models.URLField(unique=True, null=True, db_column='domain_name')
+    vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True, db_column='vendor_id')
+    is_domain_visible = models.BooleanField(default=True, db_column='link')
+    status = models.CharField(
+        max_length=STATUS_MAX_LEN,
+        choices=STATUS.choices,
+        default=STATUS.QUEUE
+    )
 
 
 class Antigen(models.Model):
@@ -79,15 +89,11 @@ class Antigen(models.Model):
 
 class Antibody(models.Model):
     ab_name = models.TextField()
-    ab_id = models.CharField(unique=True, max_length=ANTIBODY_ID_MAX_LEN, validators=[MinLengthValidator(1)])
-    accession = models.CharField(max_length=ANTIBODY_ID_MAX_LEN, validators=[MinLengthValidator(1)])
+    ab_id = models.CharField(unique=True, max_length=ANTIBODY_ID_MAX_LEN)
+    accession = models.CharField(max_length=ANTIBODY_ID_MAX_LEN)
     ix = models.AutoField(unique=True, null=False, primary_key=True)
-    uid = models.CharField(unique=True, max_length=ANTIBODY_UID_MAX_LEN, validators=[MinLengthValidator(1)])
-    commercial_type = models.CharField(
-        max_length=ANTIBODY_COMMERCIAL_TYPE_MAX_LEN,
-        choices=AntibodyCommercialType.choices,
-        default=AntibodyCommercialType.OTHER,
-    )
+    # todo: change to foreignKey to user model @afonsobspinto
+    uid = models.CharField(unique=True, max_length=ANTIBODY_UID_MAX_LEN)
     catalog_num = models.CharField(max_length=CATALOG_NUMBER_MAX_LEN, null=False)
     cat_alt = models.TextField()
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
@@ -107,16 +113,13 @@ class Antibody(models.Model):
     )
     product_conjugate = models.CharField(max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN)
     defining_citation = models.CharField(max_length=ANTIBODY_CITATION_MAX_LEN)
-    product_form = models.CharField(
-        max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN,
-        choices=ProductForm.choices,
-    )
+    product_form = models.TextField()
     comments = models.TextField()
     feedback = models.TextField()
     curator_comment = models.TextField()
     disc_date = models.DateTimeField(null=True)
     status = models.CharField(
-        max_length=ANTIBODY_STATUS_MAX_LEN,
+        max_length=STATUS_MAX_LEN,
         choices=STATUS.choices,
         default=STATUS.QUEUE
     )

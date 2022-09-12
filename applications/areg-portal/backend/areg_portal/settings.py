@@ -16,7 +16,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -51,7 +50,6 @@ MIDDLEWARE = [
     "cloudharness.middleware.django.CloudharnessMiddleware",
 ]
 
-
 ROOT_URLCONF = "areg_portal.urls"
 
 TEMPLATES = [
@@ -72,7 +70,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "areg_portal.wsgi.application"
 
-
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -91,7 +88,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -109,7 +105,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
 
 PROJECT_NAME = "areg_portal".upper()
 
@@ -170,13 +165,10 @@ ANTIBODY_ID_MAX_LEN = 32
 ANTIBODY_UID_MAX_LEN = 512
 ANTIBODY_SOURCE_ORGANISM_MAX_LEN = 128
 ANTIBODY_CLONALITY_MAX_LEN = 7
-ANTIBODY_COMMERCIAL_TYPE_MAX_LEN = 2
 ANTIBODY_CLONE_ID_MAX_LEN = 32
 ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN = 4
 ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN = 32
-ANTIBODY_PRODUCT_FORM_MAX_LEN = 2
 ANTIBODY_CITATION_MAX_LEN = 512
-ANTIBODY_STATUS_MAX_LEN = 1
 
 ANTIGEN_ID_MAX_LEN = 32
 ANTIGEN_DESCRIPTION_MAX_LEN = 512
@@ -186,5 +178,12 @@ ANTIGEN_EPITOPE_MAX_LEN = 128
 CATALOG_NUMBER_MAX_LEN = 512
 
 VENDOR_MAX_LEN = 512
-CSRF_TRUSTED_ORIGINS = ['https://www.areg.local','https://areg.local', 'https://areg.dev.metacell.us','https://areg.stage.metacell.us','https://areg.demo.metacell.us','https://antibodyregistry.org/', 'https://www.antibodyregistry.org/']
-DEBUG=True
+VENDOR_NIF_MAX_LEN = 32
+VENDOR_COMMERCIAL_TYPE_MAX_LEN = 2
+
+STATUS_MAX_LEN = 1
+
+CSRF_TRUSTED_ORIGINS = ['https://www.areg.local', 'https://areg.local', 'https://areg.dev.metacell.us',
+                        'https://areg.stage.metacell.us', 'https://areg.demo.metacell.us',
+                        'https://antibodyregistry.org/', 'https://www.antibodyregistry.org/']
+DEBUG = True
