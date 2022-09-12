@@ -6,7 +6,8 @@ import {
   FormikHelpers,
   FormikValues,
 } from "formik";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Container, Stack, Toolbar } from "@mui/material";
+import { useTheme } from "@mui/system";
 
 interface MultiStepFormProps extends FormikConfig<FormikValues> {
   children: React.ReactNode;
@@ -19,11 +20,44 @@ interface FormNavigationProps {
 }
 
 const FormNavigation = (props: FormNavigationProps) => {
+  const theme = useTheme();
+  const classes = {
+    toolbar: {
+      position: "fixed",
+      bottom: 0,
+      left: 0,
+      minWidth: "100vw",
+      backgroundColor: theme.palette.common.white,
+      boxShadow:
+        "0px -20px 24px -4px rgba(16, 24, 40, 0.02), 0px -8px 8px -4px rgba(16, 24, 40, 0.03)",
+    },
+    content: {
+      display: "flex",
+      justifyContent: "space-between",
+    },
+  };
   return (
-    <Box>
-      {props.hasPrevious && <Button onClick={props.onBackClick}>Back</Button>}
-      <Button type="submit">{props.isLastStep ? "Submit" : "Next"}</Button>
-    </Box>
+    <Toolbar sx={classes.toolbar}>
+      <Container maxWidth="xl">
+        <Box sx={classes.content}>
+          <Box>Stepper TODO</Box>
+          <Stack direction="row" spacing={2}>
+            <Button
+              disabled={!props.hasPrevious}
+              variant="contained"
+              color="info"
+              onClick={props.onBackClick}
+            >
+              Previous
+            </Button>
+
+            <Button type="submit" variant="contained" color="primary">
+              {props.isLastStep ? "Submit" : "Next"}
+            </Button>
+          </Stack>
+        </Box>
+      </Container>
+    </Toolbar>
   );
 };
 
