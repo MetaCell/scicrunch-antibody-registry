@@ -1,4 +1,3 @@
-import { DataObjectSharp } from "@mui/icons-material";
 import dataJson from "./data.json";
 
 interface AntibodiesObj {
@@ -18,6 +17,7 @@ interface AntibodiesObj {
   insert_time: string;
   curate_time: string;
   disc_date: string;
+  commercialType: string;
 }
 
 export function getAntibodies(): Promise<AntibodiesObj[]> {
