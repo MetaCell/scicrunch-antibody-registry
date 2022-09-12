@@ -1,24 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 
-import {
-  Box,
-  Button,
-  Container,
-  Dialog,
-  TextField,
-  Toolbar,
-} from "@mui/material";
+import { Box, Button, Container, Dialog, Toolbar } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/system";
 
-import MultiStepForm, { FormStep } from "../UI/MultiStepForm";
+import MultiStep, { Step } from "../UI/MultiStep";
 import AbTypeStep from "./AbTypeStep";
-
-const initialValues = {
-  commercialType: "commercial",
-  abUrl: "",
-  catNum: "",
-};
 
 const SubmissionForm = (props) => {
   const theme = useTheme();
@@ -29,6 +16,13 @@ const SubmissionForm = (props) => {
       backgroundColor: theme.palette.common.white,
     },
   };
+
+  const [selectedType, setSelectedType] = useState("commercial");
+
+  const handleTypeSelector = (value: string) => {
+    setSelectedType(value);
+  };
+
   return (
     <Dialog
       fullScreen
@@ -69,22 +63,25 @@ const SubmissionForm = (props) => {
         </Container>
       </Box>
       <Container maxWidth="xl">
-        <MultiStepForm
-          initialValues={initialValues}
-          onSubmit={(values) => {
-            alert(JSON.stringify(values, null, 2));
-          }}
-        >
-          <FormStep
+        <MultiStep onSubmit={() => console.log("submit button")}>
+          <Step
             stepName="commercialType"
-            onSubmit={() => console.log("step 1")}
+            onNext={() => console.log(selectedType)}
           >
-            <AbTypeStep label="Type of Antibody" name="commercialType" />
-          </FormStep>
-          <FormStep stepName="abUrl" onSubmit={() => console.log("step 2")}>
-            <TextField fullWidth id="url " label="URL" name="abUrl" />
-          </FormStep>
-        </MultiStepForm>
+            <AbTypeStep
+              label="Type of Antibody"
+              name="commercialType"
+              selectedValue={selectedType}
+              handleChange={(e) => handleTypeSelector(e)}
+            />
+          </Step>
+          <Step stepName="catNum" onNext={() => console.log("step 2")}>
+            <Box> soy el paso 2</Box>
+          </Step>
+          <Step stepName="abUrl" onNext={() => console.log("step 3")}>
+            <Box> soy el paso 3</Box>
+          </Step>
+        </MultiStep>
       </Container>
     </Dialog>
   );

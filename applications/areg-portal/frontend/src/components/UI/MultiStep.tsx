@@ -1,25 +1,23 @@
 import React, { useState } from "react";
-import {
-  Formik,
-  Form,
-  FormikConfig,
-  FormikHelpers,
-  FormikValues,
-} from "formik";
 import { Box, Button, Container, Stack, Toolbar } from "@mui/material";
 import { useTheme } from "@mui/system";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import DoneIcon from "@mui/icons-material/Done";
 
-interface MultiStepFormProps extends FormikConfig<FormikValues> {
+interface MultiStep {
   children: React.ReactNode;
+  onSubmit: () => void;
 }
 
-interface FormNavigationProps {
+interface NavigationProps {
   hasPrevious?: Boolean;
-  onBackClick: (values: FormikValues) => void;
+  onBackClick: () => void;
   isLastStep: Boolean;
+  onNextClick: () => void;
 }
 
-const FormNavigation = (props: FormNavigationProps) => {
+const StepNavigation = (props: NavigationProps) => {
   const theme = useTheme();
   const classes = {
     toolbar: {
@@ -47,13 +45,29 @@ const FormNavigation = (props: FormNavigationProps) => {
               variant="contained"
               color="info"
               onClick={props.onBackClick}
+              startIcon={<ChevronLeftIcon fontSize="small" />}
             >
               Previous
             </Button>
-
-            <Button type="submit" variant="contained" color="primary">
-              {props.isLastStep ? "Submit" : "Next"}
-            </Button>
+            {props.isLastStep ? (
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<DoneIcon fontSize="small" />}
+                onClick={props.onNextClick}
+              >
+                Submit
+              </Button>
+            ) : (
+              <Button
+                variant="text"
+                color="secondary"
+                endIcon={<ChevronRightIcon fontSize="small" />}
+                onClick={props.onNextClick}
+              >
+                Next
+              </Button>
+            )}
           </Stack>
         </Box>
       </Container>
@@ -61,62 +75,52 @@ const FormNavigation = (props: FormNavigationProps) => {
   );
 };
 
-const MultiStepForm = (props: MultiStepFormProps) => {
-  const { children, initialValues, onSubmit } = props;
+const MultiStep = (props: MultiStep) => {
+  const { children, onSubmit } = props;
   const [stepNumber, setStepNumber] = useState(0);
-  const [snapshot, setSnapshot] = useState(initialValues);
 
   const steps = React.Children.toArray(children) as React.ReactElement[];
   const step = steps[stepNumber];
   const totalSteps = steps.length;
   const isLastStep = stepNumber === totalSteps - 1;
 
-  const next = (values: FormikValues) => {
-    setSnapshot(values);
+  const next = () => {
     setStepNumber(stepNumber + 1);
   };
 
-  const previous = (values: FormikValues) => {
-    setSnapshot(values);
+  const previous = () => {
     setStepNumber(stepNumber - 1);
   };
 
-  const handleSubmit = (
-    values: FormikValues,
-    actions: FormikHelpers<FormikValues>
-  ) => {
+  const handleSubmit = () => {
     // if the step has its own submit function run it first
-    if (step.props.onSubmit) {
-      step.props.onSubmit(values);
+    if (step.props.onNext) {
+      step.props.onNext();
     }
 
     // in the last step run the parent onSubmit function (MultiStepForm onSubmit prop)
     //otherwise reset the touched obj so the validation doesn't fire while navigating back and forth
     // and go to next step
     if (isLastStep) {
-      return onSubmit(values, actions);
+      return onSubmit();
     } else {
-      actions.setTouched({});
-      next(values);
+      next();
     }
   };
 
   return (
-    <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-      {(formik) => (
-        <Form>
-          {step}
-          <FormNavigation
-            isLastStep={isLastStep}
-            hasPrevious={stepNumber > 0}
-            onBackClick={() => previous(formik.values)}
-          />
-        </Form>
-      )}
-    </Formik>
+    <Box>
+      {step}
+      <StepNavigation
+        isLastStep={isLastStep}
+        hasPrevious={stepNumber > 0}
+        onBackClick={previous}
+        onNextClick={handleSubmit}
+      />
+    </Box>
   );
 };
 
-export default MultiStepForm;
+export default MultiStep;
 
-export const FormStep = ({ stepName = "", children }: any) => children;
+export const Step = ({ stepName = "", children }: any) => children;
