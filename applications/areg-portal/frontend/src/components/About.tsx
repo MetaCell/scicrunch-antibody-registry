@@ -158,37 +158,37 @@ const About = () => {
     cssEase: "linear"
   };
   const partners = [
-    { name: 'thermofisher', url: 'https://www.thermofisher.com/'},
-    { name: 'proteintech', url: 'https://www.ptglab.com/'},
-    { name: 'biocell', url: 'https://bxcell.com/'},
-    { name: 'chromotek', url: 'http://www.chromotek.com/home-of-alpaca-antibodies/'},
-    { name: 'jesselllab', url: 'https://jesselllab.com/'},
-    { name: 'encorbio', url: 'https://encorbio.com/'},
-    { name: 'biolegend', url: 'https://www.biolegend.com/'},
-    { name: 'fortis', url: 'https://www.fortislife.com/'},
-    { name: 'leinco', url: 'https://www.leinco.com/'},
-    { name: 'jacksonimmuno', url: 'https://www.jacksonimmuno.com/'},
-    { name: 'phosphosolutions', url: 'https://www.phosphosolutions.com/'},
-    { name: 'bethyl', url: 'https://www.bethyl.com/'},
-    { name: 'dshb', url: 'http://dshb.biology.uiowa.edu/'},
-    { name: 'immunostar', url: 'http://immunostar.com/'},
-    { name: 'neuromab', url: 'http://neuromab.ucdavis.edu/'},
-    { name: 'sysy', url: 'https://www.sysy.com/'},
-    { name: 'atlasantibodies', url: 'https://atlasantibodies.com/'},
-    { name: 'frontier', url: 'https://www.frontier-institute.com/wp/antibodies/?lang=en'},
-    { name: 'aeonianbiotech', url: 'https://aeonianbiotech.com/'},
-    { name: 'bdbiosciences', url: 'http://www.bdbiosciences.com/us/home'},
-    { name: 'miltenyibiotec', url: 'https://www.miltenyibiotec.com/US-en/'},
-    { name: 'revmab', url: 'https://www.revmab.com/'},
-    { name: 'southernbiotech', url: 'https://www.southernbiotech.com/'},
-    { name: 'stressmarq', url: 'https://www.stressmarq.com/?v=7516fd43adaa'},
-    { name: 'wagner', url: 'http://gwagner.med.harvard.edu/'},
-    { name: 'zebrafish', url: 'https://zebrafish.org/home/guide.php'},
-    { name: 'genetex', url: 'https://www.genetex.com/'},
-    { name: 'encorbio', url: 'https://www.activemotif.com/'},
-    { name: 'licor', url: 'https://www.licor.com/'},
-    { name: 'hytest', url: 'https://www.hytest.fi/home'},
-    { name: 'cytoskeleton', url: 'https://www.cytoskeleton.com/'},
+    { name: 'thermofisher', url: 'https://www.thermofisher.com/' },
+    { name: 'proteintech', url: 'https://www.ptglab.com/' },
+    { name: 'biocell', url: 'https://bxcell.com/' },
+    { name: 'chromotek', url: 'http://www.chromotek.com/home-of-alpaca-antibodies/' },
+    { name: 'jesselllab', url: 'https://jesselllab.com/' },
+    { name: 'encorbio', url: 'https://encorbio.com/' },
+    { name: 'biolegend', url: 'https://www.biolegend.com/' },
+    { name: 'fortis', url: 'https://www.fortislife.com/' },
+    { name: 'leinco', url: 'https://www.leinco.com/' },
+    { name: 'jacksonimmuno', url: 'https://www.jacksonimmuno.com/' },
+    { name: 'phosphosolutions', url: 'https://www.phosphosolutions.com/' },
+    { name: 'bethyl', url: 'https://www.bethyl.com/' },
+    { name: 'dshb', url: 'http://dshb.biology.uiowa.edu/' },
+    { name: 'immunostar', url: 'http://immunostar.com/' },
+    { name: 'neuromab', url: 'http://neuromab.ucdavis.edu/' },
+    { name: 'sysy', url: 'https://www.sysy.com/' },
+    { name: 'atlasantibodies', url: 'https://atlasantibodies.com/' },
+    { name: 'frontier', url: 'https://www.frontier-institute.com/wp/antibodies/?lang=en' },
+    { name: 'aeonianbiotech', url: 'https://aeonianbiotech.com/' },
+    { name: 'bdbiosciences', url: 'http://www.bdbiosciences.com/us/home' },
+    { name: 'miltenyibiotec', url: 'https://www.miltenyibiotec.com/US-en/' },
+    { name: 'revmab', url: 'https://www.revmab.com/' },
+    { name: 'southernbiotech', url: 'https://www.southernbiotech.com/' },
+    { name: 'stressmarq', url: 'https://www.stressmarq.com/?v=7516fd43adaa' },
+    { name: 'wagner', url: 'http://gwagner.med.harvard.edu/' },
+    { name: 'zebrafish', url: 'https://zebrafish.org/home/guide.php' },
+    { name: 'genetex', url: 'https://www.genetex.com/' },
+    { name: 'encorbio', url: 'https://www.activemotif.com/' },
+    { name: 'licor', url: 'https://www.licor.com/' },
+    { name: 'hytest', url: 'https://www.hytest.fi/home' },
+    { name: 'cytoskeleton', url: 'https://www.cytoskeleton.com/' },
   ]
   const history = useHistory();
   const navigate = () => history.push('/');
@@ -216,12 +216,12 @@ const About = () => {
           <Slider {...settings}>
             {
               partners.map((elementInArray, index) => (
-                  <Box px={3} key={index}>
-                    <a href={elementInArray.url} target="_blank">
-                      <img src={`./assets/partners/${index+1}.svg`} alt={elementInArray.name}/>
-                    </a>
-                  </Box>
-                )
+                <Box px={3} key={index}>
+                  <a href={elementInArray.url} target="_blank">
+                    <img src={`./assets/partners/${index+1}.svg`} alt={elementInArray.name}/>
+                  </a>
+                </Box>
+              )
               )
             }
           </Slider>
