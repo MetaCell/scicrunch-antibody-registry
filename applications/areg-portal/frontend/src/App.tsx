@@ -12,8 +12,10 @@ import Submit from "./components/Submit";
 import FAQs from "./components/Support/FAQs";
 import ContactUs from "./components/Support/ContactUs";
 import TermsAndConditions from "./components/Support/TermsAndConditions";
+import { getCurrentUser } from "./services/UserService";
 
 const App = () => {
+  getCurrentUser();
   return (
     <BrowserRouter>
       <ThemeProvider theme={theme}>
@@ -23,17 +25,17 @@ const App = () => {
           <Route exact path="/" component={Home} />
           <Route exact path="/about" component={About} />
           <Route path="/submit" component={Submit} />
-          <Route path="/login" >
+          <Route path="/login">
             <Redirect to="/" />
           </Route>
           <Route path="/:antibody_id(AB_.*)" component={AntibodyDetail} />
-          <Route path="/faq" component={FAQs}/>
-          <Route path="/contact-us" component={ContactUs}/>
-          <Route path="/terms-and-conditions" component={TermsAndConditions}/>
+          <Route path="/faq" component={FAQs} />
+          <Route path="/contact-us" component={ContactUs} />
+          <Route path="/terms-and-conditions" component={TermsAndConditions} />
         </Switch>
       </ThemeProvider>
     </BrowserRouter>
-  )
+  );
 };
 
 export default App;
