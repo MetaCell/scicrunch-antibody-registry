@@ -6,6 +6,8 @@ harness:
     users:
     - username: admin
       email: admin@testuser.com
+      realmRoles:
+      - administrator
       clientRoles:
       - administrator
     - username: manager
