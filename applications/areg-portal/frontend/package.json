@@ -31,7 +31,8 @@
     "react-router-dom": "^5.0.0",
     "react-slick": "^0.29.0",
     "slick-carousel": "^1.8.1",
-    "use-clipboard-copy": "^0.1.2"
+    "use-clipboard-copy": "^0.1.2",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@babel/core": "^7.8.3",
