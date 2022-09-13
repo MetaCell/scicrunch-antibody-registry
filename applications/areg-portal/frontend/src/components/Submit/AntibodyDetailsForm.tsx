@@ -34,8 +34,9 @@ const useStyles = makeStyles((theme?: any) => ({
         color: bannerHeadingColor,
         marginBottom: "0.375rem"
     },
-    lastInput: {
-        width: "100%"
+    note:{
+        color: primaryTextColor,
+        fontWeight: 400
     }
 
 }))
@@ -99,6 +100,7 @@ const AntibodyDetailsForm = () => {
                                 endAdornment: <InputAdornment position="end">{touched.catalogNumber && errors.catalogNumber && <AlertIcon />}</InputAdornment>
                             }}
                         />
+                        {!touched.catalogNumber && !errors.catalogNumber && <Typography variant="subtitle1" className={classes.note}>Note: Submit unregistered antibodies only</Typography>}
                     </Grid>
                     <Grid item>
                         <Typography variant="h5" className={classes.label}>Vendor</Typography>
@@ -220,7 +222,8 @@ const AntibodyDetailsForm = () => {
                     <Grid item>
                         <Typography variant="h5" className={classes.label}>Comments</Typography>
                         <TextField
-                            className={classes.lastInput + " antibody-detail-comments"}
+                            fullWidth
+                            className="antibody-detail-comments"
                             multiline
                             rows={5}
                             placeholder="Anything we should know about this antibody?"
