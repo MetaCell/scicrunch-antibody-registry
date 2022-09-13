@@ -8,7 +8,6 @@ import About from "./components/About";
 import Home from "./components/Home";
 import AntibodyDetail from "./components/AntibodyDetail";
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
-import Submit from "./components/Submit";
 import FAQs from "./components/Support/FAQs";
 import ContactUs from "./components/Support/ContactUs";
 import TermsAndConditions from "./components/Support/TermsAndConditions";
@@ -24,7 +23,6 @@ const App = () => {
         <Switch>
           <Route exact path="/" component={Home} />
           <Route exact path="/about" component={About} />
-          <Route path="/submit" component={Submit} />
           <Route path="/login">
             <Redirect to="/" />
           </Route>

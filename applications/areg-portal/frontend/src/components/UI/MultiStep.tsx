@@ -7,7 +7,6 @@ import DoneIcon from "@mui/icons-material/Done";
 
 interface MultiStep {
   children: React.ReactNode;
-  onSubmit: () => void;
 }
 
 interface NavigationProps {
@@ -54,7 +53,8 @@ const StepNavigation = (props: NavigationProps) => {
                 variant="contained"
                 color="primary"
                 startIcon={<DoneIcon fontSize="small" />}
-                onClick={props.onNextClick}
+                type="submit"
+                form="add-antibody-form"
               >
                 Submit
               </Button>
@@ -76,7 +76,7 @@ const StepNavigation = (props: NavigationProps) => {
 };
 
 const MultiStep = (props: MultiStep) => {
-  const { children, onSubmit } = props;
+  const { children } = props;
   const [stepNumber, setStepNumber] = useState(0);
 
   const steps = React.Children.toArray(children) as React.ReactElement[];
@@ -92,22 +92,6 @@ const MultiStep = (props: MultiStep) => {
     setStepNumber(stepNumber - 1);
   };
 
-  const handleSubmit = () => {
-    // if the step has its own submit function run it first
-    if (step.props.onNext) {
-      step.props.onNext();
-    }
-
-    // in the last step run the parent onSubmit function (MultiStepForm onSubmit prop)
-    //otherwise reset the touched obj so the validation doesn't fire while navigating back and forth
-    // and go to next step
-    if (isLastStep) {
-      return onSubmit();
-    } else {
-      next();
-    }
-  };
-
   return (
     <Box>
       {step}
@@ -115,7 +99,7 @@ const MultiStep = (props: MultiStep) => {
         isLastStep={isLastStep}
         hasPrevious={stepNumber > 0}
         onBackClick={previous}
-        onNextClick={handleSubmit}
+        onNextClick={next}
       />
     </Box>
   );

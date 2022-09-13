@@ -6,6 +6,7 @@ import { useTheme } from "@mui/system";
 
 import MultiStep, { Step } from "../UI/MultiStep";
 import AbTypeStep from "./AbTypeStep";
+import CommercialForm from "./CommercialForm";
 
 const SubmissionForm = (props) => {
   const theme = useTheme();
@@ -63,7 +64,7 @@ const SubmissionForm = (props) => {
         </Container>
       </Box>
       <Container maxWidth="xl">
-        <MultiStep onSubmit={() => console.log("submit button")}>
+        <MultiStep>
           <Step
             stepName="commercialType"
             onNext={() => console.log(selectedType)}
@@ -76,10 +77,11 @@ const SubmissionForm = (props) => {
             />
           </Step>
           <Step stepName="catNum" onNext={() => console.log("step 2")}>
-            <Box> soy el paso 2</Box>
-          </Step>
-          <Step stepName="abUrl" onNext={() => console.log("step 3")}>
-            <Box> soy el paso 3</Box>
+            {selectedType === "commercial" ? (
+              <CommercialForm />
+            ) : (
+              <Box> soy el paso 2</Box>
+            )}
           </Step>
         </MultiStep>
       </Container>
