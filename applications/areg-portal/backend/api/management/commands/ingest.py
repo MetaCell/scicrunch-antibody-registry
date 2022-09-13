@@ -93,8 +93,10 @@ class Command(BaseCommand):
             with connection.cursor() as cursor:
                 # delete tables content (opposite order of insertion)
                 # todo: do we need all the executes or just 1 with cascade?
+                # todo: get table names from django orm
                 tables_to_delete = ['api_antibody', 'api_antigen', 'api_vendor', 'api_vendordomain']
                 for ttd in tables_to_delete:
+                    # todo: use f-string instead
                     cursor.execute(TRUNCATE_STM.replace('$tableName', ttd))
 
                 # insert vendors
@@ -148,6 +150,9 @@ class Command(BaseCommand):
 
                 # Insert into antibody
 
+                # todo: use multiline strings ```
+                # todo: use joins
+                # todo: cast tmp_table.vendor id instead of api_vendor.id
                 antibody_stm = f"INSERT INTO api_antibody (ix, ab_name, ab_id, accession, uid, catalog_num, cat_alt, " \
                                f"vendor_id, url, antigen_id, target_species, target_subregion, target_modification, " \
                                f"epitope, source_organism, clonality, clone_id, product_isotype, " \
