@@ -76,10 +76,11 @@ class Antigen(models.Model):
     def __str__(self):
         return self.entrez_id
 
-
+# todo: add model constraints according to https://github.com/MetaCell/scicrunch-antibody-registry/issues/29#issuecomment-1245134405
 class Antibody(models.Model):
     ix = models.AutoField(unique=True, null=False, primary_key=True)
     ab_name = models.CharField(max_length=ANTIBODY_NAME_MAX_LEN)
+    # todo: ab_id doesn't need to be unique
     ab_id = models.CharField(unique=True, max_length=ANTIBODY_ID_MAX_LEN)
     accession = models.CharField(max_length=ANTIBODY_ID_MAX_LEN)
     # todo: change to foreignKey to user model @afonsobspinto

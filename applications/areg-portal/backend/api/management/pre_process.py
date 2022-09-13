@@ -25,6 +25,8 @@ def remove_duplicates(csv_path, cols_subset, chunksize):
 
 
 if __name__ == '__main__':
-    remove_duplicates('../../antibody_table500000.csv', ['ab_id'], 10 ** 4)
+    pass
+    # todo: do not remove ab_id duplicates since some can be legit
+    # remove_duplicates('../../antibody_table500000.csv', ['ab_id'], 10 ** 4)
     # update_vendors('../../antibody_vendors_domain.csv', {1594: 5187})
     # df_test = pd.read_csv('../../antibody_table500000.csv')
