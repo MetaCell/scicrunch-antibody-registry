@@ -23,22 +23,24 @@ interface AbTypeStep extends FieldConfig {
   handleChange: (type: string) => void;
 }
 
-const TypeChoiceCard = ({ children, label, icon, handleClick }) => {
+const TypeChoiceCard = ({ label, icon, handleClick, selectedValue, type }) => {
   const classes = {
     card: {
       flexGrow: 1,
       maxWidth: 232,
-      border: "1px solid",
-      borderColor: "grey.200",
+      border: selectedValue === type ? "2px solid" : "1px solid",
+      borderColor: selectedValue === type ? "primary.main" : "grey.200",
+      backgroundColor: selectedValue === type ? "#F9FCFE" : null,
     },
     cardLabel: {
       color: "grey.700",
     },
   };
+
   return (
     <Card elevation={0} sx={classes.card}>
-      <CardActionArea onClick={() => {}}>
-        <CardContent sx={{ py: 3, px: 2 }} onClick={handleClick}>
+      <CardActionArea onClick={handleClick}>
+        <CardContent sx={{ py: 3, px: 2 }}>
           <Stack spacing={2} display="flex" alignItems="center">
             {icon}
             <Typography
@@ -49,7 +51,7 @@ const TypeChoiceCard = ({ children, label, icon, handleClick }) => {
             >
               {label}
             </Typography>
-            {children}
+            <Radio checked={selectedValue === type} size="small" />
           </Stack>
         </CardContent>
       </CardActionArea>
@@ -81,38 +83,23 @@ const AbTypeStep = ({ label, ...props }: AbTypeStep) => {
           label="Commercial Antibody/Kit"
           icon={<CompanyIcon />}
           handleClick={() => props.handleChange("commercial")}
-        >
-          <Radio
-            checked={props.selectedValue === "commercial"}
-            onChange={(e) => props.handleChange(e.target.value)}
-            value="commercial"
-            size="small"
-          />
-        </TypeChoiceCard>
+          selectedValue={props.selectedValue}
+          type="commercial"
+        />
         <TypeChoiceCard
           label="Personal Antibody"
           icon={<UserWithBackgroundIcon />}
           handleClick={() => props.handleChange("personal")}
-        >
-          <Radio
-            checked={props.selectedValue === "personal"}
-            onChange={(e) => props.handleChange(e.target.value)}
-            value="personal"
-            size="small"
-          />
-        </TypeChoiceCard>
+          selectedValue={props.selectedValue}
+          type="personal"
+        />
         <TypeChoiceCard
           label="Other/Custom Antibody"
           icon={<HorizontalThreeDotsIcon />}
           handleClick={() => props.handleChange("other")}
-        >
-          <Radio
-            checked={props.selectedValue === "other"}
-            onChange={(e) => props.handleChange(e.target.value)}
-            value="other"
-            size="small"
-          />
-        </TypeChoiceCard>
+          selectedValue={props.selectedValue}
+          type="other"
+        />
       </Stack>
       <Typography variant="subtitle2" sx={{ color: "grey.500", mt: 5 }}>
         Want to do a bulk upload? <Link href="/#">Contact us</Link>
