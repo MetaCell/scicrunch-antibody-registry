@@ -7,9 +7,10 @@ import {
   Grid,
   Typography,
   InputAdornment,
-  Button,
 } from "@mui/material";
 import { AlertIcon } from "../icons";
+
+import StepNavigation from "./StepNavigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
 const { bannerHeadingColor, primaryTextColor } = vars;
@@ -52,7 +53,7 @@ const validationSchema = yup.object().shape({
   catalogNumber: yup.string().required("The field is mandatory"),
 });
 
-const CommercialForm = () => {
+const CommercialForm = (props) => {
   const classes = useStyles();
 
   const formik = useFormik({
@@ -84,8 +85,8 @@ const CommercialForm = () => {
   const { errors, touched, handleSubmit, isSubmitting, getFieldProps } = formik;
 
   return (
-    <Paper className={classes.paper}>
-      <form onSubmit={handleSubmit} id="add-antibody-form">
+    <form onSubmit={handleSubmit}>
+      <Paper className={classes.paper}>
         <Grid container direction="column" gap={3} m={0} width="100%">
           <Grid item>
             <Typography variant="h1" className={classes.header}>
@@ -306,8 +307,14 @@ const CommercialForm = () => {
             />
           </Grid>
         </Grid>
-      </form>
-    </Paper>
+      </Paper>
+      <StepNavigation
+        previous={props.previous}
+        isLastStep={props.isLastStep}
+        next={props.next}
+        hasPrevious={props.hasPrevious}
+      />
+    </form>
   );
 };
 

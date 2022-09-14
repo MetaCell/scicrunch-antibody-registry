@@ -1,22 +1,21 @@
-import React, { useState } from "react";
-import { Box, Button, Container, Stack, Toolbar } from "@mui/material";
+import React from "react";
+
 import { useTheme } from "@mui/system";
+
+import { Button, Toolbar, Container, Box, Stack } from "@mui/material";
+
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DoneIcon from "@mui/icons-material/Done";
 
-interface MultiStep {
-  children: React.ReactNode;
-}
-
 interface NavigationProps {
   hasPrevious?: Boolean;
-  onBackClick: () => void;
+  previous: () => void;
   isLastStep: Boolean;
-  onNextClick: () => void;
+  next: () => void;
 }
 
-const StepNavigation = (props: NavigationProps) => {
+export const StepNavigation = (props: NavigationProps) => {
   const theme = useTheme();
   const classes = {
     toolbar: {
@@ -43,7 +42,7 @@ const StepNavigation = (props: NavigationProps) => {
               disabled={!props.hasPrevious}
               variant="contained"
               color="info"
-              onClick={props.onBackClick}
+              onClick={props.previous}
               startIcon={<ChevronLeftIcon fontSize="small" />}
             >
               Previous
@@ -62,7 +61,7 @@ const StepNavigation = (props: NavigationProps) => {
                 variant="text"
                 color="secondary"
                 endIcon={<ChevronRightIcon fontSize="small" />}
-                onClick={props.onNextClick}
+                onClick={props.next}
               >
                 Next
               </Button>
@@ -74,33 +73,4 @@ const StepNavigation = (props: NavigationProps) => {
   );
 };
 
-const MultiStep = (props: MultiStep) => {
-  const { children } = props;
-  const [stepNumber, setStepNumber] = useState(0);
-
-  const steps = React.Children.toArray(children) as React.ReactElement[];
-  const step = steps[stepNumber];
-  const totalSteps = steps.length;
-  const isLastStep = stepNumber === totalSteps - 1;
-
-  const next = () => {
-    setStepNumber(stepNumber + 1);
-  };
-
-  const previous = () => {
-    setStepNumber(stepNumber - 1);
-  };
-
-  const stepProps = {
-    previous,
-    next,
-    isLastStep,
-    hasPrevious: stepNumber > 0,
-  };
-
-  const stepWithProps = React.cloneElement(step, { ...stepProps });
-
-  return <Box>{stepWithProps}</Box>;
-};
-
-export default MultiStep;
+export default StepNavigation;

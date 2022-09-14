@@ -4,7 +4,7 @@ import { Box, Button, Container, Dialog, Toolbar } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/system";
 
-import MultiStep, { Step } from "../UI/MultiStep";
+import MultiStep from "../UI/MultiStep";
 import AbTypeStep from "./AbTypeStep";
 import CommercialForm from "./CommercialForm";
 
@@ -65,24 +65,27 @@ const SubmissionForm = (props) => {
       </Box>
       <Container maxWidth="xl">
         <MultiStep>
-          <Step
-            stepName="commercialType"
-            onNext={() => console.log(selectedType)}
-          >
-            <AbTypeStep
-              label="Type of Antibody"
-              name="commercialType"
-              selectedValue={selectedType}
-              handleChange={(e) => handleTypeSelector(e)}
+          <AbTypeStep
+            label="Type of Antibody"
+            name="commercialType"
+            selectedValue={selectedType}
+            handleChange={(e) => handleTypeSelector(e)}
+            next={props.next}
+            previous={props.previous}
+            hasPrevious={props.hasPrevious}
+            isLastStep={props.isLastStep}
+          />
+
+          {selectedType === "commercial" ? (
+            <CommercialForm
+              next={props.next}
+              previous={props.previous}
+              hasPrevious={props.hasPrevious}
+              isLastStep={props.isLastStep}
             />
-          </Step>
-          <Step stepName="catNum" onNext={() => console.log("step 2")}>
-            {selectedType === "commercial" ? (
-              <CommercialForm />
-            ) : (
-              <Box> soy el paso 2</Box>
-            )}
-          </Step>
+          ) : (
+            <Box> soy el paso 2</Box>
+          )}
         </MultiStep>
       </Container>
     </Dialog>

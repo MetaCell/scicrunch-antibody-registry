@@ -16,11 +16,16 @@ import {
   UserWithBackgroundIcon,
   HorizontalThreeDotsIcon,
 } from "../icons";
+import StepNavigation from "./StepNavigation";
 
 interface AbTypeStep extends FieldConfig {
   label: string;
   selectedValue: string;
   handleChange: (type: string) => void;
+  next: () => {};
+  previous: () => {};
+  hasPrevious: boolean;
+  isLastStep: boolean;
 }
 
 const TypeChoiceCard = ({ label, icon, handleClick, selectedValue, type }) => {
@@ -74,37 +79,45 @@ const AbTypeStep = ({ label, ...props }: AbTypeStep) => {
   };
 
   return (
-    <Box>
-      <Typography sx={classes.title} variant="h1">
-        1/3 Type of antibody
-      </Typography>
-      <Stack direction="row" spacing={1.5} sx={classes.content}>
-        <TypeChoiceCard
-          label="Commercial Antibody/Kit"
-          icon={<CompanyIcon />}
-          handleClick={() => props.handleChange("commercial")}
-          selectedValue={props.selectedValue}
-          type="commercial"
-        />
-        <TypeChoiceCard
-          label="Personal Antibody"
-          icon={<UserWithBackgroundIcon />}
-          handleClick={() => props.handleChange("personal")}
-          selectedValue={props.selectedValue}
-          type="personal"
-        />
-        <TypeChoiceCard
-          label="Other/Custom Antibody"
-          icon={<HorizontalThreeDotsIcon />}
-          handleClick={() => props.handleChange("other")}
-          selectedValue={props.selectedValue}
-          type="other"
-        />
-      </Stack>
-      <Typography variant="subtitle2" sx={{ color: "grey.500", mt: 5 }}>
-        Want to do a bulk upload? <Link href="/#">Contact us</Link>
-      </Typography>
-    </Box>
+    <>
+      <Box>
+        <Typography sx={classes.title} variant="h1">
+          1/3 Type of antibody
+        </Typography>
+        <Stack direction="row" spacing={1.5} sx={classes.content}>
+          <TypeChoiceCard
+            label="Commercial Antibody/Kit"
+            icon={<CompanyIcon />}
+            handleClick={() => props.handleChange("commercial")}
+            selectedValue={props.selectedValue}
+            type="commercial"
+          />
+          <TypeChoiceCard
+            label="Personal Antibody"
+            icon={<UserWithBackgroundIcon />}
+            handleClick={() => props.handleChange("personal")}
+            selectedValue={props.selectedValue}
+            type="personal"
+          />
+          <TypeChoiceCard
+            label="Other/Custom Antibody"
+            icon={<HorizontalThreeDotsIcon />}
+            handleClick={() => props.handleChange("other")}
+            selectedValue={props.selectedValue}
+            type="other"
+          />
+        </Stack>
+        <Typography variant="subtitle2" sx={{ color: "grey.500", mt: 5 }}>
+          Want to do a bulk upload? <Link href="/#">Contact us</Link>
+        </Typography>
+      </Box>
+      <StepNavigation
+        previous={props.previous}
+        isLastStep={props.isLastStep}
+        next={props.next}
+        hasPrevious={props.hasPrevious}
+      />
+    </>
   );
 };
 
