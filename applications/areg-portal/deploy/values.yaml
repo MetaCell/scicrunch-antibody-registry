@@ -25,15 +25,15 @@ harness:
   - uri: /admin/*
     roles:
     - administrator
-    - areg_portal:administrator
-    - areg_portal:manager
+    - areg-portal:administrator
+    - areg-portal:manager
     require-any-role: true
   - uri: /submit
     roles:
     - administrator
-    - areg_portal:administrator
-    - areg_portal:manager
-    - areg_portal:user
+    - areg-portal:administrator
+    - areg-portal:manager
+    - areg-portal:user
     require-any-role: true
   - uri: /login
     roles: []
@@ -46,6 +46,6 @@ harness:
     type: postgres
   accounts:
     roles:
-    - areg_portal:administrator
-    - areg_portal:manager
-    - areg_portal:user
+    - administrator
+    - manager
+    - user
