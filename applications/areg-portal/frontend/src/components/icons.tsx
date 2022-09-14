@@ -139,6 +139,7 @@ export const CheckedIcon = (props: SvgIconProps) => (
     sx={{ height: "1.25rem", width: "1.25rem" }}
     viewBox="0 0 20 20"
     xmlns="http://www.w3.org/2000/svg"
+    {...props}
   >
     <rect
       x="0.5"
@@ -148,7 +149,6 @@ export const CheckedIcon = (props: SvgIconProps) => (
       rx="5.5"
       stroke="#2173F2"
       fill="none"
-      {...props}
     />
     <path
       d="M14.6666 6.5L8.24992 12.9167L5.33325 10"
@@ -160,7 +160,6 @@ export const CheckedIcon = (props: SvgIconProps) => (
     />
   </SvgIcon>
 );
-
 export const UncheckedIcon = (props: SvgIconProps) => (
   <SvgIcon
     sx={{ height: "1.25rem", width: "1.25rem" }}
