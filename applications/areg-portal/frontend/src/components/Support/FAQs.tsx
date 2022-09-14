@@ -3,7 +3,7 @@ import { makeStyles } from '@mui/styles';
 import { vars } from "../../theme/variables";
 import { AccordionPlusIcon, AccordionMinusIcon } from "../icons";
 import { Box, Grid, Typography, Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
-import { faqsInfo } from "../../utils/faqsInfo";
+import { faqsInfo } from "../../content/faqsInfo";
 const { primaryTextColor, primarySubheaderColor, primaryHeaderColor } = vars;
 import SupportTabs from "../UI/SupportTabs";
 const useStyles = makeStyles(() => ({
@@ -99,9 +99,7 @@ const FAQs = () => {
                       </AccordionSummary>
                       <AccordionDetails className={classes.accordionExpanded} >
                         <Typography>
-                          <span
-                            dangerouslySetInnerHTML={{ __html: answer }}
-                          />
+                          {answer}
                         </Typography>
                       </AccordionDetails>
                     </Accordion>

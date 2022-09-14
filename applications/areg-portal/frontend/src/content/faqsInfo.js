@@ -1,3 +1,5 @@
+import React from "react";
+
 export const faqsInfo = [
   {
     question: "Is login required for search?",
@@ -13,14 +15,19 @@ export const faqsInfo = [
   },
   {
     question: "Can I add antibodies without logging in?",
-    answer: `Yes, please download a CSV file (link to a CSV’s with examples), 
+    answer: <>Yes, please download a CSV file (link to a CSV’s with examples), 
     fill in the required information and email to abr-help -at- scicrunch -dot- org. 
     If you are not able to download the file please create an Excel or CSV file with the following columns:<br/>
-    • <u>Commercial Antibody/Kit Data Fieldst</u>: *Catalog Number*, Vendor,*Vendor Product Page Link*, Antibody Name, Host Species,
-    Target/Reactive Species, Antibody Target, Clonality, Clone ID, Isotype, Conjugate, Antibody Form/Format, Uniprot ID, Epitope, Applications, Comments,Kit Contents <br/>
-    • <u>Personal/Custom Antibody Data Fields</u>: *Identifier*, *Principal Investigator - Institution *, *Principal Investigator's or Institution's Website*, 
+    <ul>
+      <li> <b>Commercial Antibody/Kit Data Fields</b>: *Catalog Number*, Vendor, *Vendor Product Page Link*, Antibody Name, Host Species,
+    Target/Reactive Species, Antibody Target, Clonality, Clone ID, Isotype, Conjugate, Antibody Form/Format, Uniprot ID, Epitope, Applications, Comments,Kit Contents </li>
+      <li><b>Personal/Custom Antibody Data Fields</b>: *Identifier*, *Principal Investigator - Institution *, *Principal Investigator's or Institution's Website*, 
     *Antibody Name *, *Host Species *, *Target/Reactive Species *, 
-    *Antibody Target *, *Clonality *, Clone ID, Isotype, Conjugate, Antibody Form/Format, Uniprot ID, Epitope, Applications, Comments, Defining Citation Fields marked with * are required.`
+    *Antibody Target *, *Clonality *, Clone ID, Isotype, Conjugate, Antibody Form/Format, Uniprot ID, Epitope, Applications, Comments, Defining Citation 
+      </li>
+    </ul>
+    Fields marked with * are required.
+    </>
   },
   {
     question: "Can I add dyes to the antibody registry?",
