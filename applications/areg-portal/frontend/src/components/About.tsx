@@ -217,7 +217,7 @@ const About = () => {
             {
               partners.map((elementInArray, index) => (
                 <Box px={3} key={index}>
-                  <a href={elementInArray.url} target="_blank">
+                  <a href={elementInArray.url} target="_blank" rel="noreferrer">
                     <img src={`./assets/partners/${index+1}.svg`} alt={elementInArray.name}/>
                   </a>
                 </Box>
