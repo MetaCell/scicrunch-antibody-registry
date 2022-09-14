@@ -7,10 +7,11 @@ import Navbar from "./components/NavBar/Navbar";
 import About from "./components/About";
 import Home from "./components/Home";
 import AntibodyDetail from "./components/AntibodyDetail";
-import Support from "./components/Support";
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import Submit from "./components/Submit";
-
+import FAQs from "./components/Support/FAQs";
+import ContactUs from "./components/Support/ContactUs";
+import TermsAndConditions from "./components/Support/TermsAndConditions";
 const App = () => {
   return (
     <BrowserRouter>
@@ -25,7 +26,9 @@ const App = () => {
             <Redirect to="/" />
           </Route>
           <Route path="/:antibody_id(AB_.*)" component={AntibodyDetail} />
-          <Route path="/support" component={Support}/>
+          <Route path="/faq" component={FAQs}/>
+          <Route path="/contact-us" component={ContactUs}/>
+          <Route path="/terms-and-conditions" component={TermsAndConditions}/>
         </Switch>
       </ThemeProvider>
     </BrowserRouter>

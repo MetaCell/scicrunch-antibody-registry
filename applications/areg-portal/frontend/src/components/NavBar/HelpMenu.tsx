@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom"
 import {
   IconButton,
   Menu,
@@ -60,7 +61,7 @@ const HelpMenu = () => {
         </ListItem>
         <Divider />
         <MenuList>
-          <MenuItem>
+          <MenuItem component={Link} to="/faq">
             <ListItemIcon>
               <FaqIcon />
             </ListItemIcon>
