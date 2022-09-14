@@ -63,7 +63,7 @@ const SubmissionForm = (props) => {
           </Toolbar>
         </Container>
       </Box>
-      <Container maxWidth="xl">
+      <Box>
         <MultiStep>
           <AbTypeStep
             label="Type of Antibody"
@@ -87,7 +87,7 @@ const SubmissionForm = (props) => {
             <Box> soy el paso 2</Box>
           )}
         </MultiStep>
-      </Container>
+      </Box>
     </Dialog>
   );
 };

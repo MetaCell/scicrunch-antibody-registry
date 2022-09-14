@@ -2,20 +2,35 @@ import React from "react";
 import { makeStyles } from "@mui/styles";
 import { vars } from "../../theme/variables";
 import {
+  Box,
+  Container,
   TextField,
   Paper,
   Grid,
   Typography,
   InputAdornment,
+  Divider,
+  Link,
 } from "@mui/material";
 import { AlertIcon } from "../icons";
 
 import StepNavigation from "./StepNavigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
+
 const { bannerHeadingColor, primaryTextColor } = vars;
 
 const useStyles = makeStyles((theme?: any) => ({
+  background: {
+    background: `linear-gradient(90deg, ${theme.palette.grey[100]} 50%, ${theme.palette.grey[50]} 50%)`,
+    [theme.breakpoints.down("lg")]: {
+      background: theme.palette.grey[100],
+    },
+  },
+  rightContainer: {
+    padding: theme.spacing(10, 0, 10, 10),
+  },
+  leftContainer: { padding: theme.spacing(10, 10, 10, 0) },
   paper: {
     textAlign: "start",
     border: "1px solid #EAECF0",
@@ -23,16 +38,12 @@ const useStyles = makeStyles((theme?: any) => ({
     boxShadow:
       " 0px 12px 16px -4px rgba(16, 24, 40, 0.08), 0px 4px 6px -2px rgba(16, 24, 40, 0.03)",
     padding: "3rem",
-    width: "720px",
   },
   formItem: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "space-between",
     "& .MuiInputBase-root.MuiOutlinedInput-root": {
-      height: "2.5rem",
       boxShadow: "0px 1px 2px rgba(16, 24, 40, 0.05)",
-      width: "300px",
     },
   },
   header: {
@@ -53,12 +64,87 @@ const validationSchema = yup.object().shape({
   catalogNumber: yup.string().required("The field is mandatory"),
 });
 
+const Iframe = ({ formik }) => {
+  const { errors, touched, getFieldProps } = formik;
+  const classes = useStyles();
+  return (
+    <Box sx={{ padding: 6, textAlign: "start" }}>
+      <Grid container direction="column" gap={3} m={0} width="100%">
+        <Grid item>
+          <Typography variant="h1" className={classes.header}>
+            2/3: Product Page Link
+          </Typography>
+        </Grid>
+        <Grid item>
+          <Typography variant="h5" className={classes.label}>
+            Vendor Product Page Link (Mandatory)
+          </Typography>
+          <TextField
+            fullWidth
+            name="url"
+            value={formik.values.url}
+            onChange={formik.handleChange}
+            {...getFieldProps("url")}
+            error={Boolean(touched.url && errors.url)}
+            helperText={touched.url && errors.url}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  {touched.catalogNumber && errors.catalogNumber && (
+                    <AlertIcon />
+                  )}
+                </InputAdornment>
+              ),
+              style: {
+                backgroundColor: "white",
+              },
+            }}
+          />
+          {!touched.catalogNumber && !errors.catalogNumber && (
+            <Typography variant="subtitle1" className={classes.note}>
+              Enter a link to the product's page on the vendor's website
+            </Typography>
+          )}
+        </Grid>
+        <Divider sx={{ my: 3 }} />
+        <Grid item>
+          <Box>Iframe</Box>
+        </Grid>
+        <Grid item>
+          <Typography variant="subtitle2">
+            <Link
+              href={formik.values.url}
+              sx={{ textDecoration: "none", color: "grey.500" }}
+            >
+              Refresh Vendor Product Page Link preview
+            </Link>
+          </Typography>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+};
+
+const FormLine = ({ children }) => {
+  const child = React.Children.toArray(children) as React.ReactElement[];
+  return (
+    <Grid container spacing={3}>
+      <Grid item lg={6}>
+        {child[0]}
+      </Grid>
+      <Grid item lg={6}>
+        {child[1]}
+      </Grid>
+    </Grid>
+  );
+};
 const CommercialForm = (props) => {
   const classes = useStyles();
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
+      url: "",
       catalogNumber: "",
       vendor: "",
       name: "",
@@ -85,229 +171,264 @@ const CommercialForm = (props) => {
   const { errors, touched, handleSubmit, isSubmitting, getFieldProps } = formik;
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Paper className={classes.paper}>
-        <Grid container direction="column" gap={3} m={0} width="100%">
-          <Grid item>
-            <Typography variant="h1" className={classes.header}>
-              3/3: Antibody Details
-            </Typography>
+    <form onSubmit={handleSubmit} className={classes.background}>
+      <Container maxWidth="xl">
+        <Grid container>
+          <Grid item lg={6} className={classes.leftContainer}>
+            <Iframe formik={formik} />
           </Grid>
-          <Grid item>
-            <Typography variant="h5" className={classes.label}>
-              Catalog Number (Mandatory)
-            </Typography>
-            <TextField
-              fullWidth
-              className="antibody-detail-catalogNumber"
-              name="catalogNumber"
-              value={formik.values.catalogNumber}
-              onChange={formik.handleChange}
-              {...getFieldProps("catalogNumber")}
-              error={Boolean(touched.catalogNumber && errors.catalogNumber)}
-              helperText={touched.catalogNumber && errors.catalogNumber}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    {touched.catalogNumber && errors.catalogNumber && (
-                      <AlertIcon />
+          <Grid item lg={6} className={classes.rightContainer} sx={{ pr: 0 }}>
+            <Paper className={classes.paper}>
+              <Grid container direction="column" gap={3} m={0} width="100%">
+                <Grid item>
+                  <Typography variant="h1" className={classes.header}>
+                    3/3: Antibody Details
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Typography variant="h5" className={classes.label}>
+                    Catalog Number (Mandatory)
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    className="antibody-detail-catalogNumber"
+                    name="catalogNumber"
+                    value={formik.values.catalogNumber}
+                    onChange={formik.handleChange}
+                    {...getFieldProps("catalogNumber")}
+                    error={Boolean(
+                      touched.catalogNumber && errors.catalogNumber
                     )}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            {!touched.catalogNumber && !errors.catalogNumber && (
-              <Typography variant="subtitle1" className={classes.note}>
-                Note: Submit unregistered antibodies only
-              </Typography>
-            )}
-          </Grid>
-          <Grid item>
-            <Typography variant="h5" className={classes.label}>
-              Vendor
-            </Typography>
-            <TextField
-              fullWidth
-              className="antibody-detail-vendor"
-              name="vendor"
-              placeholder="Cell Signaling Technology"
-              value={formik.values.vendor}
-              onChange={formik.handleChange}
-            />
-          </Grid>
-          <Grid item className={classes.formItem}>
-            <div>
-              <Typography variant="h5" className={classes.label}>
-                Antibody Name
-              </Typography>
-              <TextField
-                className="antibody-detail-name"
-                name="name"
-                placeholder="NeuN (D4G4O) XP® Rabbit mAb"
-                value={formik.values.name}
-                onChange={formik.handleChange}
-              />
-            </div>
-            <div>
-              <Typography variant="h5" className={classes.label}>
-                Host Species
-              </Typography>
-              <TextField
-                className="antibody-detail-hostSpecies"
-                name="host"
-                placeholder="Rabbit"
-                value={formik.values.host}
-                onChange={formik.handleChange}
-              />
-            </div>
-          </Grid>
-          <Grid item className={classes.formItem}>
-            <div>
-              <Typography variant="h5" className={classes.label}>
-                Target/Reactive Species
-              </Typography>
-              <TextField
-                className="antibody-detail-targetORreactiveSpecies"
-                name="targetSpecies"
-                placeholder="Human, Mouse, Rat"
-                value={formik.values.targetSpecies}
-                onChange={formik.handleChange}
-              />
-            </div>
-            <div>
-              <Typography variant="h5" className={classes.label}>
-                Antibody Target
-              </Typography>
-              <TextField
-                className="antibody-detail-target"
-                name="antibodyTarget"
-                placeholder="NeuN"
-                value={formik.values.antibodyTarget}
-                onChange={formik.handleChange}
-              />
-            </div>
-          </Grid>
-          <Grid item className={classes.formItem}>
-            <div>
-              <Typography variant="h5" className={classes.label}>
-                Clonality
-              </Typography>
-              <TextField
-                className="antibody-detail-clonality"
-                name="clonality"
-                placeholder="Monoclonal"
-                value={formik.values.clonality}
-                onChange={formik.handleChange}
-              />
-            </div>
-            <div>
-              <Typography variant="h5" className={classes.label}>
-                Clone ID
-              </Typography>
-              <TextField
-                className="antibody-detail-cloneID"
-                name="cloneID"
-                placeholder="Clone D4G4O"
-                value={formik.values.cloneID}
-                onChange={formik.handleChange}
-              />
-            </div>
-          </Grid>
-          <Grid item className={classes.formItem}>
-            <div>
-              <Typography variant="h5" className={classes.label}>
-                Isotype
-              </Typography>
-              <TextField
-                className="antibody-detail-isotype"
-                name="isotype"
-                placeholder="IgG"
-                value={formik.values.isotype}
-                onChange={formik.handleChange}
-              />
-            </div>
-            <div>
-              <Typography variant="h5" className={classes.label}>
-                Conjugate
-              </Typography>
-              <TextField
-                className="antibody-detail-conjugate"
-                name="conjugate"
-                placeholder="Alexa Fluor 488"
-                value={formik.values.conjugate}
-                onChange={formik.handleChange}
-              />
-            </div>
-          </Grid>
-          <Grid item className={classes.formItem}>
-            <div>
-              <Typography variant="h5" className={classes.label}>
-                Antibody Form/Format
-              </Typography>
-              <TextField
-                className="antibody-detail-formORformat"
-                name="format"
-                placeholder="Azide free"
-                value={formik.values.format}
-                onChange={formik.handleChange}
-              />
-            </div>
-            <div>
-              <Typography variant="h5" className={classes.label}>
-                Uniprot ID
-              </Typography>
-              <TextField
-                className="antibody-detail-uniprotID"
-                name="uniprotID"
-                placeholder="A6NFN3"
-                value={formik.values.uniprotID}
-                onChange={formik.handleChange}
-              />
-            </div>
-          </Grid>
-          <Grid item className={classes.formItem}>
-            <div>
-              <Typography variant="h5" className={classes.label}>
-                Epitope
-              </Typography>
-              <TextField
-                className="antibody-detail-epitope"
-                name="epitope"
-                placeholder="OTTHUMP00000018992"
-                value={formik.values.epitope}
-                onChange={formik.handleChange}
-              />
-            </div>
-            <div>
-              <Typography variant="h5" className={classes.label}>
-                Applications
-              </Typography>
-              <TextField
-                className="antibody-detail-applications"
-                name="applications"
-                placeholder="ELISA, IHC, WB"
-                value={formik.values.applications}
-                onChange={formik.handleChange}
-              />
-            </div>
-          </Grid>
-          <Grid item>
-            <Typography variant="h5" className={classes.label}>
-              Comments
-            </Typography>
-            <TextField
-              fullWidth
-              className="antibody-detail-comments"
-              name="comments"
-              multiline
-              rows={5}
-              placeholder="Anything we should know about this antibody?"
-              value={formik.values.comments}
-              onChange={formik.handleChange}
-            />
+                    helperText={touched.catalogNumber && errors.catalogNumber}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          {touched.catalogNumber && errors.catalogNumber && (
+                            <AlertIcon />
+                          )}
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  {!touched.catalogNumber && !errors.catalogNumber && (
+                    <Typography variant="subtitle1" className={classes.note}>
+                      Note: Submit unregistered antibodies only
+                    </Typography>
+                  )}
+                </Grid>
+                <Grid item>
+                  <Typography variant="h5" className={classes.label}>
+                    Vendor
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    className="antibody-detail-vendor"
+                    name="vendor"
+                    placeholder="Cell Signaling Technology"
+                    value={formik.values.vendor}
+                    onChange={formik.handleChange}
+                  />
+                </Grid>
+                <Grid item className={classes.formItem}>
+                  <FormLine>
+                    <Box>
+                      <Typography variant="h5" className={classes.label}>
+                        Antibody Name
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        className="antibody-detail-name"
+                        name="name"
+                        placeholder="NeuN (D4G4O) XP® Rabbit mAb"
+                        value={formik.values.name}
+                        onChange={formik.handleChange}
+                      />
+                    </Box>
+                    <Box>
+                      <Typography variant="h5" className={classes.label}>
+                        Host Species
+                      </Typography>
+                      <TextField
+                        className="antibody-detail-hostSpecies"
+                        name="host"
+                        placeholder="Rabbit"
+                        value={formik.values.host}
+                        onChange={formik.handleChange}
+                        fullWidth
+                      />
+                    </Box>
+                  </FormLine>
+                </Grid>
+                <Grid item className={classes.formItem}>
+                  <FormLine>
+                    <Box>
+                      <Typography variant="h5" className={classes.label}>
+                        Target/Reactive Species
+                      </Typography>
+                      <TextField
+                        className="antibody-detail-targetORreactiveSpecies"
+                        name="targetSpecies"
+                        placeholder="Human, Mouse, Rat"
+                        value={formik.values.targetSpecies}
+                        onChange={formik.handleChange}
+                        fullWidth
+                      />
+                    </Box>
+                    <Box>
+                      <Typography variant="h5" className={classes.label}>
+                        Antibody Target
+                      </Typography>
+                      <TextField
+                        className="antibody-detail-target"
+                        name="antibodyTarget"
+                        placeholder="NeuN"
+                        value={formik.values.antibodyTarget}
+                        onChange={formik.handleChange}
+                        fullWidth
+                      />
+                    </Box>
+                  </FormLine>
+                </Grid>
+                <Grid item className={classes.formItem}>
+                  <FormLine>
+                    <Box>
+                      <Typography variant="h5" className={classes.label}>
+                        Clonality
+                      </Typography>
+                      <TextField
+                        className="antibody-detail-clonality"
+                        name="clonality"
+                        placeholder="Monoclonal"
+                        value={formik.values.clonality}
+                        onChange={formik.handleChange}
+                        fullWidth
+                      />
+                    </Box>
+                    <Box>
+                      <Typography variant="h5" className={classes.label}>
+                        Clone ID
+                      </Typography>
+                      <TextField
+                        className="antibody-detail-cloneID"
+                        name="cloneID"
+                        placeholder="Clone D4G4O"
+                        value={formik.values.cloneID}
+                        onChange={formik.handleChange}
+                        fullWidth
+                      />
+                    </Box>
+                  </FormLine>
+                </Grid>
+                <Grid item className={classes.formItem}>
+                  <FormLine>
+                    <Box>
+                      <Typography variant="h5" className={classes.label}>
+                        Isotype
+                      </Typography>
+                      <TextField
+                        className="antibody-detail-isotype"
+                        name="isotype"
+                        placeholder="IgG"
+                        value={formik.values.isotype}
+                        onChange={formik.handleChange}
+                        fullWidth
+                      />
+                    </Box>
+                    <Box>
+                      <Typography variant="h5" className={classes.label}>
+                        Conjugate
+                      </Typography>
+                      <TextField
+                        className="antibody-detail-conjugate"
+                        name="conjugate"
+                        placeholder="Alexa Fluor 488"
+                        value={formik.values.conjugate}
+                        onChange={formik.handleChange}
+                        fullWidth
+                      />
+                    </Box>
+                  </FormLine>
+                </Grid>
+                <Grid item className={classes.formItem}>
+                  <FormLine>
+                    <Box>
+                      <Typography variant="h5" className={classes.label}>
+                        Antibody Form/Format
+                      </Typography>
+                      <TextField
+                        className="antibody-detail-formORformat"
+                        name="format"
+                        placeholder="Azide free"
+                        value={formik.values.format}
+                        onChange={formik.handleChange}
+                        fullWidth
+                      />
+                    </Box>
+                    <Box>
+                      <Typography variant="h5" className={classes.label}>
+                        Uniprot ID
+                      </Typography>
+                      <TextField
+                        className="antibody-detail-uniprotID"
+                        name="uniprotID"
+                        placeholder="A6NFN3"
+                        value={formik.values.uniprotID}
+                        onChange={formik.handleChange}
+                        fullWidth
+                      />
+                    </Box>
+                  </FormLine>
+                </Grid>
+                <Grid item className={classes.formItem}>
+                  <FormLine>
+                    <Box>
+                      <Typography variant="h5" className={classes.label}>
+                        Epitope
+                      </Typography>
+                      <TextField
+                        className="antibody-detail-epitope"
+                        name="epitope"
+                        placeholder="OTTHUMP00000018992"
+                        value={formik.values.epitope}
+                        onChange={formik.handleChange}
+                        fullWidth
+                      />
+                    </Box>
+                    <Box>
+                      <Typography variant="h5" className={classes.label}>
+                        Applications
+                      </Typography>
+                      <TextField
+                        className="antibody-detail-applications"
+                        name="applications"
+                        placeholder="ELISA, IHC, WB"
+                        value={formik.values.applications}
+                        onChange={formik.handleChange}
+                        fullWidth
+                      />
+                    </Box>
+                  </FormLine>
+                </Grid>
+                <Grid item>
+                  <Typography variant="h5" className={classes.label}>
+                    Comments
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    className="antibody-detail-comments"
+                    name="comments"
+                    multiline
+                    rows={5}
+                    placeholder="Anything we should know about this antibody?"
+                    value={formik.values.comments}
+                    onChange={formik.handleChange}
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
           </Grid>
         </Grid>
-      </Paper>
+      </Container>
       <StepNavigation
         previous={props.previous}
         isLastStep={props.isLastStep}
