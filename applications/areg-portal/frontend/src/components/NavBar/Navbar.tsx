@@ -13,16 +13,23 @@ import Searchbar from "./Searchbar";
 import NavLinks from "./NavLinks";
 import HelpMenu from "./HelpMenu";
 import { useUser, User } from "../../services/UserService"
+import UserAccountMenu from "./UserAccountMenu";
 
 const Navbar = () => {
   const user: User = useUser();
-  console.log(user);
+  const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(false)
   const login = () => {
-    
+
     window.location.href = "/login";
+    setIsLoggedIn(true);
+    localStorage.setItem("isUserLogIn","1");
   }
-    
-  
+  React.useEffect(() => {
+    let userIsLogIn = localStorage.getItem("isUserLogIn");
+    if(userIsLogIn==="1"){
+      setIsLoggedIn(true);
+    }
+  }, [])
   return (
     <Box>
       <AppBar elevation={0}>
@@ -69,9 +76,9 @@ const Navbar = () => {
             >
               <Stack direction="row" spacing={1.5}>
                 <HelpMenu />
-                <Button onClick={login}>
+                {!isLoggedIn ? <Button onClick={login}>
                   Log in / Register
-                </Button>
+                </Button> : <UserAccountMenu user={user} />}
               </Stack>
             </Box>
           </Toolbar>
