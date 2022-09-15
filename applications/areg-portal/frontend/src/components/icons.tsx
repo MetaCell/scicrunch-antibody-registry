@@ -651,3 +651,16 @@ export const HorizontalThreeDotsIcon = (props: SvgIconProps) => (
     />
   </SvgIcon>
 );
+
+export const RefreshIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="0 0 18 16" fontSize="small">
+    <path
+      d="M6.12246 14.4728C8.12174 15.3598 10.503 15.3116 12.5421 14.1343C15.93 12.1783 17.0908 7.84618 15.1348 4.45828L14.9265 4.09743M2.86571 11.5417C0.909698 8.1538 2.07048 3.8217 5.45839 1.8657C7.49754 0.68839 9.87875 0.640217 11.878 1.52719M1.07812 11.6114L3.35483 12.2215L3.96488 9.94475M14.0358 6.05479L14.6459 3.77808L16.9226 4.38813"
+      stroke="#667085"
+      strokeWidth="1.66667"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+  </SvgIcon>
+);

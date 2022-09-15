@@ -12,9 +12,12 @@ const SubmissionForm = (props) => {
   const theme = useTheme();
   const classes = {
     header: {
+      position: "sticky",
+      top: 0,
       display: "flex",
       justifyContent: "space-between",
       backgroundColor: theme.palette.common.white,
+      zIndex: 1,
     },
   };
 
@@ -37,7 +40,7 @@ const SubmissionForm = (props) => {
     >
       <Box sx={classes.header}>
         <Container maxWidth="xl">
-          <Toolbar sx={classes.header}>
+          <Toolbar sx={classes.header} disableGutters>
             <Button
               onClick={props.handleClose}
               variant="contained"

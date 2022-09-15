@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { vars } from "../../theme/variables";
 import {
   Box,
+  Button,
   Container,
   TextField,
   Paper,
@@ -11,10 +12,12 @@ import {
   InputAdornment,
   Divider,
   Link,
+  CardMedia,
 } from "@mui/material";
 import { AlertIcon } from "../icons";
 
 import StepNavigation from "./StepNavigation";
+import { RefreshIcon } from "../icons";
 import { useFormik } from "formik";
 import * as yup from "yup";
 
@@ -29,8 +32,21 @@ const useStyles = makeStyles((theme?: any) => ({
   },
   rightContainer: {
     padding: theme.spacing(10, 0, 10, 10),
+    [theme.breakpoints.down("lg")]: {
+      padding: 0,
+    },
+    height: "90vh",
+    overflow: "auto",
+    "&::-webkit-scrollbar": {
+      display: "none",
+    },
   },
-  leftContainer: { padding: theme.spacing(10, 10, 10, 0) },
+  leftContainer: {
+    padding: theme.spacing(10, 10, 10, 0),
+    [theme.breakpoints.down("lg")]: {
+      padding: 0,
+    },
+  },
   paper: {
     textAlign: "start",
     border: "1px solid #EAECF0",
@@ -58,6 +74,22 @@ const useStyles = makeStyles((theme?: any) => ({
     color: primaryTextColor,
     fontWeight: 400,
   },
+  leftBox: {
+    padding: theme.spacing(6, 0),
+    textAlign: "start",
+    height: "100%",
+  },
+  iframeDefault: {
+    height: "100%",
+    minHeight: "320px",
+    maxHeight: "420px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.palette.grey[700],
+    border: `0.25rem solid ${theme.palette.grey[100]}`,
+    borderRadius: theme.shape.borderRadius,
+  },
 }));
 
 const validationSchema = yup.object().shape({
@@ -68,15 +100,24 @@ const validationSchema = yup.object().shape({
 const Iframe = ({ formik }) => {
   const { errors, touched, getFieldProps } = formik;
   const classes = useStyles();
+
   return (
-    <Box sx={{ padding: 6, textAlign: "start" }}>
-      <Grid container direction="column" gap={3} m={0} width="100%">
-        <Grid item>
+    <Box className={classes.leftBox}>
+      <Grid
+        container
+        direction="column"
+        gap={3}
+        m={0}
+        width="100%"
+        height="100%"
+        wrap="nowrap"
+      >
+        <Grid item lg={2}>
           <Typography variant="h1" className={classes.header}>
             2/3: Product Page Link
           </Typography>
         </Grid>
-        <Grid item>
+        <Grid item lg={2}>
           <Typography variant="h5" className={classes.label}>
             Vendor Product Page Link (Mandatory)
           </Typography>
@@ -105,19 +146,32 @@ const Iframe = ({ formik }) => {
             </Typography>
           )}
         </Grid>
-        <Divider sx={{ my: 3 }} />
-        <Grid item>
-          <Box>Iframe</Box>
+        <Divider sx={{ my: 1 }} />
+        <Grid item lg={6}>
+          {touched.url && !errors.url ? (
+            <CardMedia
+              className={classes.iframeDefault}
+              component="iframe"
+              src={formik.values.url}
+            />
+          ) : (
+            <Box className={classes.iframeDefault}>
+              <Typography variant="subtitle1" sx={{ color: "grey.400" }}>
+                Enter a link in the field above to get a preview of the website
+              </Typography>
+            </Box>
+          )}
         </Grid>
-        <Grid item>
-          <Typography variant="subtitle2">
-            <Link
-              href={formik.values.url}
-              sx={{ textDecoration: "none", color: "grey.500" }}
-            >
-              Refresh Vendor Product Page Link preview
-            </Link>
-          </Typography>
+        <Grid item lg={2}>
+          <Button
+            variant="text"
+            color="info"
+            startIcon={<RefreshIcon />}
+            fullWidth
+            onClick={() => {}}
+          >
+            Refresh Vendor Product Page Link preview
+          </Button>
         </Grid>
       </Grid>
     </Box>
