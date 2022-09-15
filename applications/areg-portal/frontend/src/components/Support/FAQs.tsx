@@ -92,12 +92,12 @@ const FAQs = () => {
                     <AccordionSummary
                       expandIcon={expanded === question ? <AccordionMinusIcon /> : <AccordionPlusIcon />}
                     >
-                      <Typography>
+                      <Typography component="div">
                         {question}
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails className={classes.accordionExpanded} >
-                      <Typography>
+                      <Typography component="div">
                         {answer}
                       </Typography>
                     </AccordionDetails>
