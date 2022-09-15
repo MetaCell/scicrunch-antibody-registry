@@ -10,4 +10,6 @@ export const vars = {
   primaryTextColor: "#667085",
   bannerHeadingColor: "#344054",
   shadow: "0 0.0625rem 0.125rem rgba(16, 24, 40, 0.05)",
+  primarySubheaderColor: "#0052CC",
+  primaryHeaderColor: "#101828"
 };
