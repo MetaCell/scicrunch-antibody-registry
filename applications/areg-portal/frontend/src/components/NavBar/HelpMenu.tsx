@@ -61,7 +61,7 @@ const HelpMenu = () => {
         </ListItem>
         <Divider />
         <MenuList>
-          <MenuItem component={Link} to="/faq">
+          <MenuItem component={Link} to="/faq" onClick={handleClose}>
             <ListItemIcon>
               <FaqIcon />
             </ListItemIcon>
