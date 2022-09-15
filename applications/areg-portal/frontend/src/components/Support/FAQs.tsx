@@ -49,7 +49,7 @@ const useStyles = makeStyles(() => ({
       fontWeight: 500,
       fontSize: "1.1rem",
       color: primaryHeaderColor,
-      textAlign: "left"
+      textAlign: "start"
     },
     "& .MuiPaper-root.MuiAccordion-root.Mui-expanded": {
       backgroundColor: " #F9FAFB",
@@ -75,41 +75,39 @@ const FAQs = () => {
 
   return (
     <SupportTabs>
-      <Box>
-        <Grid container spacing={2} direction="row" alignItems="start" justifyContent="center" className={classes.grid}>
-          <Grid item xs={3}>
-            <Box className={classes.faqBox}>
-              <Typography className={classes.faqBoxSubheader}>Support</Typography>
-              <Typography className={classes.faqBoxHeader}>FAQs</Typography>
-              <Typography className={classes.faqBoxText}>Everything you need to know about the Antibody Registry. Can’t find the answer you’re looking for? Please chat to our team.</Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={5}>
-            <Box className={classes.accordion}>
-              {
-                faqsInfo.map(({ question, answer }, index) => {
-                  return (
-                    <Accordion key={index} expanded={expanded === question} onChange={handleChange(question)}>
-                      <AccordionSummary
-                        expandIcon={expanded === question ? <AccordionMinusIcon /> : <AccordionPlusIcon />}
-                      >
-                        <Typography>
-                          {question}
-                        </Typography>
-                      </AccordionSummary>
-                      <AccordionDetails className={classes.accordionExpanded} >
-                        <Typography>
-                          {answer}
-                        </Typography>
-                      </AccordionDetails>
-                    </Accordion>
-                  )
-                })
-              }
-            </Box>
-          </Grid>
+      <Grid container spacing={2} direction="row" alignItems="start" justifyContent="center" className={classes.grid}>
+        <Grid item xs={12} sm={6} md={4}>
+          <Box className={classes.faqBox}>
+            <Typography className={classes.faqBoxSubheader}>Support</Typography>
+            <Typography className={classes.faqBoxHeader}>FAQs</Typography>
+            <Typography className={classes.faqBoxText}>Everything you need to know about the Antibody Registry. Can’t find the answer you’re looking for? Please chat to our team.</Typography>
+          </Box>
         </Grid>
-      </Box>
+        <Grid item xs={12} sm={6} md={4}>
+          <Box className={classes.accordion}>
+            {
+              faqsInfo.map(({ question, answer }, index) => {
+                return (
+                  <Accordion key={index} expanded={expanded === question} onChange={handleChange(question)}>
+                    <AccordionSummary
+                      expandIcon={expanded === question ? <AccordionMinusIcon /> : <AccordionPlusIcon />}
+                    >
+                      <Typography>
+                        {question}
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails className={classes.accordionExpanded} >
+                      <Typography>
+                        {answer}
+                      </Typography>
+                    </AccordionDetails>
+                  </Accordion>
+                )
+              })
+            }
+          </Box>
+        </Grid>
+      </Grid>
     </SupportTabs>
   )
 }
