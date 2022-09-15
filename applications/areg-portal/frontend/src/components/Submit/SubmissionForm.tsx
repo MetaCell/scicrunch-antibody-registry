@@ -7,6 +7,7 @@ import { useTheme } from "@mui/system";
 import MultiStep from "../UI/MultiStep";
 import AbTypeStep from "./AbTypeStep";
 import CommercialForm from "./CommercialForm";
+import SuccessSubmission from "./SuccessSubmission";
 
 const SubmissionForm = (props) => {
   const theme = useTheme();
@@ -22,6 +23,7 @@ const SubmissionForm = (props) => {
   };
 
   const [selectedType, setSelectedType] = useState("commercial");
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleTypeSelector = (value: string) => {
     setSelectedType(value);
@@ -66,30 +68,35 @@ const SubmissionForm = (props) => {
           </Toolbar>
         </Container>
       </Box>
-      <Box>
-        <MultiStep>
-          <AbTypeStep
-            label="Type of Antibody"
-            name="commercialType"
-            selectedValue={selectedType}
-            handleChange={(e) => handleTypeSelector(e)}
-            next={props.next}
-            previous={props.previous}
-            hasPrevious={props.hasPrevious}
-            isLastStep={props.isLastStep}
-          />
-
-          {selectedType === "commercial" ? (
-            <CommercialForm
+      <Box sx={{ height: "100%" }}>
+        {isSubmitted ? (
+          <SuccessSubmission onClose={props.handleClose} />
+        ) : (
+          <MultiStep>
+            <AbTypeStep
+              label="Type of Antibody"
+              name="commercialType"
+              selectedValue={selectedType}
+              handleChange={(e) => handleTypeSelector(e)}
               next={props.next}
               previous={props.previous}
               hasPrevious={props.hasPrevious}
               isLastStep={props.isLastStep}
             />
-          ) : (
-            <Box> soy el paso 2</Box>
-          )}
-        </MultiStep>
+
+            {selectedType === "commercial" ? (
+              <CommercialForm
+                next={props.next}
+                previous={props.previous}
+                hasPrevious={props.hasPrevious}
+                isLastStep={props.isLastStep}
+                setIsSubmitted={setIsSubmitted}
+              />
+            ) : (
+              <Box> soy el paso 2</Box>
+            )}
+          </MultiStep>
+        )}
       </Box>
     </Dialog>
   );

@@ -216,7 +216,8 @@ const CommercialForm = (props) => {
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
+      console.log(values);
+      props.setIsSubmitted(true);
     },
     validateOnChange: true,
   });

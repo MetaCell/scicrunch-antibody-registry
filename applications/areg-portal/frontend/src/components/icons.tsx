@@ -664,3 +664,27 @@ export const RefreshIcon = (props: SvgIconProps) => (
     />
   </SvgIcon>
 );
+
+export const CircleCheckIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="0 0 56 56">
+    <rect x="4" y="4" width="48" height="48" rx="24" fill="#C2DAF3" />
+    <path
+      d="M23.5 28L26.5 31L32.5 25M38 28C38 33.5228 33.5228 38 28 38C22.4772 38 18 33.5228 18 28C18 22.4772 22.4772 18 28 18C33.5228 18 38 22.4772 38 28Z"
+      stroke="#2173F2"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+    <rect
+      x="4"
+      y="4"
+      width="48"
+      height="48"
+      rx="24"
+      stroke="#DFEBF8"
+      strokeWidth="8"
+      fill="none"
+    />
+  </SvgIcon>
+);
