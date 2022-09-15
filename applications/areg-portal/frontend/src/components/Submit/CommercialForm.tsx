@@ -62,6 +62,7 @@ const useStyles = makeStyles((theme?: any) => ({
 
 const validationSchema = yup.object().shape({
   catalogNumber: yup.string().required("The field is mandatory"),
+  url: yup.string().required("The field is mandatory"),
 });
 
 const Iframe = ({ formik }) => {
@@ -90,9 +91,7 @@ const Iframe = ({ formik }) => {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  {touched.catalogNumber && errors.catalogNumber && (
-                    <AlertIcon />
-                  )}
+                  {touched.url && errors.url && <AlertIcon />}
                 </InputAdornment>
               ),
               style: {
