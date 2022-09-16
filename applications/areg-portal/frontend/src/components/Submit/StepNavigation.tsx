@@ -7,12 +7,14 @@ import { Button, Toolbar, Container, Box, Stack } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DoneIcon from "@mui/icons-material/Done";
+import Steeper from "./Steeper";
 
 interface NavigationProps {
   hasPrevious?: Boolean;
   previous: () => void;
-  isLastStep: Boolean;
   next: () => void;
+  isLastStep?: Boolean;
+  activeStep: Number;
 }
 
 export const StepNavigation = (props: NavigationProps) => {
@@ -36,7 +38,7 @@ export const StepNavigation = (props: NavigationProps) => {
     <Toolbar sx={classes.toolbar}>
       <Container maxWidth="xl">
         <Box sx={classes.content}>
-          <Box>Stepper TODO</Box>
+          <Steeper activeStep={props.activeStep} />
           <Stack direction="row" spacing={2}>
             <Button
               disabled={!props.hasPrevious}

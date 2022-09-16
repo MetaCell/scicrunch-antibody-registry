@@ -25,7 +25,6 @@ interface AbTypeStep extends FieldConfig {
   next: () => {};
   previous: () => {};
   hasPrevious: boolean;
-  isLastStep: boolean;
 }
 
 const TypeChoiceCard = ({ label, icon, handleClick, selectedValue, type }) => {
@@ -113,9 +112,9 @@ const AbTypeStep = ({ label, ...props }: AbTypeStep) => {
       </Box>
       <StepNavigation
         previous={props.previous}
-        isLastStep={props.isLastStep}
         next={props.next}
         hasPrevious={props.hasPrevious}
+        activeStep={0}
       />
     </>
   );

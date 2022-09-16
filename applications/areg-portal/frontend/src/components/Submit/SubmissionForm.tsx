@@ -23,7 +23,6 @@ const SubmissionForm = (props) => {
   };
 
   const [selectedType, setSelectedType] = useState("commercial");
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleTypeSelector = (value: string) => {
     setSelectedType(value);
@@ -31,7 +30,6 @@ const SubmissionForm = (props) => {
 
   const handleClose = () => {
     props.handleClose();
-    setIsSubmitted(false);
     setSelectedType("commercial");
   };
 
@@ -75,34 +73,28 @@ const SubmissionForm = (props) => {
         </Container>
       </Box>
       <Box sx={{ height: "100%" }}>
-        {isSubmitted ? (
-          <SuccessSubmission onClose={handleClose} />
-        ) : (
-          <MultiStep>
-            <AbTypeStep
-              label="Type of Antibody"
-              name="commercialType"
-              selectedValue={selectedType}
-              handleChange={(e) => handleTypeSelector(e)}
+        <MultiStep>
+          <AbTypeStep
+            label="Type of Antibody"
+            name="commercialType"
+            selectedValue={selectedType}
+            handleChange={(e) => handleTypeSelector(e)}
+            next={props.next}
+            previous={props.previous}
+            hasPrevious={props.hasPrevious}
+          />
+
+          {selectedType === "commercial" ? (
+            <CommercialForm
               next={props.next}
               previous={props.previous}
               hasPrevious={props.hasPrevious}
-              isLastStep={props.isLastStep}
             />
-
-            {selectedType === "commercial" ? (
-              <CommercialForm
-                next={props.next}
-                previous={props.previous}
-                hasPrevious={props.hasPrevious}
-                isLastStep={props.isLastStep}
-                setIsSubmitted={setIsSubmitted}
-              />
-            ) : (
-              <Box> soy el paso 2</Box>
-            )}
-          </MultiStep>
-        )}
+          ) : (
+            <Box> soy el paso 2</Box>
+          )}
+          <SuccessSubmission onClose={handleClose} />
+        </MultiStep>
       </Box>
     </Dialog>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { FormEvent, useEffect, useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { vars } from "../../theme/variables";
 import {
@@ -11,14 +11,13 @@ import {
   Typography,
   InputAdornment,
   Divider,
-  Link,
   CardMedia,
 } from "@mui/material";
 import { AlertIcon } from "../icons";
 
 import StepNavigation from "./StepNavigation";
 import { RefreshIcon } from "../icons";
-import { useFormik } from "formik";
+import { useFormik, validateYupSchema } from "formik";
 import * as yup from "yup";
 
 const { bannerHeadingColor, primaryTextColor } = vars;
@@ -94,7 +93,10 @@ const useStyles = makeStyles((theme?: any) => ({
 
 const validationSchema = yup.object().shape({
   catalogNumber: yup.string().required("The field is mandatory"),
-  url: yup.string().required("The field is mandatory"),
+  url: yup
+    .string()
+    .url("Please enter a valid URL that starts with http or https")
+    .required("This field is mandatory"),
 });
 
 const Iframe = ({ formik }) => {
@@ -194,6 +196,20 @@ const FormLine = ({ children }) => {
 const CommercialForm = (props) => {
   const classes = useStyles();
 
+  const [isLastStep, setIsLastStep] = useState(false);
+  const [isUrlEntered, setIsUrlEntered] = useState(false);
+
+  const handleNext = () => {
+    if (touched.url && !errors.url) {
+      setIsUrlEntered(true);
+      setIsLastStep(true);
+      setFieldTouched("catalogNumber", false);
+    }
+    if (!touched.url) {
+      setFieldTouched("url", true);
+    }
+  };
+
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -217,12 +233,20 @@ const CommercialForm = (props) => {
     validationSchema: validationSchema,
     onSubmit: (values) => {
       console.log(values);
-      props.setIsSubmitted(true);
+      props.next();
     },
     validateOnChange: true,
   });
 
-  const { errors, touched, handleSubmit, isSubmitting, getFieldProps } = formik;
+  const {
+    errors,
+    touched,
+    handleSubmit,
+    isSubmitting,
+    getFieldProps,
+    setFieldTouched,
+    handleChange,
+  } = formik;
 
   return (
     <form onSubmit={handleSubmit} className={classes.background}>
@@ -245,6 +269,7 @@ const CommercialForm = (props) => {
                   </Typography>
                   <TextField
                     fullWidth
+                    disabled={!isUrlEntered}
                     className="antibody-detail-catalogNumber"
                     name="catalogNumber"
                     value={formik.values.catalogNumber}
@@ -275,6 +300,7 @@ const CommercialForm = (props) => {
                     Vendor
                   </Typography>
                   <TextField
+                    disabled={!isUrlEntered}
                     fullWidth
                     className="antibody-detail-vendor"
                     name="vendor"
@@ -290,6 +316,7 @@ const CommercialForm = (props) => {
                         Antibody Name
                       </Typography>
                       <TextField
+                        disabled={!isUrlEntered}
                         fullWidth
                         className="antibody-detail-name"
                         name="name"
@@ -303,6 +330,7 @@ const CommercialForm = (props) => {
                         Host Species
                       </Typography>
                       <TextField
+                        disabled={!isUrlEntered}
                         className="antibody-detail-hostSpecies"
                         name="host"
                         placeholder="Rabbit"
@@ -320,7 +348,7 @@ const CommercialForm = (props) => {
                         Target/Reactive Species
                       </Typography>
                       <TextField
-                        className="antibody-detail-targetORreactiveSpecies"
+                        disabled={!isUrlEntered}
                         name="targetSpecies"
                         placeholder="Human, Mouse, Rat"
                         value={formik.values.targetSpecies}
@@ -333,7 +361,7 @@ const CommercialForm = (props) => {
                         Antibody Target
                       </Typography>
                       <TextField
-                        className="antibody-detail-target"
+                        disabled={!isUrlEntered}
                         name="antibodyTarget"
                         placeholder="NeuN"
                         value={formik.values.antibodyTarget}
@@ -350,7 +378,7 @@ const CommercialForm = (props) => {
                         Clonality
                       </Typography>
                       <TextField
-                        className="antibody-detail-clonality"
+                        disabled={!isUrlEntered}
                         name="clonality"
                         placeholder="Monoclonal"
                         value={formik.values.clonality}
@@ -363,7 +391,7 @@ const CommercialForm = (props) => {
                         Clone ID
                       </Typography>
                       <TextField
-                        className="antibody-detail-cloneID"
+                        disabled={!isUrlEntered}
                         name="cloneID"
                         placeholder="Clone D4G4O"
                         value={formik.values.cloneID}
@@ -380,7 +408,7 @@ const CommercialForm = (props) => {
                         Isotype
                       </Typography>
                       <TextField
-                        className="antibody-detail-isotype"
+                        disabled={!isUrlEntered}
                         name="isotype"
                         placeholder="IgG"
                         value={formik.values.isotype}
@@ -393,7 +421,7 @@ const CommercialForm = (props) => {
                         Conjugate
                       </Typography>
                       <TextField
-                        className="antibody-detail-conjugate"
+                        disabled={!isUrlEntered}
                         name="conjugate"
                         placeholder="Alexa Fluor 488"
                         value={formik.values.conjugate}
@@ -410,7 +438,7 @@ const CommercialForm = (props) => {
                         Antibody Form/Format
                       </Typography>
                       <TextField
-                        className="antibody-detail-formORformat"
+                        disabled={!isUrlEntered}
                         name="format"
                         placeholder="Azide free"
                         value={formik.values.format}
@@ -423,7 +451,7 @@ const CommercialForm = (props) => {
                         Uniprot ID
                       </Typography>
                       <TextField
-                        className="antibody-detail-uniprotID"
+                        disabled={!isUrlEntered}
                         name="uniprotID"
                         placeholder="A6NFN3"
                         value={formik.values.uniprotID}
@@ -440,7 +468,7 @@ const CommercialForm = (props) => {
                         Epitope
                       </Typography>
                       <TextField
-                        className="antibody-detail-epitope"
+                        disabled={!isUrlEntered}
                         name="epitope"
                         placeholder="OTTHUMP00000018992"
                         value={formik.values.epitope}
@@ -453,7 +481,7 @@ const CommercialForm = (props) => {
                         Applications
                       </Typography>
                       <TextField
-                        className="antibody-detail-applications"
+                        disabled={!isUrlEntered}
                         name="applications"
                         placeholder="ELISA, IHC, WB"
                         value={formik.values.applications}
@@ -469,7 +497,7 @@ const CommercialForm = (props) => {
                   </Typography>
                   <TextField
                     fullWidth
-                    className="antibody-detail-comments"
+                    disabled={!isUrlEntered}
                     name="comments"
                     multiline
                     rows={5}
@@ -485,9 +513,10 @@ const CommercialForm = (props) => {
       </Container>
       <StepNavigation
         previous={props.previous}
-        isLastStep={props.isLastStep}
-        next={props.next}
+        next={handleNext}
         hasPrevious={props.hasPrevious}
+        isLastStep={isLastStep}
+        activeStep={isLastStep ? 2 : 1}
       />
     </form>
   );
