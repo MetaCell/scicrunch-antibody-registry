@@ -12,7 +12,7 @@ import Steeper from "./Steeper";
 interface NavigationProps {
   hasPrevious?: Boolean;
   previous: () => void;
-  next: () => void;
+  next: (e) => void;
   isLastStep?: Boolean;
   activeStep: Number;
 }
@@ -63,7 +63,7 @@ export const StepNavigation = (props: NavigationProps) => {
                 variant="text"
                 color="secondary"
                 endIcon={<ChevronRightIcon fontSize="small" />}
-                onClick={props.next}
+                onClick={(e) => props.next(e)}
               >
                 Next
               </Button>

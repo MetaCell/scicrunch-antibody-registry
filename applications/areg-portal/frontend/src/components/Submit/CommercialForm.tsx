@@ -1,9 +1,8 @@
-import React, { FormEvent, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { vars } from "../../theme/variables";
 import {
   Box,
-  Button,
   Container,
   TextField,
   Paper,
@@ -16,8 +15,7 @@ import {
 import { AlertIcon } from "../icons";
 
 import StepNavigation from "./StepNavigation";
-import { RefreshIcon } from "../icons";
-import { useFormik, validateYupSchema } from "formik";
+import { useFormik } from "formik";
 import * as yup from "yup";
 
 const { bannerHeadingColor, primaryTextColor } = vars;
@@ -74,14 +72,13 @@ const useStyles = makeStyles((theme?: any) => ({
     fontWeight: 400,
   },
   leftBox: {
-    padding: theme.spacing(6, 0),
+    padding: theme.spacing(6, 0, 3, 0),
     textAlign: "start",
     height: "100%",
   },
   iframeDefault: {
     height: "100%",
     minHeight: "320px",
-    maxHeight: "420px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -99,7 +96,7 @@ const validationSchema = yup.object().shape({
     .required("This field is mandatory"),
 });
 
-const Iframe = ({ formik }) => {
+const Iframe = ({ formik, handleBlur }) => {
   const { errors, touched, getFieldProps } = formik;
   const classes = useStyles();
 
@@ -114,12 +111,12 @@ const Iframe = ({ formik }) => {
         height="100%"
         wrap="nowrap"
       >
-        <Grid item lg={2}>
+        <Grid item>
           <Typography variant="h1" className={classes.header}>
             2/3: Product Page Link
           </Typography>
         </Grid>
-        <Grid item lg={2}>
+        <Grid item>
           <Typography variant="h5" className={classes.label}>
             Vendor Product Page Link (Mandatory)
           </Typography>
@@ -128,6 +125,7 @@ const Iframe = ({ formik }) => {
             name="url"
             value={formik.values.url}
             onChange={formik.handleChange}
+            onBlur={handleBlur}
             {...getFieldProps("url")}
             error={Boolean(touched.url && errors.url)}
             helperText={touched.url && errors.url}
@@ -149,7 +147,7 @@ const Iframe = ({ formik }) => {
           )}
         </Grid>
         <Divider sx={{ my: 1 }} />
-        <Grid item lg={6}>
+        <Grid item lg={8}>
           {touched.url && !errors.url ? (
             <CardMedia
               className={classes.iframeDefault}
@@ -163,17 +161,6 @@ const Iframe = ({ formik }) => {
               </Typography>
             </Box>
           )}
-        </Grid>
-        <Grid item lg={2}>
-          <Button
-            variant="text"
-            color="info"
-            startIcon={<RefreshIcon />}
-            fullWidth
-            onClick={() => {}}
-          >
-            Refresh Vendor Product Page Link preview
-          </Button>
         </Grid>
       </Grid>
     </Box>
@@ -198,17 +185,6 @@ const CommercialForm = (props) => {
 
   const [isLastStep, setIsLastStep] = useState(false);
   const [isUrlEntered, setIsUrlEntered] = useState(false);
-
-  const handleNext = () => {
-    if (touched.url && !errors.url) {
-      setIsUrlEntered(true);
-      setIsLastStep(true);
-      setFieldTouched("catalogNumber", false);
-    }
-    if (!touched.url) {
-      setFieldTouched("url", true);
-    }
-  };
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -236,24 +212,43 @@ const CommercialForm = (props) => {
       props.next();
     },
     validateOnChange: true,
+    validateOnBlur: true,
   });
 
-  const {
-    errors,
-    touched,
-    handleSubmit,
-    isSubmitting,
-    getFieldProps,
-    setFieldTouched,
-    handleChange,
-  } = formik;
+  const { errors, touched, handleSubmit, getFieldProps, setFieldTouched } =
+    formik;
+
+  const handleNext = (e) => {
+    e.preventDefault();
+
+    if (touched.url && !errors.url) {
+      setIsUrlEntered(true);
+      setIsLastStep(true);
+    }
+    if (!touched.url) {
+      setFieldTouched("url", true);
+    }
+  };
+
+  const handleBlur = (e) => {
+    try {
+      new URL(e.target.value);
+      setIsUrlEntered(true);
+      setIsLastStep(true);
+    } catch {}
+  };
 
   return (
-    <form onSubmit={handleSubmit} className={classes.background}>
+    <form
+      onSubmit={handleSubmit}
+      className={classes.background}
+      autoComplete="off"
+      onBlur={handleBlur}
+    >
       <Container maxWidth="xl">
         <Grid container>
           <Grid item lg={6} className={classes.leftContainer}>
-            <Iframe formik={formik} />
+            <Iframe formik={formik} handleBlur={handleBlur} />
           </Grid>
           <Grid item lg={6} className={classes.rightContainer} sx={{ pr: 0 }}>
             <Paper className={classes.paper}>
