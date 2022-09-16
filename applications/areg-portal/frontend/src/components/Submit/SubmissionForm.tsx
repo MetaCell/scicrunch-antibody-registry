@@ -29,11 +29,17 @@ const SubmissionForm = (props) => {
     setSelectedType(value);
   };
 
+  const handleClose = () => {
+    props.handleClose();
+    setIsSubmitted(false);
+    setSelectedType("commercial");
+  };
+
   return (
     <Dialog
       fullScreen
       open={props.open}
-      onClose={props.handleClose}
+      onClose={handleClose}
       PaperProps={{
         style: {
           backgroundColor: theme.palette.grey[50],
@@ -44,7 +50,7 @@ const SubmissionForm = (props) => {
         <Container maxWidth="xl">
           <Toolbar sx={classes.header} disableGutters>
             <Button
-              onClick={props.handleClose}
+              onClick={handleClose}
               variant="contained"
               color="info"
               startIcon={<CloseIcon fontSize="small" />}
@@ -70,7 +76,7 @@ const SubmissionForm = (props) => {
       </Box>
       <Box sx={{ height: "100%" }}>
         {isSubmitted ? (
-          <SuccessSubmission onClose={props.handleClose} />
+          <SuccessSubmission onClose={handleClose} />
         ) : (
           <MultiStep>
             <AbTypeStep
