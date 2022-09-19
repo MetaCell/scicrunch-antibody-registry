@@ -76,7 +76,7 @@ const HomeHeader = (props) => {
                 <Box>
                   <Stack direction="row" spacing={1.5}>
                     <Button
-                      disabled={activeSelection ? false : true}
+                      disabled={!activeSelection}
                       variant="contained"
                       color="info"
                       onClick={() => handleExport({})}

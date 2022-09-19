@@ -11,43 +11,39 @@ from areg_portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN,
 
 
 class CommercialType(models.TextChoices):
-    COMMERCIAL = 'CM', 'commercial'
-    PERSONAL = 'PS', 'personal'
-    NON_PROFIT = 'NP', 'non-profit'
-    OTHER = 'OT', 'other'
+    COMMERCIAL = 'commercial', 'commercial'
+    PERSONAL = 'personal', 'personal'
+    NON_PROFIT = 'non-profit', 'non-profit'
+    OTHER = 'other', 'other'
 
 
 class AntibodyClonality(models.TextChoices):
-    UNKNOWN = 'UNK', 'Unknown'
-    COCKTAIL = 'CKT', 'Cocktail'
-    CONTROL = 'CTR', 'Control'
-    ISOTYPE_CONTROL = 'I_CTR', 'Isotype Control'
-    MONOCLONAL = 'MNC', 'Monoclonal'
-    MONOCLONAL_SECONDARY = 'MNC_S', 'Monoclonal Secondary'
-    POLYCLONAL = 'PLC', 'Polyclonal'
-    POLYCLONAL_SECONDARY = 'PLC_S', 'Polyclonal Secondary'
-    OLIGOCLONAL = 'OLC', 'Oligoclonal'
-    RECOMBINANT = 'RCB', 'Recombinant'
-    RECOMBINANT_MONOCLONAL = 'RCB_M', 'Recombinant Monoclonal'
-    RECOMBINANT_MONOCLONAL_SECONDARY = 'RCB_M_S', 'Recombinant Monoclonal Secondary'
-    RECOMBINANT_POLYCLONAL = 'RCB_P', 'Recombinant Polyclonal'
-    RECOMBINANT_POLYCLONAL_SECONDARY = 'RCB_P_S', 'Recombinant Polyclonal Secondary'
+    UNKNOWN = 'unknown', 'Unknown'
+    COCKTAIL = 'cocktail', 'Cocktail'
+    CONTROL = 'control', 'Control'
+    ISOTYPE_CONTROL = 'isotype control', 'Isotype Control'
+    MONOCLONAL = 'monoclonal', 'Monoclonal'
+    MONOCLONAL_SECONDARY = 'monoclonal secondary', 'Monoclonal Secondary'
+    POLYCLONAL = 'polyclonal', 'Polyclonal'
+    POLYCLONAL_SECONDARY = 'polyclonal secondary', 'Polyclonal Secondary'
+    OLIGOCLONAL = 'oligoclonal', 'Oligoclonal'
+    RECOMBINANT = 'recombinant', 'Recombinant'
+    RECOMBINANT_MONOCLONAL = 'recombinant monoclonal', 'Recombinant Monoclonal'
+    RECOMBINANT_MONOCLONAL_SECONDARY = 'recombinant monoclonal secondary', 'Recombinant Monoclonal Secondary'
+    RECOMBINANT_POLYCLONAL = 'recombinant polyclonal', 'Recombinant Polyclonal'
+    RECOMBINANT_POLYCLONAL_SECONDARY = 'recombinant polyclonal secondary', 'Recombinant Polyclonal Secondary'
 
 
 class STATUS(models.TextChoices):
-    CURATED = 'C', 'CURATED'
-    REJECTED = 'R', 'REJECTED'
-    QUEUE = 'Q', 'QUEUE'
+    CURATED = 'CURATED', 'Curated'
+    REJECTED = 'REJECTED', 'Rejected'
+    QUEUE = 'QUEUE', 'Queued'
 
 
 class Vendor(models.Model):
     name = models.CharField(max_length=VENDOR_MAX_LEN, db_column='vendor')
     nif_id = models.CharField(max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id')
-    commercial_type = models.CharField(
-        max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
-        choices=CommercialType.choices,
-        default=CommercialType.OTHER,
-    )
+    
     synonyms = models.CharField(max_length=VENDOR_SYNONYMS_TYPE_MAX_LEN)
 
     def __str__(self):
@@ -69,8 +65,8 @@ class VendorDomain(models.Model):
 
 
 class Antigen(models.Model):
-    symbol = models.CharField(unique=True, max_length=ANTIBODY_TARGET_MAX_LEN, db_column='ab_target')
-    entrez_id = models.CharField(max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid', null=True)
+    symbol = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN, db_column='ab_target')
+    entrez_id = models.CharField(max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid', unique=True)
     uniprot_id = models.CharField(max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True)
 
     def __str__(self):
@@ -81,9 +77,14 @@ class Antibody(models.Model):
     ix = models.AutoField(unique=True, null=False, primary_key=True)
     ab_name = models.CharField(max_length=ANTIBODY_NAME_MAX_LEN)
     # todo: ab_id doesn't need to be unique
-    ab_id = models.CharField(unique=True, max_length=ANTIBODY_ID_MAX_LEN)
+    ab_id = models.CharField(max_length=ANTIBODY_ID_MAX_LEN)
     accession = models.CharField(max_length=ANTIBODY_ID_MAX_LEN)
     # todo: change to foreignKey to user model @afonsobspinto
+    commercial_type = models.CharField(
+        max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
+        choices=CommercialType.choices,
+        default=CommercialType.OTHER,
+    )
     uid = models.CharField(max_length=ANTIBODY_ID_MAX_LEN)
     catalog_num = models.CharField(max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=False)
     cat_alt = models.CharField(max_length=ANTIBODY_CAT_ALT_MAX_LEN)

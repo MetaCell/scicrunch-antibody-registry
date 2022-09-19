@@ -1,5 +1,7 @@
 from typing import List
 
+from api.models import Antibody
+
 from api.mappers.AntibodyMapper import AntibodyMapper
 from api.repositories import antibody_repository
 from openapi.models import Antibody as AntibodyDTO
@@ -11,11 +13,20 @@ def get_antibodies(page: int = 0, size: int = 50) -> List[AntibodyDTO]:
     antibodies_daos = antibody_repository.get_all(page, size)
     return [antibody_mapper.to_dto(dao) for dao in antibodies_daos]
 
+def generate_id(antibody: Antibody):
+    # TODO add logic to generate the AB_ID
+    import random
+    return random.randint(0, 99999999)
 
 def create_antibody(body: AddUpdateAntibodyDTO) -> None:
     antibody_mapper = AntibodyMapper()
     antibody = antibody_mapper.from_dto(body)
-    return antibody_repository.update_or_create(antibody)
+    antibody.id = generate_id(antibody)
+    antibody.ab_id = "AB_%s" % antibody.id
+    # TODO add logic to map the vendor to the url
+
+    # TODO add default values (e.g. curation state)
+    return antibody_mapper.to_dto(antibody_repository.update_or_create(antibody))
 
 
 def get_antibody(antibody_id: str) -> AntibodyDTO:

@@ -19,6 +19,8 @@ harness:
     - common
     - events
     - accounts
+    soft:
+    - pgadmin
   use_services:
   - name: common
   uri_role_mapping:

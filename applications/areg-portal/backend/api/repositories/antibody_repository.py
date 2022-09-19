@@ -11,6 +11,7 @@ def get_all(page: int = 0, size: int = 50) -> List[Antibody]:
 
 def update_or_create(antibody: Antibody):
     antibody.save()
+    return antibody
 
 
 def get(antibody_id: str):
