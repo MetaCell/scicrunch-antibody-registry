@@ -8,6 +8,7 @@ import MultiStep from "../UI/MultiStep";
 import AbTypeStep from "./AbTypeStep";
 import CommercialForm from "./CommercialForm";
 import SuccessSubmission from "./SuccessSubmission";
+import PersonalForm from "./PersonalForm";
 
 const SubmissionForm = (props) => {
   const theme = useTheme();
@@ -90,8 +91,14 @@ const SubmissionForm = (props) => {
               previous={props.previous}
               hasPrevious={props.hasPrevious}
             />
+          ) : selectedType === "personal" ? (
+            <PersonalForm
+              next={props.next}
+              previous={props.previous}
+              hasPrevious={props.hasPrevious}
+            />
           ) : (
-            <Box> soy el paso 2</Box>
+            <Box>Soy other</Box>
           )}
           {/* TODO check if the post is sucessfully send correct temporaryID
           If not, add the duplicated message */}
