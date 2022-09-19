@@ -17,19 +17,10 @@ import UserAccountMenu from "./UserAccountMenu";
 
 const Navbar = () => {
   const user: User = useUser();
-  const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(false)
   const login = () => {
 
     window.location.href = "/login";
-    setIsLoggedIn(true);
-    localStorage.setItem("isUserLogIn","1");
   }
-  React.useEffect(() => {
-    let userIsLogIn = localStorage.getItem("isUserLogIn");
-    if(userIsLogIn==="1"){
-      setIsLoggedIn(true);
-    }
-  }, [])
   return (
     <Box>
       <AppBar elevation={0}>
@@ -76,7 +67,7 @@ const Navbar = () => {
             >
               <Stack direction="row" spacing={1.5}>
                 <HelpMenu />
-                {!isLoggedIn ? <Button onClick={login}>
+                {!user? <Button onClick={login}>
                   Log in / Register
                 </Button> : <UserAccountMenu user={user} />}
               </Stack>
