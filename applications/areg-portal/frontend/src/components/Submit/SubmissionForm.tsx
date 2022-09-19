@@ -93,7 +93,9 @@ const SubmissionForm = (props) => {
           ) : (
             <Box> soy el paso 2</Box>
           )}
-          <SuccessSubmission onClose={handleClose} />
+          {/* TODO check if the post is sucessfully send correct temporaryID
+          If not, add the duplicated message */}
+          <SuccessSubmission onClose={handleClose} temporaryID={"AB_2923405"} />
         </MultiStep>
       </Box>
     </Dialog>
