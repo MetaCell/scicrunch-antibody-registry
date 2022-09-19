@@ -9,6 +9,7 @@ import AbTypeStep from "./AbTypeStep";
 import CommercialForm from "./CommercialForm";
 import SuccessSubmission from "./SuccessSubmission";
 import PersonalForm from "./PersonalForm";
+import OtherForm from "./OtherForm";
 
 const SubmissionForm = (props) => {
   const theme = useTheme();
@@ -98,7 +99,11 @@ const SubmissionForm = (props) => {
               hasPrevious={props.hasPrevious}
             />
           ) : (
-            <Box>Soy other</Box>
+            <OtherForm
+              next={props.next}
+              previous={props.previous}
+              hasPrevious={props.hasPrevious}
+            />
           )}
           {/* TODO check if the post is sucessfully send correct temporaryID
           If not, add the duplicated message */}
