@@ -48,7 +48,9 @@ class Vendor(models.Model):
 
     def __str__(self):
         return self.name
-
+class Specie(models.Model):
+    name = models.CharField(max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, unique=True)
+   
 
 class VendorDomain(models.Model):
     base_url = models.URLField(unique=True, max_length=URL_MAX_LEN, null=True, db_column='domain_name')
@@ -77,7 +79,7 @@ class Antigen(models.Model):
 class Antibody(models.Model):
     ix = models.AutoField(primary_key=True, unique=True, null=False)
     ab_name = models.CharField(max_length=ANTIBODY_NAME_MAX_LEN)
-    ab_id = models.IntegerField(max_length=ANTIBODY_ID_MAX_LEN)
+    ab_id = models.IntegerField()
     accession = models.CharField(max_length=ANTIBODY_ID_MAX_LEN)
     commercial_type = models.CharField(
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
@@ -92,11 +94,11 @@ class Antibody(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
     url = models.URLField(max_length=URL_MAX_LEN)
     antigen = models.ForeignKey(Antigen, on_delete=models.RESTRICT, db_column='antigen_id')
-    species = models.CharField(max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, db_column='target_species')
+    species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets")
     subregion = models.CharField(max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion')
     modifications = models.CharField(max_length=ANTIBODY_TARGET_MODIFICATION_MAX_LEN, db_column='target_modification')
     epitope = models.CharField(max_length=ANTIBODY_TARGET_EPITOPE_MAX_LEN)
-    source_organism = models.CharField(max_length=ANTIBODY_SOURCE_ORGANISM_MAX_LEN)
+    source_organism = models.ForeignKey(Specie, on_delete=models.RESTRICT, related_name="source")
     clonality = models.CharField(
         max_length=ANTIBODY_CLONALITY_MAX_LEN,
         choices=AntibodyClonality.choices,

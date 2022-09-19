@@ -2,7 +2,7 @@ from typing import List
 
 from api.models import Antibody
 
-from api.mappers.AntibodyMapper import AntibodyMapper
+from api.mappers.antibody_mapper import AntibodyMapper
 from api.repositories import antibody_repository
 from openapi.models import Antibody as AntibodyDTO
 from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO
