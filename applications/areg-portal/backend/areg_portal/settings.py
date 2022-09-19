@@ -174,7 +174,6 @@ ANTIBODY_DEFINING_CITATION_MAX_LEN = 2048  # 1156
 ANTIBODY_ID_MAX_LEN = 32  # 8
 ANTIBODY_CAT_ALT_MAX_LEN = 256  # 103
 ANTIBODY_DISC_DATE_MAX_LEN = 32  # 21
-ANTIBODY_URL_MAX_LEN = 2048  # 268
 
 ANTIBODY_TARGET_MAX_LEN = 512  # 323
 ANTIBODY_TARGET_SPECIES_MAX_LEN = 1024  # 800
@@ -191,6 +190,7 @@ ANTIGEN_ENTREZ_ID_MAX_LEN = 1024  # 617
 ANTIGEN_UNIPROT_ID_MAX_LEN = 64  # 32
 
 STATUS_MAX_LEN = 32
+URL_MAX_LEN = 2048  # 268
 
 CSRF_TRUSTED_ORIGINS = ['https://www.areg.local', 'https://areg.local', 'https://areg.dev.metacell.us',
                         'https://areg.stage.metacell.us', 'https://areg.demo.metacell.us',
