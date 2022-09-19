@@ -21,8 +21,8 @@ def generate_id(antibody: Antibody):
 def create_antibody(body: AddUpdateAntibodyDTO) -> None:
     antibody_mapper = AntibodyMapper()
     antibody = antibody_mapper.from_dto(body)
-    antibody.id = generate_id(antibody)
-    antibody.ab_id = "AB_%s" % antibody.id
+    antibody.ab_id = generate_id(antibody)
+    # antibody.ab_id = "AB_%s" % antibody.id
     # TODO add logic to map the vendor to the url
 
     # TODO add default values (e.g. curation state)

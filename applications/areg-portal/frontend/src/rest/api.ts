@@ -88,7 +88,7 @@ export interface AbstractAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
      * @type {string}
      * @memberof AbstractAntibody
      */
@@ -231,7 +231,7 @@ export interface AddUpdateAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
      * @type {string}
      * @memberof AddUpdateAntibody
      */
@@ -354,7 +354,7 @@ export interface Antibody {
      * @type {string}
      * @memberof Antibody
      */
-    'curateTime': string;
+    'curateTime'?: string;
     /**
      * Curator comment about this reagent 
      * @type {string}
@@ -446,7 +446,7 @@ export interface Antibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
      * @type {string}
      * @memberof Antibody
      */
@@ -576,7 +576,7 @@ export interface AntibodyAllOf {
      * @type {string}
      * @memberof AntibodyAllOf
      */
-    'curateTime': string;
+    'curateTime'?: string;
     /**
      * Curator comment about this reagent 
      * @type {string}
