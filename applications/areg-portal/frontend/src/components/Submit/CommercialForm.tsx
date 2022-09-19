@@ -512,6 +512,7 @@ const CommercialForm = (props) => {
         hasPrevious={props.hasPrevious}
         isLastStep={isLastStep}
         activeStep={isLastStep ? 2 : 1}
+        totalSteps={3}
       />
     </form>
   );

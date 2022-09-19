@@ -115,6 +115,7 @@ const AbTypeStep = ({ label, ...props }: AbTypeStep) => {
         next={props.next}
         hasPrevious={props.hasPrevious}
         activeStep={0}
+        totalSteps={3}
       />
     </>
   );

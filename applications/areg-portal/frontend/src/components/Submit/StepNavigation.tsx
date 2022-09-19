@@ -15,6 +15,7 @@ interface NavigationProps {
   next: (e) => void;
   isLastStep?: Boolean;
   activeStep: Number;
+  totalSteps: Number;
 }
 
 export const StepNavigation = (props: NavigationProps) => {
@@ -38,7 +39,10 @@ export const StepNavigation = (props: NavigationProps) => {
     <Toolbar sx={classes.toolbar}>
       <Container maxWidth="xl">
         <Box sx={classes.content}>
-          <Steeper activeStep={props.activeStep} />
+          <Steeper
+            activeStep={props.activeStep}
+            totalSteps={props.totalSteps}
+          />
           <Stack direction="row" spacing={2}>
             <Button
               disabled={!props.hasPrevious}

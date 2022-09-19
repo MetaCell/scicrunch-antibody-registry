@@ -363,6 +363,7 @@ const PersonalForm = (props) => {
         hasPrevious={props.hasPrevious}
         isLastStep={true}
         activeStep={2}
+        totalSteps={2}
       />
     </form>
   );
