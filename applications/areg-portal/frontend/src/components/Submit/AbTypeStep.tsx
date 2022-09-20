@@ -81,7 +81,7 @@ const AbTypeStep = ({ label, ...props }: AbTypeStep) => {
     <>
       <Box>
         <Typography sx={classes.title} variant="h1">
-          1/3 Type of antibody
+          1. Type of antibody
         </Typography>
         <Stack direction="row" spacing={1.5} sx={classes.content}>
           <TypeChoiceCard

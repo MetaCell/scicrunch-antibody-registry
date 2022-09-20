@@ -113,7 +113,7 @@ const Iframe = ({ formik, handleBlur }) => {
       >
         <Grid item>
           <Typography variant="h1" className={classes.header}>
-            2/3: Product Page Link
+            2. Product Page Link
           </Typography>
         </Grid>
         <Grid item>
@@ -255,7 +255,7 @@ const CommercialForm = (props) => {
               <Grid container direction="column" gap={3} m={0} width="100%">
                 <Grid item>
                   <Typography variant="h1" className={classes.header}>
-                    3/3: Antibody Details
+                    3. Antibody Details
                   </Typography>
                 </Grid>
                 <Grid item>

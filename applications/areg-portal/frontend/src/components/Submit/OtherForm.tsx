@@ -161,7 +161,7 @@ const OtherForm = (props) => {
           >
             <Grid item>
               <Typography variant="h1" className={classes.header}>
-                2/2: Antibody Details
+                2. Antibody Details
               </Typography>
             </Grid>
             <Grid item className={classes.formItem}>
@@ -362,7 +362,7 @@ const OtherForm = (props) => {
         next={props.next}
         hasPrevious={props.hasPrevious}
         isLastStep={true}
-        activeStep={2}
+        activeStep={1}
         totalSteps={2}
       />
     </form>
