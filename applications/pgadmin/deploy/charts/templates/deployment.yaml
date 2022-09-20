@@ -20,6 +20,16 @@ spec:
         app: {{ template "pgadmin.name" . }}
         release: {{ .Release.Name }}
     spec:
+      initContainers:
+        - name: init-pgadmin
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/chown", "-R", "5050:5050", "/var/lib/pgadmin"]
+          volumeMounts:
+            - name: pgadmin-data
+              mountPath: /var/lib/pgadmin
+          securityContext:
+            runAsUser: 0
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}"
