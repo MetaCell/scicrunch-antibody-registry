@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import Q
 
 from areg_portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, VENDOR_MAX_LEN, \
-    ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_SOURCE_ORGANISM_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
+    ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
     ANTIBODY_CLONE_ID_MAX_LEN, ANTIGEN_ENTREZ_ID_MAX_LEN, ANTIGEN_UNIPROT_ID_MAX_LEN, STATUS_MAX_LEN, \
     ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN, ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, ANTIBODY_PRODUCT_FORM_MAX_LEN, \
     ANTIBODY_TARGET_MODIFICATION_MAX_LEN, ANTIBODY_TARGET_SUBREGION_MAX_LEN, ANTIBODY_DEFINING_CITATION_MAX_LEN, \
@@ -48,9 +48,11 @@ class Vendor(models.Model):
 
     def __str__(self):
         return self.name
+
+
 class Specie(models.Model):
     name = models.CharField(max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, unique=True)
-   
+
 
 class VendorDomain(models.Model):
     base_url = models.URLField(unique=True, max_length=URL_MAX_LEN, null=True, db_column='domain_name')
@@ -77,6 +79,7 @@ class Antigen(models.Model):
 
 
 class Antibody(models.Model):
+    # todo: make sure autoincrement is functional with incremental ingestion
     ix = models.AutoField(primary_key=True, unique=True, null=False)
     ab_name = models.CharField(max_length=ANTIBODY_NAME_MAX_LEN)
     ab_id = models.IntegerField()
