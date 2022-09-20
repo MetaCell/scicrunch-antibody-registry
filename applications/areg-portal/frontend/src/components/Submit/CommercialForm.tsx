@@ -18,13 +18,18 @@ import StepNavigation from "./StepNavigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
 
-const { bannerHeadingColor, primaryTextColor } = vars;
+const {
+  bannerHeadingColor,
+  primaryTextColor,
+  backgroundColorForm,
+  contentBorderColor,
+} = vars;
 
 const useStyles = makeStyles((theme?: any) => ({
   background: {
-    background: `linear-gradient(90deg, ${theme.palette.grey[100]} 50%, ${theme.palette.grey[50]} 50%)`,
+    background: `linear-gradient(90deg, ${contentBorderColor} 50%, ${backgroundColorForm} 50%)`,
     [theme.breakpoints.down("lg")]: {
-      background: theme.palette.grey[100],
+      background: contentBorderColor,
     },
   },
   rightContainer: {
@@ -83,7 +88,7 @@ const useStyles = makeStyles((theme?: any) => ({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.palette.grey[700],
-    border: `0.25rem solid ${theme.palette.grey[100]}`,
+    border: `0.25rem solid ${contentBorderColor}`,
     borderRadius: theme.shape.borderRadius,
   },
 }));
@@ -511,8 +516,8 @@ const CommercialForm = (props) => {
         next={handleNext}
         hasPrevious={props.hasPrevious}
         isLastStep={isLastStep}
-        activeStep={isLastStep ? 2 : 1}
-        totalSteps={3}
+        activeStep={isLastStep ? 3 : 2}
+        totalSteps={4}
       />
     </form>
   );

@@ -31,14 +31,14 @@ const SubmissionForm = (props) => {
   };
 
   const handleClose = () => {
-    props.handleClose();
+    window.location.href = "/";
     setSelectedType("commercial");
   };
 
   return (
     <Dialog
       fullScreen
-      open={props.open}
+      open={true}
       onClose={handleClose}
       PaperProps={{
         style: {

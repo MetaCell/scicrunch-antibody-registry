@@ -362,8 +362,8 @@ const OtherForm = (props) => {
         next={props.next}
         hasPrevious={props.hasPrevious}
         isLastStep={true}
-        activeStep={1}
-        totalSteps={2}
+        activeStep={2}
+        totalSteps={3}
       />
     </form>
   );

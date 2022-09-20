@@ -6,6 +6,7 @@ import {
   Button,
   Container,
   Grid,
+  Link,
   Stack,
   Typography,
 } from "@mui/material";
@@ -33,21 +34,6 @@ const HideOnScroll = (props: Props) => {
 const HomeHeader = (props) => {
   const theme = useTheme();
   const { activeSelection, handleExport, showFilterMenu } = props;
-
-  const [openSubmissionModal, setOpenSubmissionModal] = useState(false);
-
-  const handleOpenSubmissionModal = () => {
-    setOpenSubmissionModal(true);
-  };
-
-  const handleCloseSubmissionModal = () => {
-    setOpenSubmissionModal(false);
-  };
-
-  const submissionModalProps = {
-    open: openSubmissionModal,
-    handleClose: handleCloseSubmissionModal,
-  };
 
   return (
     <Box>
@@ -120,11 +106,10 @@ const HomeHeader = (props) => {
                           }}
                         />
                       }
-                      onClick={handleOpenSubmissionModal}
+                      href="/add"
                     >
                       Submit an antibody
                     </Button>
-                    <SubmissionForm {...submissionModalProps} />
                   </Stack>
                 </Box>
               </Box>
