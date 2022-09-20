@@ -27,7 +27,7 @@ This application is composed of a FastAPI Django backend and a React frontend.
 ### Backend
 
 Backend code is inside the *backend* directory.
-See [backend/README.md#Develop]
+See [here](backend/README.md#Develop)
 
 ### Frontend
 
@@ -53,6 +53,7 @@ python3 manage.py createsuperuser
 cd static/www
 ln -s ../../../frontend/dist dist
 ```
+
 
 Compile the frontend
 ```bash
