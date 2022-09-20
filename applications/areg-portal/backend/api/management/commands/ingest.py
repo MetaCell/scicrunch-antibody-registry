@@ -38,9 +38,14 @@ def get_insert_values_into_table_stm(table_name, columns, entries):
 
 
 def clean_empty_value(value):
-    if value == '(null)' or value == '(NaN)' or (type(value) == float and math.isnan(value)):
+    if is_null_value(value):
         return None
     return value
+
+
+def is_null_value(value):
+    return value == '(null)' or value == '(NaN)' or (
+                type(value) == float and math.isnan(value)) or value == 'null' or value is None
 
 
 def handle_undefined_commercial_type(value):
@@ -100,6 +105,7 @@ class Command(BaseCommand):
                   ]
 
         start = timer()
+        logging.info("Ingestion process started")
 
         with transaction.atomic():
             with connection.cursor() as cursor:
@@ -164,7 +170,7 @@ class Command(BaseCommand):
                                                                 'ab_target',
                                                                 self.TMP_TABLE))
                 # Update antigen with ids
-
+                # todo: Update according to https://github.com/MetaCell/scicrunch-antibody-registry/issues/65
                 antigen_update_stm = f"UPDATE {self.ANTIGEN_TABLE} " \
                                      f"SET ab_target_entrez_gid=TMP.ab_target_entrez_gid, " \
                                      f"uniprot_id=TMP.uniprot_id " \
@@ -221,7 +227,7 @@ class Command(BaseCommand):
                     species_params = []
                     for index, row in chunk.iterrows():
                         target_species = row['target_species']
-                        if type(target_species) == str and target_species is not None:
+                        if not is_null_value(target_species):
                             for specie in row['target_species'].split(';'):
                                 clean_specie = get_clean_species_str(specie)
                                 species_params.extend([row['ix'], species_map[clean_specie]])

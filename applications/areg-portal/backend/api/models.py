@@ -72,11 +72,12 @@ class VendorDomain(models.Model):
         return self.base_url
 
 
+# TODO: Update according to https://github.com/MetaCell/scicrunch-antibody-registry/issues/65
 class Antigen(models.Model):
     symbol = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN, db_column='ab_target', null=True)
-    entrez_id = models.CharField(unique=True, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
+    entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
                                  null=True)
-    uniprot_id = models.CharField(unique=True, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True)
+    uniprot_id = models.CharField(unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True)
 
     def __str__(self):
         return self.entrez_id
@@ -85,7 +86,8 @@ class Antigen(models.Model):
 class Antibody(models.Model):
     # todo: make sure autoincrement is functional with incremental ingestion
     ix = models.AutoField(primary_key=True, unique=True, null=False)
-    ab_name = models.CharField(max_length=ANTIBODY_NAME_MAX_LEN)
+    # todo: In the context, is a bit strange to have nullable antibody name
+    ab_name = models.CharField(max_length=ANTIBODY_NAME_MAX_LEN, null=True)
     ab_id = models.IntegerField()
     accession = models.CharField(max_length=ANTIBODY_ID_MAX_LEN)
     commercial_type = models.CharField(
@@ -96,7 +98,7 @@ class Antibody(models.Model):
     )
     # todo: change to foreignKey to user model @afonsobspinto; Don't allow null
     uid = models.CharField(max_length=ANTIBODY_ID_MAX_LEN, null=True)
-    catalog_num = models.CharField(max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN)
+    catalog_num = models.CharField(max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True)
     cat_alt = models.CharField(max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
     # todo: confirm if can be null @afonsobspinto
@@ -119,7 +121,7 @@ class Antibody(models.Model):
     product_conjugate = models.CharField(max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, null=True)
     defining_citation = models.CharField(max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True)
     product_form = models.CharField(max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True)
-    comments = models.TextField()
+    comments = models.TextField(null=True)
     feedback = models.TextField(null=True)
     curator_comment = models.TextField(null=True)
     disc_date = models.CharField(max_length=ANTIBODY_DISC_DATE_MAX_LEN, null=True)
