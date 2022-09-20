@@ -40,8 +40,16 @@ module.exports = function webpacking(envVariables) {
         loader: "babel-loader",
       },
       {
-        test: /\.ts|tsx?$/,
-        loader: "awesome-typescript-loader",
+        test: /\.ts(x?)$/,
+        include: path.resolve(__dirname, 'src'),
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              transpileOnly: true,
+            },
+          }
+        ]
       },
       {
         test: /\.(css)$/,
