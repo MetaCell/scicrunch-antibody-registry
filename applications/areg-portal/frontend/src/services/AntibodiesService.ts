@@ -1,31 +1,10 @@
-import { DataObjectSharp } from "@mui/icons-material";
+import { Antibody, PaginatedAntibodies, AntibodyApi } from "../rest/api"
 import dataJson from "./data.json";
 
-interface AntibodiesObj {
-  id: string;
-  ab_name: string;
-  ab_id: string;
-  ab_target: string;
-  target_species: string;
-  proper_citation: string;
-  clonality: string;
-  comments: string;
-  clone_id: string;
-  host: string;
-  vendor: string;
-  catalog_num?;
-  url: string;
-  insert_time: string;
-  curate_time: string;
-  disc_date: string;
-}
+const api = new AntibodyApi();
 
-export function getAntibodies(): Promise<AntibodiesObj[]> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(dataJson);
-    }, 2000);
-  });
+export async function getAntibodies(page=0, size=10): Promise<PaginatedAntibodies> {
+  return  (await api.getAntibodies(page, size)).data;
 }
 
 export function getAntibody(id): Promise<any> {

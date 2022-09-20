@@ -22,6 +22,7 @@ import {
   SettingsIcon,
 } from "../icons";
 import HomeHeader from "./HomeHeader";
+import { Antibody } from "../../rest";
 
 const StyledBadge = (props) => {
   if (props.field === "vendor") {
@@ -55,6 +56,8 @@ const StyledCheckBox = (props) => {
     />
   );
 };
+
+const getRowId = (ab: Antibody) => ab.abId;
 
 const CustomToolbar = () => {
   const [activeSelection, setActiveSelection] = useState(true);
@@ -127,8 +130,8 @@ const getValue = (props) => {
   props.field === "ab_name_id"
     ? (cellValue = `${props.row.ab_name || ""} ${props.row.ab_id || ""}`)
     : (cellValue = `${props.row.ab_target || ""} ${
-        props.row.target_species || ""
-      }`);
+      props.row.target_species || ""
+    }`);
   return cellValue;
 };
 
@@ -287,7 +290,7 @@ const AntibodiesTable = () => {
   const fetchAntibodies = () => {
     getAntibodies()
       .then((res) => {
-        return setAntibodiesList(res);
+        return setAntibodiesList(res.items);
       })
       .catch((err) => alert(err));
   };
@@ -354,6 +357,7 @@ const AntibodiesTable = () => {
         <DataGrid
           sx={dataGridStyles}
           rows={antibodiesList}
+          getRowId={getRowId}
           columns={columns}
           pageSize={10}
           rowsPerPageOptions={[20]}
@@ -361,7 +365,7 @@ const AntibodiesTable = () => {
           disableSelectionOnClick
           getRowHeight={() => "auto"}
           onRowClick={(params) =>
-            (window.location.href = `/${params.row.ab_id}`)
+            (window.location.href = `/${params.row.abId}`)
           }
           components={{
             BaseCheckbox: StyledCheckBox,
