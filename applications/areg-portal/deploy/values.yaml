@@ -30,7 +30,7 @@ harness:
     - areg-portal:administrator
     - areg-portal:manager
     require-any-role: true
-  - uri: /submit
+  - uri: /add
     roles:
     - administrator
     - areg-portal:administrator
