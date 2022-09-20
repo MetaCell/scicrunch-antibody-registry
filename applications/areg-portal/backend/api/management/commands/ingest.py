@@ -1,3 +1,4 @@
+import itertools
 import logging
 import math
 from timeit import default_timer as timer
@@ -6,7 +7,8 @@ import pandas as pd
 from django.core.management.base import BaseCommand
 from django.db import transaction, connection
 
-from api.models import STATUS, CommercialType, AntibodyClonality, Antibody, Antigen, Vendor, VendorDomain, Specie
+from api.models import STATUS, CommercialType, AntibodyClonality, Antibody, Antigen, Vendor, VendorDomain, Specie, \
+    VendorSynonym, AntibodySpecies
 
 TRUNCATE_STM = "TRUNCATE TABLE {table_name} CASCADE;"
 INSERT_INTO_VALUES_STM = "INSERT INTO {table_name} ({columns}) VALUES {} ;"
@@ -34,7 +36,7 @@ def get_insert_values_into_table_stm(table_name, columns, entries):
 
 def clean_empty_value(value):
     if value == '(null)' or value == '(NaN)' or (type(value) == float and math.isnan(value)) or value is None:
-        return ''
+        return None
     return value
 
 
@@ -45,6 +47,14 @@ def handle_undefined_commercial_type(value):
 
 
 class Command(BaseCommand):
+    ANTIBODY_TABLE = Antibody.objects.model._meta.db_table
+    ANTIGEN_TABLE = Antigen.objects.model._meta.db_table
+    SPECIE_TABLE = Specie.objects.model._meta.db_table
+    VENDOR_DOMAIN_TABLE = VendorDomain.objects.model._meta.db_table
+    VENDOR_SYNONYM_TABLE = VendorSynonym.objects.model._meta.db_table
+    VENDOR_TABLE = Vendor.objects.model._meta.db_table
+    TMP_TABLE = 'tmp_table'
+
     help = "Ingests antibody data into the database"
 
     def add_arguments(self, parser):
@@ -62,20 +72,19 @@ class Command(BaseCommand):
 
         # Prepare vendor inserts
         df_vendor = pd.read_csv(options['vendor_table_uri'])
-        vendor_insert_stm = get_insert_values_into_table_stm(Vendor.objects.model._meta.db_table,
-                                                             ['id', 'nif_id', 'vendor', 'synonyms'],
+        vendor_insert_stm = get_insert_values_into_table_stm(self.VENDOR_TABLE,
+                                                             ['id', 'nif_id', 'vendor'],
                                                              len(df_vendor))
 
         # Prepare vendor domain inserts
         df_vendor_domain = pd.read_csv(options['vendor_domain_table_uri'])
         df_vendor_domain = df_vendor_domain.drop_duplicates(subset=["domain_name"])
-        vendor_domain_insert_stm = get_insert_values_into_table_stm(VendorDomain.objects.model._meta.db_table,
+        vendor_domain_insert_stm = get_insert_values_into_table_stm(self.VENDOR_DOMAIN_TABLE,
                                                                     ['id', 'domain_name', 'vendor_id', 'status',
                                                                      'link'],
                                                                     len(df_vendor_domain))
 
         # Prepare raw antibody inserts
-        tmp_table_name = 'tmp_table'
         header = ['ab_name', 'ab_target', 'target_species', 'vendor', 'vendor_id', 'catalog_num', 'clonality',
                   'source_organism', 'clone_id', 'url', 'link', 'ab_target_entrez_gid', 'product_isotype',
                   'product_conjugate', 'product_form', 'target_subregion', 'target_modification', 'comments',
@@ -89,18 +98,31 @@ class Command(BaseCommand):
         with transaction.atomic():
             with connection.cursor() as cursor:
                 # delete tables content (opposite order of insertion)
-                tables_to_delete = [Specie.objects.model._meta.db_table, Antibody.objects.model._meta.db_table,
-                                    Antigen.objects.model._meta.db_table, Vendor.objects.model._meta.db_table,
-                                    VendorDomain.objects.model._meta.db_table]
+                tables_to_delete = [self.SPECIE_TABLE, self.ANTIBODY_TABLE,
+                                    self.ANTIGEN_TABLE, self.VENDOR_SYNONYM_TABLE,
+                                    self.VENDOR_DOMAIN_TABLE, self.VENDOR_TABLE]
                 for ttd in tables_to_delete:
                     cursor.execute(TRUNCATE_STM.format(table_name=ttd))
 
                 # insert vendors
+                vendor_synonyms_params = []
                 vendor_params = []
                 for index, row in df_vendor.iterrows():
                     vendor_params.extend(
-                        [row['id'], clean_empty_value(row['nifID']), row['vendor'], clean_empty_value(row['synonym'])])
+                        [row['id'], clean_empty_value(row['nifID']), row['vendor']])
+                    synonyms_str = clean_empty_value(row['synonym'])
+                    if synonyms_str:
+                        for s in synonyms_str.split(','):
+                            vendor_synonyms_params.extend([row['id'], s])
+
                 cursor.execute(vendor_insert_stm, vendor_params)
+
+                # insert vendors synonyms
+                vendor_synonyms_insert_stm = get_insert_values_into_table_stm(
+                    self.VENDOR_SYNONYM_TABLE,
+                    ['vendor_id', 'name'],
+                    int(len(vendor_synonyms_params) / 2))
+                cursor.execute(vendor_synonyms_insert_stm, vendor_synonyms_params)
 
                 # insert vendors domains
                 vendor_domain_params = []
@@ -111,78 +133,106 @@ class Command(BaseCommand):
                 cursor.execute(vendor_domain_insert_stm, vendor_domain_params)
 
                 # Create copy table
-                cursor.execute(DROP_TABLE_STM.format(table_name=tmp_table_name))
-                cursor.execute(get_create_table_stm(tmp_table_name, header))
+                cursor.execute(DROP_TABLE_STM.format(table_name=self.TMP_TABLE))
+                cursor.execute(get_create_table_stm(self.TMP_TABLE, header))
 
                 # Insert raw data into tmp table
                 for chunk in pd.read_csv(options['antibody_table_uri'], chunksize=10 ** 4, dtype='unicode'):
-                    raw_data_insert_stm = get_insert_values_into_table_stm(tmp_table_name, header, len(chunk))
-                row_params = []
-                for index, row in chunk.iterrows():
-                    try:
-                        row['commercial_type'] = commercial_type_reverse_map[row['commercial_type']]
-                    except KeyError:
-                        row['commercial_type'] = None
-                    row['status'] = status_reverse_map[row['status']]
-                    row['clonality'] = clonality_reverse_map.get(row['clonality'].lower(), 'UNK') if type(
-                        row['clonality']) != float else 'UNK'
-                    row_params.extend([clean_empty_value(value) for value in row.values])
-                cursor.execute(raw_data_insert_stm, row_params)
+                    raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, header, len(chunk))
+                    row_params = []
+                    for index, row in chunk.iterrows():
+                        try:
+                            row['commercial_type'] = commercial_type_reverse_map[row['commercial_type']]
+                        except KeyError:
+                            row['commercial_type'] = None
+                        row['status'] = status_reverse_map[row['status']]
+                        row['clonality'] = clonality_reverse_map.get(row['clonality'].lower(), 'UNK') if type(
+                            row['clonality']) != float else 'UNK'
+                        row_params.extend([clean_empty_value(value) for value in row.values])
+                    cursor.execute(raw_data_insert_stm, row_params)
 
                 # Insert select distinct antigen
-                cursor.execute(get_insert_into_table_select_stm(Antigen.objects.model._meta.db_table,
+                cursor.execute(get_insert_into_table_select_stm(self.ANTIGEN_TABLE,
                                                                 'ab_target',
                                                                 True,
                                                                 'ab_target',
-                                                                tmp_table_name))
+                                                                self.TMP_TABLE))
                 # Update antigen with ids
 
-                antigen_update_stm = "UPDATE api_antigen " \
-                                     "SET ab_target_entrez_gid=TMP.ab_target_entrez_gid, " \
-                                     "uniprot_id=TMP.uniprot_id " \
-                                     "FROM tmp_table TMP " \
-                                     "WHERE api_antigen.ab_target=TMP.ab_target; "
+                antigen_update_stm = f"UPDATE {self.ANTIGEN_TABLE} " \
+                                     f"SET ab_target_entrez_gid=TMP.ab_target_entrez_gid, " \
+                                     f"uniprot_id=TMP.uniprot_id " \
+                                     f"FROM {self.TMP_TABLE} as TMP " \
+                                     f"WHERE {self.ANTIGEN_TABLE}.ab_target=TMP.ab_target; "
                 cursor.execute(antigen_update_stm)
 
                 # Insert into antibody
 
-                antibody_stm = f"INSERT INTO api_antibody (ix, ab_name, ab_id, accession, commercial_type, uid, catalog_num, cat_alt, " \
+                antibody_stm = f"INSERT INTO {self.ANTIBODY_TABLE} (ix, ab_name, ab_id, accession, commercial_type, uid, catalog_num, cat_alt, " \
                                f"vendor_id, url, antigen_id, target_subregion, target_modification, " \
-                               f"epitope, source_organism, clonality, clone_id, product_isotype, " \
+                               f"epitope, clonality, clone_id, product_isotype, " \
                                f"product_conjugate, defining_citation, product_form, comments, feedback, " \
                                f"curator_comment, disc_date, status, insert_time, curate_time)" \
                                f"SELECT DISTINCT CAST(ix as BIGINT), ab_name, ab_id, ab_id_old, commercial_type, " \
-                               f"uid, catalog_num, cat_alt, CAST(vendor_id as BIGINT), url, api_antigen.id, " \
-                               f"target_subregion, target_modification, epitope,source_organism, clonality, " \
+                               f"uid, catalog_num, cat_alt, CAST(vendor_id as BIGINT), url, {self.ANTIGEN_TABLE}.id, " \
+                               f"target_subregion, target_modification, epitope, clonality, " \
                                f"clone_id, product_isotype, product_conjugate, defining_citation, product_form, " \
                                f"comments, feedback, curator_comment, disc_date, status, " \
                                f"to_timestamp(cast(insert_time as BIGINT) / 1000000.0), " \
                                f"to_timestamp(cast(curate_time as BIGINT) / 1000000.0) " \
-                               f"FROM {tmp_table_name} as tmp " \
-                               f"JOIN api_vendor as vendor " \
+                               f"FROM {self.TMP_TABLE} as tmp " \
+                               f"JOIN {self.VENDOR_TABLE} as vendor " \
                                f"ON CAST(tmp.vendor_id AS integer) = vendor.id " \
-                               f"JOIN api_antigen as antigen " \
+                               f"JOIN {self.ANTIGEN_TABLE} as antigen " \
                                f"ON tmp.ab_target = antigen.ab_target;"
 
                 cursor.execute(antibody_stm)
 
-                get_species_stm = "SELECT DISTINCT target_species FROM {tmp_table_name} "
+                # Insert into species
+
+                get_species_stm = "SELECT DISTINCT target_species FROM {self.TMP_TABLE} " \
+                                  "UNION " \
+                                  "SELECT DISTINCT source_organism FROM {self.TMP_TABLE}"
                 cursor.execute(get_species_stm)
-                species_set = set()  # FIXME: this might crash if there are too many different species
+                species_map = {}
+                species_id = 1
                 for species_row in cursor:
                     for specie in species_row.split(';'):
-                        species_set.add(specie)
-                species_insert_stm = get_insert_values_into_table_stm(Specie.objects.model._meta.db_table,
-                                                                      ['name'],
-                                                                      len(species_set))
-                cursor.execute(species_insert_stm, list(species_set))
+                        if specie not in species_map:
+                            species_map[specie] = species_id
+                            species_id += 1
+                species_insert_stm = get_insert_values_into_table_stm(self.SPECIE_TABLE,
+                                                                      ['name', 'id'],
+                                                                      len(species_map.keys()) * 2)
+                cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(species_map.items())))
+
+                # Insert into antibody species
+
+                for chunk in pd.read_csv(options['antibody_table_uri'], chunksize=10 ** 4, dtype='unicode'):
+                    species_params = []
+                    for index, row in chunk.iterrows():
+                        for specie in row['target_species'].split(';'):
+                            species_params.extend([row['ix'], species_map[specie]])
+
+                antibody_species_insert_stm = get_insert_values_into_table_stm(
+                    AntibodySpecies.objects.model._meta.db_table, ['antibody_id', 'specie_id'], len(species_params) / 2)
+
+                cursor.execute(antibody_species_insert_stm, species_params)
+
+                # Update antibody source_organism
+
+                source_organism_update_stm = f"UPDATE {self.ANTIBODY_TABLE} " \
+                                             f"SET source_organism_id=SP.id, " \
+                                             f"FROM {self.SPECIE_TABLE} as SP " \
+                                             f"WHERE {self.ANTIBODY_TABLE}.source=SP.name; "
+                cursor.execute(source_organism_update_stm)
 
                 # Update vendor domain link
-                antigen_update_stm = "UPDATE api_vendordomain " \
-                                     "SET link = True " \
-                                     "FROM tmp_table " \
-                                     "WHERE api_vendordomain.vendor_id=CAST(tmp_table.vendor_id as BIGINT) " \
-                                     "AND lower(tmp_table.link) = 'yes'; "
+                antigen_update_stm = f"UPDATE {self.VENDOR_DOMAIN_TABLE} " \
+                                     f"SET link = True " \
+                                     f"FROM {self.TMP_TABLE} " \
+                                     f"WHERE {self.VENDOR_DOMAIN_TABLE}.vendor_id=CAST({self.TMP_TABLE}.vendor_id as BIGINT) " \
+                                     f"AND lower({self.TMP_TABLE}.link) = 'yes'; "
                 cursor.execute(antigen_update_stm)
 
                 end = timer()
