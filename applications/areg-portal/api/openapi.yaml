@@ -321,7 +321,6 @@ components:
                 - required:
                       - abId
                       - insertTime
-                      - curateTime
                   type: object
                   properties:
                       accession:
@@ -360,7 +359,6 @@ components:
                               Curator comment about this reagent
                           type: string
                       discDate:
-                          format: date-time
                           description: The date on which the antibody product was found to be discontinued
                           type: string
                       insertTime:
@@ -373,6 +371,9 @@ components:
                       targetSubregion:
                           description: The subregion of the target protein that the epitope is contained in
                           type: string
+                      vendorId:
+                          description: ""
+                          type: integer
                 - $ref: "#/components/schemas/AbstractAntibody"
         AbstractAntibody:
             description: The common fields between all REST operations for the antibody resource.
@@ -477,11 +478,6 @@ components:
                     description: |
                         The name of the company or laboratory for commercial antibodies.
                         The principal investigator name for personal/other antibodies.
-                    type: string
-                vendorId:
-                    description: >-
-                        The id of the Vendor associated to this Antibody (only available for commercial
-                        antibodies)
                     type: string
     responses:
         PaginatedAntibodies:

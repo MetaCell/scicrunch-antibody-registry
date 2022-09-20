@@ -129,12 +129,6 @@ export interface AbstractAntibody {
      * @memberof AbstractAntibody
      */
     'vendorName'?: string;
-    /**
-     * The id of the Vendor associated to this Antibody (only available for commercial antibodies)
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'vendorId'?: string;
 }
 
 export const AbstractAntibodyClonalityEnum = {
@@ -272,12 +266,6 @@ export interface AddUpdateAntibody {
      * @memberof AddUpdateAntibody
      */
     'vendorName'?: string;
-    /**
-     * The id of the Vendor associated to this Antibody (only available for commercial antibodies)
-     * @type {string}
-     * @memberof AddUpdateAntibody
-     */
-    'vendorId'?: string;
 }
 
 export const AddUpdateAntibodyClonalityEnum = {
@@ -354,7 +342,7 @@ export interface Antibody {
      * @type {string}
      * @memberof Antibody
      */
-    'curateTime': string;
+    'curateTime'?: string;
     /**
      * Curator comment about this reagent 
      * @type {string}
@@ -385,6 +373,12 @@ export interface Antibody {
      * @memberof Antibody
      */
     'targetSubregion'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Antibody
+     */
+    'vendorId'?: number;
     /**
      * Can include the following options: Unknown, Cocktail, Control, Isotype Control, Monoclonal, Monoclonal Secondary, Polyclonal, Polyclonal Secondary, Oligoclonal, Recombinant, Recombinant Monoclonal, Recombinant Monoclonal Secondary, Recombinant Polyclonal, Recombinant Polyclonal Secondary
      * @type {string}
@@ -487,12 +481,6 @@ export interface Antibody {
      * @memberof Antibody
      */
     'vendorName'?: string;
-    /**
-     * The id of the Vendor associated to this Antibody (only available for commercial antibodies)
-     * @type {string}
-     * @memberof Antibody
-     */
-    'vendorId'?: string;
 }
 
 export const AntibodyStatusEnum = {
@@ -576,7 +564,7 @@ export interface AntibodyAllOf {
      * @type {string}
      * @memberof AntibodyAllOf
      */
-    'curateTime': string;
+    'curateTime'?: string;
     /**
      * Curator comment about this reagent 
      * @type {string}
@@ -607,6 +595,12 @@ export interface AntibodyAllOf {
      * @memberof AntibodyAllOf
      */
     'targetSubregion'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AntibodyAllOf
+     */
+    'vendorId'?: number;
 }
 
 export const AntibodyAllOfStatusEnum = {
