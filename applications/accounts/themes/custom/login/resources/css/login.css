@@ -601,12 +601,12 @@ ul#kc-totp-supported-apps {
   background-image: url('../img/login.svg');
   width: 20px;
   height: 20px;
-  margin-left: 76px;
+
   position: absolute;
   font-size: 0;
   top: 50%;
-  left: 50%;
-  margin-right: -20px;
+  right: 16px;
+
   transform: translateX(-50%) translateY(-50%);
   background-size: contain;
 }
@@ -872,11 +872,16 @@ ul#kc-totp-supported-apps {
   border-radius: 8px;
 }
 
-.outlined-btn .orchid {
+.outlined-btn:hover {
+    background: #eee;
+    text-decoration: none;
+}
+
+.outlined-btn .orcid {
   width: 24px;
   font-size: 0;
   margin-right: 12px;
-  height: 18.4px;
+  height: 20px;
   background-image: url('../img/orcid.svg');
 }
 
@@ -891,6 +896,10 @@ ul#kc-totp-supported-apps {
   color: #667085;
   display: flex;
   align-items: center;
+}
+
+.login-pf-page .login-pf-settings .back-to-login a:hover {
+    opacity: 0.9;
 }
 
 .login-pf-page .login-pf-settings .back-to-login a::before {

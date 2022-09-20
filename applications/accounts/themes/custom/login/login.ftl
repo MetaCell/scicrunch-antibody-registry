@@ -10,6 +10,32 @@
     <#elseif section = "form">
     <div id="kc-form">
       <div id="kc-form-wrapper">
+      <#if realm.password && social.providers??>
+            <div id="kc-social-providers" class="${properties.kcFormSocialAccountSectionClass!}">
+                <hr/>
+                
+
+                <ul class="${properties.kcFormSocialAccountListClass!} <#if social.providers?size gt 3>${properties.kcFormSocialAccountListGridClass!}</#if>">
+                    <#list social.providers as p>
+                        <a id="social-${p.alias}" class=" outlined-btn <#if social.providers?size gt 3>${properties.kcFormSocialAccountGridItem!}</#if>"
+                                type="button" href="${p.loginUrl}">
+                            <#if p.iconClasses?has_content>
+                                <i class="${properties.kcCommonLogoIdP!} ${p.iconClasses!} orcid" aria-hidden="true"></i>
+                                <span class="${properties.kcFormSocialAccountNameClass!} kc-social-icon-text">Sign in with  ${p.displayName!}</span>
+                            <#else>
+                            <div class="orcid" ></div>
+                                Sign in with ${p.displayName!}
+                            </#if>
+                        </a>
+                    </#list>
+                </ul>
+            </div>
+        </#if>
+
+        <div class="more-login-options">
+          <span>Or use your Antibody Registry credentials</span>
+        </div>
+
         <#if realm.password>
             <form id="kc-form-login" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
                 <div class="${properties.kcFormGroupClass!}">
@@ -63,43 +89,19 @@
                   <div id="kc-form-buttons" class="${properties.kcFormGroupClass!}">
                       <input type="hidden" id="id-hidden-input" name="credentialId" <#if auth.selectedCredential?has_content>value="${auth.selectedCredential}"</#if>/>
                       <input tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}" name="login" id="kc-login" type="submit" value="${msg("doLogIn")}"/>
-                      <span class="login-icon">Login Icon</span>
+                      <div class="login-icon"></div>
                   </div>
             </form>
         </#if>
         </div>
 
-        <div class="more-login-options">
-          <span>Or</span>
-        </div>
+        
 
-        <button type="button" class="outlined-btn">
-          <span class="orchid">ORCHID</span>
-          Sign in with Orcid
-        </button>
+        
 
 
 
-        <#if realm.password && social.providers??>
-            <div id="kc-social-providers" class="${properties.kcFormSocialAccountSectionClass!}">
-                <hr/>
-                <h4>${msg("identity-provider-login-label")}</h4>
-
-                <ul class="${properties.kcFormSocialAccountListClass!} <#if social.providers?size gt 3>${properties.kcFormSocialAccountListGridClass!}</#if>">
-                    <#list social.providers as p>
-                        <a id="social-${p.alias}" class="${properties.kcFormSocialAccountListButtonClass!} <#if social.providers?size gt 3>${properties.kcFormSocialAccountGridItem!}</#if>"
-                                type="button" href="${p.loginUrl}">
-                            <#if p.iconClasses?has_content>
-                                <i class="${properties.kcCommonLogoIdP!} ${p.iconClasses!}" aria-hidden="true"></i>
-                                <span class="${properties.kcFormSocialAccountNameClass!} kc-social-icon-text">${p.displayName!}</span>
-                            <#else>
-                                <span class="${properties.kcFormSocialAccountNameClass!}">${p.displayName!}</span>
-                            </#if>
-                        </a>
-                    </#list>
-                </ul>
-            </div>
-        </#if>
+        
 
     </div>
     <#elseif section = "info" >
