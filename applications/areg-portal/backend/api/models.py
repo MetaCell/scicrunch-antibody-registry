@@ -94,33 +94,35 @@ class Antibody(models.Model):
         default=CommercialType.OTHER,
         null=True
     )
-    # todo: change to foreignKey to user model @afonsobspinto
-    uid = models.CharField(max_length=ANTIBODY_ID_MAX_LEN)
+    # todo: change to foreignKey to user model @afonsobspinto; Don't allow null
+    uid = models.CharField(max_length=ANTIBODY_ID_MAX_LEN, null=True)
     catalog_num = models.CharField(max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN)
-    cat_alt = models.CharField(max_length=ANTIBODY_CAT_ALT_MAX_LEN)
+    cat_alt = models.CharField(max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
-    url = models.URLField(max_length=URL_MAX_LEN)
+    # todo: confirm if can be null @afonsobspinto
+    url = models.URLField(max_length=URL_MAX_LEN, null=True)
     antigen = models.ForeignKey(Antigen, on_delete=models.RESTRICT, db_column='antigen_id')
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
                                      through='AntibodySpecies')
-    subregion = models.CharField(max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion')
-    modifications = models.CharField(max_length=ANTIBODY_TARGET_MODIFICATION_MAX_LEN, db_column='target_modification')
-    epitope = models.CharField(max_length=ANTIBODY_TARGET_EPITOPE_MAX_LEN)
-    source_organism = models.ForeignKey(Specie, on_delete=models.RESTRICT, related_name="source")
+    subregion = models.CharField(max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion', null=True)
+    modifications = models.CharField(max_length=ANTIBODY_TARGET_MODIFICATION_MAX_LEN, db_column='target_modification',
+                                     null=True)
+    epitope = models.CharField(max_length=ANTIBODY_TARGET_EPITOPE_MAX_LEN, null=True)
+    source_organism = models.ForeignKey(Specie, on_delete=models.RESTRICT, related_name="source", null=True)
     clonality = models.CharField(
         max_length=ANTIBODY_CLONALITY_MAX_LEN,
         choices=AntibodyClonality.choices,
         default=AntibodyClonality.UNKNOWN,
     )
-    clone_id = models.CharField(max_length=ANTIBODY_CLONE_ID_MAX_LEN)
-    product_isotype = models.CharField(max_length=ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN)
-    product_conjugate = models.CharField(max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN)
-    defining_citation = models.CharField(max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN)
-    product_form = models.CharField(max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN)
+    clone_id = models.CharField(max_length=ANTIBODY_CLONE_ID_MAX_LEN, null=True)
+    product_isotype = models.CharField(max_length=ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN, null=True)
+    product_conjugate = models.CharField(max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, null=True)
+    defining_citation = models.CharField(max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True)
+    product_form = models.CharField(max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True)
     comments = models.TextField()
-    feedback = models.TextField()
-    curator_comment = models.TextField()
-    disc_date = models.CharField(max_length=ANTIBODY_DISC_DATE_MAX_LEN)
+    feedback = models.TextField(null=True)
+    curator_comment = models.TextField(null=True)
+    disc_date = models.CharField(max_length=ANTIBODY_DISC_DATE_MAX_LEN, null=True)
     status = models.CharField(
         max_length=STATUS_MAX_LEN,
         choices=STATUS.choices,

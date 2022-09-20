@@ -1,12 +1,15 @@
 import itertools
 import logging
 import math
+import string
 from timeit import default_timer as timer
+from typing import Optional
 
 import pandas as pd
 from django.core.management.base import BaseCommand
 from django.db import transaction, connection
 
+from api.management.pre_process import preprocess
 from api.models import STATUS, CommercialType, AntibodyClonality, Antibody, Antigen, Vendor, VendorDomain, Specie, \
     VendorSynonym, AntibodySpecies
 
@@ -35,7 +38,7 @@ def get_insert_values_into_table_stm(table_name, columns, entries):
 
 
 def clean_empty_value(value):
-    if value == '(null)' or value == '(NaN)' or (type(value) == float and math.isnan(value)) or value is None:
+    if value == '(null)' or value == '(NaN)' or (type(value) == float and math.isnan(value)):
         return None
     return value
 
@@ -44,6 +47,10 @@ def handle_undefined_commercial_type(value):
     if value not in CommercialType.labels:
         return None
     return value
+
+
+def get_clean_species_str(specie: str):
+    return specie.translate(str.maketrans('', '', string.punctuation)).strip().lower()
 
 
 class Command(BaseCommand):
@@ -58,26 +65,25 @@ class Command(BaseCommand):
     help = "Ingests antibody data into the database"
 
     def add_arguments(self, parser):
-        parser.add_argument("antibody_table_uri", type=str)
-        parser.add_argument("vendor_table_uri", type=str)
-        parser.add_argument("vendor_domain_table_uri", type=str)
+        parser.add_argument("file_id", type=str)
 
     def handle(self, *args, **options):
 
-        # TODO: Pre process data
+        # Pre process google drive data
+        metadata = preprocess(options["file_id"])
 
         commercial_type_reverse_map = {value: key for key, value in CommercialType.choices}
         status_reverse_map = {value.upper(): key for key, value in STATUS.choices}
         clonality_reverse_map = {value.lower(): key for key, value in AntibodyClonality.choices}
 
         # Prepare vendor inserts
-        df_vendor = pd.read_csv(options['vendor_table_uri'])
+        df_vendor = pd.read_csv(metadata.vendor_data_path)
         vendor_insert_stm = get_insert_values_into_table_stm(self.VENDOR_TABLE,
                                                              ['id', 'nif_id', 'vendor'],
                                                              len(df_vendor))
 
         # Prepare vendor domain inserts
-        df_vendor_domain = pd.read_csv(options['vendor_domain_table_uri'])
+        df_vendor_domain = pd.read_csv(metadata.vendor_domain_data_path)
         df_vendor_domain = df_vendor_domain.drop_duplicates(subset=["domain_name"])
         vendor_domain_insert_stm = get_insert_values_into_table_stm(self.VENDOR_DOMAIN_TABLE,
                                                                     ['id', 'domain_name', 'vendor_id', 'status',
@@ -133,11 +139,10 @@ class Command(BaseCommand):
                 cursor.execute(vendor_domain_insert_stm, vendor_domain_params)
 
                 # Create copy table
-                cursor.execute(DROP_TABLE_STM.format(table_name=self.TMP_TABLE))
                 cursor.execute(get_create_table_stm(self.TMP_TABLE, header))
 
                 # Insert raw data into tmp table
-                for chunk in pd.read_csv(options['antibody_table_uri'], chunksize=10 ** 4, dtype='unicode'):
+                for chunk in pd.read_csv(metadata.antibody_data_path, chunksize=10 ** 4, dtype='unicode'):
                     raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, header, len(chunk))
                     row_params = []
                     for index, row in chunk.iterrows():
@@ -152,6 +157,7 @@ class Command(BaseCommand):
                     cursor.execute(raw_data_insert_stm, row_params)
 
                 # Insert select distinct antigen
+
                 cursor.execute(get_insert_into_table_select_stm(self.ANTIGEN_TABLE,
                                                                 'ab_target',
                                                                 True,
@@ -173,8 +179,8 @@ class Command(BaseCommand):
                                f"epitope, clonality, clone_id, product_isotype, " \
                                f"product_conjugate, defining_citation, product_form, comments, feedback, " \
                                f"curator_comment, disc_date, status, insert_time, curate_time)" \
-                               f"SELECT DISTINCT CAST(ix as BIGINT), ab_name, ab_id, ab_id_old, commercial_type, " \
-                               f"uid, catalog_num, cat_alt, CAST(vendor_id as BIGINT), url, {self.ANTIGEN_TABLE}.id, " \
+                               f"SELECT DISTINCT CAST(ix as BIGINT), ab_name, CAST(ab_id as INT), ab_id_old, commercial_type, " \
+                               f"uid, catalog_num, cat_alt, CAST(vendor_id as BIGINT), url, antigen.id, " \
                                f"target_subregion, target_modification, epitope, clonality, " \
                                f"clone_id, product_isotype, product_conjugate, defining_citation, product_form, " \
                                f"comments, feedback, curator_comment, disc_date, status, " \
@@ -190,41 +196,51 @@ class Command(BaseCommand):
 
                 # Insert into species
 
-                get_species_stm = "SELECT DISTINCT target_species FROM {self.TMP_TABLE} " \
-                                  "UNION " \
-                                  "SELECT DISTINCT source_organism FROM {self.TMP_TABLE}"
+                get_species_stm = f"SELECT DISTINCT target_species FROM {self.TMP_TABLE} " \
+                                  f"UNION " \
+                                  f"SELECT DISTINCT source_organism FROM {self.TMP_TABLE}"
                 cursor.execute(get_species_stm)
                 species_map = {}
                 species_id = 1
-                for species_row in cursor:
-                    for specie in species_row.split(';'):
-                        if specie not in species_map:
-                            species_map[specie] = species_id
-                            species_id += 1
+                for row in cursor:
+                    specie_str = row[0]
+                    if specie_str:
+                        for specie in specie_str.split(';'):
+                            clean_specie = get_clean_species_str(specie)
+                            if clean_specie not in species_map:
+                                species_map[clean_specie] = species_id
+                                species_id += 1
                 species_insert_stm = get_insert_values_into_table_stm(self.SPECIE_TABLE,
                                                                       ['name', 'id'],
-                                                                      len(species_map.keys()) * 2)
+                                                                      len(species_map.keys()))
                 cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(species_map.items())))
 
                 # Insert into antibody species
 
-                for chunk in pd.read_csv(options['antibody_table_uri'], chunksize=10 ** 4, dtype='unicode'):
+                for chunk in pd.read_csv(metadata.antibody_data_path, chunksize=10 ** 4, dtype='unicode'):
                     species_params = []
                     for index, row in chunk.iterrows():
-                        for specie in row['target_species'].split(';'):
-                            species_params.extend([row['ix'], species_map[specie]])
+                        target_species = row['target_species']
+                        if type(target_species) == str and target_species is not None:
+                            for specie in row['target_species'].split(';'):
+                                clean_specie = get_clean_species_str(specie)
+                                species_params.extend([row['ix'], species_map[clean_specie]])
 
                 antibody_species_insert_stm = get_insert_values_into_table_stm(
-                    AntibodySpecies.objects.model._meta.db_table, ['antibody_id', 'specie_id'], len(species_params) / 2)
+                    AntibodySpecies.objects.model._meta.db_table, ['antibody_id', 'specie_id'],
+                    int(len(species_params) / 2))
 
                 cursor.execute(antibody_species_insert_stm, species_params)
 
                 # Update antibody source_organism
 
                 source_organism_update_stm = f"UPDATE {self.ANTIBODY_TABLE} " \
-                                             f"SET source_organism_id=SP.id, " \
+                                             f"SET source_organism_id=SP.id " \
                                              f"FROM {self.SPECIE_TABLE} as SP " \
-                                             f"WHERE {self.ANTIBODY_TABLE}.source=SP.name; "
+                                             f"JOIN {self.TMP_TABLE} as TP " \
+                                             f"ON lower(TP.source_organism) = SP.name " \
+                                             f"WHERE CAST(TP.ix AS integer)={self.ANTIBODY_TABLE}.ix "
+
                 cursor.execute(source_organism_update_stm)
 
                 # Update vendor domain link
@@ -235,5 +251,8 @@ class Command(BaseCommand):
                                      f"AND lower({self.TMP_TABLE}.link) = 'yes'; "
                 cursor.execute(antigen_update_stm)
 
-                end = timer()
-                logging.info(f"Ingestion finished in {end - start} seconds")
+                # Drop tmp table
+                cursor.execute(DROP_TABLE_STM.format(table_name=self.TMP_TABLE))
+
+        end = timer()
+        logging.info(f"Ingestion finished in {end - start} seconds")
