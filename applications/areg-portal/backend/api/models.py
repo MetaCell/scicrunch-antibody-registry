@@ -44,10 +44,14 @@ class STATUS(models.TextChoices):
 class Vendor(models.Model):
     name = models.CharField(max_length=VENDOR_MAX_LEN, db_column='vendor')
     nif_id = models.CharField(max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id')
-    synonyms = models.CharField(max_length=VENDOR_SYNONYMS_TYPE_MAX_LEN)
 
     def __str__(self):
         return self.name
+
+class VendorSynonym(models.Model):
+    name = models.CharField(max_length=VENDOR_MAX_LEN)
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+    
 class Specie(models.Model):
     name = models.CharField(max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, unique=True)
    

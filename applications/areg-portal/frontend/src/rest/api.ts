@@ -88,7 +88,7 @@ export interface AbstractAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
      * @type {string}
      * @memberof AbstractAntibody
      */
@@ -129,12 +129,6 @@ export interface AbstractAntibody {
      * @memberof AbstractAntibody
      */
     'vendorName'?: string;
-    /**
-     * The id of the Vendor associated to this Antibody (only available for commercial antibodies)
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'vendorId'?: string;
 }
 
 export const AbstractAntibodyClonalityEnum = {
@@ -231,7 +225,7 @@ export interface AddUpdateAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
      * @type {string}
      * @memberof AddUpdateAntibody
      */
@@ -272,12 +266,6 @@ export interface AddUpdateAntibody {
      * @memberof AddUpdateAntibody
      */
     'vendorName'?: string;
-    /**
-     * The id of the Vendor associated to this Antibody (only available for commercial antibodies)
-     * @type {string}
-     * @memberof AddUpdateAntibody
-     */
-    'vendorId'?: string;
 }
 
 export const AddUpdateAntibodyClonalityEnum = {
@@ -386,6 +374,12 @@ export interface Antibody {
      */
     'targetSubregion'?: string;
     /**
+     * 
+     * @type {number}
+     * @memberof Antibody
+     */
+    'vendorId'?: number;
+    /**
      * Can include the following options: Unknown, Cocktail, Control, Isotype Control, Monoclonal, Monoclonal Secondary, Polyclonal, Polyclonal Secondary, Oligoclonal, Recombinant, Recombinant Monoclonal, Recombinant Monoclonal Secondary, Recombinant Polyclonal, Recombinant Polyclonal Secondary
      * @type {string}
      * @memberof Antibody
@@ -446,7 +440,7 @@ export interface Antibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
      * @type {string}
      * @memberof Antibody
      */
@@ -487,12 +481,6 @@ export interface Antibody {
      * @memberof Antibody
      */
     'vendorName'?: string;
-    /**
-     * The id of the Vendor associated to this Antibody (only available for commercial antibodies)
-     * @type {string}
-     * @memberof Antibody
-     */
-    'vendorId'?: string;
 }
 
 export const AntibodyStatusEnum = {
@@ -607,6 +595,12 @@ export interface AntibodyAllOf {
      * @memberof AntibodyAllOf
      */
     'targetSubregion'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AntibodyAllOf
+     */
+    'vendorId'?: number;
 }
 
 export const AntibodyAllOfStatusEnum = {
