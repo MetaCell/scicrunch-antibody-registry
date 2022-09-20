@@ -11,10 +11,8 @@ import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import FAQs from "./components/Support/FAQs";
 import ContactUs from "./components/Support/ContactUs";
 import TermsAndConditions from "./components/Support/TermsAndConditions";
-import { getCurrentUser } from "./services/UserService";
 
 const App = () => {
-  getCurrentUser();
   return (
     <BrowserRouter>
       <ThemeProvider theme={theme}>
