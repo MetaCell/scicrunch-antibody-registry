@@ -32,8 +32,8 @@
         
         "sslRequired": {{ ternary "none" "external" (not .Values.tls) | quote }},
         "enabled": true,
-        "loginTheme": "keycloak",
-        "accountTheme": "keycloak",
+        "loginTheme": "custom",
+        "accountTheme": "custom",
         "adminTheme": "keycloak",
         "emailTheme": "keycloak",
         "registrationAllowed": true,
