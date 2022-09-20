@@ -1,32 +1,38 @@
+import glob
+import json
 import os
-from functools import reduce
 
 import pandas as pd
 
-
-def update_vendors(csv_path, vendors_map):
-    df_vendor_domain = pd.read_csv(csv_path)
-    df_vendor_domain['vendor_id'] = df_vendor_domain['vendor_id'].map(
-        lambda x: vendors_map[x] if x in vendors_map else x)
-    df_vendor_domain.to_csv(
-        f"{os.path.dirname(csv_path)}/{os.path.basename(csv_path).split('.')[0]}_vendors_mapped.csv",
-        index=False)
+from api.management.gd_downloader import GDDownloader
+from areg_portal.settings import RAW_ANTIBODY_DATA, RAW_VENDOR_DATA, RAW_VENDOR_DOMAIN_DATA
 
 
-def remove_duplicates(csv_path, cols_subset, chunksize):
-    df = reduce(
-        lambda df_i, df_j: pd.concat([df_i, df_j])
-        .drop_duplicates(subset=cols_subset),
-        pd.read_csv(csv_path, chunksize=chunksize)
-    )
-    df.to_csv(
-        f"{os.path.dirname(csv_path)}/{os.path.basename(csv_path).split('.')[0]}_no_duplicates_{'_'.join(cols_subset)}.csv",
-        index=False)
+class AntibodyMetadata:
+    def __init__(self, antibody_data_path: str, vendor_data_path: str, vendor_domain_data_path: str):
+        self.antibody_data_path = antibody_data_path
+        self.vendor_data_path = vendor_data_path
+        self.vendor_domain_data_path = vendor_domain_data_path
+
+
+def update_vendors(csv_path: str, vendors_map_path: str = './vendors_mapping.json'):
+    with open(vendors_map_path, 'r') as f:
+        vendors_map = json.load(f)
+        df_vendor_domain = pd.read_csv(csv_path)
+        df_vendor_domain['vendor_id'] = df_vendor_domain['vendor_id'].map(
+            lambda x: vendors_map[str(x)] if str(x) in vendors_map else x)
+        df_vendor_domain.to_csv(csv_path, index=False, mode='w+')
+
+
+def preprocess(file_id: str, dest: str = './antibody_data') -> AntibodyMetadata:
+    gd_downloader = GDDownloader(file_id, dest)
+    gd_downloader.download()
+    metadata = AntibodyMetadata(glob.glob(os.path.join(dest, '*', RAW_ANTIBODY_DATA))[0],
+                                glob.glob(os.path.join(dest, '*', RAW_VENDOR_DATA))[0],
+                                glob.glob(os.path.join(dest, '*', RAW_VENDOR_DOMAIN_DATA))[0])
+    update_vendors(metadata.vendor_domain_data_path)
+    return metadata
 
 
 if __name__ == '__main__':
-    pass
-    # todo: do not remove ab_id duplicates since some can be legit
-    # remove_duplicates('../../antibody_table500000.csv', ['ab_id'], 10 ** 4)
-    # update_vendors('../../antibody_vendors_domain.csv', {1594: 5187})
-    # df_test = pd.read_csv('../../antibody_table500000.csv')
+    preprocess('1gW5fAGRnmm-6zbVRLYJa_zrpEjD4w500')
