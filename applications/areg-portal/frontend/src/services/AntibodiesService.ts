@@ -1,11 +1,10 @@
-import { CommentsDisabled } from "@mui/icons-material";
 import {
   Antibody,
   PaginatedAntibodies,
   AntibodyApi,
   AddUpdateAntibody,
+  AntibodyCommercialTypeEnum,
 } from "../rest/api";
-import dataJson from "./data.json";
 
 const api = new AntibodyApi();
 
@@ -16,19 +15,10 @@ export async function getAntibodies(
   return (await api.getAntibodies(page, size)).data;
 }
 
-export function getAntibody(id): Promise<any> {
-  let antibody = {};
-  for (const ab of dataJson) {
-    if (ab.ab_id === id) {
-      antibody = ab;
-    }
-  }
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(antibody);
-    }, 1000);
-  });
+export async function getAntibody(id: number): Promise<Antibody> {
+  return  (await api.getAntibody(id)).data;
 }
+
 
 export async function addAntibody(antibodyObj): Promise<any> {
   let ab = mapAntibody(antibodyObj);
@@ -56,6 +46,12 @@ function mapAntibody(antibody): AddUpdateAntibody {
     vendorName: antibody.vendor,
     applications: antibody.applications,
   };
-  if (antibody.type === "commercial") return commercialAb;
-  else return { ...commercialAb, definingCitation: antibody.citation };
+  if (antibody.type === AntibodyCommercialTypeEnum.Commercial) {
+    return commercialAb;
+  }
+  else {
+    return { 
+      ...commercialAb, 
+      definingCitation: antibody.citation
+    };}
 }

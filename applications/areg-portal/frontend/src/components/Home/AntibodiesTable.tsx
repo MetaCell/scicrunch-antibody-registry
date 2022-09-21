@@ -23,6 +23,7 @@ import {
 } from "../icons";
 import HomeHeader from "./HomeHeader";
 import { Antibody } from "../../rest";
+import { getProperCitation } from "../../utils/antibody";
 
 const StyledBadge = (props) => {
   if (props.field === "vendor") {
@@ -133,7 +134,7 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
       color={props.field === "vendor" ? "primary.main" : "grey.500"}
       component="div"
     >
-     ({props.row.vendorName}#{props.row.catalogNum}, RRID:AB_{props.row.abId})
+      {props.value}
     </Typography>
   </StyledBadge>
 }
@@ -146,6 +147,10 @@ interface ValueProps {
 
 const getValueOrEmpty = (props: ValueProps) => {
   return props.row[props.field] ?? "";
+}
+
+const getValueForCitation = (props: ValueProps) => {
+  return getProperCitation(props.row);
 }
 
 
@@ -248,6 +253,7 @@ const columns: GridColDef[] = [
     field: "properCitation",
     headerName: "Proper citation",
     flex: 2,
+    valueGetter: getValueForCitation,
     renderCell: RenderProperCitation
   },
   {
@@ -380,7 +386,7 @@ const AntibodiesTable = () => {
           disableSelectionOnClick
           getRowHeight={() => "auto"}
           onRowClick={(params) =>
-            (window.location.href = `/${params.row.abId}`)
+            (window.location.href = `/AB_${params.row.abId}`)
           }
           components={{
             BaseCheckbox: StyledCheckBox,

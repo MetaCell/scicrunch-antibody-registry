@@ -780,11 +780,11 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * Deletes an existing `Antibody`.
          * @summary Delete a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteAntibody: async (antibodyId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        deleteAntibody: async (antibodyId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'antibodyId' is not null or undefined
             assertParamExists('deleteAntibody', 'antibodyId', antibodyId)
             const localVarPath = `/antibodies/{antibodyId}`
@@ -854,11 +854,11 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * Gets the details of a single instance of a `Antibody`.
          * @summary Get a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAntibody: async (antibodyId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getAntibody: async (antibodyId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'antibodyId' is not null or undefined
             assertParamExists('getAntibody', 'antibodyId', antibodyId)
             const localVarPath = `/antibodies/{antibodyId}`
@@ -888,12 +888,12 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * Updates an existing `Antibody`.
          * @summary Update a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {AddUpdateAntibody} addUpdateAntibody Updated &#x60;Antibody&#x60; information.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateAntibody: async (antibodyId: string, addUpdateAntibody: AddUpdateAntibody, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        updateAntibody: async (antibodyId: number, addUpdateAntibody: AddUpdateAntibody, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'antibodyId' is not null or undefined
             assertParamExists('updateAntibody', 'antibodyId', antibodyId)
             // verify required parameter 'addUpdateAntibody' is not null or undefined
@@ -949,11 +949,11 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
         /**
          * Deletes an existing `Antibody`.
          * @summary Delete a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteAntibody(antibodyId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async deleteAntibody(antibodyId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteAntibody(antibodyId, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -972,23 +972,23 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
         /**
          * Gets the details of a single instance of a `Antibody`.
          * @summary Get a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAntibody(antibodyId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Antibody>> {
+        async getAntibody(antibodyId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Antibody>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getAntibody(antibodyId, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
          * Updates an existing `Antibody`.
          * @summary Update a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {AddUpdateAntibody} addUpdateAntibody Updated &#x60;Antibody&#x60; information.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async updateAntibody(antibodyId: string, addUpdateAntibody: AddUpdateAntibody, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async updateAntibody(antibodyId: number, addUpdateAntibody: AddUpdateAntibody, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.updateAntibody(antibodyId, addUpdateAntibody, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1015,11 +1015,11 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
         /**
          * Deletes an existing `Antibody`.
          * @summary Delete a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteAntibody(antibodyId: string, options?: any): AxiosPromise<void> {
+        deleteAntibody(antibodyId: number, options?: any): AxiosPromise<void> {
             return localVarFp.deleteAntibody(antibodyId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1036,22 +1036,22 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
         /**
          * Gets the details of a single instance of a `Antibody`.
          * @summary Get a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAntibody(antibodyId: string, options?: any): AxiosPromise<Antibody> {
+        getAntibody(antibodyId: number, options?: any): AxiosPromise<Antibody> {
             return localVarFp.getAntibody(antibodyId, options).then((request) => request(axios, basePath));
         },
         /**
          * Updates an existing `Antibody`.
          * @summary Update a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {AddUpdateAntibody} addUpdateAntibody Updated &#x60;Antibody&#x60; information.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateAntibody(antibodyId: string, addUpdateAntibody: AddUpdateAntibody, options?: any): AxiosPromise<void> {
+        updateAntibody(antibodyId: number, addUpdateAntibody: AddUpdateAntibody, options?: any): AxiosPromise<void> {
             return localVarFp.updateAntibody(antibodyId, addUpdateAntibody, options).then((request) => request(axios, basePath));
         },
     };
@@ -1079,12 +1079,12 @@ export class AntibodyApi extends BaseAPI {
     /**
      * Deletes an existing `Antibody`.
      * @summary Delete a Antibody
-     * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+     * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AntibodyApi
      */
-    public deleteAntibody(antibodyId: string, options?: AxiosRequestConfig) {
+    public deleteAntibody(antibodyId: number, options?: AxiosRequestConfig) {
         return AntibodyApiFp(this.configuration).deleteAntibody(antibodyId, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1104,25 +1104,25 @@ export class AntibodyApi extends BaseAPI {
     /**
      * Gets the details of a single instance of a `Antibody`.
      * @summary Get a Antibody
-     * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+     * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AntibodyApi
      */
-    public getAntibody(antibodyId: string, options?: AxiosRequestConfig) {
+    public getAntibody(antibodyId: number, options?: AxiosRequestConfig) {
         return AntibodyApiFp(this.configuration).getAntibody(antibodyId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Updates an existing `Antibody`.
      * @summary Update a Antibody
-     * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+     * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
      * @param {AddUpdateAntibody} addUpdateAntibody Updated &#x60;Antibody&#x60; information.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AntibodyApi
      */
-    public updateAntibody(antibodyId: string, addUpdateAntibody: AddUpdateAntibody, options?: AxiosRequestConfig) {
+    public updateAntibody(antibodyId: number, addUpdateAntibody: AddUpdateAntibody, options?: AxiosRequestConfig) {
         return AntibodyApiFp(this.configuration).updateAntibody(antibodyId, addUpdateAntibody, options).then((request) => request(this.axios, this.basePath));
     }
 }

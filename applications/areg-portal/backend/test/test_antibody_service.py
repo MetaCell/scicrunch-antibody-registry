@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from api.services.antibody_service import create_antibody, get_antibodies
+from api.services.antibody_service import create_antibody, get_antibodies, get_antibody
 from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO, Status, CommercialType, Clonality
 
 example_ab = {
@@ -51,3 +51,6 @@ class AnimalTestCase(TestCase):
         abs = get_antibodies()
         assert abs.page == 0
         assert len(abs.items) == 2
+
+        ab3 = get_antibody(ab.abId)
+        assert ab.url == ab3.url

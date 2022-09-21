@@ -101,10 +101,13 @@ paths:
             description: Deletes an existing `Antibody`.
         parameters:
             -
+                examples:
+                    ex1:
+                        value: '1234567'
                 name: antibodyId
-                description: A unique identifier for a `Antibody`.
+                description: The unique identifier for a `Antibody` -- stripped from "AB_"
                 schema:
-                    type: string
+                    type: integer
                 in: path
                 required: true
     /antibodies/search:
