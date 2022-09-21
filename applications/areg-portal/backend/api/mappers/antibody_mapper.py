@@ -6,7 +6,7 @@ from django.forms.models import model_to_dict
 from django.db import models
 
 from cloudharness import log
-from api.models import STATUS, Antibody, AntibodyClonality, Antigen, CommercialType, Specie, Vendor, VendorDomain, VendorSynonym
+from api.models import STATUS, Antibody, AntibodyClonality, Gene, CommercialType, Specie, Vendor, VendorDomain, VendorSynonym
 from openapi.models import Antibody as AntibodyDTO
 
 from openapi import models as api_models
@@ -29,11 +29,11 @@ class AntibodyMapper(IDAOMapper):
             antigen_symbol = dto.abTarget
             del dto.abTarget
             try:
-                ab.antigen = Antigen.objects.get(symbol=antigen_symbol)
-            except Antigen.DoesNotExist:
+                ab.antigen = Gene.objects.get(symbol=antigen_symbol)
+            except Gene.DoesNotExist:
                 # TODO what to do for non existing antigens? Create one? Should fill the table of antigens from a real data source?
                 log.warn("No antigen: %s", antigen_symbol)
-                ag = Antigen(symbol=antigen_symbol)
+                ag = Gene(symbol=antigen_symbol)
                 ag.save()
                 ab.antigen = ag
 
@@ -52,16 +52,16 @@ class AntibodyMapper(IDAOMapper):
 
             base_url = urlsplit(dto.url).hostname
             try:
-                ab.vendor = VendorDomain.objects.get(base_url=base_url)
+                ab.vendor = VendorDomain.objects.get(base_url=base_url).vendor
             except VendorDomain.DoesNotExist:
                 if dto.vendorName:
                     try:
                         v = Vendor.objects.get(name=dto.vendorName)
                         vd = VendorDomain(vendor=v, base_url=base_url, status=STATUS.QUEUE)
                         vd.save()
+                        ab.vendor = v
                     except Vendor.DoesNotExist:
-                        pass
-                ab.vendor = self.vendor_from_name(dto)
+                        ab.vendor = self.vendor_from_name(dto)
         elif dto.vendorName:
             ab.vendor = self.vendor_from_name(dto)
 
@@ -124,7 +124,7 @@ class AntibodyMapper(IDAOMapper):
                 dao_dict[k] = v.isoformat()
 
         ab = AntibodyDTO(**dict_to_camel(dao_dict), )
-        antigen: Antigen = dao.antigen
+        antigen: Gene = dao.antigen
         ab.abTarget = antigen.symbol
         ab.vendorName = dao.vendor.name
         # ab.commercialType = dao.

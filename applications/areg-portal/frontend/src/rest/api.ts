@@ -135,6 +135,12 @@ export interface AbstractAntibody {
      * @memberof AbstractAntibody
      */
     'applications'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AbstractAntibody
+     */
+    'kitContents'?: string;
 }
 
 export const AbstractAntibodyClonalityEnum = {
@@ -278,6 +284,12 @@ export interface AddUpdateAntibody {
      * @memberof AddUpdateAntibody
      */
     'applications'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AddUpdateAntibody
+     */
+    'kitContents'?: string;
 }
 
 export const AddUpdateAntibodyClonalityEnum = {
@@ -493,6 +505,12 @@ export interface Antibody {
      * @memberof Antibody
      */
     'applications'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Antibody
+     */
+    'kitContents'?: string;
 }
 
 export const AntibodyStatusEnum = {

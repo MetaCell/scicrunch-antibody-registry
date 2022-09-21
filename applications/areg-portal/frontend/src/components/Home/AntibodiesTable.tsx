@@ -148,9 +148,6 @@ const getValueOrEmpty = (props: ValueProps) => {
   return props.row[props.field] ?? "";
 }
 
-const getValueProperCitation = (props: ValueProps) => {
-  return "";
-}
 
 
 const columnsDefaultProps = {
@@ -251,7 +248,6 @@ const columns: GridColDef[] = [
     field: "properCitation",
     headerName: "Proper citation",
     flex: 2,
-    valueGetter: getValueProperCitation,
     renderCell: RenderProperCitation
   },
   {

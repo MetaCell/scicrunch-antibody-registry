@@ -413,33 +413,41 @@ components:
                         - recombinant polyclonal
                         - recombinant polyclonal secondary
                     type: string
+                    example: cocktail
                 epitope:
                     description: The AA sequence that the antibody reagent binds to
                     type: string
+                    example: OTTHUMP00000018992
                 comments:
                     description: A free text comment.
                     type: string
+                    example: comment is free text
                 url:
                     description: >-
                         Link to more information about the antibody. For personal antibodies this usually
                         lists the the principal investigator's lab website or university affiliation.
                     type: string
+                    example: >-
+                        https://www.bdbiosciences.com/en-it/products/reagents/flow-cytometry-reagents/clinical-discovery-research/single-color-antibodies-ruo-gmp/pe-mouse-anti-human-il-8.340510
                 abName:
                     description: Name provided by the company or the investigator; this does not need to be unique.
                     type: string
                 abTarget:
                     description: The symbol of the antigen molecule that the antibody was raised against.
                     type: string
+                    example: LRKK2
                 catalogNum:
                     description: |-
                         For company antibodies, the catalog number of the antibody.
                         For personal/other antibodies, an identifier unique to the antibody.
                     type: string
+                    example: N176A/35
                 cloneId:
                     description: >-
                         The identifier given by the manufacturer or creator of monoclonal antibodies,
                         typically associated with the cell line name.
                     type: string
+                    example: N176A/35
                 commercialType:
                     description: 'Can include the following: commercial, non-profit, personal, other'
                     enum:
@@ -448,6 +456,7 @@ components:
                         - personal
                         - other
                     type: string
+                    example: commercial
                 definingCitation:
                     description: 'The manuscript that describes the creation of the antibody. '
                     type: string
@@ -471,6 +480,7 @@ components:
                         rabbit or mouse. Synthetic or bacterial origins can be noted for recombinant
                         antibodies.
                     type: string
+                    example: mouse
                 targetSpecies:
                     description: >-
                         The species associated with the antigen molecule. Multiple species are specified as a
@@ -478,6 +488,7 @@ components:
                     type: array
                     items:
                         type: string
+                    example: '["mouse", "human"]'
                 uniprotId:
                     description: |
                         Protein identifier from UNIPROT
@@ -490,6 +501,13 @@ components:
                 applications:
                     description: ''
                     type: string
+                    example: 'ELISA, IHC, WB'
+                kitContents:
+                    description: ''
+                    type: string
+                    example: >-
+                        Sheep polyclonal anti-FSH antibody labeled with acridinium ester. Mouse monoclonal
+                        anti-FSH antibody covalently coupled to paramagnetic particles.
     responses:
         PaginatedAntibodies:
             content:
