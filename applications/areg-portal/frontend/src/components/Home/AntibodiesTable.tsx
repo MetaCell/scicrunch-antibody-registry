@@ -22,6 +22,8 @@ import {
   SettingsIcon,
 } from "../icons";
 import HomeHeader from "./HomeHeader";
+import { Antibody } from "../../rest";
+import { getProperCitation } from "../../utils/antibody";
 
 const StyledBadge = (props) => {
   if (props.field === "vendor") {
@@ -55,6 +57,8 @@ const StyledCheckBox = (props) => {
     />
   );
 };
+
+const getRowId = (ab: Antibody) => ab.abId;
 
 const CustomToolbar = () => {
   const [activeSelection, setActiveSelection] = useState(true);
@@ -91,7 +95,7 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
         color="grey.700"
         fontWeight={500}
       >
-        {props.row.ab_name}
+        {props.row.abName}
       </Typography>
       <Typography
         variant="caption"
@@ -99,7 +103,7 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
         component="div"
         color="grey.500"
       >
-        {props.row.ab_id}
+        AB_{props.row.abId}
       </Typography>
     </Box>
   );
@@ -114,23 +118,42 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
         color={props.field === "vendor" ? "primary.main" : "grey.500"}
         component="div"
       >
-        {props.field === "target_ant_spec"
-          ? `${props.row.ab_target} ${props.row.target_species}`
+        {props.field === "targetAntigen"
+          ? `${props.row.abTarget} ${props.row.targetSpecies}`
           : props.value}
       </Typography>
     </StyledBadge>
   );
 };
 
-const getValue = (props) => {
-  let cellValue = "";
-  props.field === "ab_name_id"
-    ? (cellValue = `${props.row.ab_name || ""} ${props.row.ab_id || ""}`)
-    : (cellValue = `${props.row.ab_target || ""} ${
-        props.row.target_species || ""
-      }`);
-  return cellValue;
-};
+const RenderProperCitation = (props: GridRenderCellParams<String>) => {
+  return <StyledBadge {...props}>
+    <Typography
+      variant="caption"
+      align="left"
+      color={props.field === "vendor" ? "primary.main" : "grey.500"}
+      component="div"
+    >
+      {props.value}
+    </Typography>
+  </StyledBadge>
+}
+
+interface ValueProps {
+  row: Antibody;
+  field: string;
+}
+
+
+const getValueOrEmpty = (props: ValueProps) => {
+  return props.row[props.field] ?? "";
+}
+
+const getValueForCitation = (props: ValueProps) => {
+  return getProperCitation(props.row);
+}
+
+
 
 const columnsDefaultProps = {
   flex: 1,
@@ -187,50 +210,51 @@ const dataGridStyles = {
 const columns: GridColDef[] = [
   {
     ...columnsDefaultProps,
-    field: "ab_name",
+    field: "abName",
     headerName: "Name",
     hide: true,
   },
   {
     ...columnsDefaultProps,
-    field: "ab_id",
+    field: "abId",
     headerName: "ID",
     hide: true,
   },
   {
     ...columnsDefaultProps,
-    field: "ab_name_id",
+    field: "nameAndId",
     headerName: "Name & ID",
     flex: 2,
     renderCell: RenderNameAndId,
-    valueGetter: getValue,
     headerAlign: "left",
     align: "left",
   },
+  // {
+  //   ...columnsDefaultProps,
+  //   field: "abTarget",
+  //   headerName: "Target antigen (excl. species)",
+  //   hide: true,
+  // },
   {
     ...columnsDefaultProps,
-    field: "ab_target",
-    headerName: "Target antigen (excl. species)",
-    hide: true,
-  },
-  {
-    ...columnsDefaultProps,
-    field: "target_species",
+    field: "targetSpecies",
     headerName: "Target species",
     hide: true,
   },
   {
     ...columnsDefaultProps,
-    field: "target_ant_spec",
+    field: "abTarget",
     headerName: "Target antigen",
     flex: 1.5,
-    valueGetter: getValue,
+    valueGetter: getValueOrEmpty,
   },
   {
     ...columnsDefaultProps,
-    field: "proper_citation",
+    field: "properCitation",
     headerName: "Proper citation",
     flex: 2,
+    valueGetter: getValueForCitation,
+    renderCell: RenderProperCitation
   },
   {
     ...columnsDefaultProps,
@@ -252,25 +276,25 @@ const columns: GridColDef[] = [
   },
   {
     ...columnsDefaultProps,
-    field: "clone_id",
+    field: "cloneId",
     headerName: "Clone ID",
   },
   {
     ...columnsDefaultProps,
-    field: "host",
+    field: "sourceOrganism",
     headerName: "Host organism",
     flex: 1.5,
   },
   {
     ...columnsDefaultProps,
-    field: "vendor",
+    field: "vendorName",
     headerName: "Link to Vendor",
     flex: 1.5,
     type: "actions",
   },
   {
     ...columnsDefaultProps,
-    field: "catalog_num",
+    field: "catalogNum",
     headerName: "Cat Num",
   },
   {
@@ -287,7 +311,7 @@ const AntibodiesTable = () => {
   const fetchAntibodies = () => {
     getAntibodies()
       .then((res) => {
-        return setAntibodiesList(res);
+        return setAntibodiesList(res.items);
       })
       .catch((err) => alert(err));
   };
@@ -354,6 +378,7 @@ const AntibodiesTable = () => {
         <DataGrid
           sx={dataGridStyles}
           rows={antibodiesList}
+          getRowId={getRowId}
           columns={columns}
           pageSize={10}
           rowsPerPageOptions={[20]}
@@ -361,7 +386,7 @@ const AntibodiesTable = () => {
           disableSelectionOnClick
           getRowHeight={() => "auto"}
           onRowClick={(params) =>
-            (window.location.href = `/${params.row.ab_id}`)
+            (window.location.href = `/AB_${params.row.abId}`)
           }
           components={{
             BaseCheckbox: StyledCheckBox,

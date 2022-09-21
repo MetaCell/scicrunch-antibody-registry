@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction, connection
 
 from api.management.pre_process import preprocess
-from api.models import STATUS, CommercialType, AntibodyClonality, Antibody, Antigen, Vendor, VendorDomain, Specie, \
+from api.models import STATUS, CommercialType, AntibodyClonality, Antibody, Gene, Vendor, VendorDomain, Specie, \
     VendorSynonym, AntibodySpecies
 
 TRUNCATE_STM = "TRUNCATE TABLE {table_name} CASCADE;"
@@ -59,7 +59,7 @@ def get_clean_species_str(specie: str):
 
 class Command(BaseCommand):
     ANTIBODY_TABLE = Antibody.objects.model._meta.db_table
-    ANTIGEN_TABLE = Antigen.objects.model._meta.db_table
+    ANTIGEN_TABLE = Gene.objects.model._meta.db_table
     SPECIE_TABLE = Specie.objects.model._meta.db_table
     VENDOR_DOMAIN_TABLE = VendorDomain.objects.model._meta.db_table
     VENDOR_SYNONYM_TABLE = VendorSynonym.objects.model._meta.db_table

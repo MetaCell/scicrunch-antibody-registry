@@ -73,7 +73,7 @@ class VendorDomain(models.Model):
 
 
 # TODO: Update according to https://github.com/MetaCell/scicrunch-antibody-registry/issues/65
-class Antigen(models.Model):
+class Gene(models.Model):
     symbol = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN, db_column='ab_target', null=True)
     entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
                                  null=True)
@@ -103,7 +103,7 @@ class Antibody(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
     # todo: confirm if can be null @afonsobspinto
     url = models.URLField(max_length=URL_MAX_LEN, null=True)
-    antigen = models.ForeignKey(Antigen, on_delete=models.RESTRICT, db_column='antigen_id')
+    antigen = models.ForeignKey(Gene, on_delete=models.RESTRICT, db_column='antigen_id')
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
                                      through='AntibodySpecies')
     subregion = models.CharField(max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion', null=True)
@@ -122,6 +122,8 @@ class Antibody(models.Model):
     defining_citation = models.CharField(max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True)
     product_form = models.CharField(max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True)
     comments = models.TextField(null=True)
+    applications = models.TextField(null=True)
+    kit_contents = models.TextField(null=True)
     feedback = models.TextField(null=True)
     curator_comment = models.TextField(null=True)
     disc_date = models.CharField(max_length=ANTIBODY_DISC_DATE_MAX_LEN, null=True)

@@ -20,10 +20,13 @@ module.exports = env => {
 
 
   const devServer = {
-    contentBase: path.join(__dirname, 'dist'),
+    static: [{
+      directory: path.resolve(__dirname, 'dist'),
+      publicPath: '/',
+    }],
     compress: true,
     port: Number(env.devPort),
-    disableHostCheck: true,
+    allowedHosts: "all",
     historyApiFallback: true,
     proxy: {
       '/api/': {

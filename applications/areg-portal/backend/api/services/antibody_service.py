@@ -33,9 +33,9 @@ def create_antibody(body: AddUpdateAntibodyDTO) -> AntibodyDTO:
     return antibody_mapper.to_dto(antibody)
 
 
-def get_antibody(antibody_id: str) -> AntibodyDTO:
+def get_antibody(antibody_id: int) -> AntibodyDTO:
     try:
-        return Antibody.objects.get(id=int(antibody_id.split("AB_")[1]))
+        return antibody_mapper.to_dto(Antibody.objects.get(ab_id=antibody_id))
     except Antibody.DoesNotExist:
         return None
 
