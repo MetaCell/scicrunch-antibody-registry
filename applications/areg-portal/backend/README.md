@@ -27,7 +27,8 @@ cluster. To do so you would need to:
 # Run setup.sh to deploy your applications to the (minikube) cluster
 1. ./setup.sh
 # Add the appropriate domains to your hosts file. It should include the domais outputted by the harness-deployment commands
-and domains of the services you want to use (areg-portal-db f.e.). With that out of the way you can simply run the 
+and domains of the services you want to use (areg-portal-db, BOOTSTRAP.areg.svc.cluster.local, kafka-0.broker.areg.svc.cluster.local f.e.).
+With that out of the way you can simply run the 
 port-forward.sh script
 2. ./port-forward.sh
 # The last crucial step is to properly set up the CH_CURRENT_APP_NAME to the ch application name (areg-portal). This will
