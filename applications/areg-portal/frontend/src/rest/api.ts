@@ -88,7 +88,7 @@ export interface AbstractAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
      * @type {string}
      * @memberof AbstractAntibody
      */
@@ -129,6 +129,12 @@ export interface AbstractAntibody {
      * @memberof AbstractAntibody
      */
     'vendorName'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AbstractAntibody
+     */
+    'applications'?: string;
 }
 
 export const AbstractAntibodyClonalityEnum = {
@@ -225,7 +231,7 @@ export interface AddUpdateAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
      * @type {string}
      * @memberof AddUpdateAntibody
      */
@@ -266,6 +272,12 @@ export interface AddUpdateAntibody {
      * @memberof AddUpdateAntibody
      */
     'vendorName'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AddUpdateAntibody
+     */
+    'applications'?: string;
 }
 
 export const AddUpdateAntibodyClonalityEnum = {
@@ -440,7 +452,7 @@ export interface Antibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
      * @type {string}
      * @memberof Antibody
      */
@@ -481,6 +493,12 @@ export interface Antibody {
      * @memberof Antibody
      */
     'vendorName'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Antibody
+     */
+    'applications'?: string;
 }
 
 export const AntibodyStatusEnum = {
