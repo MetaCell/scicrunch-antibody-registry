@@ -159,7 +159,10 @@ const PersonalForm = (props) => {
   const postAntibody = (antibody) => {
     let ab = { ...antibody, type: "personal" };
     addAntibody(ab)
-      .then((res) => console.log("res", res))
+      .then((res) => {
+        console.log("res", res);
+        props.next();
+      })
       .catch((err) => alert(err));
   };
 
@@ -187,7 +190,6 @@ const PersonalForm = (props) => {
     validationSchema: validationSchema,
     onSubmit: (values) => {
       postAntibody(values);
-      props.next();
     },
     validateOnChange: true,
     validateOnBlur: true,
