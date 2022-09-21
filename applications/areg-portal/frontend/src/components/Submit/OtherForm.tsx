@@ -9,6 +9,8 @@ import {
   Grid,
   Typography,
   InputAdornment,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { AlertIcon } from "../icons";
 
@@ -73,27 +75,65 @@ const Input = ({ formik, label, name, required, placeholder }) => {
       <Typography variant="h5" className={classes.label}>
         {label} {required && "(Mandatory)"}
       </Typography>
-      <TextField
-        fullWidth
-        name={name}
-        placeholder={placeholder}
-        value={values[name]}
-        onChange={handleChange}
-        {...getFieldProps(name)}
-        error={Boolean(touched[name] && errors[name])}
-        helperText={touched[name] && errors[name]}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              {touched[name] && errors[name] && <AlertIcon />}
-            </InputAdornment>
-          ),
-        }}
-      />
-      {!touched[name] && !errors[name] && name === "identifier" && (
-        <Typography variant="subtitle1" className={classes.note}>
-          Note: Submit unregistered antibodies only
-        </Typography>
+      {name === "clonality" ? (
+        <Select
+          name="clonality"
+          value={formik.values.clonality}
+          onChange={formik.handleChange}
+          fullWidth
+        >
+          <MenuItem value={"unknown"}>Unknown</MenuItem>
+          <MenuItem value={"cocktail"}>Cocktail</MenuItem>
+          <MenuItem value={"control"}>Control</MenuItem>
+          <MenuItem value={"isotype control"}>Isotype Control</MenuItem>
+          <MenuItem value={"monoclonal"}>Monoclonal</MenuItem>
+          <MenuItem value={"monoclonal secondary"}>
+            Monoclonal Secondary
+          </MenuItem>
+          <MenuItem value={"polyclonal"}>Polyclonal</MenuItem>
+          <MenuItem value={"polyclonal secondary"}>
+            Polyclonal Secondary
+          </MenuItem>
+          <MenuItem value={"oligoclonal"}>Oligoclonal</MenuItem>
+          <MenuItem value={"recombinant"}>Recombinant</MenuItem>
+          <MenuItem value={"recombinant monoclonal"}>
+            Recombinant Monoclonal
+          </MenuItem>
+          <MenuItem value={"recombinant monoclonal secondary"}>
+            Recombinant Monoclonal Secondary
+          </MenuItem>
+          <MenuItem value={"recombinant polyclonal"}>
+            Recombinant Polyclonal
+          </MenuItem>
+          <MenuItem value={"recombinant polyclonal secondary"}>
+            Recombinant Polyclonal Secondary
+          </MenuItem>
+        </Select>
+      ) : (
+        <>
+          <TextField
+            fullWidth
+            name={name}
+            placeholder={placeholder}
+            value={values[name]}
+            onChange={handleChange}
+            {...getFieldProps(name)}
+            error={Boolean(touched[name] && errors[name])}
+            helperText={touched[name] && errors[name]}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  {touched[name] && errors[name] && <AlertIcon />}
+                </InputAdornment>
+              ),
+            }}
+          />
+          {!touched[name] && !errors[name] && name === "identifier" && (
+            <Typography variant="subtitle1" className={classes.note}>
+              Note: Submit unregistered antibodies only
+            </Typography>
+          )}
+        </>
       )}
     </>
   );
@@ -125,7 +165,7 @@ const OtherForm = (props) => {
       host: "",
       targetSpecies: "",
       antibodyTarget: "",
-      clonality: "",
+      clonality: "unknown",
       cloneID: "",
       isotype: "",
       conjugate: "",

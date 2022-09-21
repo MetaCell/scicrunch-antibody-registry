@@ -11,12 +11,15 @@ import {
   InputAdornment,
   Divider,
   CardMedia,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { AlertIcon } from "../icons";
 
 import StepNavigation from "./StepNavigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
+import { addAntibody } from "../../services/AntibodiesService";
 
 const {
   bannerHeadingColor,
@@ -187,6 +190,13 @@ const FormLine = ({ children }) => {
 const CommercialForm = (props) => {
   const classes = useStyles();
 
+  const postAntibody = (antibody) => {
+    let ab = { ...antibody, type: "commercial" };
+    addAntibody(ab)
+      .then((res) => console.log("res", res))
+      .catch((err) => alert(err));
+  };
+
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -197,7 +207,7 @@ const CommercialForm = (props) => {
       host: "",
       targetSpecies: "",
       antibodyTarget: "",
-      clonality: "",
+      clonality: "unknown",
       cloneID: "",
       isotype: "",
       conjugate: "",
@@ -209,7 +219,7 @@ const CommercialForm = (props) => {
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
-      console.log(values);
+      postAntibody(values);
       props.next();
     },
     validateOnChange: true,
@@ -345,13 +355,42 @@ const CommercialForm = (props) => {
                       <Typography variant="h5" className={classes.label}>
                         Clonality
                       </Typography>
-                      <TextField
+
+                      <Select
                         name="clonality"
-                        placeholder="Monoclonal"
                         value={formik.values.clonality}
                         onChange={formik.handleChange}
                         fullWidth
-                      />
+                      >
+                        <MenuItem value={"unknown"}>Unknown</MenuItem>
+                        <MenuItem value={"cocktail"}>Cocktail</MenuItem>
+                        <MenuItem value={"control"}>Control</MenuItem>
+                        <MenuItem value={"isotype control"}>
+                          Isotype Control
+                        </MenuItem>
+                        <MenuItem value={"monoclonal"}>Monoclonal</MenuItem>
+                        <MenuItem value={"monoclonal secondary"}>
+                          Monoclonal Secondary
+                        </MenuItem>
+                        <MenuItem value={"polyclonal"}>Polyclonal</MenuItem>
+                        <MenuItem value={"polyclonal secondary"}>
+                          Polyclonal Secondary
+                        </MenuItem>
+                        <MenuItem value={"oligoclonal"}>Oligoclonal</MenuItem>
+                        <MenuItem value={"recombinant"}>Recombinant</MenuItem>
+                        <MenuItem value={"recombinant monoclonal"}>
+                          Recombinant Monoclonal
+                        </MenuItem>
+                        <MenuItem value={"recombinant monoclonal secondary"}>
+                          Recombinant Monoclonal Secondary
+                        </MenuItem>
+                        <MenuItem value={"recombinant polyclonal"}>
+                          Recombinant Polyclonal
+                        </MenuItem>
+                        <MenuItem value={"recombinant polyclonal secondary"}>
+                          Recombinant Polyclonal Secondary
+                        </MenuItem>
+                      </Select>
                     </Box>
                     <Box>
                       <Typography variant="h5" className={classes.label}>
