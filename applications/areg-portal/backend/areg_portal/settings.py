@@ -196,3 +196,7 @@ CSRF_TRUSTED_ORIGINS = ['https://www.areg.local', 'https://areg.local', 'https:/
                         'https://areg.stage.metacell.us', 'https://areg.demo.metacell.us',
                         'https://antibodyregistry.org/', 'https://www.antibodyregistry.org/']
 DEBUG = True
+
+RAW_ANTIBODY_DATA = 'antibody_table.csv'
+RAW_VENDOR_DATA = 'antibody_vendors.csv'
+RAW_VENDOR_DOMAIN_DATA = 'antibody_vendors_domain.csv'
