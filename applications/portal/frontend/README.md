@@ -1,1 +1,1 @@
-# areg-portal
+# portal

@@ -3,7 +3,7 @@ import uuid
 from cloudharness.workflows import operations
 
 INGEST_OP = "areg-ingest-task-op"
-INGEST_IMAGE = "areg-portal"
+INGEST_IMAGE = "portal"
 
 
 def _create_task(image_name, **kwargs):

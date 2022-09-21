@@ -169,7 +169,6 @@ class Command(BaseCommand):
                                                                 'ab_target',
                                                                 self.TMP_TABLE))
                 # Update antigen with ids
-                # todo: Update according to https://github.com/MetaCell/scicrunch-antibody-registry/issues/65
                 antigen_update_stm = f"UPDATE {self.ANTIGEN_TABLE} " \
                                      f"SET ab_target_entrez_gid=TMP.ab_target_entrez_gid, " \
                                      f"uniprot_id=TMP.uniprot_id " \

@@ -28,15 +28,15 @@ harness:
   - uri: /admin/*
     roles:
     - administrator
-    - areg-portal:administrator
-    - areg-portal:manager
+    - portal:administrator
+    - portal:manager
     require-any-role: true
   - uri: /add
     roles:
     - administrator
-    - areg-portal:administrator
-    - areg-portal:manager
-    - areg-portal:user
+    - portal:administrator
+    - portal:manager
+    - portal:user
     require-any-role: true
   - uri: /login
     roles: []
