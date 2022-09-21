@@ -124,7 +124,8 @@ class AntibodyMapper(IDAOMapper):
                 dao_dict[k] = v.isoformat()
 
         ab = AntibodyDTO(**dict_to_camel(dao_dict), )
-        ab.abTarget = dao.antigen.symbol
+        antigen: Antigen = dao.antigen
+        ab.abTarget = antigen.symbol
         ab.vendorName = dao.vendor.name
         # ab.commercialType = dao.
         return ab

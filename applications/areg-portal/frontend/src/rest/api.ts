@@ -338,12 +338,6 @@ export interface Antibody {
      */
     'abId': string;
     /**
-     * Gene identifier for the gene that is associated with the protein target
-     * @type {string}
-     * @memberof Antibody
-     */
-    'abTargetEntrezGid'?: string;
-    /**
      * The alternative catalog numbers for this product, delimited by comma, e.g., 9101S, 9101P, 9191L
      * @type {string}
      * @memberof Antibody
@@ -565,12 +559,6 @@ export interface AntibodyAllOf {
      * @memberof AntibodyAllOf
      */
     'abId': string;
-    /**
-     * Gene identifier for the gene that is associated with the protein target
-     * @type {string}
-     * @memberof AntibodyAllOf
-     */
-    'abTargetEntrezGid'?: string;
     /**
      * The alternative catalog numbers for this product, delimited by comma, e.g., 9101S, 9101P, 9191L
      * @type {string}

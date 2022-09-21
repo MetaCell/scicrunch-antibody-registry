@@ -352,9 +352,6 @@ components:
                         abId:
                             description: Antibody identifier
                             type: string
-                        abTargetEntrezGid:
-                            description: Gene identifier for the gene that is associated with the protein target
-                            type: string
                         catAlt:
                             description: >-
                                 The alternative catalog numbers for this product, delimited by comma, e.g.,
