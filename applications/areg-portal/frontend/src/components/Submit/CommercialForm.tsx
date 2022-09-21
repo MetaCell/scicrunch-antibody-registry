@@ -269,7 +269,6 @@ const CommercialForm = (props) => {
                   </Typography>
                   <TextField
                     fullWidth
-                    disabled={!isUrlEntered}
                     className="antibody-detail-catalogNumber"
                     name="catalogNumber"
                     value={formik.values.catalogNumber}
@@ -300,7 +299,6 @@ const CommercialForm = (props) => {
                     Vendor
                   </Typography>
                   <TextField
-                    disabled={!isUrlEntered}
                     fullWidth
                     className="antibody-detail-vendor"
                     name="vendor"
@@ -316,7 +314,6 @@ const CommercialForm = (props) => {
                         Antibody Name
                       </Typography>
                       <TextField
-                        disabled={!isUrlEntered}
                         fullWidth
                         className="antibody-detail-name"
                         name="name"
@@ -330,7 +327,6 @@ const CommercialForm = (props) => {
                         Host Species
                       </Typography>
                       <TextField
-                        disabled={!isUrlEntered}
                         className="antibody-detail-hostSpecies"
                         name="host"
                         placeholder="Rabbit"
@@ -348,7 +344,6 @@ const CommercialForm = (props) => {
                         Target/Reactive Species
                       </Typography>
                       <TextField
-                        disabled={!isUrlEntered}
                         name="targetSpecies"
                         placeholder="Human, Mouse, Rat"
                         value={formik.values.targetSpecies}
@@ -361,7 +356,6 @@ const CommercialForm = (props) => {
                         Antibody Target
                       </Typography>
                       <TextField
-                        disabled={!isUrlEntered}
                         name="antibodyTarget"
                         placeholder="NeuN"
                         value={formik.values.antibodyTarget}
@@ -378,7 +372,6 @@ const CommercialForm = (props) => {
                         Clonality
                       </Typography>
                       <TextField
-                        disabled={!isUrlEntered}
                         name="clonality"
                         placeholder="Monoclonal"
                         value={formik.values.clonality}
@@ -391,7 +384,6 @@ const CommercialForm = (props) => {
                         Clone ID
                       </Typography>
                       <TextField
-                        disabled={!isUrlEntered}
                         name="cloneID"
                         placeholder="Clone D4G4O"
                         value={formik.values.cloneID}
@@ -408,7 +400,6 @@ const CommercialForm = (props) => {
                         Isotype
                       </Typography>
                       <TextField
-                        disabled={!isUrlEntered}
                         name="isotype"
                         placeholder="IgG"
                         value={formik.values.isotype}
@@ -421,7 +412,6 @@ const CommercialForm = (props) => {
                         Conjugate
                       </Typography>
                       <TextField
-                        disabled={!isUrlEntered}
                         name="conjugate"
                         placeholder="Alexa Fluor 488"
                         value={formik.values.conjugate}
@@ -438,7 +428,6 @@ const CommercialForm = (props) => {
                         Antibody Form/Format
                       </Typography>
                       <TextField
-                        disabled={!isUrlEntered}
                         name="format"
                         placeholder="Azide free"
                         value={formik.values.format}
@@ -451,7 +440,6 @@ const CommercialForm = (props) => {
                         Uniprot ID
                       </Typography>
                       <TextField
-                        disabled={!isUrlEntered}
                         name="uniprotID"
                         placeholder="A6NFN3"
                         value={formik.values.uniprotID}
@@ -468,7 +456,6 @@ const CommercialForm = (props) => {
                         Epitope
                       </Typography>
                       <TextField
-                        disabled={!isUrlEntered}
                         name="epitope"
                         placeholder="OTTHUMP00000018992"
                         value={formik.values.epitope}
@@ -481,7 +468,6 @@ const CommercialForm = (props) => {
                         Applications
                       </Typography>
                       <TextField
-                        disabled={!isUrlEntered}
                         name="applications"
                         placeholder="ELISA, IHC, WB"
                         value={formik.values.applications}
@@ -497,7 +483,6 @@ const CommercialForm = (props) => {
                   </Typography>
                   <TextField
                     fullWidth
-                    disabled={!isUrlEntered}
                     name="comments"
                     multiline
                     rows={5}
@@ -518,6 +503,7 @@ const CommercialForm = (props) => {
         isLastStep={isLastStep}
         activeStep={isLastStep ? 3 : 2}
         totalSteps={4}
+        formik={formik}
       />
     </form>
   );

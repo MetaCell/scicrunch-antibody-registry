@@ -364,6 +364,7 @@ const OtherForm = (props) => {
         isLastStep={true}
         activeStep={2}
         totalSteps={3}
+        formik={formik}
       />
     </form>
   );

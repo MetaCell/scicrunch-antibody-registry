@@ -16,6 +16,7 @@ interface NavigationProps {
   isLastStep?: Boolean;
   activeStep: Number;
   totalSteps: Number;
+  formik?;
 }
 
 export const StepNavigation = (props: NavigationProps) => {
@@ -59,6 +60,9 @@ export const StepNavigation = (props: NavigationProps) => {
                 color="primary"
                 startIcon={<DoneIcon fontSize="small" />}
                 type="submit"
+                disabled={
+                  props.formik && !(props.formik.isValid && props.formik.dirty)
+                }
               >
                 Submit
               </Button>
