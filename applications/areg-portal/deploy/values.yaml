@@ -19,6 +19,7 @@ harness:
     - common
     - events
     - accounts
+    - argo
     soft:
     - pgadmin
   use_services:

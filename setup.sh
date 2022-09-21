@@ -14,7 +14,7 @@ kubectl create ns areg
 kubectl config use-context areg
 kubectl create rolebinding areg-admin-default --clusterrole=admin --serviceaccount=areg:default -n areg
 
-eval $(minikube docker-env)
+eval $(minikube --profile areg docker-env)
 kubectl config use-context areg
 harness-deployment cloud-harness . -l -d areg.local -dtls -n areg -e dev -i areg-portal
 
