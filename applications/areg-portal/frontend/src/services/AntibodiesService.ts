@@ -54,6 +54,7 @@ function mapAntibody(antibody): AddUpdateAntibody {
     targetSpecies: antibody.targetSpecies.split(/\W/),
     uniprotId: antibody.uniprotID,
     vendorName: antibody.vendor,
+    applications: antibody.applications,
   };
   if (antibody.type === "commercial") return commercialAb;
   else return { ...commercialAb, definingCitation: antibody.citation };
