@@ -363,7 +363,6 @@ const OtherForm = (props) => {
         hasPrevious={props.hasPrevious}
         isLastStep={true}
         activeStep={2}
-        totalSteps={3}
         formik={formik}
       />
     </form>

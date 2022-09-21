@@ -101,7 +101,7 @@ const validationSchema = yup.object().shape({
     .required("This field is mandatory"),
 });
 
-const Iframe = ({ formik, handleBlur }) => {
+const Iframe = ({ formik }) => {
   const { errors, touched, getFieldProps } = formik;
   const classes = useStyles();
 
@@ -130,7 +130,6 @@ const Iframe = ({ formik, handleBlur }) => {
             name="url"
             value={formik.values.url}
             onChange={formik.handleChange}
-            onBlur={handleBlur}
             {...getFieldProps("url")}
             error={Boolean(touched.url && errors.url)}
             helperText={touched.url && errors.url}
@@ -188,9 +187,6 @@ const FormLine = ({ children }) => {
 const CommercialForm = (props) => {
   const classes = useStyles();
 
-  const [isLastStep, setIsLastStep] = useState(false);
-  const [isUrlEntered, setIsUrlEntered] = useState(false);
-
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -220,40 +216,18 @@ const CommercialForm = (props) => {
     validateOnBlur: true,
   });
 
-  const { errors, touched, handleSubmit, getFieldProps, setFieldTouched } =
-    formik;
-
-  const handleNext = (e) => {
-    e.preventDefault();
-
-    if (touched.url && !errors.url) {
-      setIsUrlEntered(true);
-      setIsLastStep(true);
-    }
-    if (!touched.url) {
-      setFieldTouched("url", true);
-    }
-  };
-
-  const handleBlur = (e) => {
-    try {
-      new URL(e.target.value);
-      setIsUrlEntered(true);
-      setIsLastStep(true);
-    } catch {}
-  };
+  const { errors, touched, handleSubmit, getFieldProps } = formik;
 
   return (
     <form
       onSubmit={handleSubmit}
       className={classes.background}
       autoComplete="off"
-      onBlur={handleBlur}
     >
       <Container maxWidth="xl">
         <Grid container>
           <Grid item lg={6} className={classes.leftContainer}>
-            <Iframe formik={formik} handleBlur={handleBlur} />
+            <Iframe formik={formik} />
           </Grid>
           <Grid item lg={6} className={classes.rightContainer} sx={{ pr: 0 }}>
             <Paper className={classes.paper}>
@@ -498,11 +472,10 @@ const CommercialForm = (props) => {
       </Container>
       <StepNavigation
         previous={props.previous}
-        next={handleNext}
+        next={props.next}
         hasPrevious={props.hasPrevious}
-        isLastStep={isLastStep}
-        activeStep={isLastStep ? 3 : 2}
-        totalSteps={4}
+        isLastStep={true}
+        activeStep={2}
         formik={formik}
       />
     </form>

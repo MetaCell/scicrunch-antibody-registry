@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 import { Typography } from "@mui/material";
 import { useTheme } from "@mui/system";
 
-export default function Stepper({ activeStep, totalSteps }) {
+export default function Stepper({ activeStep }) {
   const theme = useTheme();
   const classes = {
     paper: {
@@ -17,26 +17,18 @@ export default function Stepper({ activeStep, totalSteps }) {
       },
     },
   };
-  const stepsTitle = [
-    "Type of Antibody",
-    "Product Page Link",
-    "Antibody Details",
-  ];
+  const stepsTitle = ["Type of Antibody", "Antibody Details"];
   return (
     <MobileStepper
       variant="progress"
-      steps={totalSteps}
+      steps={3}
       position="static"
       activeStep={activeStep}
       sx={classes.paper}
       nextButton={
         <Typography variant="subtitle1" sx={classes.paper}>
-          Step {activeStep}:{" "}
-          {activeStep === 1
-            ? stepsTitle[0]
-            : totalSteps === 3
-            ? stepsTitle[2]
-            : stepsTitle[activeStep - 1]}
+          Step {activeStep}/2:
+          {stepsTitle[activeStep - 1]}
         </Typography>
       }
       backButton={<Button sx={{ display: "none" }}></Button>}
