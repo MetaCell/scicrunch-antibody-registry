@@ -17,6 +17,7 @@ import { AlertIcon } from "../icons";
 import StepNavigation from "./StepNavigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
+import { addAntibody } from "../../services/AntibodiesService";
 
 const { bannerHeadingColor, primaryTextColor } = vars;
 
@@ -54,7 +55,7 @@ const useStyles = makeStyles((theme?: any) => ({
 const requiredFieldValidation = yup.string().required("The field is mandatory");
 
 const validationSchema = yup.object().shape({
-  identifier: requiredFieldValidation,
+  catalogNumber: requiredFieldValidation,
   vendor: requiredFieldValidation,
   name: requiredFieldValidation,
   host: requiredFieldValidation,
@@ -128,7 +129,7 @@ const Input = ({ formik, label, name, required, placeholder }) => {
               ),
             }}
           />
-          {!touched[name] && !errors[name] && name === "identifier" && (
+          {!touched[name] && !errors[name] && name === "catalogNumber" && (
             <Typography variant="subtitle1" className={classes.note}>
               Note: Submit unregistered antibodies only
             </Typography>
@@ -155,10 +156,17 @@ const FormLine = ({ children }) => {
 const OtherForm = (props) => {
   const classes = useStyles();
 
+  const postAntibody = (antibody) => {
+    let ab = { ...antibody, type: "other" };
+    addAntibody(ab)
+      .then((res) => console.log("res", res))
+      .catch((err) => alert(err));
+  };
+
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      identifier: "",
+      catalogNumber: "",
       vendor: "",
       url: "",
       name: "",
@@ -178,7 +186,7 @@ const OtherForm = (props) => {
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
-      console.log("estos son los values", values);
+      postAntibody(values);
       props.next();
     },
     validateOnChange: true,
@@ -208,11 +216,11 @@ const OtherForm = (props) => {
               <FormLine>
                 <Box>
                   <Input
-                    name="identifier"
+                    name="catalogNumber"
                     label="Identifier"
                     required={true}
                     formik={formik}
-                    placeholder="An identifier unique to your antibody (e.g. Labname_001 or myab_1023)"
+                    placeholder="An catalogNumber unique to your antibody (e.g. Labname_001 or myab_1023)"
                   />
                 </Box>
                 <Box>
