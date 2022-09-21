@@ -3,7 +3,6 @@ import logging
 import math
 import string
 from timeit import default_timer as timer
-from typing import Optional
 
 import pandas as pd
 from django.core.management.base import BaseCommand
