@@ -7,7 +7,15 @@ import {
   GridRenderCellParams,
   GridCsvExportOptions,
 } from "@mui/x-data-grid";
-import { Typography, Box, Link, Checkbox } from "@mui/material";
+import {
+  Typography,
+  Box,
+  Link,
+  Checkbox,
+  Popover,
+  Button,
+} from "@mui/material";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
 //project imports
 import { getAntibodies } from "../../services/AntibodiesService";
@@ -20,10 +28,12 @@ import {
   UncheckedIcon,
   FilterIcon,
   SettingsIcon,
+  CopyIcon,
 } from "../icons";
 import HomeHeader from "./HomeHeader";
 import { Antibody } from "../../rest";
 import { getProperCitation } from "../../utils/antibody";
+import { useTheme } from "@mui/system";
 
 const StyledBadge = (props) => {
   if (props.field === "vendor") {
@@ -127,33 +137,89 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
 };
 
 const RenderProperCitation = (props: GridRenderCellParams<String>) => {
-  return <StyledBadge {...props}>
-    <Typography
-      variant="caption"
-      align="left"
-      color={props.field === "vendor" ? "primary.main" : "grey.500"}
-      component="div"
-    >
-      {props.value}
-    </Typography>
-  </StyledBadge>
-}
+  const theme = useTheme();
+  const classes = {
+    popover: {
+      p: 1,
+      backgroundColor: theme.palette.grey[900],
+      color: theme.palette.common.white,
+      fontSize: "1rem",
+    },
+
+    citationColumn: {
+      cursor: "auto",
+      display: "flex",
+      alignItems: "center",
+    },
+  };
+  const [anchorCitationPopover, setAnchorCitationPopover] =
+    useState<HTMLButtonElement | null>(null);
+
+  const handleClickCitation = (event) => {
+    setAnchorCitationPopover(event.currentTarget);
+    setTimeout(handleCloseCitation, 1000);
+  };
+
+  const handleCloseCitation = () => {
+    setAnchorCitationPopover(null);
+  };
+
+  const open = Boolean(anchorCitationPopover);
+  const id = open ? "simple-popover" : undefined;
+  return (
+    <StyledBadge {...props}>
+      <Box sx={classes.citationColumn}>
+        <Typography
+          variant="caption"
+          align="left"
+          color={props.field === "vendor" ? "primary.main" : "grey.500"}
+          component="div"
+        >
+          {props.value}
+        </Typography>
+        <CopyToClipboard text={props.value}>
+          <Button
+            onClick={handleClickCitation}
+            size="small"
+            sx={{ minWidth: 0 }}
+            startIcon={
+              <CopyIcon stroke={theme.palette.grey[500]} fontSize="inherit" />
+            }
+          />
+        </CopyToClipboard>
+        <Popover
+          id={id}
+          open={open}
+          anchorEl={anchorCitationPopover}
+          onClose={handleCloseCitation}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "center",
+            horizontal: "center",
+          }}
+        >
+          <Typography sx={classes.popover}>Citation copied</Typography>
+        </Popover>
+      </Box>
+    </StyledBadge>
+  );
+};
 
 interface ValueProps {
   row: Antibody;
   field: string;
 }
 
-
 const getValueOrEmpty = (props: ValueProps) => {
   return props.row[props.field] ?? "";
-}
+};
 
 const getValueForCitation = (props: ValueProps) => {
   return getProperCitation(props.row);
-}
-
-
+};
 
 const columnsDefaultProps = {
   flex: 1,
@@ -254,7 +320,8 @@ const columns: GridColDef[] = [
     headerName: "Proper citation",
     flex: 2,
     valueGetter: getValueForCitation,
-    renderCell: RenderProperCitation
+    renderCell: RenderProperCitation,
+    type: "actions",
   },
   {
     ...columnsDefaultProps,
