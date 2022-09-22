@@ -55,61 +55,6 @@ paths:
             operationId: createAntibody
             summary: Create a Antibody
             description: Creates a new instance of a `Antibody`.
-    '/antibodies/{antibodyId}':
-        summary: Path used to manage a single Antibody.
-        description: >-
-            The REST endpoint/path used to get, update, and delete single instances of an `Antibody`.  This
-            path contains `GET`, `PUT`, and `DELETE` operations used to perform the get, update, and delete
-            tasks, respectively.
-        get:
-            tags:
-                - antibody
-            responses:
-                '200':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Antibody'
-                    description: Successful response - returns a single `Antibody`.
-            operationId: getAntibody
-            summary: Get a Antibody
-            description: Gets the details of a single instance of a `Antibody`.
-        put:
-            requestBody:
-                description: Updated `Antibody` information.
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/AddUpdateAntibody'
-                required: true
-            tags:
-                - antibody
-            responses:
-                '202':
-                    description: Successful response.
-            operationId: updateAntibody
-            summary: Update a Antibody
-            description: Updates an existing `Antibody`.
-        delete:
-            tags:
-                - antibody
-            responses:
-                '204':
-                    description: Successful response.
-            operationId: deleteAntibody
-            summary: Delete a Antibody
-            description: Deletes an existing `Antibody`.
-        parameters:
-            -
-                examples:
-                    ex1:
-                        value: '1234567'
-                name: antibodyId
-                description: The unique identifier for a `Antibody` -- stripped from "AB_"
-                schema:
-                    type: integer
-                in: path
-                required: true
     /antibodies/search:
         summary: Path used to search on antibodies.
         description: >-
@@ -218,7 +163,7 @@ paths:
         description: The REST endpoint/path used to ingest antibody's csv data into the database.
         post:
             requestBody:
-                description: The parameters needed for the ingestion process.
+                description: The google drive file id of the zipped data to ingest.
                 content:
                     application/json:
                         schema:
@@ -227,11 +172,66 @@ paths:
             tags:
                 - ingest
             responses:
-                '201':
-                    description: Successful response - returns an 201.
+                '200':
+                    description: Successful response - returns an 200.
             operationId: ingest
             summary: Ingest antibody's csv data into the database
             description: Ingest antibody's csv data into the database
+    '/antibodies/{antibody_id}':
+        summary: Path used to manage a single Antibody.
+        description: >-
+            The REST endpoint/path used to get, update, and delete single instances of an `Antibody`.  This
+            path contains `GET`, `PUT`, and `DELETE` operations used to perform the get, update, and delete
+            tasks, respectively.
+        get:
+            tags:
+                - antibody
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Antibody'
+                    description: Successful response - returns a single `Antibody`.
+            operationId: getAntibody
+            summary: Get a Antibody
+            description: Gets the details of a single instance of a `Antibody`.
+        put:
+            requestBody:
+                description: Updated `Antibody` information.
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AddUpdateAntibody'
+                required: true
+            tags:
+                - antibody
+            responses:
+                '202':
+                    description: Successful response.
+            operationId: updateAntibody
+            summary: Update a Antibody
+            description: Updates an existing `Antibody`.
+        delete:
+            tags:
+                - antibody
+            responses:
+                '204':
+                    description: Successful response.
+            operationId: deleteAntibody
+            summary: Delete a Antibody
+            description: Deletes an existing `Antibody`.
+        parameters:
+            -
+                examples:
+                    ex1:
+                        value: '1234567'
+                name: antibody_id
+                description: The unique identifier for a `Antibody` -- stripped from "AB_"
+                schema:
+                    type: integer
+                in: path
+                required: true
 components:
     schemas:
         AddUpdateAntibody:
@@ -239,7 +239,13 @@ components:
             type: object
             allOf:
                 -
+                    required:
+                        - url
                     type: object
+                    properties:
+                        url:
+                            description: ''
+                            type: string
                 -
                     $ref: '#/components/schemas/AbstractAntibody'
         FilterRequest:
@@ -390,7 +396,6 @@ components:
             description: The common fields between all REST operations for the antibody resource.
             required:
                 - catalogNum
-                - url
                 - commercialType
             type: object
             properties:

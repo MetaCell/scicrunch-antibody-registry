@@ -50,7 +50,7 @@ export interface AbstractAntibody {
      * @type {string}
      * @memberof AbstractAntibody
      */
-    'url': string;
+    'url'?: string;
     /**
      * Name provided by the company or the investigator; this does not need to be unique.
      * @type {string}
@@ -177,6 +177,12 @@ export type AbstractAntibodyCommercialTypeEnum = typeof AbstractAntibodyCommerci
  */
 export interface AddUpdateAntibody {
     /**
+     * Link to more information about the antibody. For personal antibodies this usually lists the the principal investigator\'s lab website or university affiliation.
+     * @type {string}
+     * @memberof AddUpdateAntibody
+     */
+    'url': string;
+    /**
      * Can include the following options: Unknown, Cocktail, Control, Isotype Control, Monoclonal, Monoclonal Secondary, Polyclonal, Polyclonal Secondary, Oligoclonal, Recombinant, Recombinant Monoclonal, Recombinant Monoclonal Secondary, Recombinant Polyclonal, Recombinant Polyclonal Secondary
      * @type {string}
      * @memberof AddUpdateAntibody
@@ -194,12 +200,6 @@ export interface AddUpdateAntibody {
      * @memberof AddUpdateAntibody
      */
     'comments'?: string;
-    /**
-     * Link to more information about the antibody. For personal antibodies this usually lists the the principal investigator\'s lab website or university affiliation.
-     * @type {string}
-     * @memberof AddUpdateAntibody
-     */
-    'url': string;
     /**
      * Name provided by the company or the investigator; this does not need to be unique.
      * @type {string}
@@ -320,6 +320,19 @@ export const AddUpdateAntibodyCommercialTypeEnum = {
 export type AddUpdateAntibodyCommercialTypeEnum = typeof AddUpdateAntibodyCommercialTypeEnum[keyof typeof AddUpdateAntibodyCommercialTypeEnum];
 
 /**
+ * 
+ * @export
+ * @interface AddUpdateAntibodyAllOf
+ */
+export interface AddUpdateAntibodyAllOf {
+    /**
+     * 
+     * @type {string}
+     * @memberof AddUpdateAntibodyAllOf
+     */
+    'url': string;
+}
+/**
  * The data type associated with the antibody resource
  * @export
  * @interface Antibody
@@ -420,7 +433,7 @@ export interface Antibody {
      * @type {string}
      * @memberof Antibody
      */
-    'url': string;
+    'url'?: string;
     /**
      * Name provided by the company or the investigator; this does not need to be unique.
      * @type {string}
@@ -787,8 +800,8 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
         deleteAntibody: async (antibodyId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'antibodyId' is not null or undefined
             assertParamExists('deleteAntibody', 'antibodyId', antibodyId)
-            const localVarPath = `/antibodies/{antibodyId}`
-                .replace(`{${"antibodyId"}}`, encodeURIComponent(String(antibodyId)));
+            const localVarPath = `/antibodies/{antibody_id}`
+                .replace(`{${"antibody_id"}}`, encodeURIComponent(String(antibodyId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -861,8 +874,8 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
         getAntibody: async (antibodyId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'antibodyId' is not null or undefined
             assertParamExists('getAntibody', 'antibodyId', antibodyId)
-            const localVarPath = `/antibodies/{antibodyId}`
-                .replace(`{${"antibodyId"}}`, encodeURIComponent(String(antibodyId)));
+            const localVarPath = `/antibodies/{antibody_id}`
+                .replace(`{${"antibody_id"}}`, encodeURIComponent(String(antibodyId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -898,8 +911,8 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             assertParamExists('updateAntibody', 'antibodyId', antibodyId)
             // verify required parameter 'addUpdateAntibody' is not null or undefined
             assertParamExists('updateAntibody', 'addUpdateAntibody', addUpdateAntibody)
-            const localVarPath = `/antibodies/{antibodyId}`
-                .replace(`{${"antibodyId"}}`, encodeURIComponent(String(antibodyId)));
+            const localVarPath = `/antibodies/{antibody_id}`
+                .replace(`{${"antibody_id"}}`, encodeURIComponent(String(antibodyId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1137,7 +1150,7 @@ export const IngestApiAxiosParamCreator = function (configuration?: Configuratio
         /**
          * Ingest antibody\'s csv data into the database
          * @summary Ingest antibody\'s csv data into the database
-         * @param {string} body The parameters needed for the ingestion process.
+         * @param {string} body The google drive file id of the zipped data to ingest.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1183,7 +1196,7 @@ export const IngestApiFp = function(configuration?: Configuration) {
         /**
          * Ingest antibody\'s csv data into the database
          * @summary Ingest antibody\'s csv data into the database
-         * @param {string} body The parameters needed for the ingestion process.
+         * @param {string} body The google drive file id of the zipped data to ingest.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1204,7 +1217,7 @@ export const IngestApiFactory = function (configuration?: Configuration, basePat
         /**
          * Ingest antibody\'s csv data into the database
          * @summary Ingest antibody\'s csv data into the database
-         * @param {string} body The parameters needed for the ingestion process.
+         * @param {string} body The google drive file id of the zipped data to ingest.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1224,7 +1237,7 @@ export class IngestApi extends BaseAPI {
     /**
      * Ingest antibody\'s csv data into the database
      * @summary Ingest antibody\'s csv data into the database
-     * @param {string} body The parameters needed for the ingestion process.
+     * @param {string} body The google drive file id of the zipped data to ingest.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof IngestApi

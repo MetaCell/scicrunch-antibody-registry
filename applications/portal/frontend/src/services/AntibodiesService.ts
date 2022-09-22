@@ -9,7 +9,7 @@ import {
 const api = new AntibodyApi();
 
 export async function getAntibodies(
-  page = 0,
+  page = 1,
   size = 10
 ): Promise<PaginatedAntibodies> {
   return (await api.getAntibodies(page, size)).data;
