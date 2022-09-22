@@ -23,8 +23,8 @@ const App = () => {
         <Switch>
           <Route exact path="/" component={Home} />
           <Route exact path="/about" component={About} />
-          <Route path="/submit" component={Submit} />
-          <Route path="/login" >
+          <Route exact path="/add" component={Submit} />
+          <Route path="/login">
             <Redirect to="/" />
           </Route>
           <Route path="/:antibody_id(AB_.*)" component={AntibodyDetail} />
@@ -35,7 +35,7 @@ const App = () => {
         </Switch>
       </ThemeProvider>
     </BrowserRouter>
-  )
+  );
 };
 
 export default App;

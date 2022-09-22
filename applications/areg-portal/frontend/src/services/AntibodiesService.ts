@@ -1,43 +1,57 @@
-import { DataObjectSharp } from "@mui/icons-material";
-import dataJson from "./data.json";
+import {
+  Antibody,
+  PaginatedAntibodies,
+  AntibodyApi,
+  AddUpdateAntibody,
+  AntibodyCommercialTypeEnum,
+} from "../rest/api";
 
-interface AntibodiesObj {
-  id: string;
-  ab_name: string;
-  ab_id: string;
-  ab_target: string;
-  target_species: string;
-  proper_citation: string;
-  clonality: string;
-  comments: string;
-  clone_id: string;
-  host: string;
-  vendor: string;
-  catalog_num?;
-  url: string;
-  insert_time: string;
-  curate_time: string;
-  disc_date: string;
+const api = new AntibodyApi();
+
+export async function getAntibodies(
+  page = 0,
+  size = 10
+): Promise<PaginatedAntibodies> {
+  return (await api.getAntibodies(page, size)).data;
 }
 
-export function getAntibodies(): Promise<AntibodiesObj[]> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(dataJson);
-    }, 2000);
-  });
+export async function getAntibody(id: number): Promise<Antibody> {
+  return  (await api.getAntibody(id)).data;
 }
 
-export function getAntibody(id): Promise<any> {
-  let antibody = {};
-  for (const ab of dataJson) {
-    if (ab.ab_id === id) {
-      antibody = ab;
-    }
+
+export async function addAntibody(antibodyObj): Promise<any> {
+  let ab = mapAntibody(antibodyObj);
+  console.log("mappedObj", ab);
+  return (await api.createAntibody(ab)).data;
+}
+
+function mapAntibody(antibody): AddUpdateAntibody {
+  let commercialAb = {
+    clonality: antibody.clonality,
+    epitope: antibody.epitope,
+    comments: antibody.comments,
+    url: antibody.url,
+    abName: antibody.name,
+    abTarget: antibody.antibodyTarget,
+    catalogNum: antibody.catalogNumber,
+    cloneId: antibody.cloneID,
+    commercialType: antibody.type,
+    productConjugate: antibody.conjugate,
+    productForm: antibody.format,
+    productIsotype: antibody.isotype,
+    sourceOrganism: antibody.host,
+    targetSpecies: antibody.targetSpecies.split(/\W/),
+    uniprotId: antibody.uniprotID,
+    vendorName: antibody.vendor,
+    applications: antibody.applications,
+  };
+  if (antibody.type === AntibodyCommercialTypeEnum.Commercial) {
+    return commercialAb;
   }
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(antibody);
-    }, 1000);
-  });
+  else {
+    return { 
+      ...commercialAb, 
+      definingCitation: antibody.citation
+    };}
 }

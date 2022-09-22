@@ -19,6 +19,8 @@ harness:
     - common
     - events
     - accounts
+    soft:
+    - pgadmin
   use_services:
   - name: common
   uri_role_mapping:
@@ -28,7 +30,7 @@ harness:
     - areg-portal:administrator
     - areg-portal:manager
     require-any-role: true
-  - uri: /submit
+  - uri: /add
     roles:
     - administrator
     - areg-portal:administrator

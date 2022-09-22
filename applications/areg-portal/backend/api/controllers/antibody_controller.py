@@ -13,7 +13,7 @@ def create_antibody(body: AddUpdateAntibodyDTO) -> None:
     return antibody_service.create_antibody(body)
 
 
-def get_antibody(antibody_id: str) -> AntibodyDTO:
+def get_antibody(antibody_id: int) -> AntibodyDTO:
     return antibody_service.get_antibody(antibody_id)
 
 

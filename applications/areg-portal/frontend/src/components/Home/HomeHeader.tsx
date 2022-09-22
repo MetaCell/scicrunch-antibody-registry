@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import {
   AppBar,
@@ -6,12 +6,14 @@ import {
   Button,
   Container,
   Grid,
+  Link,
   Stack,
   Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { AddAntibodyIcon, DownloadIcon } from "../icons";
 import TableToolbar from "./TableToolbar";
+import SubmissionForm from "../Submit/SubmissionForm";
 
 interface Props {
   /**
@@ -32,6 +34,7 @@ const HideOnScroll = (props: Props) => {
 const HomeHeader = (props) => {
   const theme = useTheme();
   const { activeSelection, handleExport, showFilterMenu } = props;
+
   return (
     <Box>
       <AppBar elevation={0} sx={{ top: "4.5rem" }}>
@@ -103,7 +106,7 @@ const HomeHeader = (props) => {
                           }}
                         />
                       }
-                      onClick={() => (window.location.href = "/submit")}
+                      href="/add"
                     >
                       Submit an antibody
                     </Button>

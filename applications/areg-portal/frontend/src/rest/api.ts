@@ -98,7 +98,7 @@ export interface AbstractAntibody {
      * @type {string}
      * @memberof AbstractAntibody
      */
-    'productForm'?: AbstractAntibodyProductFormEnum;
+    'productForm'?: string;
     /**
      * Can include the following: IgG, IgY, IgA, IgM as well as the IgG subtypes
      * @type {string}
@@ -112,11 +112,11 @@ export interface AbstractAntibody {
      */
     'sourceOrganism'?: string;
     /**
-     * The species associated with the antigen molecule.
-     * @type {string}
+     * The species associated with the antigen molecule. Multiple species are specified as a comma separated string
+     * @type {Array<string>}
      * @memberof AbstractAntibody
      */
-    'targetSpecies'?: string;
+    'targetSpecies'?: Array<string>;
     /**
      * Protein identifier from UNIPROT 
      * @type {string}
@@ -124,28 +124,40 @@ export interface AbstractAntibody {
      */
     'uniprotId'?: string;
     /**
-     * The name of the company or laboratory for company antibodies. The principal investigator name for personal/other antibodies. 
+     * The name of the company or laboratory for commercial antibodies. The principal investigator name for personal/other antibodies. 
      * @type {string}
      * @memberof AbstractAntibody
      */
     'vendorName'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AbstractAntibody
+     */
+    'applications'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AbstractAntibody
+     */
+    'kitContents'?: string;
 }
 
 export const AbstractAntibodyClonalityEnum = {
-    Unknown: 'Unknown',
-    Cocktail: 'Cocktail',
-    Control: 'Control',
-    IsotypeControl: 'IsotypeControl',
-    Monoclonal: 'Monoclonal',
-    MonoclonalSecondary: 'MonoclonalSecondary',
-    Polyclonal: 'Polyclonal',
-    PolyclonalSecondary: 'PolyclonalSecondary',
-    Oligoclonal: 'Oligoclonal',
-    Recombinant: 'Recombinant',
-    RecombinantMonoclonal: 'RecombinantMonoclonal',
-    RecombinantMonoclonalSecondary: 'RecombinantMonoclonalSecondary',
-    RecombinantPolyclonal: 'RecombinantPolyclonal',
-    RecombinantPolyclonalSecondary: 'RecombinantPolyclonalSecondary'
+    Unknown: 'unknown',
+    Cocktail: 'cocktail',
+    Control: 'control',
+    IsotypeControl: 'isotype control',
+    Monoclonal: 'monoclonal',
+    MonoclonalSecondary: 'monoclonal secondary',
+    Polyclonal: 'polyclonal',
+    PolyclonalSecondary: 'polyclonal secondary',
+    Oligoclonal: 'oligoclonal',
+    Recombinant: 'recombinant',
+    RecombinantMonoclonal: 'recombinant monoclonal',
+    RecombinantMonoclonalSecondary: 'recombinant monoclonal secondary',
+    RecombinantPolyclonal: 'recombinant polyclonal',
+    RecombinantPolyclonalSecondary: 'recombinant polyclonal secondary'
 } as const;
 
 export type AbstractAntibodyClonalityEnum = typeof AbstractAntibodyClonalityEnum[keyof typeof AbstractAntibodyClonalityEnum];
@@ -157,13 +169,6 @@ export const AbstractAntibodyCommercialTypeEnum = {
 } as const;
 
 export type AbstractAntibodyCommercialTypeEnum = typeof AbstractAntibodyCommercialTypeEnum[keyof typeof AbstractAntibodyCommercialTypeEnum];
-export const AbstractAntibodyProductFormEnum = {
-    Lyophilized: 'Lyophilized',
-    AffinityPurified: 'AffinityPurified',
-    Liquid: 'Liquid'
-} as const;
-
-export type AbstractAntibodyProductFormEnum = typeof AbstractAntibodyProductFormEnum[keyof typeof AbstractAntibodyProductFormEnum];
 
 /**
  * The data type associated with the POST and PUT methods of the antibody resource
@@ -242,7 +247,7 @@ export interface AddUpdateAntibody {
      * @type {string}
      * @memberof AddUpdateAntibody
      */
-    'productForm'?: AddUpdateAntibodyProductFormEnum;
+    'productForm'?: string;
     /**
      * Can include the following: IgG, IgY, IgA, IgM as well as the IgG subtypes
      * @type {string}
@@ -256,11 +261,11 @@ export interface AddUpdateAntibody {
      */
     'sourceOrganism'?: string;
     /**
-     * The species associated with the antigen molecule.
-     * @type {string}
+     * The species associated with the antigen molecule. Multiple species are specified as a comma separated string
+     * @type {Array<string>}
      * @memberof AddUpdateAntibody
      */
-    'targetSpecies'?: string;
+    'targetSpecies'?: Array<string>;
     /**
      * Protein identifier from UNIPROT 
      * @type {string}
@@ -268,28 +273,40 @@ export interface AddUpdateAntibody {
      */
     'uniprotId'?: string;
     /**
-     * The name of the company or laboratory for company antibodies. The principal investigator name for personal/other antibodies. 
+     * The name of the company or laboratory for commercial antibodies. The principal investigator name for personal/other antibodies. 
      * @type {string}
      * @memberof AddUpdateAntibody
      */
     'vendorName'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AddUpdateAntibody
+     */
+    'applications'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AddUpdateAntibody
+     */
+    'kitContents'?: string;
 }
 
 export const AddUpdateAntibodyClonalityEnum = {
-    Unknown: 'Unknown',
-    Cocktail: 'Cocktail',
-    Control: 'Control',
-    IsotypeControl: 'IsotypeControl',
-    Monoclonal: 'Monoclonal',
-    MonoclonalSecondary: 'MonoclonalSecondary',
-    Polyclonal: 'Polyclonal',
-    PolyclonalSecondary: 'PolyclonalSecondary',
-    Oligoclonal: 'Oligoclonal',
-    Recombinant: 'Recombinant',
-    RecombinantMonoclonal: 'RecombinantMonoclonal',
-    RecombinantMonoclonalSecondary: 'RecombinantMonoclonalSecondary',
-    RecombinantPolyclonal: 'RecombinantPolyclonal',
-    RecombinantPolyclonalSecondary: 'RecombinantPolyclonalSecondary'
+    Unknown: 'unknown',
+    Cocktail: 'cocktail',
+    Control: 'control',
+    IsotypeControl: 'isotype control',
+    Monoclonal: 'monoclonal',
+    MonoclonalSecondary: 'monoclonal secondary',
+    Polyclonal: 'polyclonal',
+    PolyclonalSecondary: 'polyclonal secondary',
+    Oligoclonal: 'oligoclonal',
+    Recombinant: 'recombinant',
+    RecombinantMonoclonal: 'recombinant monoclonal',
+    RecombinantMonoclonalSecondary: 'recombinant monoclonal secondary',
+    RecombinantPolyclonal: 'recombinant polyclonal',
+    RecombinantPolyclonalSecondary: 'recombinant polyclonal secondary'
 } as const;
 
 export type AddUpdateAntibodyClonalityEnum = typeof AddUpdateAntibodyClonalityEnum[keyof typeof AddUpdateAntibodyClonalityEnum];
@@ -301,13 +318,6 @@ export const AddUpdateAntibodyCommercialTypeEnum = {
 } as const;
 
 export type AddUpdateAntibodyCommercialTypeEnum = typeof AddUpdateAntibodyCommercialTypeEnum[keyof typeof AddUpdateAntibodyCommercialTypeEnum];
-export const AddUpdateAntibodyProductFormEnum = {
-    Lyophilized: 'Lyophilized',
-    AffinityPurified: 'AffinityPurified',
-    Liquid: 'Liquid'
-} as const;
-
-export type AddUpdateAntibodyProductFormEnum = typeof AddUpdateAntibodyProductFormEnum[keyof typeof AddUpdateAntibodyProductFormEnum];
 
 /**
  * The data type associated with the antibody resource
@@ -340,12 +350,6 @@ export interface Antibody {
      */
     'abId': string;
     /**
-     * Gene identifier for the gene that is associated with the protein target
-     * @type {string}
-     * @memberof Antibody
-     */
-    'abTargetEntrezGid'?: string;
-    /**
      * The alternative catalog numbers for this product, delimited by comma, e.g., 9101S, 9101P, 9191L
      * @type {string}
      * @memberof Antibody
@@ -356,7 +360,7 @@ export interface Antibody {
      * @type {string}
      * @memberof Antibody
      */
-    'curateTime': string;
+    'curateTime'?: string;
     /**
      * Curator comment about this reagent 
      * @type {string}
@@ -387,6 +391,12 @@ export interface Antibody {
      * @memberof Antibody
      */
     'targetSubregion'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Antibody
+     */
+    'vendorId'?: number;
     /**
      * Can include the following options: Unknown, Cocktail, Control, Isotype Control, Monoclonal, Monoclonal Secondary, Polyclonal, Polyclonal Secondary, Oligoclonal, Recombinant, Recombinant Monoclonal, Recombinant Monoclonal Secondary, Recombinant Polyclonal, Recombinant Polyclonal Secondary
      * @type {string}
@@ -458,7 +468,7 @@ export interface Antibody {
      * @type {string}
      * @memberof Antibody
      */
-    'productForm'?: AntibodyProductFormEnum;
+    'productForm'?: string;
     /**
      * Can include the following: IgG, IgY, IgA, IgM as well as the IgG subtypes
      * @type {string}
@@ -472,11 +482,11 @@ export interface Antibody {
      */
     'sourceOrganism'?: string;
     /**
-     * The species associated with the antigen molecule.
-     * @type {string}
+     * The species associated with the antigen molecule. Multiple species are specified as a comma separated string
+     * @type {Array<string>}
      * @memberof Antibody
      */
-    'targetSpecies'?: string;
+    'targetSpecies'?: Array<string>;
     /**
      * Protein identifier from UNIPROT 
      * @type {string}
@@ -484,35 +494,47 @@ export interface Antibody {
      */
     'uniprotId'?: string;
     /**
-     * The name of the company or laboratory for company antibodies. The principal investigator name for personal/other antibodies. 
+     * The name of the company or laboratory for commercial antibodies. The principal investigator name for personal/other antibodies. 
      * @type {string}
      * @memberof Antibody
      */
     'vendorName'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Antibody
+     */
+    'applications'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Antibody
+     */
+    'kitContents'?: string;
 }
 
 export const AntibodyStatusEnum = {
-    Curated: 'Curated',
-    Rejected: 'Rejected',
-    Queue: 'Queue'
+    Curated: 'CURATED',
+    Rejected: 'REJECTED',
+    Queue: 'QUEUE'
 } as const;
 
 export type AntibodyStatusEnum = typeof AntibodyStatusEnum[keyof typeof AntibodyStatusEnum];
 export const AntibodyClonalityEnum = {
-    Unknown: 'Unknown',
-    Cocktail: 'Cocktail',
-    Control: 'Control',
-    IsotypeControl: 'IsotypeControl',
-    Monoclonal: 'Monoclonal',
-    MonoclonalSecondary: 'MonoclonalSecondary',
-    Polyclonal: 'Polyclonal',
-    PolyclonalSecondary: 'PolyclonalSecondary',
-    Oligoclonal: 'Oligoclonal',
-    Recombinant: 'Recombinant',
-    RecombinantMonoclonal: 'RecombinantMonoclonal',
-    RecombinantMonoclonalSecondary: 'RecombinantMonoclonalSecondary',
-    RecombinantPolyclonal: 'RecombinantPolyclonal',
-    RecombinantPolyclonalSecondary: 'RecombinantPolyclonalSecondary'
+    Unknown: 'unknown',
+    Cocktail: 'cocktail',
+    Control: 'control',
+    IsotypeControl: 'isotype control',
+    Monoclonal: 'monoclonal',
+    MonoclonalSecondary: 'monoclonal secondary',
+    Polyclonal: 'polyclonal',
+    PolyclonalSecondary: 'polyclonal secondary',
+    Oligoclonal: 'oligoclonal',
+    Recombinant: 'recombinant',
+    RecombinantMonoclonal: 'recombinant monoclonal',
+    RecombinantMonoclonalSecondary: 'recombinant monoclonal secondary',
+    RecombinantPolyclonal: 'recombinant polyclonal',
+    RecombinantPolyclonalSecondary: 'recombinant polyclonal secondary'
 } as const;
 
 export type AntibodyClonalityEnum = typeof AntibodyClonalityEnum[keyof typeof AntibodyClonalityEnum];
@@ -524,13 +546,6 @@ export const AntibodyCommercialTypeEnum = {
 } as const;
 
 export type AntibodyCommercialTypeEnum = typeof AntibodyCommercialTypeEnum[keyof typeof AntibodyCommercialTypeEnum];
-export const AntibodyProductFormEnum = {
-    Lyophilized: 'Lyophilized',
-    AffinityPurified: 'AffinityPurified',
-    Liquid: 'Liquid'
-} as const;
-
-export type AntibodyProductFormEnum = typeof AntibodyProductFormEnum[keyof typeof AntibodyProductFormEnum];
 
 /**
  * 
@@ -563,12 +578,6 @@ export interface AntibodyAllOf {
      */
     'abId': string;
     /**
-     * Gene identifier for the gene that is associated with the protein target
-     * @type {string}
-     * @memberof AntibodyAllOf
-     */
-    'abTargetEntrezGid'?: string;
-    /**
      * The alternative catalog numbers for this product, delimited by comma, e.g., 9101S, 9101P, 9191L
      * @type {string}
      * @memberof AntibodyAllOf
@@ -579,7 +588,7 @@ export interface AntibodyAllOf {
      * @type {string}
      * @memberof AntibodyAllOf
      */
-    'curateTime': string;
+    'curateTime'?: string;
     /**
      * Curator comment about this reagent 
      * @type {string}
@@ -610,12 +619,18 @@ export interface AntibodyAllOf {
      * @memberof AntibodyAllOf
      */
     'targetSubregion'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AntibodyAllOf
+     */
+    'vendorId'?: number;
 }
 
 export const AntibodyAllOfStatusEnum = {
-    Curated: 'Curated',
-    Rejected: 'Rejected',
-    Queue: 'Queue'
+    Curated: 'CURATED',
+    Rejected: 'REJECTED',
+    Queue: 'QUEUE'
 } as const;
 
 export type AntibodyAllOfStatusEnum = typeof AntibodyAllOfStatusEnum[keyof typeof AntibodyAllOfStatusEnum];
@@ -765,11 +780,11 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * Deletes an existing `Antibody`.
          * @summary Delete a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteAntibody: async (antibodyId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        deleteAntibody: async (antibodyId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'antibodyId' is not null or undefined
             assertParamExists('deleteAntibody', 'antibodyId', antibodyId)
             const localVarPath = `/antibodies/{antibodyId}`
@@ -839,11 +854,11 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * Gets the details of a single instance of a `Antibody`.
          * @summary Get a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAntibody: async (antibodyId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getAntibody: async (antibodyId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'antibodyId' is not null or undefined
             assertParamExists('getAntibody', 'antibodyId', antibodyId)
             const localVarPath = `/antibodies/{antibodyId}`
@@ -873,12 +888,12 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * Updates an existing `Antibody`.
          * @summary Update a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {AddUpdateAntibody} addUpdateAntibody Updated &#x60;Antibody&#x60; information.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateAntibody: async (antibodyId: string, addUpdateAntibody: AddUpdateAntibody, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        updateAntibody: async (antibodyId: number, addUpdateAntibody: AddUpdateAntibody, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'antibodyId' is not null or undefined
             assertParamExists('updateAntibody', 'antibodyId', antibodyId)
             // verify required parameter 'addUpdateAntibody' is not null or undefined
@@ -934,11 +949,11 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
         /**
          * Deletes an existing `Antibody`.
          * @summary Delete a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteAntibody(antibodyId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async deleteAntibody(antibodyId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteAntibody(antibodyId, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -950,30 +965,30 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAntibodies(page?: number, size?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Antibody>>> {
+        async getAntibodies(page?: number, size?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAntibodies>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getAntibodies(page, size, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
          * Gets the details of a single instance of a `Antibody`.
          * @summary Get a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAntibody(antibodyId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Antibody>> {
+        async getAntibody(antibodyId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Antibody>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getAntibody(antibodyId, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
          * Updates an existing `Antibody`.
          * @summary Update a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {AddUpdateAntibody} addUpdateAntibody Updated &#x60;Antibody&#x60; information.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async updateAntibody(antibodyId: string, addUpdateAntibody: AddUpdateAntibody, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async updateAntibody(antibodyId: number, addUpdateAntibody: AddUpdateAntibody, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.updateAntibody(antibodyId, addUpdateAntibody, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1000,11 +1015,11 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
         /**
          * Deletes an existing `Antibody`.
          * @summary Delete a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteAntibody(antibodyId: string, options?: any): AxiosPromise<void> {
+        deleteAntibody(antibodyId: number, options?: any): AxiosPromise<void> {
             return localVarFp.deleteAntibody(antibodyId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1015,28 +1030,28 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAntibodies(page?: number, size?: number, options?: any): AxiosPromise<Array<Antibody>> {
+        getAntibodies(page?: number, size?: number, options?: any): AxiosPromise<PaginatedAntibodies> {
             return localVarFp.getAntibodies(page, size, options).then((request) => request(axios, basePath));
         },
         /**
          * Gets the details of a single instance of a `Antibody`.
          * @summary Get a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAntibody(antibodyId: string, options?: any): AxiosPromise<Antibody> {
+        getAntibody(antibodyId: number, options?: any): AxiosPromise<Antibody> {
             return localVarFp.getAntibody(antibodyId, options).then((request) => request(axios, basePath));
         },
         /**
          * Updates an existing `Antibody`.
          * @summary Update a Antibody
-         * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
          * @param {AddUpdateAntibody} addUpdateAntibody Updated &#x60;Antibody&#x60; information.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateAntibody(antibodyId: string, addUpdateAntibody: AddUpdateAntibody, options?: any): AxiosPromise<void> {
+        updateAntibody(antibodyId: number, addUpdateAntibody: AddUpdateAntibody, options?: any): AxiosPromise<void> {
             return localVarFp.updateAntibody(antibodyId, addUpdateAntibody, options).then((request) => request(axios, basePath));
         },
     };
@@ -1064,12 +1079,12 @@ export class AntibodyApi extends BaseAPI {
     /**
      * Deletes an existing `Antibody`.
      * @summary Delete a Antibody
-     * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+     * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AntibodyApi
      */
-    public deleteAntibody(antibodyId: string, options?: AxiosRequestConfig) {
+    public deleteAntibody(antibodyId: number, options?: AxiosRequestConfig) {
         return AntibodyApiFp(this.configuration).deleteAntibody(antibodyId, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1089,26 +1104,133 @@ export class AntibodyApi extends BaseAPI {
     /**
      * Gets the details of a single instance of a `Antibody`.
      * @summary Get a Antibody
-     * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+     * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AntibodyApi
      */
-    public getAntibody(antibodyId: string, options?: AxiosRequestConfig) {
+    public getAntibody(antibodyId: number, options?: AxiosRequestConfig) {
         return AntibodyApiFp(this.configuration).getAntibody(antibodyId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Updates an existing `Antibody`.
      * @summary Update a Antibody
-     * @param {string} antibodyId A unique identifier for a &#x60;Antibody&#x60;.
+     * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
      * @param {AddUpdateAntibody} addUpdateAntibody Updated &#x60;Antibody&#x60; information.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AntibodyApi
      */
-    public updateAntibody(antibodyId: string, addUpdateAntibody: AddUpdateAntibody, options?: AxiosRequestConfig) {
+    public updateAntibody(antibodyId: number, addUpdateAntibody: AddUpdateAntibody, options?: AxiosRequestConfig) {
         return AntibodyApiFp(this.configuration).updateAntibody(antibodyId, addUpdateAntibody, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+/**
+ * IngestApi - axios parameter creator
+ * @export
+ */
+export const IngestApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Ingest antibody\'s csv data into the database
+         * @summary Ingest antibody\'s csv data into the database
+         * @param {string} body The parameters needed for the ingestion process.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        ingest: async (body: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'body' is not null or undefined
+            assertParamExists('ingest', 'body', body)
+            const localVarPath = `/ingest`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * IngestApi - functional programming interface
+ * @export
+ */
+export const IngestApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = IngestApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Ingest antibody\'s csv data into the database
+         * @summary Ingest antibody\'s csv data into the database
+         * @param {string} body The parameters needed for the ingestion process.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async ingest(body: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.ingest(body, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * IngestApi - factory interface
+ * @export
+ */
+export const IngestApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = IngestApiFp(configuration)
+    return {
+        /**
+         * Ingest antibody\'s csv data into the database
+         * @summary Ingest antibody\'s csv data into the database
+         * @param {string} body The parameters needed for the ingestion process.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        ingest(body: string, options?: any): AxiosPromise<void> {
+            return localVarFp.ingest(body, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * IngestApi - object-oriented interface
+ * @export
+ * @class IngestApi
+ * @extends {BaseAPI}
+ */
+export class IngestApi extends BaseAPI {
+    /**
+     * Ingest antibody\'s csv data into the database
+     * @summary Ingest antibody\'s csv data into the database
+     * @param {string} body The parameters needed for the ingestion process.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof IngestApi
+     */
+    public ingest(body: string, options?: AxiosRequestConfig) {
+        return IngestApiFp(this.configuration).ingest(body, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

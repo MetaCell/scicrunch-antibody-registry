@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from api.models import Antibody, Antigen, Vendor
+from api.models import Antibody, Gene, Vendor
 
 admin.site.register(Antibody)
-admin.site.register(Antigen)
+admin.site.register(Gene)
 admin.site.register(Vendor)

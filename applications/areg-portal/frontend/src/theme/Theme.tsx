@@ -96,6 +96,20 @@ const theme = createTheme({
           color: theme.palette.grey[500],
           fontWeight: "600",
         }),
+        textSecondary: ({ theme }) => ({
+          background: theme.palette.primary.light,
+          color: theme.palette.primary.dark,
+          fontWeight: 600,
+          fontSize: "1rem",
+          lineHeight: "1.5rem",
+          boxShadow: shadow,
+          border: `1px solid ${theme.palette.primary.light}`,
+          "&:hover": {
+            background: theme.palette.primary.light,
+            color: theme.palette.common.black,
+            boxShadow: shadow,
+          },
+        }),
         containedSecondary: {
           background: whiteColor,
           border: `0.0625rem solid ${btnBorderColor}`,
@@ -112,6 +126,7 @@ const theme = createTheme({
             color: primaryColor,
           },
         },
+
         contained: ({ ownerState, theme }) => ({
           borderRadius: "0.375rem",
           fontWeight: 600,

@@ -409,7 +409,12 @@ export const StepIcon = (props: SvgIconProps) => (
 );
 
 export const CopyIcon = (props: SvgIconProps) => (
-  <SvgIcon viewBox="0 0 20 20" fontSize="small" stroke={props.stroke} {...props}>
+  <SvgIcon
+    viewBox="0 0 20 20"
+    fontSize="small"
+    stroke={props.stroke}
+    {...props}
+  >
     <path
       d="M4.16699 12.5C3.39042 12.5 3.00214 12.5 2.69585 12.3731C2.28747 12.2039 1.96302 11.8795 1.79386 11.4711C1.66699 11.1648 1.66699 10.7765 1.66699 9.99996V4.33329C1.66699 3.39987 1.66699 2.93316 1.84865 2.57664C2.00844 2.26304 2.2634 2.00807 2.57701 1.84828C2.93353 1.66663 3.40024 1.66663 4.33366 1.66663H10.0003C10.7769 1.66663 11.1652 1.66663 11.4715 1.79349C11.8798 1.96265 12.2043 2.28711 12.3735 2.69549C12.5003 3.00177 12.5003 3.39006 12.5003 4.16663M10.167 18.3333H15.667C16.6004 18.3333 17.0671 18.3333 17.4236 18.1516C17.7372 17.9918 17.9922 17.7369 18.152 17.4233C18.3337 17.0668 18.3337 16.6 18.3337 15.6666V10.1666C18.3337 9.23321 18.3337 8.7665 18.152 8.40998C17.9922 8.09637 17.7372 7.8414 17.4236 7.68162C17.0671 7.49996 16.6004 7.49996 15.667 7.49996H10.167C9.23357 7.49996 8.76686 7.49996 8.41034 7.68162C8.09674 7.8414 7.84177 8.09637 7.68198 8.40998C7.50033 8.7665 7.50033 9.23321 7.50033 10.1666V15.6666C7.50033 16.6 7.50033 17.0668 7.68198 17.4233C7.84177 17.7369 8.09674 17.9918 8.41034 18.1516C8.76686 18.3333 9.23357 18.3333 10.167 18.3333Z"
       strokeWidth="1.66667"
@@ -421,7 +426,12 @@ export const CopyIcon = (props: SvgIconProps) => (
 );
 
 export const ExternalLinkIcon = (props: SvgIconProps) => (
-  <SvgIcon viewBox="0 0 20 20" fontSize="small" stroke={props.stroke} {...props}>
+  <SvgIcon
+    viewBox="0 0 20 20"
+    fontSize="small"
+    stroke={props.stroke}
+    {...props}
+  >
     <path
       d="M16.5 6.50001L16.5 1.50001M16.5 1.50001H11.5M16.5 1.50001L9 9M7.33333 1.5H5.5C4.09987 1.5 3.3998 1.5 2.86502 1.77248C2.39462 2.01217 2.01217 2.39462 1.77248 2.86502C1.5 3.3998 1.5 4.09987 1.5 5.5V12.5C1.5 13.9001 1.5 14.6002 1.77248 15.135C2.01217 15.6054 2.39462 15.9878 2.86502 16.2275C3.3998 16.5 4.09987 16.5 5.5 16.5H12.5C13.9001 16.5 14.6002 16.5 15.135 16.2275C15.6054 15.9878 15.9878 15.6054 16.2275 15.135C16.5 14.6002 16.5 13.9001 16.5 12.5V10.6667"
       strokeWidth="1.66667"
@@ -539,9 +549,8 @@ export const ThreeDotsIcon = (props: SvgIconProps) => (
       strokeLinejoin="round"
       fill="none"
     />
-
   </SvgIcon>
-)
+);
 export const UserIcon = () => (
   <SvgIcon viewBox="0 -6 28 24">
     <path
@@ -554,7 +563,7 @@ export const UserIcon = () => (
       fill="none"
     />
   </SvgIcon>
-)
+);
 
 export const CubeIcon = () => (
   <SvgIcon viewBox="0 -6 28 24">
@@ -568,7 +577,7 @@ export const CubeIcon = () => (
       fill="none"
     />
   </SvgIcon>
-)
+);
 
 export const LogoutIcon = () => (
   <SvgIcon viewBox="0 -6 28 24">
@@ -591,6 +600,15 @@ export const EyeIcon = (props: SvgIconProps) => (
       d="M2.01677 10.5943C1.90328 10.4146 1.84654 10.3248 1.81477 10.1862C1.79091 10.0821 1.79091 9.91791 1.81477 9.81382C1.84654 9.67523 1.90328 9.58538 2.01677 9.40568C2.95461 7.9207 5.74617 4.16666 10.0003 4.16666C14.2545 4.16666 17.0461 7.9207 17.9839 9.40568C18.0974 9.58538 18.1541 9.67523 18.1859 9.81382C18.2098 9.91791 18.2098 10.0821 18.1859 10.1862C18.1541 10.3248 18.0974 10.4146 17.9839 10.5943C17.0461 12.0793 14.2545 15.8333 10.0003 15.8333C5.74617 15.8333 2.95461 12.0793 2.01677 10.5943Z"
       stroke="black"
       strokeWidth="1.5"
+);
+
+export const AlertIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="0 0 16 16" fontSize="small" stroke={props.stroke}>
+    <path
+      xmlns="http://www.w3.org/2000/svg"
+      d="M8.00016 5.33325V7.99992M8.00016 10.6666H8.00683M14.6668 7.99992C14.6668 11.6818 11.6821 14.6666 8.00016 14.6666C4.31826 14.6666 1.3335 11.6818 1.3335 7.99992C1.3335 4.31802 4.31826 1.33325 8.00016 1.33325C11.6821 1.33325 14.6668 4.31802 14.6668 7.99992Z"
+      stroke="#F04438"
+      strokeWidth="1.33333"
       strokeLinecap="round"
       strokeLinejoin="round"
       fill="none"
@@ -615,8 +633,104 @@ export const EyeOffIcon=(props: SvgIconProps) => (
       stroke="black" 
       strokeWidth="1.5" 
       strokeLinecap="round" 
+  </SvgIcon>
+);
+export const CompanyIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="0 0 32 32" fontSize="medium">
+    <rect width="32" height="32" rx="16" fill="#DFEBF8" />
+    <path
+      d="M15.333 15.3333H12.133C11.3863 15.3333 11.0129 15.3333 10.7277 15.4787C10.4768 15.6065 10.2728 15.8105 10.145 16.0613C9.99967 16.3466 9.99967 16.7199 9.99967 17.4667V22M21.9997 22V12.1333C21.9997 11.3866 21.9997 11.0132 21.8544 10.728C21.7265 10.4771 21.5225 10.2732 21.2717 10.1453C20.9864 10 20.6131 10 19.8663 10H17.4663C16.7196 10 16.3462 10 16.061 10.1453C15.8101 10.2732 15.6062 10.4771 15.4783 10.728C15.333 11.0132 15.333 11.3866 15.333 12.1333V22M22.6663 22H9.33301M17.6663 12.6667H19.6663M17.6663 15.3333H19.6663M17.6663 18H19.6663"
+      stroke="#2173F2"
+      strokeWidth="1.33333"
+      strokeLinecap="round"
       strokeLinejoin="round"
       fill="none"
     />
   </SvgIcon>
-)
+);
+
+export const UserWithBackgroundIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="0 0 32 32" fontSize="medium">
+    <rect width="32" height="32" rx="16" fill="#DFEBF8" />
+    <g clipPath="url(#clip0_1376_17941)">
+      <path
+        d="M11.5439 20.9589C11.9494 20.0034 12.8963 19.3333 13.9997 19.3333H17.9997C19.1031 19.3333 20.0499 20.0034 20.4555 20.9589M18.6663 14.3333C18.6663 15.806 17.4724 16.9999 15.9997 16.9999C14.5269 16.9999 13.333 15.806 13.333 14.3333C13.333 12.8605 14.5269 11.6666 15.9997 11.6666C17.4724 11.6666 18.6663 12.8605 18.6663 14.3333ZM22.6663 15.9999C22.6663 19.6818 19.6816 22.6666 15.9997 22.6666C12.3178 22.6666 9.33301 19.6818 9.33301 15.9999C9.33301 12.318 12.3178 9.33325 15.9997 9.33325C19.6816 9.33325 22.6663 12.318 22.6663 15.9999Z"
+        stroke="#2173F2"
+        strokeWidth="1.33333"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_1376_17941">
+        <rect width="16" height="16" fill="white" transform="translate(8 8)" />
+      </clipPath>
+    </defs>
+  </SvgIcon>
+);
+
+export const HorizontalThreeDotsIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="0 0 32 32" fontSize="medium">
+    <rect width="32" height="32" rx="16" fill="#DFEBF8" />
+    <path
+      d="M16.0003 16.6666C16.3685 16.6666 16.667 16.3681 16.667 15.9999C16.667 15.6317 16.3685 15.3333 16.0003 15.3333C15.6321 15.3333 15.3337 15.6317 15.3337 15.9999C15.3337 16.3681 15.6321 16.6666 16.0003 16.6666Z"
+      stroke="#2173F2"
+      strokeWidth="1.33333"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M20.667 16.6666C21.0352 16.6666 21.3337 16.3681 21.3337 15.9999C21.3337 15.6317 21.0352 15.3333 20.667 15.3333C20.2988 15.3333 20.0003 15.6317 20.0003 15.9999C20.0003 16.3681 20.2988 16.6666 20.667 16.6666Z"
+      stroke="#2173F2"
+      strokeWidth="1.33333"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M11.3337 16.6666C11.7018 16.6666 12.0003 16.3681 12.0003 15.9999C12.0003 15.6317 11.7018 15.3333 11.3337 15.3333C10.9655 15.3333 10.667 15.6317 10.667 15.9999C10.667 16.3681 10.9655 16.6666 11.3337 16.6666Z"
+      stroke="#2173F2"
+      strokeWidth="1.33333"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+  </SvgIcon>
+);
+
+export const RefreshIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="0 0 18 16" fontSize="small">
+    <path
+      d="M6.12246 14.4728C8.12174 15.3598 10.503 15.3116 12.5421 14.1343C15.93 12.1783 17.0908 7.84618 15.1348 4.45828L14.9265 4.09743M2.86571 11.5417C0.909698 8.1538 2.07048 3.8217 5.45839 1.8657C7.49754 0.68839 9.87875 0.640217 11.878 1.52719M1.07812 11.6114L3.35483 12.2215L3.96488 9.94475M14.0358 6.05479L14.6459 3.77808L16.9226 4.38813"
+      stroke="#667085"
+      strokeWidth="1.66667"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+  </SvgIcon>
+);
+
+export const CircleCheckIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="0 0 56 56">
+    <rect x="4" y="4" width="48" height="48" rx="24" fill="#C2DAF3" />
+    <path
+      d="M23.5 28L26.5 31L32.5 25M38 28C38 33.5228 33.5228 38 28 38C22.4772 38 18 33.5228 18 28C18 22.4772 22.4772 18 28 18C33.5228 18 38 22.4772 38 28Z"
+      stroke="#2173F2"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+    <rect
+      x="4"
+      y="4"
+      width="48"
+      height="48"
+      rx="24"
+      stroke="#DFEBF8"
+      strokeWidth="8"
+      fill="none"
+    />
+  </SvgIcon>
+);
