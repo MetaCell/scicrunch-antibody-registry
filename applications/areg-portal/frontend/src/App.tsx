@@ -27,8 +27,11 @@ const App = () => {
           <Route path="/login">
             <Redirect to="/" />
           </Route>
+          <Route path="/oauth/logout">
+            <Redirect to="/" />
+          </Route>
           <Route path="/:antibody_id(AB_.*)" component={AntibodyDetail} />
-          <Route path="/account-details" component={AccountDetails}/>
+          <Route path="/user" component={AccountDetails}/>
           <Route path="/faq" component={FAQs}/>
           <Route path="/contact-us" component={ContactUs}/>
           <Route path="/terms-and-conditions" component={TermsAndConditions}/>

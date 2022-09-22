@@ -1,5 +1,5 @@
 import React from "react";
-
+import { useHistory } from "react-router-dom"
 import {
   IconButton,
   Menu,
@@ -23,7 +23,10 @@ interface UserProps {
 const UserAccountMenu = (props: UserProps) => {
   const { user } = props;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const history = useHistory();
   const open = Boolean(anchorEl);
+
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -79,7 +82,8 @@ const UserAccountMenu = (props: UserProps) => {
               </ListItem>
               <Divider />
               <MenuList sx={{ "& .MuiMenuItem-root": { paddingTop: "0.4rem" } }}>
-                <MenuItem>
+                <MenuItem onClick={() => {
+                  history.push("/user"); setAnchorEl(null)}}>
                   <ListItemIcon>
                     <UserIcon />
                   </ListItemIcon>
@@ -92,7 +96,7 @@ const UserAccountMenu = (props: UserProps) => {
                   <Typography variant="h5" color="grey.500">API Key</Typography>
                 </MenuItem>
                 <Divider />
-                <MenuItem>
+                <MenuItem onClick={() => window.location.href = "/oauth/logout"}>
                   <ListItemIcon>
                     <LogoutIcon />
                   </ListItemIcon>
