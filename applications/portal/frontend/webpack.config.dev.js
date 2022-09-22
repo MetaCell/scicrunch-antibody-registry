@@ -13,7 +13,7 @@ module.exports = env => {
   console.log('Dev server address: ', theDomain);
 
   const proxyTarget = theDomain;
-  const replaceHost = (uri, appName) => (uri.includes("areg-portal") && uri.replace("areg-portal", appName + '.' + theDomain)) || uri;
+  const replaceHost = (uri, appName) => (uri.includes("portal") && uri.replace("portal", appName + '.' + theDomain)) || uri;
   if (!env.port) {
     env.devPort = PORT;
   }
@@ -30,7 +30,7 @@ module.exports = env => {
     historyApiFallback: true,
     proxy: {
       '/api/': {
-        target: replaceHost( proxyTarget, 'areg-portal'),
+        target: replaceHost( proxyTarget, 'portal'),
         secure: false,
         changeOrigin: true,
       }

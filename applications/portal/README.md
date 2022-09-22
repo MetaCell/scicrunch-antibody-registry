@@ -1,4 +1,4 @@
-# areg-portal
+# portal
 
 FastAPI/Django/React-based web application.
 This application is constructed to be deployed inside a cloud-harness Kubernetes.
