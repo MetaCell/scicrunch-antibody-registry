@@ -127,8 +127,8 @@ const getValue = (props) => {
   props.field === "ab_name_id"
     ? (cellValue = `${props.row.ab_name || ""} ${props.row.ab_id || ""}`)
     : (cellValue = `${props.row.ab_target || ""} ${
-        props.row.target_species || ""
-      }`);
+      props.row.target_species || ""
+    }`);
   return cellValue;
 };
 

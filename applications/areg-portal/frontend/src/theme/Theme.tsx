@@ -5,8 +5,8 @@ import { vars } from "./variables";
 const { primaryFont, whiteColor, primaryColor, btnBorderColor, shadow } = vars;
 
 declare module "@mui/material/styles" {
-  interface Theme {}
-  interface ThemeOptions {}
+  interface Theme { }
+  interface ThemeOptions { }
 }
 
 const theme = createTheme({
@@ -29,6 +29,7 @@ const theme = createTheme({
       main: "#2173F2",
       light: "#DFEBF8",
       dark: "#0052CC",
+      200: "#A5C8F0"
     },
   },
   shape: {
@@ -46,6 +47,11 @@ const theme = createTheme({
       fontFamily: primaryFont,
       fontWeight: 600,
       fontSize: "1.875rem",
+    },
+    h2: {
+      fontFamily: "'proxima-nova', 'sans-serif'",
+      fontWeight: 600,
+      fontSize: "1.125rem"
     },
     h5: {
       fontFamily: "'proxima-nova', 'sans-serif'",
@@ -178,7 +184,7 @@ const theme = createTheme({
     },
     MuiSvgIcon: {
       styleOverrides: {
-        root: ({teme}) => ({
+        root: ({ teme }) => ({
           color: theme.palette.grey[400]
         }),
       },

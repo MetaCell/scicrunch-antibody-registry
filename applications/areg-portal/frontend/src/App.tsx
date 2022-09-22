@@ -12,6 +12,7 @@ import Submit from "./components/Submit";
 import FAQs from "./components/Support/FAQs";
 import ContactUs from "./components/Support/ContactUs";
 import TermsAndConditions from "./components/Support/TermsAndConditions";
+import AccountDetails from "./components/AccountDetails";
 
 const App = () => {
   return (
@@ -27,6 +28,7 @@ const App = () => {
             <Redirect to="/" />
           </Route>
           <Route path="/:antibody_id(AB_.*)" component={AntibodyDetail} />
+          <Route path="/account-details" component={AccountDetails}/>
           <Route path="/faq" component={FAQs}/>
           <Route path="/contact-us" component={ContactUs}/>
           <Route path="/terms-and-conditions" component={TermsAndConditions}/>
