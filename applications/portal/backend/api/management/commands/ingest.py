@@ -77,7 +77,6 @@ class Command(BaseCommand):
         metadata = preprocess(options["file_id"])
 
         commercial_type_reverse_map = {value: key for key, value in CommercialType.choices}
-        status_reverse_map = {value.upper(): key for key, value in STATUS.choices}
         clonality_reverse_map = {value.lower(): key for key, value in AntibodyClonality.choices}
 
         # Prepare vendor inserts
@@ -140,26 +139,26 @@ class Command(BaseCommand):
                 for index, row in df_vendor_domain.iterrows():
                     vendor_domain_params.extend(
                         [row['id'], row['domain_name'], row['vendor_id'],
-                         status_reverse_map[row['status'].upper()], False])
+                         row['status'].upper(), False])
                 cursor.execute(vendor_domain_insert_stm, vendor_domain_params)
 
                 # Create copy table
                 cursor.execute(get_create_table_stm(self.TMP_TABLE, header))
 
                 # Insert raw data into tmp table
-                for chunk in pd.read_csv(metadata.antibody_data_path, chunksize=10 ** 4, dtype='unicode'):
-                    raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, header, len(chunk))
-                    row_params = []
-                    for index, row in chunk.iterrows():
-                        try:
-                            row['commercial_type'] = commercial_type_reverse_map[row['commercial_type']]
-                        except KeyError:
-                            row['commercial_type'] = None
-                        row['status'] = status_reverse_map[row['status']]
-                        row['clonality'] = clonality_reverse_map.get(row['clonality'].lower(), 'UNK') if type(
-                            row['clonality']) != float else 'UNK'
-                        row_params.extend([clean_empty_value(value) for value in row.values])
-                    cursor.execute(raw_data_insert_stm, row_params)
+                for antibody_data_path in metadata.antibody_data_path:
+                    for chunk in pd.read_csv(antibody_data_path, chunksize=10 ** 4, dtype='unicode'):
+                        raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, header, len(chunk))
+                        row_params = []
+                        for index, row in chunk.iterrows():
+                            try:
+                                row['commercial_type'] = commercial_type_reverse_map[row['commercial_type']]
+                            except KeyError:
+                                row['commercial_type'] = None
+                            row['clonality'] = clonality_reverse_map.get(row['clonality'].lower(), 'UNK') if type(
+                                row['clonality']) != float else 'UNK'
+                            row_params.extend([clean_empty_value(value) for value in row.values])
+                        cursor.execute(raw_data_insert_stm, row_params)
 
                 # Insert select distinct antigen
 

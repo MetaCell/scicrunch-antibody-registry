@@ -1,6 +1,7 @@
 import glob
 import json
 import os
+from typing import List
 
 import pandas as pd
 
@@ -9,7 +10,7 @@ from areg_portal.settings import RAW_ANTIBODY_DATA, RAW_VENDOR_DATA, RAW_VENDOR_
 
 
 class AntibodyMetadata:
-    def __init__(self, antibody_data_path: str, vendor_data_path: str, vendor_domain_data_path: str):
+    def __init__(self, antibody_data_path: List[str], vendor_data_path: str, vendor_domain_data_path: str):
         self.antibody_data_path = antibody_data_path
         self.vendor_data_path = vendor_data_path
         self.vendor_domain_data_path = vendor_domain_data_path
@@ -27,9 +28,9 @@ def update_vendors(csv_path: str, vendors_map_path: str = './vendors_mapping.jso
 def preprocess(file_id: str, dest: str = './antibody_data') -> AntibodyMetadata:
     gd_downloader = GDDownloader(file_id, dest)
     gd_downloader.download()
-    metadata = AntibodyMetadata(glob.glob(os.path.join(dest, '*', RAW_ANTIBODY_DATA))[0],
-                                glob.glob(os.path.join(dest, '*', RAW_VENDOR_DATA))[0],
-                                glob.glob(os.path.join(dest, '*', RAW_VENDOR_DOMAIN_DATA))[0])
+    metadata = AntibodyMetadata(glob.glob(os.path.join(dest, '*', f"{RAW_ANTIBODY_DATA}*.csv")),
+                                glob.glob(os.path.join(dest, '*', f"{RAW_VENDOR_DATA}.csv"))[0],
+                                glob.glob(os.path.join(dest, '*', f"{RAW_VENDOR_DOMAIN_DATA}.csv"))[0])
     update_vendors(metadata.vendor_domain_data_path)
     return metadata
 
