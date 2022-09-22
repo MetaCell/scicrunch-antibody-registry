@@ -1,5 +1,6 @@
 import { Link } from "@mui/material";
-import React, { useState } from "react";
+import React from "react";
+import { useHistory, useLocation } from "react-router-dom";
 
 interface LinkButtonProps {
   label?: string;
@@ -33,31 +34,23 @@ const LinkButton = (props: LinkButtonProps) => {
 };
 
 const NavLinks = () => {
-  const [isHomeViewActive, setIsHomeViewActive] = useState(true);
-  const [isAboutViewActive, setIsAboutViewActive] = useState(false);
-  const handleOnClick = (e) => {
-    if (e.target.innerText === "Home") {
-      setIsHomeViewActive(true);
-      setIsAboutViewActive(false);
-    } else {
-      setIsHomeViewActive(false);
-      setIsAboutViewActive(true);
-    }
-  };
+  const history = useHistory();
+  const location = useLocation();
+
+  const isHomeViewActive = location.pathname == "/";
+  const isAboutViewActive = location.pathname == "/about";
 
   return (
     <>
       <LinkButton
         className={isHomeViewActive ? "selected" : ""}
         label="Home"
-        href="/#"
-        onClick={handleOnClick}
+        onClick={() => history.push("/")}
       />
       <LinkButton
         className={isAboutViewActive ? "selected" : ""}
         label="About"
-        href="/"
-        onClick={handleOnClick}
+        onClick={() => history.push("/about")}
       />
     </>
   );

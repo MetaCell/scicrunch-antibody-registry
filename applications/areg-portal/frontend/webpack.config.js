@@ -25,7 +25,7 @@ module.exports = function webpacking(envVariables) {
   console.log("####################");
 
   const { mode } = env;
-  const devtool = env.mode === "source-map";
+  const devtool = "source-map";
 
   const output = {
     path: path.resolve(__dirname, "dist"),
@@ -40,8 +40,16 @@ module.exports = function webpacking(envVariables) {
         loader: "babel-loader",
       },
       {
-        test: /\.ts|tsx?$/,
-        loader: "awesome-typescript-loader",
+        test: /\.ts(x?)$/,
+        include: path.resolve(__dirname, 'src'),
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              transpileOnly: true,
+            },
+          }
+        ]
       },
       {
         test: /\.(css)$/,

@@ -15,8 +15,17 @@ Python >= 3
 # store the accounts api admin password on the local disk
 
 mkdir -p /opt/cloudharness/resources/auth/
-kubectl -n mnp get secrets accounts -o yaml|grep api_user_password|cut -d " " -f 4|base64 -d > /opt/cloudharness/resources/auth/api_user_password
+kubectl -n areg get secrets accounts -o yaml|grep api_user_password|cut -d " " -f 4|base64 -d > /opt/cloudharness/resources/auth/api_user_password
 
 # Make the cloudharness application configuration available on your local machine
 cp deployment/helm/values.yaml /opt/cloudharness/resources/allvalues.yaml
+```
+
+### Update migrations
+
+After changes to the model are made, migrations need to be updated
+
+To do so, run:
+```
+python manage.py makemigrations
 ```

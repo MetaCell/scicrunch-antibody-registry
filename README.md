@@ -101,3 +101,11 @@ To upgrade an existing deployment, use:
 ```
 helm upgrade areg deployment/helm --namespace areg --install --reset-values [--force]
 ```
+
+## CoC
+
+Antibody Registry adheres to the Contributor Covenant: https://www.contributor-covenant.org/
+
+## Citing Antibody Registry in academic work
+
+Please cite as The Antibody Registry (RRID:SCR_006397) https://antibodyregistry.org/

@@ -1,0 +1,8 @@
+harness:
+  subdomain: pg
+  deployment:
+    auto: false
+  service:
+    auto: false
+    name: areg-pgadmin
+    port: 80

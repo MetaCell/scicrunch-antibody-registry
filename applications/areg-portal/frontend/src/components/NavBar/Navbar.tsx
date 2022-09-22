@@ -5,15 +5,21 @@ import {
   Button,
   Container,
   Divider,
-  IconButton,
   Stack,
   Toolbar,
+  Link,
 } from "@mui/material";
 import Searchbar from "./Searchbar";
 import NavLinks from "./NavLinks";
-import { HelpIcon } from "../icons";
+import HelpMenu from "./HelpMenu";
+import { useUser, User } from "../../services/UserService";
+import UserAccountMenu from "./UserAccountMenu";
 
 const Navbar = () => {
+  const user: User = useUser();
+  const login = () => {
+    window.location.href = "/login";
+  };
   return (
     <Box>
       <AppBar elevation={0}>
@@ -34,7 +40,10 @@ const Navbar = () => {
               }}
             >
               <Stack direction="row" spacing={2}>
-                <Box component="img" src="./assets/logo.svg" />
+                <Link href="/">
+                  <img src="./assets/logo.svg" title="Antibody Registry" />
+                </Link>
+
                 <Divider
                   orientation="vertical"
                   flexItem
@@ -56,23 +65,12 @@ const Navbar = () => {
               }}
             >
               <Stack direction="row" spacing={1.5}>
-                <IconButton
-                  disableRipple
-                  sx={{
-                    p: 1.25,
-                  }}
-                >
-                  <HelpIcon
-                    sx={{
-                      width: "1.25rem",
-                      heigth: "1.25rem",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  />
-                </IconButton>
-                <Button sx={{ px: 1.75, py: 1 }}>Log in / Register</Button>
+                <HelpMenu />
+                {!user ? (
+                  <Button onClick={login}>Log in / Register</Button>
+                ) : (
+                  <UserAccountMenu user={user} />
+                )}
               </Stack>
             </Box>
           </Toolbar>
