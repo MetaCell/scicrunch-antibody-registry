@@ -25,6 +25,7 @@ const SubmissionForm = (props) => {
   };
 
   const [selectedType, setSelectedType] = useState("commercial");
+  const [temporaryID, setTemporaryID] = useState("");
 
   const handleTypeSelector = (value: string) => {
     setSelectedType(value);
@@ -33,6 +34,7 @@ const SubmissionForm = (props) => {
   const handleClose = () => {
     window.location.href = "/";
     setSelectedType("commercial");
+    setSelectedType("");
   };
 
   return (
@@ -91,23 +93,26 @@ const SubmissionForm = (props) => {
               next={props.next}
               previous={props.previous}
               hasPrevious={props.hasPrevious}
+              setTemporaryID={setTemporaryID}
             />
           ) : selectedType === "personal" ? (
             <PersonalForm
               next={props.next}
               previous={props.previous}
               hasPrevious={props.hasPrevious}
+              setTemporaryID={setTemporaryID}
             />
           ) : (
             <OtherForm
               next={props.next}
               previous={props.previous}
               hasPrevious={props.hasPrevious}
+              setTemporaryID={setTemporaryID}
             />
           )}
           {/* TODO check if the post is sucessfully send correct temporaryID
           If not, add the duplicated message */}
-          <SuccessSubmission onClose={handleClose} temporaryID={"AB_2923405"} />
+          <SuccessSubmission onClose={handleClose} temporaryID={temporaryID} />
         </MultiStep>
       </Box>
     </Dialog>
