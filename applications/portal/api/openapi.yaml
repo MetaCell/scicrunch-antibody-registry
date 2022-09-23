@@ -296,6 +296,15 @@ paths:
             operationId: getUserAntibodies
             summary: List Antibodies
             description: Gets a list of `Antibody` entities.
+    /datainfo:
+        get:
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DataInfo'
+                    description: Returns info
 components:
     schemas:
         AddUpdateAntibody:
@@ -580,6 +589,21 @@ components:
                     example: >-
                         Sheep polyclonal anti-FSH antibody labeled with acridinium ester. Mouse monoclonal
                         anti-FSH antibody covalently coupled to paramagnetic particles.
+        DataInfo:
+            description: Information about the data in the system
+            required:
+                - lastupdate
+                - total
+            type: object
+            properties:
+                total:
+                    description: The total number of antibodies in the system
+                    minimum: 0
+                    type: integer
+                lastupdate:
+                    format: date
+                    description: ''
+                    type: string
     responses:
         PaginatedAntibodies:
             content:
