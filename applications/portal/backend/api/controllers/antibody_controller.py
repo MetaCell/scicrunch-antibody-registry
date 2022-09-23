@@ -1,6 +1,9 @@
+from fastapi import HTTPException
+
 from typing import List
 
 from api.services import antibody_service
+
 from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO
 
@@ -10,7 +13,11 @@ def get_antibodies(page: int = 0, size: int = 50) -> List[AntibodyDTO]:
 
 
 def create_antibody(body: AddUpdateAntibodyDTO) -> None:
-    return antibody_service.create_antibody(body)
+    try:
+        return antibody_service.create_antibody(body)
+    except antibody_service.AntibodyDataException as e:
+        raise HTTPException(status_code=400, detail=e.field_name)
+
 
 
 def get_antibody(antibody_id: int) -> AntibodyDTO:

@@ -1,3 +1,4 @@
+from email.mime import base
 import enum
 import datetime
 from urllib.parse import urlsplit
@@ -15,7 +16,11 @@ from .mapping_utils import dict_to_snake, dict_to_camel, to_camel, to_snake
 
 dto_fields = {to_snake(f) for f in AntibodyDTO.__fields__}
 
-
+class AntibodyDataException(Exception): 
+    def __init__(self, message, field_name, field_value):
+        super().__init__(message)
+        self.field_name = field_name
+        self.field_value = field_value
 class AntibodyMapper(IDAOMapper):
 
     def from_dto(self, dto: AntibodyDTO) -> Antibody:
@@ -43,7 +48,7 @@ class AntibodyMapper(IDAOMapper):
             try:
                 ab.source_organism = Specie.objects.get(name=specie)
             except Specie.DoesNotExist:
-                log.warn("Adding specie: %s", antigen_symbol)
+                log.info("Adding specie: %s", antigen_symbol)
                 sp = Specie(name=specie)
                 sp.save()
                 ab.source_organism = sp
@@ -51,12 +56,16 @@ class AntibodyMapper(IDAOMapper):
             # Vendor url check workflows https://github.com/MetaCell/scicrunch-antibody-registry/issues/51
 
             base_url = urlsplit(dto.url).hostname
+            if not base_url:
+                raise AntibodyDataException("Not a valid url", "url", dto.url)
             try:
                 ab.vendor = VendorDomain.objects.get(base_url=base_url).vendor
             except VendorDomain.DoesNotExist:
                 if dto.vendorName:
                     try:
-                        v = Vendor.objects.get(name=dto.vendorName)
+                        v: Vendor = Vendor.objects.get(name=dto.vendorName)
+                        
+                        log.info("Adding new domain `%s` to vendor `%s`", base_url, v.name)
                         vd = VendorDomain(vendor=v, base_url=base_url, status=STATUS.QUEUE)
                         vd.save()
                         ab.vendor = v
@@ -124,8 +133,10 @@ class AntibodyMapper(IDAOMapper):
                 dao_dict[k] = v.isoformat()
 
         ab = AntibodyDTO(**dict_to_camel(dao_dict), )
-        antigen: Gene = dao.antigen
-        ab.abTarget = antigen.symbol
-        ab.vendorName = dao.vendor.name
+        if dao.antigen:
+            antigen: Gene = dao.antigen
+            ab.abTarget = antigen.symbol
+        if dao.vendor:
+            ab.vendorName = dao.vendor.name
         # ab.commercialType = dao.
         return ab

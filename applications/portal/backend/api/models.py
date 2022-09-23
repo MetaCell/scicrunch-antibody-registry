@@ -102,9 +102,9 @@ class Antibody(models.Model):
     cat_alt = models.CharField(max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
     url = models.URLField(max_length=URL_MAX_LEN, null=True)
-    antigen = models.ForeignKey(Gene, on_delete=models.RESTRICT, db_column='antigen_id')
+    antigen = models.ForeignKey(Gene, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
-                                     through='AntibodySpecies')
+                                     through='AntibodySpecies', null=True)
     subregion = models.CharField(max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion', null=True)
     modifications = models.CharField(max_length=ANTIBODY_TARGET_MODIFICATION_MAX_LEN, db_column='target_modification',
                                      null=True)

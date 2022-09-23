@@ -1,10 +1,10 @@
 from typing import List
 
 
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator
 
 from api.models import Antibody
-from api.mappers.antibody_mapper import AntibodyMapper
+from api.mappers.antibody_mapper import AntibodyMapper, AntibodyDataException
 from openapi.models import Antibody as AntibodyDTO, PaginatedAntibodies
 from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO
 
@@ -56,3 +56,4 @@ def update_antibody(antibody_id: str, body: AddUpdateAntibodyDTO) -> AntibodyDTO
 
 def delete_antibody(antibody_id: str) -> None:
     return antibody_repository.delete(antibody_id)
+
