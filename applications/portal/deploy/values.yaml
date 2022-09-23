@@ -32,11 +32,7 @@ harness:
     - portal:manager
     require-any-role: true
   - uri: /add
-    roles:
-    - administrator
-    - portal:administrator
-    - portal:manager
-    - portal:user
+    roles: []
     require-any-role: true
   - uri: /login
     roles: []
