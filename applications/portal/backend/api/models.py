@@ -96,15 +96,17 @@ class Antibody(models.Model):
         default=CommercialType.OTHER,
         null=True
     )
-    # todo: change to foreignKey to user model @afonsobspinto; Don't allow null
-    uid = models.CharField(max_length=ANTIBODY_ID_MAX_LEN, null=True)
+    # This user id maps the users in keycloak
+    uid = models.CharField(max_length=256, null=True)
+    # Maps to old users -- used only for migration purpose
+    uid_legacy = models.IntegerField(null=True)
     catalog_num = models.CharField(max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True)
     cat_alt = models.CharField(max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
     url = models.URLField(max_length=URL_MAX_LEN, null=True)
     antigen = models.ForeignKey(Gene, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
-                                     through='AntibodySpecies', null=True)
+                                     through='AntibodySpecies')
     subregion = models.CharField(max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion', null=True)
     modifications = models.CharField(max_length=ANTIBODY_TARGET_MODIFICATION_MAX_LEN, db_column='target_modification',
                                      null=True)
@@ -151,3 +153,7 @@ class Antibody(models.Model):
 class AntibodySpecies(models.Model):
     antibody = models.ForeignKey(Antibody, on_delete=models.CASCADE)
     specie = models.ForeignKey(Specie, on_delete=models.CASCADE)
+
+
+
+    
