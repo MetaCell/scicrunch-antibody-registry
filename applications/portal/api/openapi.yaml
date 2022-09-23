@@ -309,13 +309,9 @@ components:
                 -
                     required:
                         - url
-                        - usedid
                     type: object
                     properties:
                         url:
-                            description: ''
-                            type: string
-                        usedid:
                             description: ''
                             type: string
                 -
