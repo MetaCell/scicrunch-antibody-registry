@@ -21,9 +21,9 @@ def get_user_id():
     except Exception as e:
         raise HTTPException(status_code=401, detail="Unrecognized user")
 
-def get_user_antibodies(page: int = 0, size: int = 50) -> List[AntibodyDTO]:
+def get_user_antibodies(page: int = 1, size: int = 50) -> List[AntibodyDTO]:
     
-    return antibody_service.get_user_antibodies(page, size, get_user_id())
+    return antibody_service.get_user_antibodies(get_user_id(), page, size)
 
 def create_antibody(body: AddUpdateAntibodyDTO) -> None:
     try:

@@ -3,16 +3,28 @@ from typing import List
 
 from django.core.paginator import Paginator
 
-from api.models import Antibody
+from cloudharness import log
+
+from api.models import STATUS, Antibody
 from api.mappers.antibody_mapper import AntibodyMapper, AntibodyDataException
 from openapi.models import Antibody as AntibodyDTO, PaginatedAntibodies
 from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO
 
 
+class DuplicatedAntibody(Exception):
+    def __init__(self, ab_id):
+        super().__init__("Antibody exists")
+        self.ab_id = ab_id
+
 antibody_mapper = AntibodyMapper()
 
-def get_antibodies(page: int = 0, size: int = 50) -> PaginatedAntibodies:
-    p = Paginator(Antibody.objects.all(), size)
+def get_antibodies(page: int = 1, size: int = 50) -> PaginatedAntibodies:
+    p = Paginator(Antibody.objects.all().filter(status=STATUS.CURATED), size)
+    items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
+    return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
+
+def get_user_antibodies(userid: str, page: int = 1, size: int = 50) -> PaginatedAntibodies:
+    p = Paginator(Antibody.objects.all().filter(uid=userid), size)
     items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
 
@@ -21,16 +33,21 @@ def generate_id(antibody: Antibody):
     import random
     return random.randint(0, 99999999)
 
-def create_antibody(body: AddUpdateAntibodyDTO) -> AntibodyDTO:
-    
-    antibody = antibody_mapper.from_dto(body)
-    antibody.ab_id = generate_id(antibody)
-    # antibody.ab_id = "AB_%s" % antibody.id
-    # TODO add logic to map the vendor to the url
+def create_antibody(body: AddUpdateAntibodyDTO, userid: str) -> AntibodyDTO:
 
-    # TODO add default values (e.g. curation state)
-    antibody.save()
-    return antibody_mapper.to_dto(antibody)
+    try:
+        ab: Antibody = Antibody.objects.get(vendor__name=body.vendorName, catalog_num=body.catalogNum)
+        raise DuplicatedAntibody(ab.ab_id)
+    except Antibody.DoesNotExist:
+        antibody = antibody_mapper.from_dto(body)
+        antibody.ab_id = generate_id(antibody)
+        antibody.uid = userid
+        antibody.status = STATUS.QUEUE
+        antibody.save()
+        return antibody_mapper.to_dto(antibody)
+    except Antibody.MultipleObjectsReturned:
+        log.warn("Unexpectedly found multiple antibodies with catalog number %s and vendor %s", body.vendorName, body.catalogNum)
+        raise DuplicatedAntibody(", ". join(str(a.ab_id) for a in Antibody.objects.all().filter(vendor__name=body.vendorName, catalog_num=body.catalogNum)))
 
 
 def get_antibody(antibody_id: int) -> AntibodyDTO:
