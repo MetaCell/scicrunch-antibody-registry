@@ -776,6 +776,12 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication cookieAuth required
+
 
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
@@ -899,6 +905,52 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
+         * Gets a list of `Antibody` entities.
+         * @summary List Antibodies
+         * @param {number} [page] Represents the page requested, considering the size parameter
+         * @param {number} [size] Corresponds to the cardinality of antibodies requested
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserAntibodies: async (page?: number, size?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/antibodies/user`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication cookieAuth required
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Updates an existing `Antibody`.
          * @summary Update a Antibody
          * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
@@ -923,6 +975,8 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
 
 
     
@@ -955,7 +1009,7 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async createAntibody(addUpdateAntibody: AddUpdateAntibody, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async createAntibody(addUpdateAntibody: AddUpdateAntibody, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Antibody>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.createAntibody(addUpdateAntibody, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -994,6 +1048,18 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * Gets a list of `Antibody` entities.
+         * @summary List Antibodies
+         * @param {number} [page] Represents the page requested, considering the size parameter
+         * @param {number} [size] Corresponds to the cardinality of antibodies requested
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getUserAntibodies(page?: number, size?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAntibodies>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserAntibodies(page, size, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Updates an existing `Antibody`.
          * @summary Update a Antibody
          * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
@@ -1022,7 +1088,7 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createAntibody(addUpdateAntibody: AddUpdateAntibody, options?: any): AxiosPromise<void> {
+        createAntibody(addUpdateAntibody: AddUpdateAntibody, options?: any): AxiosPromise<Antibody> {
             return localVarFp.createAntibody(addUpdateAntibody, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1055,6 +1121,17 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
          */
         getAntibody(antibodyId: number, options?: any): AxiosPromise<Antibody> {
             return localVarFp.getAntibody(antibodyId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Gets a list of `Antibody` entities.
+         * @summary List Antibodies
+         * @param {number} [page] Represents the page requested, considering the size parameter
+         * @param {number} [size] Corresponds to the cardinality of antibodies requested
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserAntibodies(page?: number, size?: number, options?: any): AxiosPromise<PaginatedAntibodies> {
+            return localVarFp.getUserAntibodies(page, size, options).then((request) => request(axios, basePath));
         },
         /**
          * Updates an existing `Antibody`.
@@ -1124,6 +1201,19 @@ export class AntibodyApi extends BaseAPI {
      */
     public getAntibody(antibodyId: number, options?: AxiosRequestConfig) {
         return AntibodyApiFp(this.configuration).getAntibody(antibodyId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Gets a list of `Antibody` entities.
+     * @summary List Antibodies
+     * @param {number} [page] Represents the page requested, considering the size parameter
+     * @param {number} [size] Corresponds to the cardinality of antibodies requested
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AntibodyApi
+     */
+    public getUserAntibodies(page?: number, size?: number, options?: AxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).getUserAntibodies(page, size, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
