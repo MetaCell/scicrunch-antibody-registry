@@ -31,6 +31,9 @@ const theme = createTheme({
       dark: "#0052CC",
       200: "#A5C8F0"
     },
+    error: {
+      main: "#D92D20",
+    },
   },
   shape: {
     borderRadius: 8,
