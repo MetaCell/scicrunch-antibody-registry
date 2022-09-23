@@ -42,7 +42,7 @@ class STATUS(models.TextChoices):
 
 
 class Vendor(models.Model):
-    name = models.CharField(max_length=VENDOR_MAX_LEN, db_column='vendor')
+    name = models.CharField(max_length=VENDOR_MAX_LEN, db_column='vendor', db_index=True)
     nif_id = models.CharField(max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id', null=True)
 
     def __str__(self):
@@ -50,8 +50,8 @@ class Vendor(models.Model):
 
 
 class VendorSynonym(models.Model):
-    name = models.CharField(max_length=VENDOR_MAX_LEN)
-    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+    name = models.CharField(max_length=VENDOR_MAX_LEN, db_index=True)
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, db_index=True)
 
 
 class Specie(models.Model):
@@ -59,13 +59,13 @@ class Specie(models.Model):
 
 
 class VendorDomain(models.Model):
-    base_url = models.URLField(unique=True, max_length=URL_MAX_LEN, null=True, db_column='domain_name')
-    vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True, db_column='vendor_id')
+    base_url = models.URLField(unique=True, max_length=URL_MAX_LEN, null=True, db_column='domain_name', db_index=True)
+    vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True, db_column='vendor_id', db_index=True)
     is_domain_visible = models.BooleanField(default=True, db_column='link')
     status = models.CharField(
         max_length=STATUS_MAX_LEN,
         choices=STATUS.choices,
-        default=STATUS.QUEUE
+        default=STATUS.QUEUE, db_index=True
     )
 
     def __str__(self):
@@ -74,10 +74,10 @@ class VendorDomain(models.Model):
 
 # TODO: Update according to https://github.com/MetaCell/scicrunch-antibody-registry/issues/65
 class Gene(models.Model):
-    symbol = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN, db_column='ab_target', null=True)
+    symbol = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN, db_column='ab_target', null=True, db_index=True)
     entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
-                                 null=True)
-    uniprot_id = models.CharField(unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True)
+                                 null=True, db_index=True)
+    uniprot_id = models.CharField(unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True)
 
     def __str__(self):
         return self.entrez_id
@@ -87,8 +87,8 @@ class Antibody(models.Model):
     # todo: make sure autoincrement is functional with incremental ingestion
     ix = models.AutoField(primary_key=True, unique=True, null=False)
     # todo: In the context, is a bit strange to have nullable antibody name
-    ab_name = models.CharField(max_length=ANTIBODY_NAME_MAX_LEN, null=True)
-    ab_id = models.IntegerField()
+    ab_name = models.CharField(max_length=ANTIBODY_NAME_MAX_LEN, null=True, db_index=True)
+    ab_id = models.IntegerField(db_index=True)
     accession = models.CharField(max_length=ANTIBODY_ID_MAX_LEN)
     commercial_type = models.CharField(
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
@@ -97,10 +97,10 @@ class Antibody(models.Model):
         null=True
     )
     # This user id maps the users in keycloak
-    uid = models.CharField(max_length=256, null=True)
+    uid = models.CharField(max_length=256, null=True, db_index=True)
     # Maps to old users -- used only for migration purpose
     uid_legacy = models.IntegerField(null=True)
-    catalog_num = models.CharField(max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True)
+    catalog_num = models.CharField(max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True)
     cat_alt = models.CharField(max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
     url = models.URLField(max_length=URL_MAX_LEN, null=True)
@@ -131,10 +131,11 @@ class Antibody(models.Model):
     status = models.CharField(
         max_length=STATUS_MAX_LEN,
         choices=STATUS.choices,
-        default=STATUS.QUEUE
+        default=STATUS.QUEUE, 
+        db_index=True
     )
-    insert_time = models.DateTimeField(auto_now_add=True)
-    curate_time = models.DateTimeField(auto_now=True)
+    insert_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    curate_time = models.DateTimeField(auto_now=True, db_index=True)
 
     def __str__(self):
         return self.uid
@@ -151,8 +152,8 @@ class Antibody(models.Model):
 
 
 class AntibodySpecies(models.Model):
-    antibody = models.ForeignKey(Antibody, on_delete=models.CASCADE)
-    specie = models.ForeignKey(Specie, on_delete=models.CASCADE)
+    antibody = models.ForeignKey(Antibody, on_delete=models.CASCADE, db_index=True)
+    specie = models.ForeignKey(Specie, on_delete=models.CASCADE, db_index=True)
 
 
 
