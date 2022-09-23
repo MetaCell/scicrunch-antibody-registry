@@ -195,6 +195,7 @@ const CommercialForm = (props) => {
     addAntibody(ab)
       .then((res) => {
         console.log("res", res);
+        props.setTemporaryID(res.abId);
         props.next();
       })
       .catch((err) => alert(err));
