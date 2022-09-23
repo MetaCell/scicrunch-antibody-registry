@@ -92,5 +92,7 @@ def count():
 def last_update():
     # Used to improve performance -- otherwise need to sort all antibodies!
     last_date = datetime.now() - dateutil.relativedelta.relativedelta(months=6)
-
-    return Antibody.objects.all().filter(status=STATUS.CURATED, curate_time__gte=last_date).latest("curate_time").curate_time
+    try:
+        return Antibody.objects.all().filter(status=STATUS.CURATED, curate_time__gte=last_date).latest("curate_time").curate_time
+    except Antibody.DoesNotExist:
+        return Antibody.objects.all().filter(status=STATUS.CURATED).latest("curate_time").curate_time
