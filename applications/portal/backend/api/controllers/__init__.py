@@ -2,3 +2,4 @@ import api.controllers.antibody_controller as antibody_controller
 import api.controllers.search_controller as search_controller
 import api.controllers.test_controller as test_controller
 import api.controllers.ingest_controller as ingest_controller
+import api.controllers.api_controller as api_controller
