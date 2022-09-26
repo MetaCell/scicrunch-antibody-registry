@@ -34,7 +34,7 @@ steps:
     commands:
     - bash cloud-harness/install.sh
     - harness-deployment cloud-harness . -t ${{CF_BUILD_ID}} -d ${{DOMAIN}} -r ${{REGISTRY}}
-      -rs ${{REGISTRY_SECRET}} -n ${{NAMESPACE}} -e dev -i areg-portal
+      -rs ${{REGISTRY_SECRET}} -n ${{NAMESPACE}} -e dev -i portal
   prepare_deployment_view:
     commands:
     - helm template ./deployment/helm --debug -n ${{NAMESPACE}}
@@ -181,7 +181,7 @@ steps:
         image_name: areg/events
         title: Events
         working_directory: ./cloud-harness/applications/events
-      areg-portal:
+      portal:
         type: build
         stage: build
         tag: '${{CF_BUILD_ID}}'
@@ -195,9 +195,9 @@ steps:
         - REGISTRY=${{REGISTRY}}/areg/
         - CLOUDHARNESS_FRONTEND_BUILD=${{REGISTRY}}/areg/cloudharness-frontend-build:${{CF_BUILD_ID}}
         - CLOUDHARNESS_DJANGO=${{REGISTRY}}/areg/cloudharness-django:${{CF_BUILD_ID}}
-        image_name: areg/areg-portal
-        title: Areg portal
-        working_directory: ./applications/areg-portal
+        image_name: areg/portal
+        title: Portal
+        working_directory: ./applications/portal
   deployment:
     stage: deploy
     type: helm
@@ -290,11 +290,11 @@ steps:
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
-      publish_areg-portal:
+      publish_portal:
         stage: publish
         type: push
-        title: Areg portal
-        candidate: '${{REGISTRY}}/areg/areg-portal:${{CF_BUILD_ID}}'
+        title: Portal
+        candidate: '${{REGISTRY}}/areg/portal:${{CF_BUILD_ID}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
