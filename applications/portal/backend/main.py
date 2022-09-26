@@ -71,10 +71,10 @@ if os.environ.get('KUBERNETES_SERVICE_HOST', None):
     # init the auth service when running in/for k8s
     from cloudharness_django.services import get_auth_service, init_services
 
-    def init():
-        init_services()
+
+    init_services()
             # start the kafka event listener when running in/for k8s
-        import cloudharness_django.services.events
+    import cloudharness_django.services.events
 
 
 # enable the Bearer Authentication
