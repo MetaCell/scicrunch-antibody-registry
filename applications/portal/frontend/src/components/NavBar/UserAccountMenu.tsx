@@ -84,7 +84,7 @@ const UserAccountMenu = (props: UserProps) => {
               <Divider />
               <MenuList sx={{ "& .MuiMenuItem-root": { paddingTop: "0.4rem" } }}>
                 <MenuItem onClick={() => {
-                  history.push("/user"); setAnchorEl(null)}} component={Link} to="/account-details">
+                  history.push("/user"); setAnchorEl(null)}} component={Link}>
                   <ListItemIcon>
                     <UserIcon />
                   </ListItemIcon>
