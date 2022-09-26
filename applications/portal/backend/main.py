@@ -71,24 +71,11 @@ if os.environ.get('KUBERNETES_SERVICE_HOST', None):
     # init the auth service when running in/for k8s
     from cloudharness_django.services import get_auth_service, init_services
 
-    async def init():
-        import asyncio
-
-        try:
-            log.info("Initializing user service")
-            init_services()
+    def init():
+        init_services()
             # start the kafka event listener when running in/for k8s
-            import cloudharness_django.services.events
-        except:
-            from cloudharness import log
+        import cloudharness_django.services.events
 
-            log.warn(
-                "Accounts not available -- user syncronization for backoffice not available. Waiting 30 seconds..."
-            )
-            await asyncio.sleep(30)
-            await init()
-
-    init()
 
 # enable the Bearer Authentication
 security = APIKeyCookie(name="kc-access")
