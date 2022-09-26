@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom"
 import { useHistory } from "react-router-dom"
 import {
   IconButton,
@@ -83,7 +84,7 @@ const UserAccountMenu = (props: UserProps) => {
               <Divider />
               <MenuList sx={{ "& .MuiMenuItem-root": { paddingTop: "0.4rem" } }}>
                 <MenuItem onClick={() => {
-                  history.push("/user"); setAnchorEl(null)}}>
+                  history.push("/user"); setAnchorEl(null)}} component={Link} to="/account-details">
                   <ListItemIcon>
                     <UserIcon />
                   </ListItemIcon>

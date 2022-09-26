@@ -1,13 +1,23 @@
 import React from "react";
 import { useTheme } from "@mui/material/styles";
 import { Grid, Typography, Button, Box, Divider, TextField, InputAdornment } from "@mui/material";
-import { CheckIcon, EmailIcon, ExternalLinkIcon, EyeIcon, EyeOffIcon } from "../icons";
+import { CheckIcon, EmailIcon, ExternalLinkIcon } from "../icons";
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 
-const AccountDetailsForm = () => {
+import { User } from "../../services/UserService";
+
+interface UserProps {
+  user: User
+}
+
+
+const AccountDetailsForm = (props:UserProps) => {
   const theme = useTheme();
   const [isPassOrigShown, setIsPassOrigShown] = React.useState(false);
   const [isPassNewShown, setIsPassNewShown] = React.useState(false);
   const [isPassConfirmShown, setIsPassConfirmShown] = React.useState(false);
+  console.log("Acc details page user: ", props.user)
   const classes = {
     saveButton: {
       border: `1px solid ${theme.palette.primary[200]}`,
@@ -60,11 +70,11 @@ const AccountDetailsForm = () => {
           <Grid item lg={9} display="flex" justifyContent="space-between">
             <Grid item lg={5.9}>
               <Typography variant="subtitle1" color="grey.700" pb={0.75}>First Name</Typography>
-              <TextField value="Olivia" fullWidth />
+              <TextField value={props.user.first_name} fullWidth />
             </Grid>
             <Grid item lg={5.9}>
               <Typography variant="subtitle1" color="grey.700" pb={0.75}>Last Name</Typography>
-              <TextField value="Olivia" fullWidth />
+              <TextField value={props.user.last_name} fullWidth />
             </Grid>
           </Grid>
         </Grid>
@@ -78,7 +88,7 @@ const AccountDetailsForm = () => {
             <Typography variant="subtitle1" color="grey.700" pb={0.75}>Email</Typography>
             <TextField
               fullWidth
-              value="olivia.rhye@gmail.com"
+              value={props.user.email}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start" sx={{ pl: 2 }}>
@@ -105,7 +115,7 @@ const AccountDetailsForm = () => {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <Button startIcon={isPassOrigShown ? <EyeIcon /> : <EyeOffIcon />} sx={classes.showButton} color="inherit" onClick={() => setIsPassOrigShown(!isPassOrigShown)}>Show</Button>
+                      <Button startIcon={isPassOrigShown ? <VisibilityOffOutlinedIcon sx={{ color:"#000" }} /> : <VisibilityOutlinedIcon sx={{ color:"#000" }} />} sx={classes.showButton} color="inherit" onClick={() => setIsPassOrigShown(!isPassOrigShown)}>Show</Button>
                     </InputAdornment>
                   )
                 }}
@@ -120,7 +130,7 @@ const AccountDetailsForm = () => {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <Button startIcon={isPassNewShown ? <EyeIcon /> : <EyeOffIcon />} sx={classes.showButton} color="inherit" onClick={() => setIsPassNewShown(!isPassNewShown)}>Show</Button>
+                      <Button startIcon={isPassNewShown ? <VisibilityOffOutlinedIcon sx={{ color:"#000" }} /> : <VisibilityOutlinedIcon sx={{ color:"#000" }} />} sx={classes.showButton} color="inherit" onClick={() => setIsPassNewShown(!isPassNewShown)}>Show</Button>
                     </InputAdornment>
                   )
                 }}
@@ -135,7 +145,7 @@ const AccountDetailsForm = () => {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <Button startIcon={isPassConfirmShown ? <EyeIcon /> : <EyeOffIcon />} sx={classes.showButton} color="inherit" onClick={() => setIsPassConfirmShown(!isPassConfirmShown)}>Show</Button>
+                      <Button startIcon={isPassConfirmShown ? <VisibilityOffOutlinedIcon sx={{ color:"#000" }} /> : <VisibilityOutlinedIcon sx={{ color:"#000" }} />} sx={classes.showButton} color="inherit" onClick={() => setIsPassConfirmShown(!isPassConfirmShown)}>Show</Button>
                     </InputAdornment>
                   )
                 }}
