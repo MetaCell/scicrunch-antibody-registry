@@ -25,6 +25,7 @@ module.exports = env => {
       publicPath: '/',
     }],
     compress: true,
+    https: env.DOMAIN.includes("https"),
     port: Number(env.devPort),
     allowedHosts: "all",
     historyApiFallback: true,
