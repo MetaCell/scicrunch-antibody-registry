@@ -75,6 +75,7 @@ if os.environ.get('KUBERNETES_SERVICE_HOST', None):
         import asyncio
 
         try:
+            log.info("Initializing user service")
             init_services()
             # start the kafka event listener when running in/for k8s
             import cloudharness_django.services.events
@@ -85,7 +86,7 @@ if os.environ.get('KUBERNETES_SERVICE_HOST', None):
                 "Accounts not available -- user syncronization for backoffice not available. Waiting 30 seconds..."
             )
             await asyncio.sleep(30)
-            init()
+            await init()
 
     init()
 
