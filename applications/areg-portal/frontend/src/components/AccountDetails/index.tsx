@@ -8,7 +8,7 @@ const AccountDetails = () => {
   const user: User = useUser();
   return (
         <>
-            <SubHeader>Good morning, Olivia.</SubHeader>
+            <SubHeader>Good morning, {user.preferred_username}.</SubHeader>
             <Container maxWidth="lg" disableGutters>
               <AccountDetailsForm user={user}/>
             </Container>

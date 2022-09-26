@@ -11,13 +11,11 @@ interface UserProps {
   user: User
 }
 
-
 const AccountDetailsForm = (props:UserProps) => {
   const theme = useTheme();
   const [isPassOrigShown, setIsPassOrigShown] = React.useState(false);
   const [isPassNewShown, setIsPassNewShown] = React.useState(false);
   const [isPassConfirmShown, setIsPassConfirmShown] = React.useState(false);
-  console.log("Acc details page user: ", props.user)
   const classes = {
     saveButton: {
       border: `1px solid ${theme.palette.primary[200]}`,
