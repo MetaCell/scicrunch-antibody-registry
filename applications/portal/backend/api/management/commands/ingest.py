@@ -14,6 +14,21 @@ from api.models import CommercialType, AntibodyClonality, Antibody, Gene, Vendor
     VendorSynonym, AntibodySpecies
 from areg_portal.settings import ANTIBODY_ANTIBODY_START_SEQ, ANTIBODY_VENDOR_START_SEQ, \
     ANTIBODY_VENDOR_DOMAIN_START_SEQ
+import logging
+import math
+import string
+from timeit import default_timer as timer
+
+import pandas as pd
+from django.core.management.base import BaseCommand
+from django.core.management.color import no_style
+from django.db import transaction, connection
+
+from api.management.pre_process import preprocess
+from api.models import CommercialType, AntibodyClonality, Antibody, Gene, Vendor, VendorDomain, Specie, \
+    VendorSynonym, AntibodySpecies
+from areg_portal.settings import ANTIBODY_ANTIBODY_START_SEQ, ANTIBODY_VENDOR_START_SEQ, \
+    ANTIBODY_VENDOR_DOMAIN_START_SEQ
 
 TRUNCATE_STM = "TRUNCATE TABLE {table_name} CASCADE;"
 INSERT_INTO_VALUES_STM = "INSERT INTO {table_name} ({columns}) VALUES {} ;"
@@ -175,7 +190,6 @@ class Command(BaseCommand):
                     len_csv = sum(1 for row in open(antibody_data_path, 'r'))
 
                     for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=chunk_size, dtype='unicode')):
-                        logging.info(f"File progress: {int(min((i + 1) * chunk_size, len_csv) / len_csv * 100)}% ")
                         raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, header, len(chunk))
                         row_params = []
                         for index, row in chunk.iterrows():
@@ -187,6 +201,8 @@ class Command(BaseCommand):
                                 row['clonality']) != float else 'UNK'
                             row_params.extend([clean_empty_value(value) for value in row.values])
                         cursor.execute(raw_data_insert_stm, row_params)
+                        logging.info(f"File progress: {int(min((i + 1) * chunk_size, len_csv) / len_csv * 100)}% ")
+
 
                 end = timer()
                 logging.info(f"Temporary table filled ({end - start} seconds)")
@@ -223,9 +239,9 @@ class Command(BaseCommand):
                                f"to_timestamp(cast(insert_time as BIGINT) / 1000000.0), " \
                                f"to_timestamp(cast(curate_time as BIGINT) / 1000000.0) " \
                                f"FROM {self.TMP_TABLE} as tmp " \
-                               f"JOIN {self.VENDOR_TABLE} as vendor " \
+                               f"FULL JOIN {self.VENDOR_TABLE} as vendor " \
                                f"ON CAST(tmp.vendor_id AS integer) = vendor.id " \
-                               f"JOIN {self.ANTIGEN_TABLE} as antigen " \
+                               f"FULL JOIN {self.ANTIGEN_TABLE} as antigen " \
                                f"ON tmp.ab_target = antigen.ab_target;"
 
                 start = timer()
@@ -236,73 +252,73 @@ class Command(BaseCommand):
 
                 # Insert into species
 
-                # get_species_stm = f"SELECT DISTINCT target_species FROM {self.TMP_TABLE} " \
-                #                   f"UNION " \
-                #                   f"SELECT DISTINCT source_organism FROM {self.TMP_TABLE}"
-                #
-                # start = timer()
-                # cursor.execute(get_species_stm)
-                # species_map = {}
-                # species_id = 1
-                # for row in cursor:
-                #     specie_str = row[0]
-                #     if specie_str:
-                #         for specie in specie_str.split(';'):
-                #             clean_specie = get_clean_species_str(specie)
-                #             if clean_specie not in species_map:
-                #                 species_map[clean_specie] = species_id
-                #                 species_id += 1
-                # species_insert_stm = get_insert_values_into_table_stm(self.SPECIE_TABLE,
-                #                                                       ['name', 'id'],
-                #                                                       len(species_map.keys()))
-                # cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(species_map.items())))
-                # end = timer()
-                # logging.info(f"Species added ({end - start} seconds)")
-                #
-                # # Insert into antibody species
-                # start = timer()
-                # for antibody_data_path in metadata.antibody_data_path:
-                #     for chunk in pd.read_csv(antibody_data_path, chunksize=chunk_size, dtype='unicode'):
-                #         species_params = []
-                #         for index, row in chunk.iterrows():
-                #             target_species = row['target_species']
-                #             if not is_null_value(target_species):
-                #                 for specie in row['target_species'].split(';'):
-                #                     clean_specie = get_clean_species_str(specie)
-                #                     species_params.extend([row['ix'], species_map[clean_specie]])
-                #
-                # antibody_species_insert_stm = get_insert_values_into_table_stm(
-                #     AntibodySpecies.objects.model._meta.db_table, ['antibody_id', 'specie_id'],
-                #     int(len(species_params) / 2))
-                #
-                # cursor.execute(antibody_species_insert_stm, species_params)
-                # end = timer()
-                # logging.info(f"AntibodySpecies added ({end - start} seconds)")
-                #
-                # # Update antibody source_organism
-                #
-                # source_organism_update_stm = f"UPDATE {self.ANTIBODY_TABLE} " \
-                #                              f"SET source_organism_id=SP.id " \
-                #                              f"FROM {self.SPECIE_TABLE} as SP " \
-                #                              f"JOIN {self.TMP_TABLE} as TP " \
-                #                              f"ON lower(TP.source_organism) = SP.name " \
-                #                              f"WHERE CAST(TP.ix AS integer)={self.ANTIBODY_TABLE}.ix "
-                # start = timer()
-                # cursor.execute(source_organism_update_stm)
-                # end = timer()
-                # logging.info(f"Antibodies source organisms updated ({end - start} seconds)")
-                #
-                # # Update vendor domain link
-                # antigen_update_stm = f"UPDATE {self.VENDOR_DOMAIN_TABLE} " \
-                #                      f"SET link = True " \
-                #                      f"FROM {self.TMP_TABLE} " \
-                #                      f"WHERE {self.VENDOR_DOMAIN_TABLE}.vendor_id=CAST({self.TMP_TABLE}.vendor_id as BIGINT) " \
-                #                      f"AND lower({self.TMP_TABLE}.link) = 'yes'; "
-                # start = timer()
-                # cursor.execute(antigen_update_stm)
-                # end = timer()
-                #
-                # logging.info(f"Vendor domain links updated ({end - start} seconds)")
+                get_species_stm = f"SELECT DISTINCT target_species FROM {self.TMP_TABLE} " \
+                                  f"UNION " \
+                                  f"SELECT DISTINCT source_organism FROM {self.TMP_TABLE}"
+
+                start = timer()
+                cursor.execute(get_species_stm)
+                species_map = {}
+                species_id = 1
+                for row in cursor:
+                    specie_str = row[0]
+                    if specie_str:
+                        for specie in specie_str.split(';'):
+                            clean_specie = get_clean_species_str(specie)
+                            if clean_specie not in species_map:
+                                species_map[clean_specie] = species_id
+                                species_id += 1
+                species_insert_stm = get_insert_values_into_table_stm(self.SPECIE_TABLE,
+                                                                      ['name', 'id'],
+                                                                      len(species_map.keys()))
+                cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(species_map.items())))
+                end = timer()
+                logging.info(f"Species added ({end - start} seconds)")
+
+                # Insert into antibody species
+                start = timer()
+                for antibody_data_path in metadata.antibody_data_path:
+                    for chunk in pd.read_csv(antibody_data_path, chunksize=chunk_size, dtype='unicode'):
+                        species_params = []
+                        for index, row in chunk.iterrows():
+                            target_species = row['target_species']
+                            if not is_null_value(target_species):
+                                for specie in row['target_species'].split(';'):
+                                    clean_specie = get_clean_species_str(specie)
+                                    species_params.extend([row['ix'], species_map[clean_specie]])
+
+                antibody_species_insert_stm = get_insert_values_into_table_stm(
+                    AntibodySpecies.objects.model._meta.db_table, ['antibody_id', 'specie_id'],
+                    int(len(species_params) / 2))
+
+                cursor.execute(antibody_species_insert_stm, species_params)
+                end = timer()
+                logging.info(f"AntibodySpecies added ({end - start} seconds)")
+
+                # Update antibody source_organism
+
+                source_organism_update_stm = f"UPDATE {self.ANTIBODY_TABLE} " \
+                                             f"SET source_organism_id=SP.id " \
+                                             f"FROM {self.SPECIE_TABLE} as SP " \
+                                             f"JOIN {self.TMP_TABLE} as TP " \
+                                             f"ON lower(TP.source_organism) = SP.name " \
+                                             f"WHERE CAST(TP.ix AS integer)={self.ANTIBODY_TABLE}.ix "
+                start = timer()
+                cursor.execute(source_organism_update_stm)
+                end = timer()
+                logging.info(f"Antibodies source organisms updated ({end - start} seconds)")
+
+                # Update vendor domain link
+                antigen_update_stm = f"UPDATE {self.VENDOR_DOMAIN_TABLE} " \
+                                     f"SET link = True " \
+                                     f"FROM {self.TMP_TABLE} " \
+                                     f"WHERE {self.VENDOR_DOMAIN_TABLE}.vendor_id=CAST({self.TMP_TABLE}.vendor_id as BIGINT) " \
+                                     f"AND lower({self.TMP_TABLE}.link) = 'yes'; "
+                start = timer()
+                cursor.execute(antigen_update_stm)
+                end = timer()
+
+                logging.info(f"Vendor domain links updated ({end - start} seconds)")
 
                 # Reset sequence fields
                 tables_to_restart_seq = {
