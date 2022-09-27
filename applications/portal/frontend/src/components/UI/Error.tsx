@@ -1,7 +1,7 @@
 import React from "react";
 import { Container, Typography, Button, Stack, Box } from "@mui/material";
 
-const Error400 = (props) => {
+const Error = (props) => {
   const classes = {
     container: {
       minHeight: "90vh",
@@ -22,11 +22,10 @@ const Error400 = (props) => {
     <Container maxWidth="xl" sx={classes.container}>
       <Stack spacing={3} sx={classes.stack}>
         <Typography variant="h1" color="grey.700">
-          Error 400 Bad Request
+          Something went wrong
         </Typography>
         <Typography variant="subtitle1" align="center" sx={classes.message}>
-          {/* {props.error.message || "We are sorry for the inconvenience"} */}
-          We are sorry for the inconvenience
+          Error message: {props.detail}. We are sorry for the inconvenience
         </Typography>
         <Box>
           <Button variant="contained" href="/" sx={{ width: "fit-content" }}>
@@ -38,4 +37,4 @@ const Error400 = (props) => {
   );
 };
 
-export default Error400;
+export default Error;

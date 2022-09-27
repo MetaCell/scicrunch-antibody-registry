@@ -19,7 +19,7 @@ import { AlertIcon } from "../icons";
 import StepNavigation from "./StepNavigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { addAntibody } from "../../services/AntibodiesService";
+import { postNewAntibody } from "../../utils/antibody";
 
 const {
   bannerHeadingColor,
@@ -192,21 +192,7 @@ const CommercialForm = (props) => {
 
   const postAntibody = (antibody) => {
     let ab = { ...antibody, type: "commercial" };
-    addAntibody(ab)
-      .then((res) => {
-        console.log("res", res);
-        props.setAntibodyId(res.abId);
-        props.next();
-      })
-      .catch((err) => {
-        if (err.response.status === 409) {
-          let id = err.response.data.detail.split(" ")[7].match(/\d/g).join("");
-          props.setIsDuplicated(true);
-          props.setAntibodyId(id);
-          props.next();
-        } else if (err.response.status === 500) {
-        }
-      });
+    postNewAntibody(ab, props);
   };
 
   const formik = useFormik({
