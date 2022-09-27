@@ -10,6 +10,7 @@ import CommercialForm from "./CommercialForm";
 import SuccessSubmission from "./SuccessSubmission";
 import PersonalForm from "./PersonalForm";
 import OtherForm from "./OtherForm";
+import DuplicatedMsg from "./DuplicatedMsg";
 
 const SubmissionForm = (props) => {
   const theme = useTheme();
@@ -25,7 +26,8 @@ const SubmissionForm = (props) => {
   };
 
   const [selectedType, setSelectedType] = useState("commercial");
-  const [temporaryID, setTemporaryID] = useState("");
+  const [antibodyId, setAntibodyId] = useState("");
+  const [isDuplicated, setIsDuplicated] = useState(false);
 
   const handleTypeSelector = (value: string) => {
     setSelectedType(value);
@@ -34,7 +36,8 @@ const SubmissionForm = (props) => {
   const handleClose = () => {
     window.location.href = "/";
     setSelectedType("commercial");
-    setSelectedType("");
+    setAntibodyId("");
+    setIsDuplicated(false);
   };
 
   return (
@@ -93,26 +96,29 @@ const SubmissionForm = (props) => {
               next={props.next}
               previous={props.previous}
               hasPrevious={props.hasPrevious}
-              setTemporaryID={setTemporaryID}
+              setAntibodyId={setAntibodyId}
+              setIsDuplicated={setIsDuplicated}
             />
           ) : selectedType === "personal" ? (
             <PersonalForm
               next={props.next}
               previous={props.previous}
               hasPrevious={props.hasPrevious}
-              setTemporaryID={setTemporaryID}
+              setAntibodyId={setAntibodyId}
             />
           ) : (
             <OtherForm
               next={props.next}
               previous={props.previous}
               hasPrevious={props.hasPrevious}
-              setTemporaryID={setTemporaryID}
+              setAntibodyId={setAntibodyId}
             />
           )}
-          {/* TODO check if the post is sucessfully send correct temporaryID
-          If not, add the duplicated message */}
-          <SuccessSubmission onClose={handleClose} temporaryID={temporaryID} />
+          {isDuplicated ? (
+            <DuplicatedMsg antibodyId={antibodyId} />
+          ) : (
+            <SuccessSubmission onClose={handleClose} temporaryID={antibodyId} />
+          )}
         </MultiStep>
       </Box>
     </Dialog>

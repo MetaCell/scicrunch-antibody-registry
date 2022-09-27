@@ -195,10 +195,18 @@ const CommercialForm = (props) => {
     addAntibody(ab)
       .then((res) => {
         console.log("res", res);
-        props.setTemporaryID(res.abId);
+        props.setAntibodyId(res.abId);
         props.next();
       })
-      .catch((err) => alert(err));
+      .catch((err) => {
+        if (err.response.status === 409) {
+          let id = err.response.data.detail.split(" ")[7].match(/\d/g).join("");
+          props.setIsDuplicated(true);
+          props.setAntibodyId(id);
+          props.next();
+        } else if (err.response.status === 500) {
+        }
+      });
   };
 
   const formik = useFormik({

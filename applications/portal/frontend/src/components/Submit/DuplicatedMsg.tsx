@@ -61,6 +61,9 @@ const DuplicatedMsg = (props) => {
       borderColor: theme.palette.grey[300],
       borderRadius: theme.shape,
     },
+    button: {
+      width: "fit-content",
+    },
   };
 
   return (
@@ -73,13 +76,13 @@ const DuplicatedMsg = (props) => {
         <Typography variant="h1" color="error.main">
           This antibody is a duplicate
         </Typography>
-        <Box>
+        {/* <Box>
           <Typography variant="subtitle1" sx={classes.label}>
             Search the antibody by catalog number and save time
           </Typography>
           <Box display="flex" sx={classes.group}>
             <Box sx={classes.input}>
-              <Typography>{props.catalogNum}</Typography>
+              <Typography>{props.antibodyId}</Typography>
             </Box>
             <Button
               variant="text"
@@ -91,7 +94,7 @@ const DuplicatedMsg = (props) => {
               Search
             </Button>
           </Box>
-        </Box>
+        </Box> */}
         <Divider>
           <Typography variant="subtitle1" sx={classes.message}>
             English
@@ -100,7 +103,8 @@ const DuplicatedMsg = (props) => {
         <Typography variant="subtitle1" align="center" sx={classes.message}>
           The Antibody you Entered is a Duplicate, which will be Rejected. We
           have found that the antibody you entered already exists in our system.
-          The ID associated with the antibody is RRID:AB_{props.abId}.
+          The ID associated with the antibody is RRID:AB_
+          {props.antibodyId}.
         </Typography>
         <Divider>
           <Typography variant="subtitle1" sx={classes.message}>
@@ -110,8 +114,19 @@ const DuplicatedMsg = (props) => {
         <Typography variant="subtitle1" align="center" sx={classes.message}>
           您所提交的抗体已经存在于我们的系统中，此次申请将会被拒绝
           我们发现您所提交的抗体已经存在于我们的系统中，它的ID 是 RRID:AB_
-          {props.abId}.
+          {props.antibodyId}.
         </Typography>
+        <Box>
+          <Button
+            //onClick={props.onClose}
+            href={`/AB_${props.antibodyId}`}
+            variant="contained"
+            color="primary"
+            sx={classes.button}
+          >
+            Go to the existing antibody record
+          </Button>
+        </Box>
       </Stack>
       <Link
         target="_blank"
