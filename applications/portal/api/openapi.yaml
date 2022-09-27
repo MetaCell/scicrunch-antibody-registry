@@ -73,6 +73,8 @@ paths:
             security:
                 -
                     cookieAuth: []
+                -
+                    bearerAuth: []
             operationId: createAntibody
             summary: Create a Antibody
             description: Creates a new instance of a `Antibody`.
@@ -617,3 +619,8 @@ components:
             name: kc-access
             in: cookie
             x-apikeyInfoFunc: cloudharness.auth.decode_token
+        bearerAuth:
+            scheme: bearer
+            bearerFormat: JWT
+            type: http
+            x-bearerInfoFunc: cloudharness.auth.decode_token

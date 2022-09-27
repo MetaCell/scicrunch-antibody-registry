@@ -77,6 +77,8 @@ class AntibodyMapper(IDAOMapper):
         ab_dict = dict_to_snake(dto.dict())
 
         for k, v in ab_dict.items():
+            if not v:
+                continue
             if isinstance(v, enum.Enum):
                 setattr(ab, k, v.value)
             else:

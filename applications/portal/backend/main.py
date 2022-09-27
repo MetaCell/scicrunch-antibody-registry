@@ -11,7 +11,7 @@ from django.apps import apps
 from django.conf import settings
 from django.core.asgi import get_asgi_application
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
-from fastapi.security import APIKeyCookie, HTTPBasicCredentials
+from fastapi.security import APIKeyCookie, HTTPBasicCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from openapi.models import (
     AddUpdateAntibody,
@@ -78,8 +78,8 @@ if os.environ.get('KUBERNETES_SERVICE_HOST', None):
 
 
 # enable the Bearer Authentication
-security = APIKeyCookie(name="kc-access")
-
+#security = APIKeyCookie(name="kc-access") # This works but having issues with dev server
+security = HTTPBearer()
 
 async def has_access(credentials: HTTPBasicCredentials = Depends(security)):
     """

@@ -1,3 +1,4 @@
+import { Configuration } from "../rest";
 import {
   Antibody,
   PaginatedAntibodies,
@@ -5,6 +6,8 @@ import {
   AddUpdateAntibody,
   AntibodyCommercialTypeEnum,
 } from "../rest/api";
+
+import { getToken } from "./UserService"
 
 const api = new AntibodyApi();
 
@@ -23,7 +26,7 @@ export async function getAntibody(id: number): Promise<Antibody> {
 export async function addAntibody(antibodyObj): Promise<any> {
   let ab = mapAntibody(antibodyObj);
   console.log("mappedObj", ab);
-  return (await api.createAntibody(ab)).data;
+  return (await new AntibodyApi(new Configuration({ apiKey: getToken(), accessToken: getToken() })).createAntibody(ab)).data;
 }
 
 function mapAntibody(antibody): AddUpdateAntibody {

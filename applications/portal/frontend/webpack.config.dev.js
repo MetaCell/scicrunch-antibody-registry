@@ -34,6 +34,8 @@ module.exports = env => {
         target: replaceHost( proxyTarget, 'portal'),
         secure: false,
         changeOrigin: true,
+        cookieDomainRewrite: {  "localhost": "osb.local" },
+        withCredentials: true,
       }
     },
   };
