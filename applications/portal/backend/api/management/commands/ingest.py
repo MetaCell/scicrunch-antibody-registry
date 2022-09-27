@@ -11,24 +11,10 @@ from django.db import transaction, connection
 
 from api.management.pre_process import preprocess
 from api.models import CommercialType, AntibodyClonality, Antibody, Gene, Vendor, VendorDomain, Specie, \
-    VendorSynonym, AntibodySpecies
+    VendorSynonym, AntibodySpecies, STATUS
 from areg_portal.settings import ANTIBODY_ANTIBODY_START_SEQ, ANTIBODY_VENDOR_START_SEQ, \
     ANTIBODY_VENDOR_DOMAIN_START_SEQ
-import logging
-import math
-import string
-from timeit import default_timer as timer
-
-import pandas as pd
-from django.core.management.base import BaseCommand
-from django.core.management.color import no_style
-from django.db import transaction, connection
-
-from api.management.pre_process import preprocess
-from api.models import CommercialType, AntibodyClonality, Antibody, Gene, Vendor, VendorDomain, Specie, \
-    VendorSynonym, AntibodySpecies
-from areg_portal.settings import ANTIBODY_ANTIBODY_START_SEQ, ANTIBODY_VENDOR_START_SEQ, \
-    ANTIBODY_VENDOR_DOMAIN_START_SEQ
+from areg_portal.settings import CHUNCK_SIZE
 
 TRUNCATE_STM = "TRUNCATE TABLE {table_name} CASCADE;"
 INSERT_INTO_VALUES_STM = "INSERT INTO {table_name} ({columns}) VALUES {} ;"
@@ -78,6 +64,13 @@ def handle_undefined_commercial_type(value):
 
 def get_clean_species_str(specie: str):
     return specie.translate(str.maketrans('', '', string.punctuation)).strip().lower()
+
+
+UNKNOWN_VENDORS = {'1669', '1667', '1625', '1633', '1628', '11599', '12068', '12021', '1632', '5455', '1626', '1670', '11278', '(null)', '1684', '11598', '0', '1682', '11434'}
+
+
+def has_incorrect_vendor_id(row):
+    return row['vendor_id'] in UNKNOWN_VENDORS and row['status'] == STATUS.REJECTED
 
 
 class Command(BaseCommand):
@@ -182,27 +175,26 @@ class Command(BaseCommand):
                 start = timer()
                 cursor.execute(get_create_table_stm(self.TMP_TABLE, header))
 
-                chunk_size = 10 ** 5
-
                 # Insert raw data into tmp table
+
                 for antibody_data_path in metadata.antibody_data_path:
                     logging.info(antibody_data_path)
-                    len_csv = sum(1 for row in open(antibody_data_path, 'r'))
-
-                    for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=chunk_size, dtype='unicode')):
-                        raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, header, len(chunk))
+                    len_csv = sum(1 for _ in open(antibody_data_path, 'r'))
+                    for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNCK_SIZE, dtype='unicode')):
                         row_params = []
+                        raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, header, len(chunk))
                         for index, row in chunk.iterrows():
                             try:
                                 row['commercial_type'] = commercial_type_reverse_map[row['commercial_type']]
                             except KeyError:
                                 row['commercial_type'] = None
+                            if has_incorrect_vendor_id(row):
+                                row['vendor_id'] = None
                             row['clonality'] = clonality_reverse_map.get(row['clonality'].lower(), 'UNK') if type(
                                 row['clonality']) != float else 'UNK'
                             row_params.extend([clean_empty_value(value) for value in row.values])
                         cursor.execute(raw_data_insert_stm, row_params)
-                        logging.info(f"File progress: {int(min((i + 1) * chunk_size, len_csv) / len_csv * 100)}% ")
-
+                        logging.info(f"File progress: {int(min((i + 1) * CHUNCK_SIZE, len_csv) / len_csv * 100)}% ")
 
                 end = timer()
                 logging.info(f"Temporary table filled ({end - start} seconds)")
@@ -239,9 +231,9 @@ class Command(BaseCommand):
                                f"to_timestamp(cast(insert_time as BIGINT) / 1000000.0), " \
                                f"to_timestamp(cast(curate_time as BIGINT) / 1000000.0) " \
                                f"FROM {self.TMP_TABLE} as tmp " \
-                               f"FULL JOIN {self.VENDOR_TABLE} as vendor " \
+                               f"LEFT JOIN {self.VENDOR_TABLE} as vendor " \
                                f"ON CAST(tmp.vendor_id AS integer) = vendor.id " \
-                               f"FULL JOIN {self.ANTIGEN_TABLE} as antigen " \
+                               f"LEFT JOIN {self.ANTIGEN_TABLE} as antigen " \
                                f"ON tmp.ab_target = antigen.ab_target;"
 
                 start = timer()
@@ -278,7 +270,7 @@ class Command(BaseCommand):
                 # Insert into antibody species
                 start = timer()
                 for antibody_data_path in metadata.antibody_data_path:
-                    for chunk in pd.read_csv(antibody_data_path, chunksize=chunk_size, dtype='unicode'):
+                    for chunk in pd.read_csv(antibody_data_path, chunksize=CHUNCK_SIZE, dtype='unicode'):
                         species_params = []
                         for index, row in chunk.iterrows():
                             target_species = row['target_species']

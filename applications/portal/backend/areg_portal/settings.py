@@ -198,3 +198,5 @@ DEBUG = True
 RAW_ANTIBODY_DATA = 'antibody_table'
 RAW_VENDOR_DATA = 'antibody_vendors'
 RAW_VENDOR_DOMAIN_DATA = 'antibody_vendors_domain'
+
+CHUNCK_SIZE = 10 ** 5
