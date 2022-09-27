@@ -1,5 +1,9 @@
 from django.db import models
 from django.db.models import Q
+from django.db.models import Transform, CharField
+from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.indexes import GinIndex
+
 
 from areg_portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
@@ -9,6 +13,33 @@ from areg_portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN,
     ANTIBODY_ID_MAX_LEN, ANTIBODY_CAT_ALT_MAX_LEN, VENDOR_COMMERCIAL_TYPE_MAX_LEN, ANTIBODY_TARGET_EPITOPE_MAX_LEN, \
     VENDOR_NIF_MAX_LEN, ANTIBODY_TARGET_SPECIES_MAX_LEN, ANTIBODY_DISC_DATE_MAX_LEN, \
     URL_MAX_LEN
+
+
+@CharField.register_lookup
+class Normalize(Transform):
+    lookup_name = 'normalize'
+
+    def as_sql(self, compiler, connection):
+        lhs, params = compiler.compile(self.lhs)
+        return (f"UPPER(regexp_replace({lhs}, '[^a-zA-Z0-9]', '', 'g'))", params)
+
+
+@CharField.register_lookup
+class NormalizeRelaxed(Transform):
+    lookup_name = 'normalize_relaxed'
+
+    def as_sql(self, compiler, connection):
+        lhs, params = compiler.compile(self.lhs)
+        return (f"UPPER(regexp_replace({lhs}, '[^a-zA-Z0-9,]', '', 'g'))", params)
+
+
+@CharField.register_lookup
+class SplitOnComma(Transform):
+    lookup_name = 'comma_split'
+
+    def as_sql(self, compiler, connection):
+        lhs, params = compiler.compile(self.lhs)
+        return (f"regexp_replace({lhs}, '[, ]', ' ', 'g')", params)
 
 
 class CommercialType(models.TextChoices):
@@ -131,14 +162,14 @@ class Antibody(models.Model):
     status = models.CharField(
         max_length=STATUS_MAX_LEN,
         choices=STATUS.choices,
-        default=STATUS.QUEUE, 
+        default=STATUS.QUEUE,
         db_index=True
     )
     insert_time = models.DateTimeField(auto_now_add=True, db_index=True)
     curate_time = models.DateTimeField(auto_now=True, db_index=True)
 
     def __str__(self):
-        return self.uid
+        return f"{self.catalog_num} #({self.cat_alt})"
 
     class Meta:
         constraints = [
@@ -149,6 +180,10 @@ class Antibody(models.Model):
                                                                  Q(vendor__isnull=False)),
                                    name='curated_constraints'),
         ]
+        indexes = [
+            GinIndex(SearchVector('catalog_num__normalize', config='english'), name='catalog_num_fts_idx'),
+            GinIndex(SearchVector('cat_alt__normalize_relaxed__comma_split', config='english'), name='cat_alt_fts_idx'),
+        ]
 
 
 class AntibodySpecies(models.Model):
@@ -157,4 +192,3 @@ class AntibodySpecies(models.Model):
 
 
 
-    
