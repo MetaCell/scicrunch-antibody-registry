@@ -295,6 +295,8 @@ paths:
             security:
                 -
                     cookieAuth: []
+                -
+                    bearerAuth: []
             operationId: getUserAntibodies
             summary: List Antibodies
             description: Gets a list of `Antibody` entities.
