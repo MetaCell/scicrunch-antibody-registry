@@ -4,7 +4,7 @@ import { useTheme } from "@mui/material/styles";
 import { GridToolbarColumnsButton } from "@mui/x-data-grid";
 import { HouseIcon, SendIcon, FilteringIcon } from "../icons";
 
-const TableToolbar = ({ showFilterMenu }) => {
+const TableToolbar = ({ showFilterMenu, handleTabsChange }) => {
   const theme = useTheme();
   const [value, setValue] = useState("one");
 
@@ -45,6 +45,7 @@ const TableToolbar = ({ showFilterMenu }) => {
           }
           iconPosition="start"
           label="All Results"
+          onClick={() => handleTabsChange(1)}
         />
         <Tab
           sx={{ p: 0, color: "grey.500", minHeight: "56px" }}
@@ -60,6 +61,7 @@ const TableToolbar = ({ showFilterMenu }) => {
           }
           iconPosition="start"
           label="My Submissions"
+          onClick={() => handleTabsChange(2)}
         />
       </Tabs>
       <Box display="flex" flexDirection="row">

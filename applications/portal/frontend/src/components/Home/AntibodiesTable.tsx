@@ -36,14 +36,10 @@ import { getProperCitation } from "../../utils/antibody";
 import { useTheme } from "@mui/system";
 
 const StyledBadge = (props) => {
-  if (props.field === "vendor") {
+  if (props.field === "vendorName") {
     return (
       <Box bgcolor="primary.light" px={0.5} py={0.25} borderRadius="0.25rem">
-        <Link
-          underline="none"
-          target="_blank"
-          href={`https://${props.row.url}`}
-        >
+        <Link underline="none" target="_blank" href={props.row.url}>
           {props.children}
         </Link>
       </Box>
@@ -70,7 +66,7 @@ const StyledCheckBox = (props) => {
 
 const getRowId = (ab: Antibody) => ab.abId;
 
-const CustomToolbar = () => {
+const CustomToolbar = ({ handleTabsChange }) => {
   const [activeSelection, setActiveSelection] = useState(true);
 
   const apiRef = useGridApiContext();
@@ -92,6 +88,7 @@ const CustomToolbar = () => {
       activeSelection={activeSelection}
       handleExport={handleExport}
       showFilterMenu={showFilterMenu}
+      handleTabsChange={handleTabsChange}
     />
   );
 };
@@ -125,7 +122,7 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
       <Typography
         variant="caption"
         align="left"
-        color={props.field === "vendor" ? "primary.main" : "grey.500"}
+        color={props.field === "vendorName" ? "primary.main" : "grey.500"}
         component="div"
       >
         {props.field === "targetAntigen"
@@ -373,6 +370,7 @@ const columns: GridColDef[] = [
 
 const AntibodiesTable = () => {
   const [antibodiesList, setAntibodiesList] = useState([]);
+  const [activeTab, setActiveTab] = useState(1);
 
   const fetchAntibodies = () => {
     getAntibodies()
@@ -382,9 +380,256 @@ const AntibodiesTable = () => {
       .catch((err) => alert(err));
   };
 
-  useEffect(fetchAntibodies, []);
+  const fetchUserAntibodies = () => {
+    const items = [
+      {
+        clonality: "unknown",
+        epitope: null,
+        comments: null,
+        url: "https://www.cellsignal.com/products/antibody-conjugates/neun-d4g4o-xp-rabbit-mab-alexa-fluor-488-conjugate/54761",
+        abName: "hh",
+        abTarget: "hh",
+        catalogNum: "54761",
+        cloneId: null,
+        commercialType: "personal",
+        definingCitation: null,
+        productConjugate: null,
+        productForm: null,
+        productIsotype: null,
+        sourceOrganism: null,
+        targetSpecies: null,
+        uniprotId: null,
+        vendorName: "string",
+        applications: null,
+        kitContents: null,
+        accession: "",
+        status: "QUEUE",
+        feedback: null,
+        abId: "25520410",
+        catAlt: null,
+        curateTime: "2022-09-27T10:02:28.416438+00:00",
+        curatorComment: null,
+        discDate: null,
+        insertTime: "2022-09-27T10:02:28.405856+00:00",
+        targetModification: null,
+        targetSubregion: null,
+        vendorId: 1,
+      },
+      {
+        clonality: "unknown",
+        epitope: null,
+        comments: null,
+        url: "https://www.cellsignal.com/products/antibody-conjugates/neun-d4g4o-xp-rabbit-mab-alexa-fluor-488-conjugate/54761",
+        abName: "fgfg",
+        abTarget: "ff",
+        catalogNum: "54761",
+        cloneId: null,
+        commercialType: "other",
+        definingCitation: null,
+        productConjugate: null,
+        productForm: null,
+        productIsotype: null,
+        sourceOrganism: null,
+        targetSpecies: null,
+        uniprotId: null,
+        vendorName: "string",
+        applications: null,
+        kitContents: null,
+        accession: "",
+        status: "QUEUE",
+        feedback: null,
+        abId: "59898603",
+        catAlt: null,
+        curateTime: "2022-09-27T10:04:11.111390+00:00",
+        curatorComment: null,
+        discDate: null,
+        insertTime: "2022-09-27T10:04:11.100735+00:00",
+        targetModification: null,
+        targetSubregion: null,
+        vendorId: 1,
+      },
+      {
+        clonality: "unknown",
+        epitope: null,
+        comments: null,
+        url: "https://www.cellsignal.com/products/antibody-conjugates/neun-d4g4o-xp-rabbit-mab-alexa-fluor-488-conjugate/54761",
+        abName: null,
+        abTarget: null,
+        catalogNum: "54761",
+        cloneId: null,
+        commercialType: "commercial",
+        definingCitation: null,
+        productConjugate: null,
+        productForm: null,
+        productIsotype: null,
+        sourceOrganism: null,
+        targetSpecies: null,
+        uniprotId: null,
+        vendorName: "string",
+        applications: null,
+        kitContents: null,
+        accession: "",
+        status: "QUEUE",
+        feedback: null,
+        abId: "93629159",
+        catAlt: null,
+        curateTime: "2022-09-27T10:25:23.112356+00:00",
+        curatorComment: null,
+        discDate: null,
+        insertTime: "2022-09-27T10:25:23.049990+00:00",
+        targetModification: null,
+        targetSubregion: null,
+        vendorId: 1,
+      },
+      {
+        clonality: "unknown",
+        epitope: null,
+        comments: null,
+        url: "https://www.cellsignal.com/products/antibody-conjugates/neun-d4g4o-xp-rabbit-mab-alexa-fluor-488-conjugate/54761",
+        abName: null,
+        abTarget: null,
+        catalogNum: "54761",
+        cloneId: null,
+        commercialType: "commercial",
+        definingCitation: null,
+        productConjugate: null,
+        productForm: null,
+        productIsotype: null,
+        sourceOrganism: null,
+        targetSpecies: null,
+        uniprotId: null,
+        vendorName: "string",
+        applications: null,
+        kitContents: null,
+        accession: "",
+        status: "QUEUE",
+        feedback: null,
+        abId: "40793895",
+        catAlt: null,
+        curateTime: "2022-09-27T10:26:12.819677+00:00",
+        curatorComment: null,
+        discDate: null,
+        insertTime: "2022-09-27T10:26:12.811027+00:00",
+        targetModification: null,
+        targetSubregion: null,
+        vendorId: 1,
+      },
+      {
+        clonality: "unknown",
+        epitope: null,
+        comments: null,
+        url: "https://www.cellsignal.com/products/antibody-conjugates/neun-d4g4o-xp-rabbit-mab-alexa-fluor-488-conjugate/54768",
+        abName: null,
+        abTarget: null,
+        catalogNum: "54768",
+        cloneId: null,
+        commercialType: "commercial",
+        definingCitation: null,
+        productConjugate: null,
+        productForm: null,
+        productIsotype: null,
+        sourceOrganism: null,
+        targetSpecies: null,
+        uniprotId: null,
+        vendorName: "string",
+        applications: null,
+        kitContents: null,
+        accession: "",
+        status: "QUEUE",
+        feedback: null,
+        abId: "42040869",
+        catAlt: null,
+        curateTime: "2022-09-27T10:50:52.281340+00:00",
+        curatorComment: null,
+        discDate: null,
+        insertTime: "2022-09-27T10:50:52.270576+00:00",
+        targetModification: null,
+        targetSubregion: null,
+        vendorId: 1,
+      },
+      {
+        clonality: "unknown",
+        epitope: null,
+        comments: null,
+        url: "https://www.cellsignal.com/products/antibody-conjugates/neun-d4g4o-xp-rabbit-mab-alexa-fluor-488-conjugate/54768",
+        abName: null,
+        abTarget: null,
+        catalogNum: "54768",
+        cloneId: null,
+        commercialType: "commercial",
+        definingCitation: null,
+        productConjugate: null,
+        productForm: null,
+        productIsotype: null,
+        sourceOrganism: null,
+        targetSpecies: null,
+        uniprotId: null,
+        vendorName: "string",
+        applications: null,
+        kitContents: null,
+        accession: "",
+        status: "QUEUE",
+        feedback: null,
+        abId: "53695027",
+        catAlt: null,
+        curateTime: "2022-09-27T10:51:29.605908+00:00",
+        curatorComment: null,
+        discDate: null,
+        insertTime: "2022-09-27T10:51:29.598045+00:00",
+        targetModification: null,
+        targetSubregion: null,
+        vendorId: 1,
+      },
+      {
+        clonality: "unknown",
+        epitope: null,
+        comments: null,
+        url: "https://www.zenhub.com/",
+        abName: null,
+        abTarget: null,
+        catalogNum: "555",
+        cloneId: null,
+        commercialType: "commercial",
+        definingCitation: null,
+        productConjugate: null,
+        productForm: null,
+        productIsotype: null,
+        sourceOrganism: null,
+        targetSpecies: null,
+        uniprotId: null,
+        vendorName: "Bio",
+        applications: null,
+        kitContents: null,
+        accession: "",
+        status: "QUEUE",
+        feedback: null,
+        abId: "10283594",
+        catAlt: null,
+        curateTime: "2022-09-27T10:52:20.865109+00:00",
+        curatorComment: null,
+        discDate: null,
+        insertTime: "2022-09-27T10:52:20.855770+00:00",
+        targetModification: null,
+        targetSubregion: null,
+        vendorId: 2,
+      },
+    ];
+    return setAntibodiesList(items);
+  };
+
+  const handleTabsChange = (tab) => {
+    setActiveTab(tab);
+    setAntibodiesList([]);
+  };
+
+  useEffect(() => {
+    activeTab === 2 ? fetchUserAntibodies() : fetchAntibodies();
+  }, [activeTab]);
 
   const compProps = {
+    toolbar: {
+      handleTabsChange,
+    },
     panel: {
       sx: {
         "& .MuiTypography-body1": {
