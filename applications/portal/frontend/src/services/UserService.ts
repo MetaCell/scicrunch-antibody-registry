@@ -62,7 +62,10 @@ export function getCurrentUser() {
 export function useUser() {
   const [user, setUser] = useState(undefined);
   if (user === undefined) {
-    setUser(getCurrentUser());
+    const u = getCurrentUser()
+    setUser(u);
+    return u;
+
   }
   return user;
 }
