@@ -8,7 +8,7 @@ import {
   Link,
   Divider,
 } from "@mui/material";
-import { CircleAlertIcon, SearchIcon } from "../icons";
+import { CircleAlertIcon } from "../icons";
 import { useTheme } from "@mui/system";
 
 const DuplicatedMsg = (props) => {
@@ -38,29 +38,6 @@ const DuplicatedMsg = (props) => {
       fontWeight: 600,
       mb: theme.spacing(5),
     },
-    label: { color: "grey.700", fontWeight: 500, textAlign: "left" },
-    buttonGrey: {
-      color: "grey.700",
-      padding: theme.spacing(1, 2),
-    },
-    input: {
-      flexGrow: 2,
-      display: "flex",
-      alignItems: "center",
-      padding: theme.spacing(0, 1),
-      borderRight: "solid 1px",
-      borderColor: theme.palette.grey[300],
-      "& .MuiTypography-root": {
-        fontSize: "1rem",
-        fontWeight: 400,
-        color: "grey.900",
-      },
-    },
-    group: {
-      border: "solid 1px",
-      borderColor: theme.palette.grey[300],
-      borderRadius: theme.shape,
-    },
     button: {
       width: "fit-content",
     },
@@ -73,28 +50,9 @@ const DuplicatedMsg = (props) => {
         <Box>
           <CircleAlertIcon />
         </Box>
-        <Typography variant="h1" color="error.main">
+        <Typography variant="h1" color="error.light">
           This antibody is a duplicate
         </Typography>
-        {/* <Box>
-          <Typography variant="subtitle1" sx={classes.label}>
-            Search the antibody by catalog number and save time
-          </Typography>
-          <Box display="flex" sx={classes.group}>
-            <Box sx={classes.input}>
-              <Typography>{props.antibodyId}</Typography>
-            </Box>
-            <Button
-              variant="text"
-              color="info"
-              size="small"
-              startIcon={<SearchIcon stroke="black" />}
-              sx={classes.buttonGrey}
-            >
-              Search
-            </Button>
-          </Box>
-        </Box> */}
         <Divider>
           <Typography variant="subtitle1" sx={classes.message}>
             English
@@ -118,7 +76,6 @@ const DuplicatedMsg = (props) => {
         </Typography>
         <Box>
           <Button
-            //onClick={props.onClose}
             href={`/AB_${props.antibodyId}`}
             variant="contained"
             color="primary"
