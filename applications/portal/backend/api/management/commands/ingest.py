@@ -1,6 +1,5 @@
 import itertools
 import logging
-import math
 import string
 from timeit import default_timer as timer
 
@@ -10,7 +9,7 @@ from django.core.management.color import no_style
 from django.db import transaction, connection
 
 from api.management.pre_process import preprocess
-from api.models import CommercialType, AntibodyClonality, Antibody, Gene, Vendor, VendorDomain, Specie, \
+from api.models import Antibody, Gene, Vendor, VendorDomain, Specie, \
     VendorSynonym, AntibodySpecies, STATUS
 from areg_portal.settings import ANTIBODY_ANTIBODY_START_SEQ, ANTIBODY_VENDOR_START_SEQ, \
     ANTIBODY_VENDOR_DOMAIN_START_SEQ, ANTIBODY_HEADER
@@ -24,6 +23,10 @@ INSERT_INTO_SELECT_STM = "INSERT INTO {to_table_name} ({to_columns}) SELECT {dis
 RESTART_SEQ_STM = "ALTER SEQUENCE {table_name} RESTART WITH {value};"
 
 
+# CREATE_INDEX_STM = "CREATE INDEX {index_name} ON {table_name} ({column});"
+# DROP_INDEX_STM = "DROP INDEX {index_name} ON {table_name};"
+
+
 def get_restart_seq_stm(table_name, value):
     return RESTART_SEQ_STM.format(table_name=table_name, value=value)
 
@@ -31,6 +34,14 @@ def get_restart_seq_stm(table_name, value):
 def get_create_table_stm(table_name, columns):
     columns_str = ", ".join([f"{column} text" for column in columns])
     return CREATE_TABLE_STM.format(table_name=table_name, columns=columns_str)
+
+
+# def get_create_index_stm(table_name, column):
+#     return CREATE_INDEX_STM.format(index_name=get_index_name(table_name, column), table_name=table_name, column=column)
+#
+#
+# def get_index_name(table_name, column):
+#     return f"idx_{table_name}_{column}"
 
 
 def get_insert_into_table_select_stm(to_table_name, to_columns, distinct, from_columns, from_table_name):
@@ -45,32 +56,12 @@ def get_insert_values_into_table_stm(table_name, columns, entries):
         columns=', '.join(columns))
 
 
-def clean_empty_value(value):
-    if is_null_value(value):
-        return None
-    return value
-
-
-def is_null_value(value):
-    return value == '(null)' or value == '(NaN)' or (
-            type(value) == float and math.isnan(value)) or value == 'null' or value is None
-
-
-def handle_undefined_commercial_type(value):
-    if value not in CommercialType.labels:
-        return None
-    return value
-
-
 def get_clean_species_str(specie: str):
     return specie.translate(str.maketrans('', '', string.punctuation)).strip().lower()
 
 
-UNKNOWN_VENDORS = {'1669', '1667', '1625', '1633', '1628', '11599', '12068', '12021', '1632', '5455', '1626', '1670', '11278', '(null)', '1684', '11598', '0', '1682', '11434'}
-
-
-def has_incorrect_vendor_id(row):
-    return row['vendor_id'] in UNKNOWN_VENDORS and row['status'] == STATUS.REJECTED
+UNKNOWN_VENDORS = {'1669', '1667', '1625', '1633', '1628', '11599', '12068', '12021', '1632', '5455', '1626', '1670',
+                   '11278', '(null)', '1684', '11598', '0', '1682', '11434'}
 
 
 class Command(BaseCommand):
@@ -92,17 +83,18 @@ class Command(BaseCommand):
         # Pre process google drive data
         metadata = preprocess(options["file_id"])
 
-        commercial_type_reverse_map = {value: key for key, value in CommercialType.choices}
-        clonality_reverse_map = {value.lower(): key for key, value in AntibodyClonality.choices}
-
         # Prepare vendor inserts
         df_vendor = pd.read_csv(metadata.vendor_data_path)
+        df_vendor.where(pd.notnull(df_vendor), None)
+
         vendor_insert_stm = get_insert_values_into_table_stm(self.VENDOR_TABLE,
                                                              ['id', 'nif_id', 'vendor'],
                                                              len(df_vendor))
 
         # Prepare vendor domain inserts
         df_vendor_domain = pd.read_csv(metadata.vendor_domain_data_path)
+        df_vendor_domain.where(pd.notnull(df_vendor_domain), None)
+
         df_vendor_domain = df_vendor_domain.drop_duplicates(subset=["domain_name"])
         vendor_domain_insert_stm = get_insert_values_into_table_stm(self.VENDOR_DOMAIN_TABLE,
                                                                     ['id', 'domain_name', 'vendor_id', 'status',
@@ -135,8 +127,8 @@ class Command(BaseCommand):
 
                 for index, row in df_vendor.iterrows():
                     vendor_params.extend(
-                        [row['id'], clean_empty_value(row['nifID']), row['vendor']])
-                    synonyms_str = clean_empty_value(row['synonym'])
+                        [row['id'], row['nifID'], row['vendor']])
+                    synonyms_str = row['synonym']
                     if synonyms_str:
                         for s in synonyms_str.split(','):
                             vendor_synonyms_params.extend([row['id'], s])
@@ -174,18 +166,15 @@ class Command(BaseCommand):
                     logging.info(antibody_data_path)
                     len_csv = sum(1 for _ in open(antibody_data_path, 'r'))
                     for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode')):
-                        row_params = []
-                        raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, ANTIBODY_HEADER, len(chunk))
-                        for index, row in chunk.iterrows():
-                            try:
-                                row['commercial_type'] = commercial_type_reverse_map[row['commercial_type']]
-                            except KeyError:
-                                row['commercial_type'] = None
-                            if has_incorrect_vendor_id(row):
-                                row['vendor_id'] = None
-                            row['clonality'] = clonality_reverse_map.get(row['clonality'].lower(), 'UNK') if type(
-                                row['clonality']) != float else 'UNK'
-                            row_params.extend([clean_empty_value(value) for value in row.values])
+                        chunk.where(pd.notnull(chunk), None)
+
+                        raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, ANTIBODY_HEADER,
+                                                                               len(chunk))
+                        antibodies_chunk = chunk[
+                            (~chunk['vendor_id'].isin(UNKNOWN_VENDORS)) & (chunk['status'] != STATUS.REJECTED)]
+
+                        row_params = antibodies_chunk.values.tolist()
+
                         cursor.execute(raw_data_insert_stm, row_params)
                         logging.info(f"File progress: {int(min((i + 1) * CHUNK_SIZE, len_csv) / len_csv * 100)}% ")
 
@@ -216,7 +205,7 @@ class Command(BaseCommand):
                                f"epitope, clonality, clone_id, product_isotype, " \
                                f"product_conjugate, defining_citation, product_form, comments, feedback, " \
                                f"curator_comment, disc_date, status, insert_time, curate_time)" \
-                               f"SELECT DISTINCT CAST(ix as BIGINT), ab_name, ab_id, ab_id_old, commercial_type, " \
+                               f"SELECT DISTINCT CAST(ix AS INTEGER), ab_name, ab_id, ab_id_old, commercial_type, " \
                                f"uid, catalog_num, cat_alt, CAST(vendor_id as BIGINT), url, antigen.id, " \
                                f"target_subregion, target_modification, epitope, clonality, " \
                                f"clone_id, product_isotype, product_conjugate, defining_citation, product_form, " \
@@ -264,10 +253,13 @@ class Command(BaseCommand):
                 start = timer()
                 for antibody_data_path in metadata.antibody_data_paths:
                     for chunk in pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode'):
+
+                        chunk.where(pd.notnull(chunk), None)
+
                         species_params = []
                         for index, row in chunk.iterrows():
                             target_species = row['target_species']
-                            if not is_null_value(target_species):
+                            if target_species:
                                 for specie in row['target_species'].split(';'):
                                     clean_specie = get_clean_species_str(specie)
                                     species_params.extend([row['ix'], species_map[clean_specie]])
@@ -281,6 +273,7 @@ class Command(BaseCommand):
                 logging.info(f"AntibodySpecies added ({end - start} seconds)")
 
                 # Update antibody source_organism
+                # cursor.execute(get_create_index_stm(self.TMP_TABLE, 'ix'))
 
                 source_organism_update_stm = f"UPDATE {self.ANTIBODY_TABLE} " \
                                              f"SET source_organism_id=SP.id " \
@@ -325,6 +318,7 @@ class Command(BaseCommand):
                 # Drop tmp table
                 start = timer()
                 cursor.execute(DROP_TABLE_STM.format(table_name=self.TMP_TABLE))
+                # cursor.execute(DROP_INDEX_STM.format(table_name=self.TMP_TABLE, index_name=get_index_name(self.TMP_TABLE, 'ix')))
                 end = timer()
                 logging.info(f"Temporary table dropped ({end - start} seconds)")
 
