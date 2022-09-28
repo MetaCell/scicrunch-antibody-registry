@@ -54,12 +54,12 @@ const SuccessSubmission = (props) => {
         </Typography>
         <Box>
           <Button
-            onClick={props.onClose}
+            onClick={() => (window.location.href = "/submissions")}
             variant="contained"
             color="primary"
             sx={classes.button}
           >
-            See my submission
+            See my submissions
           </Button>
         </Box>
       </Stack>

@@ -1,17 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { Box, Button, Stack, Tab, Tabs } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { GridToolbarColumnsButton } from "@mui/x-data-grid";
 import { HouseIcon, SendIcon, FilteringIcon } from "../icons";
+import { useUser, User } from "../../services/UserService";
 
-const TableToolbar = ({ showFilterMenu, handleTabsChange }) => {
+const TableToolbar = ({ showFilterMenu, activeTab }) => {
+  const user: User = useUser();
   const theme = useTheme();
-  const [value, setValue] = useState("one");
-
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    setValue(newValue);
-  };
-
   return (
     <Box
       sx={(theme) => ({
@@ -23,8 +19,7 @@ const TableToolbar = ({ showFilterMenu, handleTabsChange }) => {
       })}
     >
       <Tabs
-        value={value}
-        onChange={handleChange}
+        value={activeTab === "all results" ? "one" : "two"}
         textColor="primary"
         indicatorColor="primary"
         sx={{
@@ -37,7 +32,7 @@ const TableToolbar = ({ showFilterMenu, handleTabsChange }) => {
           icon={
             <HouseIcon
               stroke={
-                value == "one"
+                activeTab === "all results"
                   ? theme.palette.primary.main
                   : theme.palette.grey[400]
               }
@@ -45,15 +40,20 @@ const TableToolbar = ({ showFilterMenu, handleTabsChange }) => {
           }
           iconPosition="start"
           label="All Results"
-          onClick={() => handleTabsChange(1)}
+          onClick={() => (window.location.href = "/")}
         />
         <Tab
-          sx={{ p: 0, color: "grey.500", minHeight: "56px" }}
+          sx={{
+            p: 0,
+            color: "grey.500",
+            minHeight: "56px",
+            display: !user && "none",
+          }}
           value="two"
           icon={
             <SendIcon
               stroke={
-                value == "two"
+                activeTab == "my submissions"
                   ? theme.palette.primary.main
                   : theme.palette.grey[400]
               }
@@ -61,7 +61,7 @@ const TableToolbar = ({ showFilterMenu, handleTabsChange }) => {
           }
           iconPosition="start"
           label="My Submissions"
-          onClick={() => handleTabsChange(2)}
+          onClick={() => (window.location.href = "/submissions")}
         />
       </Tabs>
       <Box display="flex" flexDirection="row">

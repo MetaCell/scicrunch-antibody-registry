@@ -34,6 +34,8 @@ import HomeHeader from "./HomeHeader";
 import { Antibody } from "../../rest";
 import { getProperCitation } from "../../utils/antibody";
 import { useTheme } from "@mui/system";
+import { useUser, User } from "../../services/UserService";
+import ConnectAccount from "./ConnectAccount";
 
 const StyledBadge = (props) => {
   if (props.field === "vendorName") {
@@ -66,7 +68,7 @@ const StyledCheckBox = (props) => {
 
 const getRowId = (ab: Antibody) => ab.abId;
 
-const CustomToolbar = ({ handleTabsChange }) => {
+const CustomToolbar = ({ activeTab }) => {
   const [activeSelection, setActiveSelection] = useState(true);
 
   const apiRef = useGridApiContext();
@@ -88,7 +90,7 @@ const CustomToolbar = ({ handleTabsChange }) => {
       activeSelection={activeSelection}
       handleExport={handleExport}
       showFilterMenu={showFilterMenu}
-      handleTabsChange={handleTabsChange}
+      activeTab={activeTab}
     />
   );
 };
@@ -368,9 +370,10 @@ const columns: GridColDef[] = [
   },
 ];
 
-const AntibodiesTable = () => {
+const AntibodiesTable = (props) => {
+  const user: User = useUser();
+  const currentPath = window.location.pathname;
   const [antibodiesList, setAntibodiesList] = useState([]);
-  const [activeTab, setActiveTab] = useState(1);
 
   const fetchAntibodies = () => {
     getAntibodies()
@@ -617,18 +620,15 @@ const AntibodiesTable = () => {
     return setAntibodiesList(items);
   };
 
-  const handleTabsChange = (tab) => {
-    setActiveTab(tab);
-    setAntibodiesList([]);
-  };
-
   useEffect(() => {
-    activeTab === 2 ? fetchUserAntibodies() : fetchAntibodies();
-  }, [activeTab]);
+    props.activeTab === "all results"
+      ? fetchAntibodies()
+      : user && fetchUserAntibodies();
+  }, []);
 
   const compProps = {
     toolbar: {
-      handleTabsChange,
+      activeTab: props.activeTab,
     },
     panel: {
       sx: {
@@ -686,34 +686,38 @@ const AntibodiesTable = () => {
   return (
     <Box>
       <Box sx={{ flexGrow: 1, height: "90vh" }}>
-        <DataGrid
-          sx={dataGridStyles}
-          rows={antibodiesList}
-          getRowId={getRowId}
-          columns={columns}
-          pageSize={10}
-          rowsPerPageOptions={[20]}
-          checkboxSelection
-          disableSelectionOnClick
-          getRowHeight={() => "auto"}
-          onRowClick={(params) =>
-            (window.location.href = `/AB_${params.row.abId}`)
-          }
-          components={{
-            BaseCheckbox: StyledCheckBox,
-            ColumnFilteredIcon: FilteredColumnIcon,
-            ColumnUnsortedIcon: SortingIcon,
-            ColumnSortedAscendingIcon: AscSortedIcon,
-            ColumnSortedDescendingIcon: DescSortedIcon,
-            Toolbar: CustomToolbar,
-            ColumnMenuIcon: FilterIcon,
-            ColumnSelectorIcon: SettingsIcon,
-          }}
-          componentsProps={compProps}
-          localeText={{
-            toolbarColumns: "Table settings",
-          }}
-        />
+        {currentPath === "/submissions" && !user ? (
+          <ConnectAccount />
+        ) : (
+          <DataGrid
+            sx={dataGridStyles}
+            rows={antibodiesList}
+            getRowId={getRowId}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[20]}
+            checkboxSelection
+            disableSelectionOnClick
+            getRowHeight={() => "auto"}
+            onRowClick={(params) =>
+              (window.location.href = `/AB_${params.row.abId}`)
+            }
+            components={{
+              BaseCheckbox: StyledCheckBox,
+              ColumnFilteredIcon: FilteredColumnIcon,
+              ColumnUnsortedIcon: SortingIcon,
+              ColumnSortedAscendingIcon: AscSortedIcon,
+              ColumnSortedDescendingIcon: DescSortedIcon,
+              Toolbar: CustomToolbar,
+              ColumnMenuIcon: FilterIcon,
+              ColumnSelectorIcon: SettingsIcon,
+            }}
+            componentsProps={compProps}
+            localeText={{
+              toolbarColumns: "Table settings",
+            }}
+          />
+        )}
       </Box>
     </Box>
   );
