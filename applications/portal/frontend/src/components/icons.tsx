@@ -19,7 +19,7 @@ export const SearchIcon = (props: SvgIconProps) => (
   <SvgIcon viewBox="0 0 18 18" {...props}>
     <path
       d="M16.5 16.5L11.5001 11.5M13.1667 7.33333C13.1667 10.555 10.555 13.1667 7.33333 13.1667C4.11167 13.1667 1.5 10.555 1.5 7.33333C1.5 4.11167 4.11167 1.5 7.33333 1.5C10.555 1.5 13.1667 4.11167 13.1667 7.33333Z"
-      stroke="#98A2B3"
+      stroke={props.stroke || "#98A2B3"}
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -729,6 +729,30 @@ export const CircleCheckIcon = (props: SvgIconProps) => (
       height="48"
       rx="24"
       stroke="#DFEBF8"
+      strokeWidth="8"
+      fill="none"
+    />
+  </SvgIcon>
+);
+
+export const CircleAlertIcon = (props: SvgIconProps) => (
+  <SvgIcon viewBox="0 0 56 56">
+    <rect x="4" y="4" width="48" height="48" rx="24" fill="#FEE4E2" />
+    <path
+      d="M28 24V28M28 32H28.01M38 28C38 33.5228 33.5228 38 28 38C22.4772 38 18 33.5228 18 28C18 22.4772 22.4772 18 28 18C33.5228 18 38 22.4772 38 28Z"
+      stroke="#D92D20"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+    <rect
+      x="4"
+      y="4"
+      width="48"
+      height="48"
+      rx="24"
+      stroke="#FEF3F2"
       strokeWidth="8"
       fill="none"
     />
