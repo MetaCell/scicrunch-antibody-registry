@@ -135,7 +135,6 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
     </StyledBadge>
   );
 };
-
 const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   const theme = useTheme();
   const classes = {
