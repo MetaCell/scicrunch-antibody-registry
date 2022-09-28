@@ -18,7 +18,10 @@ import {
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
 //project imports
-import { getAntibodies } from "../../services/AntibodiesService";
+import {
+  getAntibodies,
+  getUserAntibodies,
+} from "../../services/AntibodiesService";
 import {
   AscSortedIcon,
   DescSortedIcon,
@@ -206,6 +209,32 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   );
 };
 
+const RenderStatus = (props: GridRenderCellParams<string>) => {
+  const statusesTag = {
+    CURATED: ["Accepted", "success"],
+    REJECTED: ["Rejected", "error"],
+    QUEUE: ["In Queue", "warning"],
+  };
+
+  return (
+    <Box
+      bgcolor={`${statusesTag[props.value][1]}.contrastText`}
+      px={1}
+      py={0.25}
+      borderRadius="1rem"
+    >
+      <Typography
+        variant="caption"
+        align="left"
+        color={`${statusesTag[props.value][1]}.main`}
+        component="div"
+      >
+        {statusesTag[props.value][0]}
+      </Typography>
+    </Box>
+  );
+};
+
 interface ValueProps {
   row: Antibody;
   field: string;
@@ -271,104 +300,6 @@ const dataGridStyles = {
     cursor: "pointer",
   },
 };
-const columns: GridColDef[] = [
-  {
-    ...columnsDefaultProps,
-    field: "abName",
-    headerName: "Name",
-    hide: true,
-  },
-  {
-    ...columnsDefaultProps,
-    field: "abId",
-    headerName: "ID",
-    hide: true,
-  },
-  {
-    ...columnsDefaultProps,
-    field: "nameAndId",
-    headerName: "Name & ID",
-    flex: 2,
-    renderCell: RenderNameAndId,
-    headerAlign: "left",
-    align: "left",
-  },
-  // {
-  //   ...columnsDefaultProps,
-  //   field: "abTarget",
-  //   headerName: "Target antigen (excl. species)",
-  //   hide: true,
-  // },
-  {
-    ...columnsDefaultProps,
-    field: "targetSpecies",
-    headerName: "Target species",
-    hide: true,
-  },
-  {
-    ...columnsDefaultProps,
-    field: "abTarget",
-    headerName: "Target antigen",
-    flex: 1.5,
-    valueGetter: getValueOrEmpty,
-  },
-  {
-    ...columnsDefaultProps,
-    field: "properCitation",
-    headerName: "Proper citation",
-    flex: 2,
-    valueGetter: getValueForCitation,
-    renderCell: RenderProperCitation,
-    type: "actions",
-  },
-  {
-    ...columnsDefaultProps,
-    field: "clonality",
-    headerName: "Clonality",
-  },
-  {
-    ...columnsDefaultProps,
-    field: "reference",
-    headerName: "Reference",
-    flex: 1.5,
-  },
-  {
-    ...columnsDefaultProps,
-    field: "comments",
-    headerName: "Comments",
-    flex: 3,
-    align: "left",
-  },
-  {
-    ...columnsDefaultProps,
-    field: "cloneId",
-    headerName: "Clone ID",
-  },
-  {
-    ...columnsDefaultProps,
-    field: "sourceOrganism",
-    headerName: "Host organism",
-    flex: 1.5,
-  },
-  {
-    ...columnsDefaultProps,
-    field: "vendorName",
-    headerName: "Link to Vendor",
-    flex: 1.5,
-    type: "actions",
-  },
-  {
-    ...columnsDefaultProps,
-    field: "catalogNum",
-    headerName: "Cat Num",
-  },
-  {
-    ...columnsDefaultProps,
-    field: "url",
-    headerName: "Product URL",
-    hide: true,
-  },
-];
 
 const AntibodiesTable = (props) => {
   const user: User = useUser();
@@ -384,240 +315,11 @@ const AntibodiesTable = (props) => {
   };
 
   const fetchUserAntibodies = () => {
-    const items = [
-      {
-        clonality: "unknown",
-        epitope: null,
-        comments: null,
-        url: "https://www.cellsignal.com/products/antibody-conjugates/neun-d4g4o-xp-rabbit-mab-alexa-fluor-488-conjugate/54761",
-        abName: "hh",
-        abTarget: "hh",
-        catalogNum: "54761",
-        cloneId: null,
-        commercialType: "personal",
-        definingCitation: null,
-        productConjugate: null,
-        productForm: null,
-        productIsotype: null,
-        sourceOrganism: null,
-        targetSpecies: null,
-        uniprotId: null,
-        vendorName: "string",
-        applications: null,
-        kitContents: null,
-        accession: "",
-        status: "QUEUE",
-        feedback: null,
-        abId: "25520410",
-        catAlt: null,
-        curateTime: "2022-09-27T10:02:28.416438+00:00",
-        curatorComment: null,
-        discDate: null,
-        insertTime: "2022-09-27T10:02:28.405856+00:00",
-        targetModification: null,
-        targetSubregion: null,
-        vendorId: 1,
-      },
-      {
-        clonality: "unknown",
-        epitope: null,
-        comments: null,
-        url: "https://www.cellsignal.com/products/antibody-conjugates/neun-d4g4o-xp-rabbit-mab-alexa-fluor-488-conjugate/54761",
-        abName: "fgfg",
-        abTarget: "ff",
-        catalogNum: "54761",
-        cloneId: null,
-        commercialType: "other",
-        definingCitation: null,
-        productConjugate: null,
-        productForm: null,
-        productIsotype: null,
-        sourceOrganism: null,
-        targetSpecies: null,
-        uniprotId: null,
-        vendorName: "string",
-        applications: null,
-        kitContents: null,
-        accession: "",
-        status: "QUEUE",
-        feedback: null,
-        abId: "59898603",
-        catAlt: null,
-        curateTime: "2022-09-27T10:04:11.111390+00:00",
-        curatorComment: null,
-        discDate: null,
-        insertTime: "2022-09-27T10:04:11.100735+00:00",
-        targetModification: null,
-        targetSubregion: null,
-        vendorId: 1,
-      },
-      {
-        clonality: "unknown",
-        epitope: null,
-        comments: null,
-        url: "https://www.cellsignal.com/products/antibody-conjugates/neun-d4g4o-xp-rabbit-mab-alexa-fluor-488-conjugate/54761",
-        abName: null,
-        abTarget: null,
-        catalogNum: "54761",
-        cloneId: null,
-        commercialType: "commercial",
-        definingCitation: null,
-        productConjugate: null,
-        productForm: null,
-        productIsotype: null,
-        sourceOrganism: null,
-        targetSpecies: null,
-        uniprotId: null,
-        vendorName: "string",
-        applications: null,
-        kitContents: null,
-        accession: "",
-        status: "QUEUE",
-        feedback: null,
-        abId: "93629159",
-        catAlt: null,
-        curateTime: "2022-09-27T10:25:23.112356+00:00",
-        curatorComment: null,
-        discDate: null,
-        insertTime: "2022-09-27T10:25:23.049990+00:00",
-        targetModification: null,
-        targetSubregion: null,
-        vendorId: 1,
-      },
-      {
-        clonality: "unknown",
-        epitope: null,
-        comments: null,
-        url: "https://www.cellsignal.com/products/antibody-conjugates/neun-d4g4o-xp-rabbit-mab-alexa-fluor-488-conjugate/54761",
-        abName: null,
-        abTarget: null,
-        catalogNum: "54761",
-        cloneId: null,
-        commercialType: "commercial",
-        definingCitation: null,
-        productConjugate: null,
-        productForm: null,
-        productIsotype: null,
-        sourceOrganism: null,
-        targetSpecies: null,
-        uniprotId: null,
-        vendorName: "string",
-        applications: null,
-        kitContents: null,
-        accession: "",
-        status: "QUEUE",
-        feedback: null,
-        abId: "40793895",
-        catAlt: null,
-        curateTime: "2022-09-27T10:26:12.819677+00:00",
-        curatorComment: null,
-        discDate: null,
-        insertTime: "2022-09-27T10:26:12.811027+00:00",
-        targetModification: null,
-        targetSubregion: null,
-        vendorId: 1,
-      },
-      {
-        clonality: "unknown",
-        epitope: null,
-        comments: null,
-        url: "https://www.cellsignal.com/products/antibody-conjugates/neun-d4g4o-xp-rabbit-mab-alexa-fluor-488-conjugate/54768",
-        abName: null,
-        abTarget: null,
-        catalogNum: "54768",
-        cloneId: null,
-        commercialType: "commercial",
-        definingCitation: null,
-        productConjugate: null,
-        productForm: null,
-        productIsotype: null,
-        sourceOrganism: null,
-        targetSpecies: null,
-        uniprotId: null,
-        vendorName: "string",
-        applications: null,
-        kitContents: null,
-        accession: "",
-        status: "QUEUE",
-        feedback: null,
-        abId: "42040869",
-        catAlt: null,
-        curateTime: "2022-09-27T10:50:52.281340+00:00",
-        curatorComment: null,
-        discDate: null,
-        insertTime: "2022-09-27T10:50:52.270576+00:00",
-        targetModification: null,
-        targetSubregion: null,
-        vendorId: 1,
-      },
-      {
-        clonality: "unknown",
-        epitope: null,
-        comments: null,
-        url: "https://www.cellsignal.com/products/antibody-conjugates/neun-d4g4o-xp-rabbit-mab-alexa-fluor-488-conjugate/54768",
-        abName: null,
-        abTarget: null,
-        catalogNum: "54768",
-        cloneId: null,
-        commercialType: "commercial",
-        definingCitation: null,
-        productConjugate: null,
-        productForm: null,
-        productIsotype: null,
-        sourceOrganism: null,
-        targetSpecies: null,
-        uniprotId: null,
-        vendorName: "string",
-        applications: null,
-        kitContents: null,
-        accession: "",
-        status: "QUEUE",
-        feedback: null,
-        abId: "53695027",
-        catAlt: null,
-        curateTime: "2022-09-27T10:51:29.605908+00:00",
-        curatorComment: null,
-        discDate: null,
-        insertTime: "2022-09-27T10:51:29.598045+00:00",
-        targetModification: null,
-        targetSubregion: null,
-        vendorId: 1,
-      },
-      {
-        clonality: "unknown",
-        epitope: null,
-        comments: null,
-        url: "https://www.zenhub.com/",
-        abName: null,
-        abTarget: null,
-        catalogNum: "555",
-        cloneId: null,
-        commercialType: "commercial",
-        definingCitation: null,
-        productConjugate: null,
-        productForm: null,
-        productIsotype: null,
-        sourceOrganism: null,
-        targetSpecies: null,
-        uniprotId: null,
-        vendorName: "Bio",
-        applications: null,
-        kitContents: null,
-        accession: "",
-        status: "QUEUE",
-        feedback: null,
-        abId: "10283594",
-        catAlt: null,
-        curateTime: "2022-09-27T10:52:20.865109+00:00",
-        curatorComment: null,
-        discDate: null,
-        insertTime: "2022-09-27T10:52:20.855770+00:00",
-        targetModification: null,
-        targetSubregion: null,
-        vendorId: 2,
-      },
-    ];
-    return setAntibodiesList(items);
+    getUserAntibodies()
+      .then((res) => {
+        return setAntibodiesList(res.items);
+      })
+      .catch((err) => alert(err));
   };
 
   useEffect(() => {
@@ -625,6 +327,113 @@ const AntibodiesTable = (props) => {
       ? fetchAntibodies()
       : user && fetchUserAntibodies();
   }, []);
+
+  const columns: GridColDef[] = [
+    {
+      ...columnsDefaultProps,
+      field: "abName",
+      headerName: "Name",
+      hide: true,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "abId",
+      headerName: "ID",
+      hide: true,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "nameAndId",
+      headerName: "Name & ID",
+      flex: 2,
+      renderCell: RenderNameAndId,
+      headerAlign: "left",
+      align: "left",
+    },
+    // {
+    //   ...columnsDefaultProps,
+    //   field: "abTarget",
+    //   headerName: "Target antigen (excl. species)",
+    //   hide: true,
+    // },
+    {
+      ...columnsDefaultProps,
+      field: "targetSpecies",
+      headerName: "Target species",
+      hide: true,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "abTarget",
+      headerName: "Target antigen",
+      flex: 1.5,
+      valueGetter: getValueOrEmpty,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "properCitation",
+      headerName: "Proper citation",
+      flex: 2,
+      valueGetter: getValueForCitation,
+      renderCell: RenderProperCitation,
+      type: "actions",
+    },
+    {
+      ...columnsDefaultProps,
+      field: "clonality",
+      headerName: "Clonality",
+    },
+    {
+      ...columnsDefaultProps,
+      field: "reference",
+      headerName: "Reference",
+      flex: 1.5,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "comments",
+      headerName: "Comments",
+      flex: 3,
+      align: "left",
+    },
+    {
+      ...columnsDefaultProps,
+      field: "cloneId",
+      headerName: "Clone ID",
+    },
+    {
+      ...columnsDefaultProps,
+      field: "sourceOrganism",
+      headerName: "Host organism",
+      flex: 1.5,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "vendorName",
+      headerName: "Link to Vendor",
+      flex: 1.5,
+      type: "actions",
+    },
+    {
+      ...columnsDefaultProps,
+      field: "catalogNum",
+      headerName: "Cat Num",
+    },
+    {
+      ...columnsDefaultProps,
+      field: "url",
+      headerName: "Product URL",
+      hide: true,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "status",
+      headerName: "Status",
+      hide: props.activeTab === "all results" ? true : false,
+      renderCell: RenderStatus,
+      flex: 1.3,
+    },
+  ];
 
   const compProps = {
     toolbar: {

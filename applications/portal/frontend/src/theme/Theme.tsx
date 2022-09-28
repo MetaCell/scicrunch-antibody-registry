@@ -34,6 +34,18 @@ const theme = createTheme({
     error: {
       main: "#D92D20",
     },
+    success: {
+      main: "#027A48",
+      contrastText: "#ECFDF3",
+    },
+    error: {
+      main: "#B42318",
+      contrastText: "#FEF3F2",
+    },
+    warning: {
+      main: "#FDB022",
+      contrastText: "#FFFAEB",
+    },
   },
   shape: {
     borderRadius: 8,
