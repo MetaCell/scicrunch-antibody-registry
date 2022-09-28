@@ -199,4 +199,12 @@ RAW_ANTIBODY_DATA = 'antibody_table'
 RAW_VENDOR_DATA = 'antibody_vendors'
 RAW_VENDOR_DOMAIN_DATA = 'antibody_vendors_domain'
 
-CHUNCK_SIZE = 10 ** 5
+CHUNK_SIZE = 10 ** 5
+
+ANTIBODY_HEADER = ['ab_name', 'ab_target', 'target_species', 'vendor', 'vendor_id', 'catalog_num', 'clonality',
+                   'source_organism', 'clone_id', 'url', 'link', 'ab_target_entrez_gid', 'product_isotype',
+                   'product_conjugate', 'product_form', 'target_subregion', 'target_modification', 'comments',
+                   'feedback', 'defining_citation', 'disc_date', 'curator_comment', 'id', 'ab_id', 'ab_id_old',
+                   'of_record', 'ix', 'uid', 'status', 'insert_time', 'curate_time', 'cat_alt', 'commercial_type',
+                   'uniprot_id', 'epitope'
+                   ]

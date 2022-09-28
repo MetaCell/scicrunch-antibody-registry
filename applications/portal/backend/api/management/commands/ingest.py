@@ -13,8 +13,8 @@ from api.management.pre_process import preprocess
 from api.models import CommercialType, AntibodyClonality, Antibody, Gene, Vendor, VendorDomain, Specie, \
     VendorSynonym, AntibodySpecies, STATUS
 from areg_portal.settings import ANTIBODY_ANTIBODY_START_SEQ, ANTIBODY_VENDOR_START_SEQ, \
-    ANTIBODY_VENDOR_DOMAIN_START_SEQ
-from areg_portal.settings import CHUNCK_SIZE
+    ANTIBODY_VENDOR_DOMAIN_START_SEQ, ANTIBODY_HEADER
+from areg_portal.settings import CHUNK_SIZE
 
 TRUNCATE_STM = "TRUNCATE TABLE {table_name} CASCADE;"
 INSERT_INTO_VALUES_STM = "INSERT INTO {table_name} ({columns}) VALUES {} ;"
@@ -110,13 +110,6 @@ class Command(BaseCommand):
                                                                     len(df_vendor_domain))
 
         # Prepare raw antibody inserts
-        header = ['ab_name', 'ab_target', 'target_species', 'vendor', 'vendor_id', 'catalog_num', 'clonality',
-                  'source_organism', 'clone_id', 'url', 'link', 'ab_target_entrez_gid', 'product_isotype',
-                  'product_conjugate', 'product_form', 'target_subregion', 'target_modification', 'comments',
-                  'feedback', 'defining_citation', 'disc_date', 'curator_comment', 'id', 'ab_id', 'ab_id_old',
-                  'of_record', 'ix', 'uid', 'status', 'insert_time', 'curate_time', 'cat_alt', 'commercial_type',
-                  'uniprot_id', 'epitope'
-                  ]
 
         transaction_start = timer()
         logging.info("Ingestion process started")
@@ -173,16 +166,16 @@ class Command(BaseCommand):
 
                 # Create copy table
                 start = timer()
-                cursor.execute(get_create_table_stm(self.TMP_TABLE, header))
+                cursor.execute(get_create_table_stm(self.TMP_TABLE, ANTIBODY_HEADER))
 
                 # Insert raw data into tmp table
 
-                for antibody_data_path in metadata.antibody_data_path:
+                for antibody_data_path in metadata.antibody_data_paths:
                     logging.info(antibody_data_path)
                     len_csv = sum(1 for _ in open(antibody_data_path, 'r'))
-                    for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNCK_SIZE, dtype='unicode')):
+                    for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode')):
                         row_params = []
-                        raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, header, len(chunk))
+                        raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, ANTIBODY_HEADER, len(chunk))
                         for index, row in chunk.iterrows():
                             try:
                                 row['commercial_type'] = commercial_type_reverse_map[row['commercial_type']]
@@ -194,7 +187,7 @@ class Command(BaseCommand):
                                 row['clonality']) != float else 'UNK'
                             row_params.extend([clean_empty_value(value) for value in row.values])
                         cursor.execute(raw_data_insert_stm, row_params)
-                        logging.info(f"File progress: {int(min((i + 1) * CHUNCK_SIZE, len_csv) / len_csv * 100)}% ")
+                        logging.info(f"File progress: {int(min((i + 1) * CHUNK_SIZE, len_csv) / len_csv * 100)}% ")
 
                 end = timer()
                 logging.info(f"Temporary table filled ({end - start} seconds)")
@@ -269,8 +262,8 @@ class Command(BaseCommand):
 
                 # Insert into antibody species
                 start = timer()
-                for antibody_data_path in metadata.antibody_data_path:
-                    for chunk in pd.read_csv(antibody_data_path, chunksize=CHUNCK_SIZE, dtype='unicode'):
+                for antibody_data_path in metadata.antibody_data_paths:
+                    for chunk in pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode'):
                         species_params = []
                         for index, row in chunk.iterrows():
                             target_species = row['target_species']
