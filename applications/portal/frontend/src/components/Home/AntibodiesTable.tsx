@@ -18,7 +18,10 @@ import {
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
 //project imports
-import { getAntibodies } from "../../services/AntibodiesService";
+import {
+  getAntibodies,
+  getUserAntibodies,
+} from "../../services/AntibodiesService";
 import {
   AscSortedIcon,
   DescSortedIcon,
@@ -34,16 +37,15 @@ import HomeHeader from "./HomeHeader";
 import { Antibody } from "../../rest";
 import { getProperCitation } from "../../utils/antibody";
 import { useTheme } from "@mui/system";
+import { useUser, User } from "../../services/UserService";
+import ConnectAccount from "./ConnectAccount";
+import { ALLRESULTS } from "../../constants/constants";
 
 const StyledBadge = (props) => {
-  if (props.field === "vendor") {
+  if (props.field === "vendorName") {
     return (
       <Box bgcolor="primary.light" px={0.5} py={0.25} borderRadius="0.25rem">
-        <Link
-          underline="none"
-          target="_blank"
-          href={`https://${props.row.url}`}
-        >
+        <Link underline="none" target="_blank" href={props.row.url}>
           {props.children}
         </Link>
       </Box>
@@ -70,7 +72,7 @@ const StyledCheckBox = (props) => {
 
 const getRowId = (ab: Antibody) => ab.abId;
 
-const CustomToolbar = () => {
+const CustomToolbar = ({ activeTab }) => {
   const [activeSelection, setActiveSelection] = useState(true);
 
   const apiRef = useGridApiContext();
@@ -92,6 +94,7 @@ const CustomToolbar = () => {
       activeSelection={activeSelection}
       handleExport={handleExport}
       showFilterMenu={showFilterMenu}
+      activeTab={activeTab}
     />
   );
 };
@@ -125,7 +128,7 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
       <Typography
         variant="caption"
         align="left"
-        color={props.field === "vendor" ? "primary.main" : "grey.500"}
+        color={props.field === "vendorName" ? "primary.main" : "grey.500"}
         component="div"
       >
         {props.field === "targetAntigen"
@@ -207,6 +210,32 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   );
 };
 
+const RenderStatus = (props: GridRenderCellParams<string>) => {
+  const statusesTag = {
+    CURATED: ["Accepted", "success"],
+    REJECTED: ["Rejected", "error"],
+    QUEUE: ["In Queue", "warning"],
+  };
+
+  return (
+    <Box
+      bgcolor={`${statusesTag[props.value][1]}.contrastText`}
+      px={1}
+      py={0.25}
+      borderRadius="1rem"
+    >
+      <Typography
+        variant="caption"
+        align="left"
+        color={`${statusesTag[props.value][1]}.main`}
+        component="div"
+      >
+        {statusesTag[props.value][0]}
+      </Typography>
+    </Box>
+  );
+};
+
 interface ValueProps {
   row: Antibody;
   field: string;
@@ -272,106 +301,10 @@ const dataGridStyles = {
     cursor: "pointer",
   },
 };
-const columns: GridColDef[] = [
-  {
-    ...columnsDefaultProps,
-    field: "abName",
-    headerName: "Name",
-    hide: true,
-  },
-  {
-    ...columnsDefaultProps,
-    field: "abId",
-    headerName: "ID",
-    hide: true,
-  },
-  {
-    ...columnsDefaultProps,
-    field: "nameAndId",
-    headerName: "Name & ID",
-    flex: 2,
-    renderCell: RenderNameAndId,
-    headerAlign: "left",
-    align: "left",
-  },
-  // {
-  //   ...columnsDefaultProps,
-  //   field: "abTarget",
-  //   headerName: "Target antigen (excl. species)",
-  //   hide: true,
-  // },
-  {
-    ...columnsDefaultProps,
-    field: "targetSpecies",
-    headerName: "Target species",
-    hide: true,
-  },
-  {
-    ...columnsDefaultProps,
-    field: "abTarget",
-    headerName: "Target antigen",
-    flex: 1.5,
-    valueGetter: getValueOrEmpty,
-  },
-  {
-    ...columnsDefaultProps,
-    field: "properCitation",
-    headerName: "Proper citation",
-    flex: 2,
-    valueGetter: getValueForCitation,
-    renderCell: RenderProperCitation,
-    type: "actions",
-  },
-  {
-    ...columnsDefaultProps,
-    field: "clonality",
-    headerName: "Clonality",
-  },
-  {
-    ...columnsDefaultProps,
-    field: "reference",
-    headerName: "Reference",
-    flex: 1.5,
-  },
-  {
-    ...columnsDefaultProps,
-    field: "comments",
-    headerName: "Comments",
-    flex: 3,
-    align: "left",
-  },
-  {
-    ...columnsDefaultProps,
-    field: "cloneId",
-    headerName: "Clone ID",
-  },
-  {
-    ...columnsDefaultProps,
-    field: "sourceOrganism",
-    headerName: "Host organism",
-    flex: 1.5,
-  },
-  {
-    ...columnsDefaultProps,
-    field: "vendorName",
-    headerName: "Link to Vendor",
-    flex: 1.5,
-    type: "actions",
-  },
-  {
-    ...columnsDefaultProps,
-    field: "catalogNum",
-    headerName: "Cat Num",
-  },
-  {
-    ...columnsDefaultProps,
-    field: "url",
-    headerName: "Product URL",
-    hide: true,
-  },
-];
 
-const AntibodiesTable = () => {
+const AntibodiesTable = (props) => {
+  const user: User = useUser();
+  const currentPath = window.location.pathname;
   const [antibodiesList, setAntibodiesList] = useState([]);
 
   const fetchAntibodies = () => {
@@ -382,9 +315,131 @@ const AntibodiesTable = () => {
       .catch((err) => alert(err));
   };
 
-  useEffect(fetchAntibodies, []);
+  const fetchUserAntibodies = () => {
+    getUserAntibodies()
+      .then((res) => {
+        return setAntibodiesList(res.items);
+      })
+      .catch((err) => alert(err));
+  };
+
+  useEffect(() => {
+    props.activeTab === ALLRESULTS
+      ? fetchAntibodies()
+      : user && fetchUserAntibodies();
+  }, []);
+
+  const columns: GridColDef[] = [
+    {
+      ...columnsDefaultProps,
+      field: "abName",
+      headerName: "Name",
+      hide: true,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "abId",
+      headerName: "ID",
+      hide: true,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "nameAndId",
+      headerName: "Name & ID",
+      flex: 2,
+      renderCell: RenderNameAndId,
+      headerAlign: "left",
+      align: "left",
+    },
+    // {
+    //   ...columnsDefaultProps,
+    //   field: "abTarget",
+    //   headerName: "Target antigen (excl. species)",
+    //   hide: true,
+    // },
+    {
+      ...columnsDefaultProps,
+      field: "targetSpecies",
+      headerName: "Target species",
+      hide: true,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "abTarget",
+      headerName: "Target antigen",
+      flex: 1.5,
+      valueGetter: getValueOrEmpty,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "properCitation",
+      headerName: "Proper citation",
+      flex: 2,
+      valueGetter: getValueForCitation,
+      renderCell: RenderProperCitation,
+      type: "actions",
+    },
+    {
+      ...columnsDefaultProps,
+      field: "clonality",
+      headerName: "Clonality",
+    },
+    {
+      ...columnsDefaultProps,
+      field: "reference",
+      headerName: "Reference",
+      flex: 1.5,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "comments",
+      headerName: "Comments",
+      flex: 3,
+      align: "left",
+    },
+    {
+      ...columnsDefaultProps,
+      field: "cloneId",
+      headerName: "Clone ID",
+    },
+    {
+      ...columnsDefaultProps,
+      field: "sourceOrganism",
+      headerName: "Host organism",
+      flex: 1.5,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "vendorName",
+      headerName: "Link to Vendor",
+      flex: 1.5,
+      type: "actions",
+    },
+    {
+      ...columnsDefaultProps,
+      field: "catalogNum",
+      headerName: "Cat Num",
+    },
+    {
+      ...columnsDefaultProps,
+      field: "url",
+      headerName: "Product URL",
+      hide: true,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "status",
+      headerName: "Status",
+      hide: props.activeTab === ALLRESULTS ? true : false,
+      renderCell: RenderStatus,
+      flex: 1.3,
+    },
+  ];
 
   const compProps = {
+    toolbar: {
+      activeTab: props.activeTab,
+    },
     panel: {
       sx: {
         "& .MuiTypography-body1": {
@@ -441,34 +496,38 @@ const AntibodiesTable = () => {
   return (
     <Box>
       <Box sx={{ flexGrow: 1, height: "90vh" }}>
-        <DataGrid
-          sx={dataGridStyles}
-          rows={antibodiesList}
-          getRowId={getRowId}
-          columns={columns}
-          pageSize={10}
-          rowsPerPageOptions={[20]}
-          checkboxSelection
-          disableSelectionOnClick
-          getRowHeight={() => "auto"}
-          onRowClick={(params) =>
-            (window.location.href = `/AB_${params.row.abId}`)
-          }
-          components={{
-            BaseCheckbox: StyledCheckBox,
-            ColumnFilteredIcon: FilteredColumnIcon,
-            ColumnUnsortedIcon: SortingIcon,
-            ColumnSortedAscendingIcon: AscSortedIcon,
-            ColumnSortedDescendingIcon: DescSortedIcon,
-            Toolbar: CustomToolbar,
-            ColumnMenuIcon: FilterIcon,
-            ColumnSelectorIcon: SettingsIcon,
-          }}
-          componentsProps={compProps}
-          localeText={{
-            toolbarColumns: "Table settings",
-          }}
-        />
+        {currentPath === "/submissions" && !user ? (
+          <ConnectAccount />
+        ) : (
+          <DataGrid
+            sx={dataGridStyles}
+            rows={antibodiesList}
+            getRowId={getRowId}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[20]}
+            checkboxSelection
+            disableSelectionOnClick
+            getRowHeight={() => "auto"}
+            onRowClick={(params) =>
+              (window.location.href = `/AB_${params.row.abId}`)
+            }
+            components={{
+              BaseCheckbox: StyledCheckBox,
+              ColumnFilteredIcon: FilteredColumnIcon,
+              ColumnUnsortedIcon: SortingIcon,
+              ColumnSortedAscendingIcon: AscSortedIcon,
+              ColumnSortedDescendingIcon: DescSortedIcon,
+              Toolbar: CustomToolbar,
+              ColumnMenuIcon: FilterIcon,
+              ColumnSelectorIcon: SettingsIcon,
+            }}
+            componentsProps={compProps}
+            localeText={{
+              toolbarColumns: "Table settings",
+            }}
+          />
+        )}
       </Box>
     </Box>
   );
