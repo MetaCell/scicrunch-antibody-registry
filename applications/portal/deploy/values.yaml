@@ -28,19 +28,16 @@ harness:
     - uri: /admin/*
       roles:
         - administrator
+    - uri: /admin
+      roles:
+        - administrator
       require-any-role: true
     - uri: /add
       roles: []
       require-any-role: true
-    - uri: /test1
+    - uri: /submissions
       roles: []
       require-any-role: false
-    - uri: /test2
-    - uri: /test3
-      roles:
-        - offline_access
-      require-any-role: false
-
     - uri: /login
       roles: []
       require-any-role: true

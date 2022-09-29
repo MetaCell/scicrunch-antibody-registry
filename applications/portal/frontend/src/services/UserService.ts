@@ -5,6 +5,7 @@ export interface User {
   first_name: string;
   last_name: string;
   preferred_username: string;
+  realm_access: {roles: string[]}
 }
 
 function getCookie(name): string {

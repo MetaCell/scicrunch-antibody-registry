@@ -346,7 +346,7 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "nameAndId",
       headerName: "Name & ID",
-      flex: 2,
+      flex: 3,
       renderCell: RenderNameAndId,
       headerAlign: "left",
       align: "left",
@@ -389,6 +389,7 @@ const AntibodiesTable = (props) => {
       field: "reference",
       headerName: "Reference",
       flex: 1.5,
+      hide: true,
     },
     {
       ...columnsDefaultProps,
@@ -401,6 +402,7 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "cloneId",
       headerName: "Clone ID",
+      hide: true,
     },
     {
       ...columnsDefaultProps,
@@ -430,7 +432,7 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "status",
       headerName: "Status",
-      hide: props.activeTab === ALLRESULTS ? true : false,
+      hide: props.activeTab === ALLRESULTS,
       renderCell: RenderStatus,
       flex: 1.3,
     },

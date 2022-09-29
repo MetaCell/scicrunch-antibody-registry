@@ -13,7 +13,7 @@ const api = new AntibodyApi();
 
 export async function getAntibodies(
   page = 1,
-  size = 10
+  size = 100
 ): Promise<PaginatedAntibodies> {
   return (await api.getAntibodies(page, size)).data;
 }
@@ -64,7 +64,7 @@ function mapAntibody(antibody): AddUpdateAntibody {
 
 export async function getUserAntibodies(
   page = 1,
-  size = 10
+  size = 100
 ): Promise<PaginatedAntibodies> {
   return (
     await new AntibodyApi(
