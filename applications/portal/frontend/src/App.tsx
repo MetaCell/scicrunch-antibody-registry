@@ -13,6 +13,7 @@ import FAQs from "./components/Support/FAQs";
 import ContactUs from "./components/Support/ContactUs";
 import TermsAndConditions from "./components/Support/TermsAndConditions";
 import AccountDetails from "./components/AccountDetails";
+import { ALLRESULTS, MYSUBMISSIONS } from "./constants/constants";
 
 const App = () => {
   return (
@@ -21,7 +22,9 @@ const App = () => {
         <CssBaseline />
         <Navbar />
         <Switch>
-          <Route exact path="/" component={Home} />
+          <Route exact path="/">
+            <Home activeTab={ALLRESULTS} />
+          </Route>
           <Route exact path="/about" component={About} />
           <Route exact path="/add" component={Submit} />
           <Route path="/login">
@@ -35,6 +38,9 @@ const App = () => {
           <Route path="/faq" component={FAQs} />
           <Route path="/contact-us" component={ContactUs} />
           <Route path="/terms-and-conditions" component={TermsAndConditions} />
+          <Route path="/submissions">
+            <Home activeTab={MYSUBMISSIONS} />
+          </Route>
         </Switch>
       </ThemeProvider>
     </BrowserRouter>

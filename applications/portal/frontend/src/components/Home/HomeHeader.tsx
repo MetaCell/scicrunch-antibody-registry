@@ -33,7 +33,7 @@ const HideOnScroll = (props: Props) => {
 const HomeHeader = (props) => {
   const theme = useTheme();
   const [records, setRecords] = useState<number>();
-  const { activeSelection, handleExport, showFilterMenu } = props;
+  const { activeSelection, handleExport, showFilterMenu, activeTab } = props;
 
   const fetchRecords = () => {
     getRecords()
@@ -123,7 +123,10 @@ const HomeHeader = (props) => {
                 </Box>
               </Box>
             </HideOnScroll>
-            <TableToolbar showFilterMenu={showFilterMenu} />
+            <TableToolbar
+              showFilterMenu={showFilterMenu}
+              activeTab={activeTab}
+            />
           </Stack>
         </Container>
       </AppBar>

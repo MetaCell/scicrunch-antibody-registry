@@ -37,7 +37,8 @@ const NavLinks = () => {
   const history = useHistory();
   const location = useLocation();
 
-  const isHomeViewActive = location.pathname == "/";
+  const isHomeViewActive =
+    location.pathname == "/" || location.pathname == "/submissions";
   const isAboutViewActive = location.pathname == "/about";
 
   return (
