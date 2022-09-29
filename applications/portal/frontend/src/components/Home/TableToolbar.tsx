@@ -4,6 +4,7 @@ import { useTheme } from "@mui/material/styles";
 import { GridToolbarColumnsButton } from "@mui/x-data-grid";
 import { HouseIcon, SendIcon, FilteringIcon } from "../icons";
 import { useUser, User } from "../../services/UserService";
+import { ALLRESULTS } from "../../constants/constants";
 
 const TableToolbar = ({ showFilterMenu, activeTab }) => {
   const user: User = useUser();
@@ -19,7 +20,7 @@ const TableToolbar = ({ showFilterMenu, activeTab }) => {
       })}
     >
       <Tabs
-        value={activeTab === "all results" ? "one" : "two"}
+        value={activeTab === ALLRESULTS ? "one" : "two"}
         textColor="primary"
         indicatorColor="primary"
         sx={{
@@ -32,7 +33,7 @@ const TableToolbar = ({ showFilterMenu, activeTab }) => {
           icon={
             <HouseIcon
               stroke={
-                activeTab === "all results"
+                activeTab === ALLRESULTS
                   ? theme.palette.primary.main
                   : theme.palette.grey[400]
               }

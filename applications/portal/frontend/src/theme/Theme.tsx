@@ -29,7 +29,7 @@ const theme = createTheme({
       main: "#2173F2",
       light: "#DFEBF8",
       dark: "#0052CC",
-      200: "#A5C8F0",
+      contrastText: "#A5C8F0",
     },
     error: {
       light: "#D92D20",

@@ -39,6 +39,7 @@ import { getProperCitation } from "../../utils/antibody";
 import { useTheme } from "@mui/system";
 import { useUser, User } from "../../services/UserService";
 import ConnectAccount from "./ConnectAccount";
+import { ALLRESULTS } from "../../constants/constants";
 
 const StyledBadge = (props) => {
   if (props.field === "vendorName") {
@@ -323,7 +324,7 @@ const AntibodiesTable = (props) => {
   };
 
   useEffect(() => {
-    props.activeTab === "all results"
+    props.activeTab === ALLRESULTS
       ? fetchAntibodies()
       : user && fetchUserAntibodies();
   }, []);
@@ -429,7 +430,7 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "status",
       headerName: "Status",
-      hide: props.activeTab === "all results" ? true : false,
+      hide: props.activeTab === ALLRESULTS ? true : false,
       renderCell: RenderStatus,
       flex: 1.3,
     },
