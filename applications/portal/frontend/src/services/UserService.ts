@@ -56,13 +56,22 @@ export function getCurrentUser() {
       1
     );
   }
-  return parseJwt(getCookie("kc-access"));
+  return parseJwt(getToken());
+}
+
+
+
+export function getToken(): string {
+  return getCookie("kc-access");
 }
 
 export function useUser() {
   const [user, setUser] = useState(undefined);
   if (user === undefined) {
-    setUser(getCurrentUser());
+    const u = getCurrentUser()
+    setUser(u);
+    return u;
+
   }
   return user;
 }

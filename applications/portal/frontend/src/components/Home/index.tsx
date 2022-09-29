@@ -4,10 +4,10 @@ import { Container } from "@mui/material";
 
 import AntibodiesTable from "./AntibodiesTable";
 
-const Home = () => {
+const Home = (props) => {
   return (
     <Container maxWidth="xl">
-      <AntibodiesTable />
+      <AntibodiesTable {...props} />
     </Container>
   );
 };

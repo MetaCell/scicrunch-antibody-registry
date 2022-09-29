@@ -17,7 +17,7 @@ import { AlertIcon } from "../icons";
 import StepNavigation from "./StepNavigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { addAntibody } from "../../services/AntibodiesService";
+import { postNewAntibody } from "../../helpers/antibody";
 
 const { bannerHeadingColor, primaryTextColor } = vars;
 
@@ -155,15 +155,11 @@ const FormLine = ({ children }) => {
 };
 const OtherForm = (props) => {
   const classes = useStyles();
+  const { setAntibodyId, setApiResponse, next } = props;
 
   const postAntibody = (antibody) => {
     let ab = { ...antibody, type: "other" };
-    addAntibody(ab)
-      .then((res) => {
-        console.log("res", res);
-        props.next();
-      })
-      .catch((err) => alert(err));
+    postNewAntibody(ab, setAntibodyId, setApiResponse, next);
   };
 
   const formik = useFormik({
@@ -409,7 +405,7 @@ const OtherForm = (props) => {
       </Container>
       <StepNavigation
         previous={props.previous}
-        next={props.next}
+        next={next}
         hasPrevious={props.hasPrevious}
         isLastStep={true}
         activeStep={2}

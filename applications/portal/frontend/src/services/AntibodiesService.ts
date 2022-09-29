@@ -1,3 +1,4 @@
+import { Configuration } from "../rest";
 import {
   Antibody,
   PaginatedAntibodies,
@@ -5,6 +6,8 @@ import {
   AddUpdateAntibody,
   AntibodyCommercialTypeEnum,
 } from "../rest/api";
+
+import { getToken } from "./UserService";
 
 const api = new AntibodyApi();
 
@@ -16,14 +19,17 @@ export async function getAntibodies(
 }
 
 export async function getAntibody(id: number): Promise<Antibody> {
-  return  (await api.getAntibody(id)).data;
+  return (await api.getAntibody(id)).data;
 }
-
 
 export async function addAntibody(antibodyObj): Promise<any> {
   let ab = mapAntibody(antibodyObj);
   console.log("mappedObj", ab);
-  return (await api.createAntibody(ab)).data;
+  return (
+    await new AntibodyApi(
+      new Configuration({ apiKey: getToken(), accessToken: getToken() })
+    ).createAntibody(ab)
+  ).data;
 }
 
 function mapAntibody(antibody): AddUpdateAntibody {
@@ -48,10 +54,21 @@ function mapAntibody(antibody): AddUpdateAntibody {
   };
   if (antibody.type === AntibodyCommercialTypeEnum.Commercial) {
     return commercialAb;
+  } else {
+    return {
+      ...commercialAb,
+      definingCitation: antibody.citation,
+    };
   }
-  else {
-    return { 
-      ...commercialAb, 
-      definingCitation: antibody.citation
-    };}
+}
+
+export async function getUserAntibodies(
+  page = 1,
+  size = 10
+): Promise<PaginatedAntibodies> {
+  return (
+    await new AntibodyApi(
+      new Configuration({ apiKey: getToken(), accessToken: getToken() })
+    ).getUserAntibodies(page, size)
+  ).data;
 }

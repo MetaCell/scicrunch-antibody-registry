@@ -7,7 +7,7 @@ import {
   Popover,
   Stack,
   Typography,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -118,12 +118,23 @@ export const AntibodyDetail = () => {
   };
 
   useEffect(() => fetchAntibody(antibody_id.slice(3)), []);
-  if(!antibody) {
-    return <Box sx={{ display: 'flex', width: "100%", height: "100%", minHeight: "50vh", alignItems: "center", alignContent: "center" }}>
-      <CircularProgress />
-    </Box>
+  if (!antibody) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          width: "100%",
+          height: "100%",
+          minHeight: "50vh",
+          alignItems: "center",
+          alignContent: "center",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
-  const citation = antibody && getProperCitation(antibody)
+  const citation = antibody && getProperCitation(antibody);
   return (
     <>
       <SubHeader>AB_{antibody.abId}</SubHeader>
@@ -160,7 +171,9 @@ export const AntibodyDetail = () => {
                 </Grid>
                 <Grid item xs={3}>
                   <Typography variant="h4">ID</Typography>
-                  <Typography variant="subtitle2">AB_{antibody.abId}</Typography>
+                  <Typography variant="subtitle2">
+                    AB_{antibody.abId}
+                  </Typography>
                 </Grid>
                 <Grid item xs={3}>
                   <Typography variant="h4">Target antigen</Typography>
@@ -183,7 +196,9 @@ export const AntibodyDetail = () => {
                 </Grid>
                 <Grid item xs={3}>
                   <Typography variant="h4">Host organism</Typography>
-                  <Typography variant="subtitle2">{antibody.sourceOrganism}</Typography>
+                  <Typography variant="subtitle2">
+                    {antibody.sourceOrganism}
+                  </Typography>
                 </Grid>
               </Grid>
               <Divider />
@@ -192,9 +207,7 @@ export const AntibodyDetail = () => {
                   <Typography variant="subtitle1">Proper citation</Typography>
                 </Grid>
                 <Grid item xs={8}>
-                  <Typography variant="subtitle2">
-                    {citation}
-                  </Typography>
+                  <Typography variant="subtitle2">{citation}</Typography>
                   <CopyToClipboard text={citation}>
                     <Button
                       variant="text"
@@ -245,7 +258,9 @@ export const AntibodyDetail = () => {
                   <Typography variant="subtitle1">Vendor</Typography>
                 </Grid>
                 <Grid item xs={8}>
-                  <Typography variant="subtitle2">{antibody.vendorName}</Typography>
+                  <Typography variant="subtitle2">
+                    {antibody.vendorName}
+                  </Typography>
 
                   <Button
                     variant="text"
@@ -254,7 +269,7 @@ export const AntibodyDetail = () => {
                     endIcon={
                       <ExternalLinkIcon stroke={theme.palette.primary.dark} />
                     }
-                    href={`https://${antibody.url}`}
+                    href={antibody.url}
                   >
                     Open in vendor website
                   </Button>

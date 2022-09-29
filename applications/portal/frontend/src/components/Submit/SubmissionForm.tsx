@@ -10,6 +10,9 @@ import CommercialForm from "./CommercialForm";
 import SuccessSubmission from "./SuccessSubmission";
 import PersonalForm from "./PersonalForm";
 import OtherForm from "./OtherForm";
+import DuplicatedMsg from "./DuplicatedMsg";
+import Error500 from "../UI/Error500";
+import Error from "../UI/Error";
 
 const SubmissionForm = (props) => {
   const theme = useTheme();
@@ -25,6 +28,8 @@ const SubmissionForm = (props) => {
   };
 
   const [selectedType, setSelectedType] = useState("commercial");
+  const [antibodyId, setAntibodyId] = useState("");
+  const [apiResponse, setApiResponse] = useState({ status: 0, detail: "" });
 
   const handleTypeSelector = (value: string) => {
     setSelectedType(value);
@@ -33,6 +38,7 @@ const SubmissionForm = (props) => {
   const handleClose = () => {
     window.location.href = "/";
     setSelectedType("commercial");
+    setAntibodyId("");
   };
 
   return (
@@ -91,23 +97,35 @@ const SubmissionForm = (props) => {
               next={props.next}
               previous={props.previous}
               hasPrevious={props.hasPrevious}
+              setAntibodyId={setAntibodyId}
+              setApiResponse={setApiResponse}
             />
           ) : selectedType === "personal" ? (
             <PersonalForm
               next={props.next}
               previous={props.previous}
               hasPrevious={props.hasPrevious}
+              setAntibodyId={setAntibodyId}
+              setApiResponse={setApiResponse}
             />
           ) : (
             <OtherForm
               next={props.next}
               previous={props.previous}
               hasPrevious={props.hasPrevious}
+              setAntibodyId={setAntibodyId}
+              setApiResponse={setApiResponse}
             />
           )}
-          {/* TODO check if the post is sucessfully send correct temporaryID
-          If not, add the duplicated message */}
-          <SuccessSubmission onClose={handleClose} temporaryID={"AB_2923405"} />
+          {apiResponse.status === 200 ? (
+            <SuccessSubmission onClose={handleClose} temporaryID={antibodyId} />
+          ) : apiResponse.status === 409 ? (
+            <DuplicatedMsg antibodyId={antibodyId} />
+          ) : apiResponse.status === 500 ? (
+            <Error500 />
+          ) : (
+            <Error detail={apiResponse.detail} />
+          )}
         </MultiStep>
       </Box>
     </Dialog>

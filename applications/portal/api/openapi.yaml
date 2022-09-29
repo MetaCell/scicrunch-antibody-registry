@@ -18,12 +18,18 @@ paths:
                 - antibody
             parameters:
                 -
+                    examples:
+                        first:
+                            value: '1'
                     name: page
                     description: 'Represents the page requested, considering the size parameter'
                     schema:
                         type: integer
                     in: query
                 -
+                    examples:
+                        default:
+                            value: '10'
                     name: size
                     description: Corresponds to the cardinality of antibodies requested
                     schema:
@@ -51,7 +57,24 @@ paths:
                 - antibody
             responses:
                 '201':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Antibody'
                     description: Successful response.
+                '400':
+                    content:
+                        application/json: {}
+                    description: some valiidation error. The name of the errored field is returned
+                '409':
+                    description: >-
+                        Raised when the antibody is duplicated (catalog number already present for the same
+                        vendor)
+            security:
+                -
+                    cookieAuth: []
+                -
+                    bearerAuth: []
             operationId: createAntibody
             summary: Create a Antibody
             description: Creates a new instance of a `Antibody`.
@@ -209,6 +232,9 @@ paths:
             responses:
                 '202':
                     description: Successful response.
+            security:
+                -
+                    cookieAuth: []
             operationId: updateAntibody
             summary: Update a Antibody
             description: Updates an existing `Antibody`.
@@ -232,6 +258,57 @@ paths:
                     type: integer
                 in: path
                 required: true
+    /antibodies/user:
+        summary: Path used to manage the list of antibodies.
+        description: >-
+            The REST endpoint/path used to list and create zero or more `Antibody` entities.  This path
+            contains a `GET` and `POST` operation to perform the list and create tasks, respectively.
+        get:
+            tags:
+                - antibody
+            parameters:
+                -
+                    examples:
+                        first:
+                            value: '1'
+                    name: page
+                    description: 'Represents the page requested, considering the size parameter'
+                    schema:
+                        type: integer
+                    in: query
+                -
+                    examples:
+                        default:
+                            value: '10'
+                    name: size
+                    description: Corresponds to the cardinality of antibodies requested
+                    schema:
+                        type: integer
+                    in: query
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PaginatedAntibodies'
+                    description: Successful response - returns an array of `Antibody` entities.
+            security:
+                -
+                    cookieAuth: []
+                -
+                    bearerAuth: []
+            operationId: getUserAntibodies
+            summary: List Antibodies
+            description: Gets a list of `Antibody` entities.
+    /datainfo:
+        get:
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DataInfo'
+                    description: Returns info
 components:
     schemas:
         AddUpdateAntibody:
@@ -516,6 +593,21 @@ components:
                     example: >-
                         Sheep polyclonal anti-FSH antibody labeled with acridinium ester. Mouse monoclonal
                         anti-FSH antibody covalently coupled to paramagnetic particles.
+        DataInfo:
+            description: Information about the data in the system
+            required:
+                - lastupdate
+                - total
+            type: object
+            properties:
+                total:
+                    description: The total number of antibodies in the system
+                    minimum: 0
+                    type: integer
+                lastupdate:
+                    format: date
+                    description: ''
+                    type: string
     responses:
         PaginatedAntibodies:
             content:
@@ -523,3 +615,14 @@ components:
                     schema:
                         $ref: '#/components/schemas/PaginatedAntibodies'
             description: ''
+    securitySchemes:
+        cookieAuth:
+            type: apiKey
+            name: kc-access
+            in: cookie
+            x-apikeyInfoFunc: cloudharness.auth.decode_token
+        bearerAuth:
+            scheme: bearer
+            bearerFormat: JWT
+            type: http
+            x-bearerInfoFunc: cloudharness.auth.decode_token

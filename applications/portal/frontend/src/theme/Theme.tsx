@@ -29,6 +29,20 @@ const theme = createTheme({
       main: "#2173F2",
       light: "#DFEBF8",
       dark: "#0052CC",
+      contrastText: "#A5C8F0",
+    },
+    error: {
+      light: "#D92D20",
+      main: "#B42318",
+      contrastText: "#FEF3F2",
+    },
+    success: {
+      main: "#027A48",
+      contrastText: "#ECFDF3",
+    },
+    warning: {
+      main: "#FDB022",
+      contrastText: "#FFFAEB",
     },
   },
   shape: {
@@ -46,6 +60,11 @@ const theme = createTheme({
       fontFamily: primaryFont,
       fontWeight: 600,
       fontSize: "1.875rem",
+    },
+    h2: {
+      fontFamily: "'proxima-nova', 'sans-serif'",
+      fontWeight: 600,
+      fontSize: "1.125rem",
     },
     h5: {
       fontFamily: "'proxima-nova', 'sans-serif'",

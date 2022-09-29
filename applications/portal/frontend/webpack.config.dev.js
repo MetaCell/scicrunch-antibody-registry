@@ -25,6 +25,7 @@ module.exports = env => {
       publicPath: '/',
     }],
     compress: true,
+    https: env.DOMAIN.includes("https"),
     port: Number(env.devPort),
     allowedHosts: "all",
     historyApiFallback: true,
@@ -33,6 +34,8 @@ module.exports = env => {
         target: replaceHost( proxyTarget, 'portal'),
         secure: false,
         changeOrigin: true,
+        cookieDomainRewrite: {  "localhost": "osb.local" },
+        withCredentials: true,
       }
     },
   };

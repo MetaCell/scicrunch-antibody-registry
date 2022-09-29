@@ -75,6 +75,30 @@ start the FastAPI server
 uvicorn --workers 2 --host 0.0.0.0 --port 8000 main:app
 ```
 
+On Visual Studio Code, can use the following run configuration:
+
+```json
+{
+      "args": [
+        "--host",
+        "0.0.0.0",
+        "--port", "8000",
+        "main:app"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/applications/portal/backend",
+      "justMyCode": false,
+      "name": "Backend",
+      "module": "uvicorn",
+      "request": "launch",
+      "type": "python",
+      "env": {
+        "CH_CURRENT_APP_NAME": "portal",
+        "CH_VALUES_PATH": "${workspaceFolder}/deployment/helm/values.yaml"
+      }
+    },
+```
+
 
 ### Running local with port forwardings to a kubernetes cluster
 When you create port forwards to microservices in your k8s cluster you want to forced your local backend server to initialize
