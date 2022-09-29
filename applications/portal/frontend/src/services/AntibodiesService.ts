@@ -5,7 +5,6 @@ import {
   AntibodyApi,
   AddUpdateAntibody,
   AntibodyCommercialTypeEnum,
-  DataInfo,
 } from "../rest/api";
 
 import { getToken } from "./UserService";
@@ -72,8 +71,4 @@ export async function getUserAntibodies(
       new Configuration({ apiKey: getToken(), accessToken: getToken() })
     ).getUserAntibodies(page, size)
   ).data;
-}
-
-export async function getRecords():Promise<DataInfo>{
-  return (await api.getRecords()).data;
 }

@@ -13,7 +13,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { AddAntibodyIcon, DownloadIcon } from "../icons";
 import TableToolbar from "./TableToolbar";
-import { getRecords } from "../../services/AntibodiesService";
+import { getDataInfo } from "../../services/InfoService";
 
 interface Props {
   /**
@@ -38,7 +38,7 @@ const HomeHeader = (props) => {
   const { activeSelection, handleExport, showFilterMenu, activeTab } = props;
 
   const fetchRecords = () => {
-    getRecords()
+    getDataInfo()
       .then((res) => {
         setRecords(res.total);
         setLastupdate(res.lastupdate);
