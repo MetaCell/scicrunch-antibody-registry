@@ -8,9 +8,11 @@ from typing import List
 import pandas as pd
 from timeit import default_timer as timer
 from api.management.gd_downloader import GDDownloader
-from api.models import AntibodyClonality, CommercialType
+from api.models import AntibodyClonality, CommercialType, STATUS
 from areg_portal.settings import RAW_ANTIBODY_DATA, RAW_VENDOR_DATA, RAW_VENDOR_DOMAIN_DATA, CHUNK_SIZE, ANTIBODY_HEADER
 
+UNKNOWN_VENDORS = {'1669', '1667', '1625', '1633', '1628', '11599', '12068', '12021', '1632', '5455', '1626', '1670',
+                   '11278', '(null)', '1684', '11598', '0', '1682', '11434'}
 MAX_TRIES = 10
 
 
@@ -66,12 +68,16 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
 
                 clean_df(chunk)
 
+                # filter valid antibodies
+                chunk = chunk[(~chunk['vendor_id'].isin(UNKNOWN_VENDORS)) & (chunk['status'] != STATUS.REJECTED)]
+
                 # point unknown commercial type and clonality to None and unk
 
-                chunk['commercial_type'].where(chunk['commercial_type'].isin({c[0] for c in CommercialType.choices}),
-                                               None, inplace=True)
-                chunk['clonality'].where(chunk['clonality'].isin({c[0] for c in AntibodyClonality.choices}), 'unknown',
-                                         inplace=True)
+                chunk['commercial_type'] = chunk['commercial_type'].where(
+                    chunk['commercial_type'].isin({c[0] for c in CommercialType.choices}),
+                    None)
+                chunk['clonality'] = chunk['clonality'].where(
+                    chunk['clonality'].isin({c[0] for c in AntibodyClonality.choices}), 'unknown')
 
                 # get rows that need custom update
 

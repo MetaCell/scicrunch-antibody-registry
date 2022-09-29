@@ -60,10 +60,6 @@ def get_clean_species_str(specie: str):
     return specie.translate(str.maketrans('', '', string.punctuation)).strip().lower()
 
 
-UNKNOWN_VENDORS = {'1669', '1667', '1625', '1633', '1628', '11599', '12068', '12021', '1632', '5455', '1626', '1670',
-                   '11278', '(null)', '1684', '11598', '0', '1682', '11434'}
-
-
 class Command(BaseCommand):
     ANTIBODY_TABLE = Antibody.objects.model._meta.db_table
     ANTIGEN_TABLE = Gene.objects.model._meta.db_table
@@ -167,13 +163,10 @@ class Command(BaseCommand):
                     for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode')):
                         chunk = chunk.where(pd.notnull(chunk), None)
 
-                        antibodies_chunk = chunk[
-                            (~chunk['vendor_id'].isin(UNKNOWN_VENDORS)) & (chunk['status'] != STATUS.REJECTED)]
-
                         raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, ANTIBODY_HEADER,
-                                                                               len(antibodies_chunk))
+                                                                               len(chunk))
 
-                        cursor.execute(raw_data_insert_stm, antibodies_chunk.to_numpy().flatten().tolist())
+                        cursor.execute(raw_data_insert_stm, chunk.to_numpy().flatten().tolist())
                         logging.info(f"File progress: {int(min((i + 1) * CHUNK_SIZE, len_csv) / len_csv * 100)}% ")
 
                 end = timer()
