@@ -12,6 +12,7 @@ import {
   MenuItem,
   Stack
 } from "@mui/material";
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
 import { ThreeDotsIcon, UserIcon, LogoutIcon, CubeIcon } from "../icons";
 
@@ -96,6 +97,12 @@ const UserAccountMenu = (props: UserProps) => {
                   </ListItemIcon>
                   <Typography variant="h5" color="grey.500">API Key</Typography>
                 </MenuItem>
+                {user.realm_access.roles.includes("administrator") && <MenuItem onClick={() => window.location.href = "/admin/"}>
+                  <ListItemIcon>
+                    <AdminPanelSettingsIcon fontSize="small" sx={{ pl: 0 }}  />
+                  </ListItemIcon>
+                  <Typography variant="h5" color="grey.500">Admin panel</Typography>
+                </MenuItem> }
                 <Divider />
                 <MenuItem onClick={() => window.location.href = "/oauth/logout"}>
                   <ListItemIcon>
