@@ -5,6 +5,7 @@ import {
   AntibodyApi,
   AddUpdateAntibody,
   AntibodyCommercialTypeEnum,
+  DataInfo,
 } from "../rest/api";
 
 import { getToken } from "./UserService"
@@ -57,4 +58,8 @@ function mapAntibody(antibody): AddUpdateAntibody {
       ...commercialAb, 
       definingCitation: antibody.citation
     };}
+}
+
+export async function getRecords():Promise<DataInfo>{
+  return (await api.getRecords()).data;
 }

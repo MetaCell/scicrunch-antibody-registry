@@ -889,6 +889,28 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
                 options: localVarRequestOptions,
             };
         },
+        getRecords: async(options:AxiosRequestConfig={}): Promise<RequestArgs> => {
+            const localVarPath = '/datainfo';
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+
+        },
         /**
          * Gets the details of a single instance of a `Antibody`.
          * @summary Get a Antibody
@@ -1055,6 +1077,10 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getAntibodies(page, size, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
+        async getRecords(options?:AxiosRequestConfig): Promise<(axios?:AxiosInstance,basePath?:string)=>AxiosPromise<DataInfo>>{
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRecords(options);
+            return createRequestFunction(localVarAxiosArgs,globalAxios,BASE_PATH,configuration);
+        },
         /**
          * Gets the details of a single instance of a `Antibody`.
          * @summary Get a Antibody
@@ -1208,6 +1234,9 @@ export class AntibodyApi extends BaseAPI {
      */
     public getAntibodies(page?: number, size?: number, options?: AxiosRequestConfig) {
         return AntibodyApiFp(this.configuration).getAntibodies(page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+    public getRecords(options?:AxiosRequestConfig){
+        return AntibodyApiFp(this.configuration).getRecords(options).then((request) => request(this.axios,this.basePath));
     }
 
     /**

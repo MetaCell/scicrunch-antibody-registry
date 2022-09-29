@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import {
   AppBar,
@@ -6,14 +6,13 @@ import {
   Button,
   Container,
   Grid,
-  Link,
   Stack,
   Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { AddAntibodyIcon, DownloadIcon } from "../icons";
 import TableToolbar from "./TableToolbar";
-import SubmissionForm from "../Submit/SubmissionForm";
+import { getRecords } from "../../services/AntibodiesService";
 
 interface Props {
   /**
@@ -33,8 +32,18 @@ const HideOnScroll = (props: Props) => {
 
 const HomeHeader = (props) => {
   const theme = useTheme();
+  const [records, setRecords] = useState<number>();
   const { activeSelection, handleExport, showFilterMenu } = props;
 
+  const fetchRecords = () => {
+    getRecords()
+      .then((res) => {
+        setRecords(res.total);
+      }).catch((err) => {
+        console.log("Error: ", err)
+      })
+  }
+  useEffect(fetchRecords,[]);
   return (
     <Box>
       <AppBar elevation={0} sx={{ top: "4.5rem" }}>
@@ -61,7 +70,7 @@ const HomeHeader = (props) => {
                           color="common.white"
                           align="left"
                         >
-                          2,512,817 records
+                          {records} records
                         </Typography>
                       </Box>
                     </Grid>
