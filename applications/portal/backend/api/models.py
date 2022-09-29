@@ -72,7 +72,6 @@ class VendorDomain(models.Model):
         return self.base_url
 
 
-# TODO: Update according to https://github.com/MetaCell/scicrunch-antibody-registry/issues/65
 class Gene(models.Model):
     symbol = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN, db_column='ab_target', null=True, db_index=True)
     entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
@@ -84,12 +83,10 @@ class Gene(models.Model):
 
 
 class Antibody(models.Model):
-    # todo: make sure autoincrement is functional with incremental ingestion
     ix = models.AutoField(primary_key=True, unique=True, null=False)
-    # todo: In the context, is a bit strange to have nullable antibody name
     ab_name = models.CharField(max_length=ANTIBODY_NAME_MAX_LEN, null=True, db_index=True)
-    ab_id = models.IntegerField(db_index=True)
-    accession = models.CharField(max_length=ANTIBODY_ID_MAX_LEN)
+    ab_id = models.CharField(max_length=ANTIBODY_ID_MAX_LEN, null=True, db_index=True)
+    accession = models.CharField(max_length=ANTIBODY_ID_MAX_LEN, null=True)
     commercial_type = models.CharField(
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
         choices=CommercialType.choices,
@@ -131,7 +128,7 @@ class Antibody(models.Model):
     status = models.CharField(
         max_length=STATUS_MAX_LEN,
         choices=STATUS.choices,
-        default=STATUS.QUEUE, 
+        default=STATUS.QUEUE,
         db_index=True
     )
     insert_time = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -154,7 +151,3 @@ class Antibody(models.Model):
 class AntibodySpecies(models.Model):
     antibody = models.ForeignKey(Antibody, on_delete=models.CASCADE, db_index=True)
     specie = models.ForeignKey(Specie, on_delete=models.CASCADE, db_index=True)
-
-
-
-    
