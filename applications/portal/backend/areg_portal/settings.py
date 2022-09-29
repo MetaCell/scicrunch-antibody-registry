@@ -13,7 +13,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -48,7 +47,6 @@ MIDDLEWARE = [
     "cloudharness.middleware.django.CloudharnessMiddleware",
 ]
 
-
 ROOT_URLCONF = "areg_portal.urls"
 
 TEMPLATES = [
@@ -69,7 +67,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "areg_portal.wsgi.application"
 
-
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -88,7 +85,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -106,7 +102,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
 
 PROJECT_NAME = "areg_portal".upper()
 
@@ -200,10 +195,14 @@ RAW_VENDOR_DOMAIN_DATA = 'antibody_vendors_domain'
 
 CHUNK_SIZE = 10 ** 5
 
-ANTIBODY_HEADER = ['ab_name', 'ab_target', 'target_species', 'vendor', 'vendor_id', 'catalog_num', 'clonality',
-                   'source_organism', 'clone_id', 'url', 'link', 'ab_target_entrez_gid', 'product_isotype',
-                   'product_conjugate', 'product_form', 'target_subregion', 'target_modification', 'comments',
-                   'feedback', 'defining_citation', 'disc_date', 'curator_comment', 'id', 'ab_id', 'ab_id_old',
-                   'of_record', 'ix', 'uid', 'status', 'insert_time', 'curate_time', 'cat_alt', 'commercial_type',
-                   'uniprot_id', 'epitope'
-                   ]
+ANTIBODY_HEADER = {'ab_name': "text", 'ab_target': "text", 'target_species': "text", 'vendor': "text",
+                   'vendor_id': "int", 'catalog_num': "text", 'clonality': "text",
+                   'source_organism': "text", 'clone_id': "text", 'url': "text", 'link': "text",
+                   'ab_target_entrez_gid': "text", 'product_isotype': "text",
+                   'product_conjugate': "text", 'product_form': "text", 'target_subregion': "text",
+                   'target_modification': "text", 'comments': "text",
+                   'feedback': "text", 'defining_citation': "text", 'disc_date': "text", 'curator_comment': "text",
+                   'id': "text", 'ab_id': "text", 'ab_id_old': "text",
+                   'of_record': "text", 'ix': "int", 'uid': "text", 'status': "text", 'insert_time': "text",
+                   'curate_time': "text", 'cat_alt': "text", 'commercial_type': "text",
+                   'uniprot_id': "text", 'epitope': "text"}

@@ -10,7 +10,7 @@ from django.db import transaction, connection
 
 from api.management.pre_process import preprocess
 from api.models import Antibody, Gene, Vendor, VendorDomain, Specie, \
-    VendorSynonym, AntibodySpecies, STATUS
+    VendorSynonym, AntibodySpecies
 from areg_portal.settings import ANTIBODY_ANTIBODY_START_SEQ, ANTIBODY_VENDOR_START_SEQ, \
     ANTIBODY_VENDOR_DOMAIN_START_SEQ, ANTIBODY_HEADER
 from areg_portal.settings import CHUNK_SIZE
@@ -23,25 +23,13 @@ INSERT_INTO_SELECT_STM = "INSERT INTO {to_table_name} ({to_columns}) SELECT {dis
 RESTART_SEQ_STM = "ALTER SEQUENCE {table_name} RESTART WITH {value};"
 
 
-# CREATE_INDEX_STM = "CREATE INDEX {index_name} ON {table_name} ({column});"
-# DROP_INDEX_STM = "DROP INDEX {index_name} ON {table_name};"
-
-
 def get_restart_seq_stm(table_name, value):
     return RESTART_SEQ_STM.format(table_name=table_name, value=value)
 
 
-def get_create_table_stm(table_name, columns):
-    columns_str = ", ".join([f"{column} text" for column in columns])
+def get_create_table_stm(table_name, columns_dict):
+    columns_str = ", ".join([f"{column} {columns_dict[column]}" for column in columns_dict])
     return CREATE_TABLE_STM.format(table_name=table_name, columns=columns_str)
-
-
-# def get_create_index_stm(table_name, column):
-#     return CREATE_INDEX_STM.format(index_name=get_index_name(table_name, column), table_name=table_name, column=column)
-#
-#
-# def get_index_name(table_name, column):
-#     return f"idx_{table_name}_{column}"
 
 
 def get_insert_into_table_select_stm(to_table_name, to_columns, distinct, from_columns, from_table_name):
@@ -52,9 +40,9 @@ def get_insert_into_table_select_stm(to_table_name, to_columns, distinct, from_c
 
 def get_insert_values_into_table_stm(table_name, columns, entries):
     return INSERT_INTO_VALUES_STM.format(
-        ', '.join([f"({', '.join(['%s' for _ in range(0, len(columns))])})"] * entries), table_name=table_name,
+        ', '.join([f"({', '.join(['%s' for _ in range(0, len(columns))])})"] * entries),
+        table_name=table_name,
         columns=', '.join(columns))
-
 
 def get_clean_species_str(specie: str):
     return specie.translate(str.maketrans('', '', string.punctuation)).strip().lower()
@@ -75,7 +63,6 @@ class Command(BaseCommand):
         parser.add_argument("file_id", type=str)
 
     def handle(self, *args, **options):
-
         # Pre process google drive data
         metadata = preprocess(options["file_id"])
 
@@ -109,10 +96,11 @@ class Command(BaseCommand):
                                     self.ANTIGEN_TABLE, self.VENDOR_SYNONYM_TABLE,
                                     self.VENDOR_DOMAIN_TABLE, self.VENDOR_TABLE]
                 start = timer()
+
                 for ttd in tables_to_delete:
                     cursor.execute(TRUNCATE_STM.format(table_name=ttd))
-                end = timer()
 
+                end = timer()
                 logging.info(f"Tables truncated ({end - start} seconds)")
 
                 # insert vendors
@@ -143,29 +131,38 @@ class Command(BaseCommand):
                 # insert vendors domains
                 vendor_domain_params = []
                 start = timer()
+
                 for index, row in df_vendor_domain.iterrows():
                     vendor_domain_params.extend(
                         [row['id'], row['domain_name'], row['vendor_id'],
                          row['status'].upper(), False])
                 cursor.execute(vendor_domain_insert_stm, vendor_domain_params)
+
                 end = timer()
                 logging.info(f"Vendor domains added ({end - start} seconds)")
 
                 # Create copy table
                 start = timer()
+
                 cursor.execute(get_create_table_stm(self.TMP_TABLE, ANTIBODY_HEADER))
 
                 # Insert raw data into tmp table
 
+                d_types = ANTIBODY_HEADER.copy()
+                for dt in d_types:
+                    if dt == 'int':
+                        d_types[dt] = 'int64'
+                    else:
+                        d_types[dt] = 'unicode'
+
                 for antibody_data_path in metadata.antibody_data_paths:
                     logging.info(antibody_data_path)
                     len_csv = sum(1 for _ in open(antibody_data_path, 'r'))
-                    for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode')):
+                    for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype=d_types)):
                         chunk = chunk.where(pd.notnull(chunk), None)
 
-                        raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, ANTIBODY_HEADER,
+                        raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, ANTIBODY_HEADER.keys(),
                                                                                len(chunk))
-
                         cursor.execute(raw_data_insert_stm, chunk.to_numpy().flatten().tolist())
                         logging.info(f"File progress: {int(min((i + 1) * CHUNK_SIZE, len_csv) / len_csv * 100)}% ")
 
@@ -174,11 +171,13 @@ class Command(BaseCommand):
 
                 # Insert select distinct antigen
                 start = timer()
+
                 cursor.execute(get_insert_into_table_select_stm(self.ANTIGEN_TABLE,
                                                                 'ab_target',
                                                                 True,
                                                                 'ab_target',
                                                                 self.TMP_TABLE))
+
                 # Update antigen with ids
                 antigen_update_stm = f"UPDATE {self.ANTIGEN_TABLE} " \
                                      f"SET ab_target_entrez_gid=TMP.ab_target_entrez_gid, " \
@@ -186,34 +185,9 @@ class Command(BaseCommand):
                                      f"FROM {self.TMP_TABLE} as TMP " \
                                      f"WHERE {self.ANTIGEN_TABLE}.ab_target=TMP.ab_target; "
                 cursor.execute(antigen_update_stm)
+
                 end = timer()
                 logging.info(f"Genes added ({end - start} seconds)")
-
-                # Insert into antibody
-
-                antibody_stm = f"INSERT INTO {self.ANTIBODY_TABLE} (ix, ab_name, ab_id, accession, commercial_type, uid, catalog_num, cat_alt, " \
-                               f"vendor_id, url, antigen_id, target_subregion, target_modification, " \
-                               f"epitope, clonality, clone_id, product_isotype, " \
-                               f"product_conjugate, defining_citation, product_form, comments, feedback, " \
-                               f"curator_comment, disc_date, status, insert_time, curate_time)" \
-                               f"SELECT DISTINCT CAST(ix AS INTEGER), ab_name, ab_id, ab_id_old, commercial_type, " \
-                               f"uid, catalog_num, cat_alt, CAST(vendor_id as BIGINT), url, antigen.id, " \
-                               f"target_subregion, target_modification, epitope, clonality, " \
-                               f"clone_id, product_isotype, product_conjugate, defining_citation, product_form, " \
-                               f"comments, feedback, curator_comment, disc_date, status, " \
-                               f"to_timestamp(cast(insert_time as BIGINT) / 1000000.0), " \
-                               f"to_timestamp(cast(curate_time as BIGINT) / 1000000.0) " \
-                               f"FROM {self.TMP_TABLE} as tmp " \
-                               f"LEFT JOIN {self.VENDOR_TABLE} as vendor " \
-                               f"ON CAST(tmp.vendor_id AS integer) = vendor.id " \
-                               f"LEFT JOIN {self.ANTIGEN_TABLE} as antigen " \
-                               f"ON tmp.ab_target = antigen.ab_target;"
-
-                start = timer()
-                cursor.execute(antibody_stm)
-                end = timer()
-
-                logging.info(f"Antibodies added ({end - start} seconds)")
 
                 # Insert into species
 
@@ -222,6 +196,7 @@ class Command(BaseCommand):
                                   f"SELECT DISTINCT source_organism FROM {self.TMP_TABLE}"
 
                 start = timer()
+
                 cursor.execute(get_species_stm)
                 species_map = {}
                 species_id = 1
@@ -237,14 +212,45 @@ class Command(BaseCommand):
                                                                       ['name', 'id'],
                                                                       len(species_map.keys()))
                 cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(species_map.items())))
+
                 end = timer()
                 logging.info(f"Species added ({end - start} seconds)")
 
+                # Insert into antibody
+
+                antibody_stm = f"INSERT INTO {self.ANTIBODY_TABLE} (ix, ab_name, ab_id, accession, commercial_type, uid, catalog_num, cat_alt, " \
+                               f"vendor_id, url, antigen_id, target_subregion, target_modification, " \
+                               f"epitope, clonality, clone_id, product_isotype, " \
+                               f"product_conjugate, defining_citation, product_form, comments, feedback, " \
+                               f"curator_comment, disc_date, status, insert_time, curate_time, source_organism_id)" \
+                               f"SELECT DISTINCT ix, ab_name, ab_id, ab_id_old, commercial_type, " \
+                               f"uid, catalog_num, cat_alt, vendor_id, url, antigen.id, " \
+                               f"target_subregion, target_modification, epitope, clonality, " \
+                               f"clone_id, product_isotype, product_conjugate, defining_citation, product_form, " \
+                               f"comments, feedback, curator_comment, disc_date, status, " \
+                               f"to_timestamp(cast(insert_time as BIGINT) / 1000000.0), " \
+                               f"to_timestamp(cast(curate_time as BIGINT) / 1000000.0), SP.id " \
+                               f"FROM {self.TMP_TABLE} as TMP " \
+                               f"LEFT JOIN {self.VENDOR_TABLE} as vendor " \
+                               f"ON TMP.vendor_id = vendor.id " \
+                               f"LEFT JOIN {self.ANTIGEN_TABLE} as antigen " \
+                               f"ON TMP.ab_target = antigen.ab_target " \
+                               f"LEFT JOIN {self.SPECIE_TABLE} as SP " \
+                               f"ON TMP.source_organism = SP.name "
+
+                start = timer()
+
+                cursor.execute(antibody_stm)
+
+                end = timer()
+
+                logging.info(f"Antibodies added ({end - start} seconds)")
+
                 # Insert into antibody species
                 start = timer()
-                for antibody_data_path in metadata.antibody_data_paths:
-                    for chunk in pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode'):
 
+                for antibody_data_path in metadata.antibody_data_paths:
+                    for chunk in pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype=d_types):
                         chunk = chunk.where(pd.notnull(chunk), None)
 
                         species_params = []
@@ -260,31 +266,20 @@ class Command(BaseCommand):
                     int(len(species_params) / 2))
 
                 cursor.execute(antibody_species_insert_stm, species_params)
+
                 end = timer()
                 logging.info(f"AntibodySpecies added ({end - start} seconds)")
-
-                # Update antibody source_organism
-                # cursor.execute(get_create_index_stm(self.TMP_TABLE, 'ix'))
-
-                source_organism_update_stm = f"UPDATE {self.ANTIBODY_TABLE} " \
-                                             f"SET source_organism_id=SP.id " \
-                                             f"FROM {self.SPECIE_TABLE} as SP " \
-                                             f"JOIN {self.TMP_TABLE} as TP " \
-                                             f"ON lower(TP.source_organism) = SP.name " \
-                                             f"WHERE CAST(TP.ix AS integer)={self.ANTIBODY_TABLE}.ix "
-                start = timer()
-                cursor.execute(source_organism_update_stm)
-                end = timer()
-                logging.info(f"Antibodies source organisms updated ({end - start} seconds)")
 
                 # Update vendor domain link
                 antigen_update_stm = f"UPDATE {self.VENDOR_DOMAIN_TABLE} " \
                                      f"SET link = True " \
                                      f"FROM {self.TMP_TABLE} " \
-                                     f"WHERE {self.VENDOR_DOMAIN_TABLE}.vendor_id=CAST({self.TMP_TABLE}.vendor_id as BIGINT) " \
-                                     f"AND lower({self.TMP_TABLE}.link) = 'yes'; "
+                                     f"WHERE {self.VENDOR_DOMAIN_TABLE}.vendor_id={self.TMP_TABLE}.vendor_id " \
+                                     f"AND {self.TMP_TABLE}.link = 'yes'; "
                 start = timer()
+
                 cursor.execute(antigen_update_stm)
+
                 end = timer()
 
                 logging.info(f"Vendor domain links updated ({end - start} seconds)")
@@ -295,7 +290,9 @@ class Command(BaseCommand):
                     'api_vendor_id_seq': ANTIBODY_VENDOR_START_SEQ,
                     'api_vendordomain_id_seq': ANTIBODY_VENDOR_DOMAIN_START_SEQ,
                 }
+
                 start = timer()
+
                 for ttr in tables_to_restart_seq:
                     cursor.execute(get_restart_seq_stm(ttr, tables_to_restart_seq[ttr]))
 
@@ -303,13 +300,15 @@ class Command(BaseCommand):
                                                                        [Specie, Gene, AntibodySpecies, VendorSynonym])
                 for rss in reset_sequence_sql:
                     cursor.execute(rss)
+
                 end = timer()
                 logging.info(f"Sequence tables updated ({end - start} seconds)")
 
                 # Drop tmp table
                 start = timer()
+
                 cursor.execute(DROP_TABLE_STM.format(table_name=self.TMP_TABLE))
-                # cursor.execute(DROP_INDEX_STM.format(table_name=self.TMP_TABLE, index_name=get_index_name(self.TMP_TABLE, 'ix')))
+
                 end = timer()
                 logging.info(f"Temporary table dropped ({end - start} seconds)")
 

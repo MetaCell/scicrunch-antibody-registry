@@ -65,22 +65,25 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
             for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode')):
 
                 # converge null values to None
-
                 clean_df(chunk)
 
-                # filter valid antibodies
-                chunk = chunk[(~chunk['vendor_id'].isin(UNKNOWN_VENDORS)) & (chunk['status'] != STATUS.REJECTED)]
+                # lowercase necessary columns
+                chunk["source_organism"] = chunk["source_organism"].str.lower()
+                chunk["link"] = chunk["link"].str.lower()
 
-                # point unknown commercial type and clonality to None and unk
+                # point unknown vendor_id to None
+                chunk['vendor_id'] = chunk['vendor_id'].where(~chunk['vendor_id'].isin(UNKNOWN_VENDORS), None)
 
+                # point unknown commercial type to None
                 chunk['commercial_type'] = chunk['commercial_type'].where(
                     chunk['commercial_type'].isin({c[0] for c in CommercialType.choices}),
                     None)
+
+                # point unknown clonality to 'unknown'
                 chunk['clonality'] = chunk['clonality'].where(
                     chunk['clonality'].isin({c[0] for c in AntibodyClonality.choices}), 'unknown')
 
                 # get rows that need custom update
-
                 relevant_rows = chunk.loc[chunk['ix'].isin(antibodies_map.keys())]
 
                 # apply custom update to relevant rows
@@ -89,9 +92,8 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
                         chunk.loc[chunk['ix'] == row['ix'], atr] = antibodies_map[row['ix']][atr]
 
                 # save chunk temp file
-
                 chunk.to_csv(tmp_antibody_data_path, mode='a',
-                             header=ANTIBODY_HEADER if i == 0 else False, index=False)
+                             header=ANTIBODY_HEADER.keys() if i == 0 else False, index=False)
 
             replace_file(antibody_data_path, tmp_antibody_data_path)
 
