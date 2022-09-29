@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Pluralize from "pluralize";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import {
   AppBar,
@@ -33,18 +34,24 @@ const HideOnScroll = (props: Props) => {
 const HomeHeader = (props) => {
   const theme = useTheme();
   const [records, setRecords] = useState<number>();
+  const [lastupdate,setLastupdate] = useState<string>();
   const { activeSelection, handleExport, showFilterMenu, activeTab } = props;
 
   const fetchRecords = () => {
     getRecords()
       .then((res) => {
-        console.log("res: ",res);
         setRecords(res.total);
+        setLastupdate(res.lastupdate);
       }).catch((err) => {
         console.log("Error: ", err)
       })
   }
   useEffect(fetchRecords,[]);
+
+  const date = new Date(lastupdate);
+  const day = date.toLocaleString('en-US', { day: '2-digit' });
+  const month = date.toLocaleString('en-US', { month:'long' });
+  const dayOfWeek = date.toLocaleString('en-US',{ weekday:'long' })
 
   return (
     <Box>
@@ -72,7 +79,7 @@ const HomeHeader = (props) => {
                           color="common.white"
                           align="left"
                         >
-                          {records} {records>1?"records":"record"}
+                          {records} {Pluralize("records",records)}
                         </Typography>
                       </Box>
                     </Grid>
@@ -82,7 +89,7 @@ const HomeHeader = (props) => {
                         color="grey.400"
                         align="left"
                       >
-                        Last Updated: Friday, 15th July
+                        Last Updated: {dayOfWeek}, {day} {month}
                       </Typography>
                     </Grid>
                   </Grid>
