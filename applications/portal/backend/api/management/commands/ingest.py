@@ -85,7 +85,7 @@ class Command(BaseCommand):
 
         # Prepare vendor inserts
         df_vendor = pd.read_csv(metadata.vendor_data_path)
-        df_vendor.where(pd.notnull(df_vendor), None)
+        df_vendor = df_vendor.where(pd.notnull(df_vendor), None)
 
         vendor_insert_stm = get_insert_values_into_table_stm(self.VENDOR_TABLE,
                                                              ['id', 'nif_id', 'vendor'],
@@ -93,9 +93,8 @@ class Command(BaseCommand):
 
         # Prepare vendor domain inserts
         df_vendor_domain = pd.read_csv(metadata.vendor_domain_data_path)
-        df_vendor_domain.where(pd.notnull(df_vendor_domain), None)
+        df_vendor_domain = df_vendor_domain.where(pd.notnull(df_vendor_domain), None)
 
-        df_vendor_domain = df_vendor_domain.drop_duplicates(subset=["domain_name"])
         vendor_domain_insert_stm = get_insert_values_into_table_stm(self.VENDOR_DOMAIN_TABLE,
                                                                     ['id', 'domain_name', 'vendor_id', 'status',
                                                                      'link'],
@@ -166,16 +165,15 @@ class Command(BaseCommand):
                     logging.info(antibody_data_path)
                     len_csv = sum(1 for _ in open(antibody_data_path, 'r'))
                     for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode')):
-                        chunk.where(pd.notnull(chunk), None)
+                        chunk = chunk.where(pd.notnull(chunk), None)
 
-                        raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, ANTIBODY_HEADER,
-                                                                               len(chunk))
                         antibodies_chunk = chunk[
                             (~chunk['vendor_id'].isin(UNKNOWN_VENDORS)) & (chunk['status'] != STATUS.REJECTED)]
 
-                        row_params = antibodies_chunk.values.tolist()
+                        raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, ANTIBODY_HEADER,
+                                                                               len(antibodies_chunk))
 
-                        cursor.execute(raw_data_insert_stm, row_params)
+                        cursor.execute(raw_data_insert_stm, antibodies_chunk.to_numpy().flatten().tolist())
                         logging.info(f"File progress: {int(min((i + 1) * CHUNK_SIZE, len_csv) / len_csv * 100)}% ")
 
                 end = timer()
@@ -254,7 +252,7 @@ class Command(BaseCommand):
                 for antibody_data_path in metadata.antibody_data_paths:
                     for chunk in pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode'):
 
-                        chunk.where(pd.notnull(chunk), None)
+                        chunk = chunk.where(pd.notnull(chunk), None)
 
                         species_params = []
                         for index, row in chunk.iterrows():

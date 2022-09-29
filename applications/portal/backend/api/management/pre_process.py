@@ -5,7 +5,6 @@ import os
 import time
 from typing import List
 
-import numpy as np
 import pandas as pd
 from timeit import default_timer as timer
 from api.management.gd_downloader import GDDownloader
@@ -38,6 +37,7 @@ def update_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_mapp
     with open(vendors_map_path, 'r') as f:
         vendors_map = json.load(f)
         df_vendor_domain = pd.read_csv(csv_path)
+        df_vendor_domain = df_vendor_domain.drop_duplicates(subset=["domain_name"])
         df_vendor_domain['vendor_id'] = df_vendor_domain['vendor_id'].map(
             lambda x: vendors_map[str(x)] if str(x) in vendors_map else x)
         df_vendor_domain.to_csv(csv_path, index=False, mode='w+')
@@ -58,20 +58,23 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
     with open(antibodies_map_path, 'r') as f:
         antibodies_map = json.load(f)
         for antibody_data_path in csv_paths:
+            logging.info(f"Processing {antibody_data_path} file")
             tmp_antibody_data_path = antibody_data_path.replace('.csv', '_tmp.csv')
             for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode')):
+
                 # converge null values to None
+
                 clean_df(chunk)
 
-                # todo: https://stackoverflow.com/a/26436036/16197038
                 # point unknown commercial type and clonality to None and unk
-                chunk['commercial_type'] = chunk['commercial_type'].apply(
-                    lambda x: None if x is None or x.lower() not in {c[0] for c in CommercialType.choices} else x)
 
-                chunk['clonality'] = chunk['clonality'].apply(
-                    lambda x: 'UNK' if x is None or x.lower() not in {c[0] for c in AntibodyClonality.choices} else x)
+                chunk['commercial_type'].where(chunk['commercial_type'].isin({c[0] for c in CommercialType.choices}),
+                                               None, inplace=True)
+                chunk['clonality'].where(chunk['clonality'].isin({c[0] for c in AntibodyClonality.choices}), 'unknown',
+                                         inplace=True)
 
                 # get rows that need custom update
+
                 relevant_rows = chunk.loc[chunk['ix'].isin(antibodies_map.keys())]
 
                 # apply custom update to relevant rows
@@ -80,9 +83,11 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
                         chunk.loc[chunk['ix'] == row['ix'], atr] = antibodies_map[row['ix']][atr]
 
                 # save chunk temp file
+
                 chunk.to_csv(tmp_antibody_data_path, mode='a',
                              header=ANTIBODY_HEADER if i == 0 else False, index=False)
-                replace_file(antibody_data_path, tmp_antibody_data_path)
+
+            replace_file(antibody_data_path, tmp_antibody_data_path)
 
 
 def preprocess(file_id: str, dest: str = './antibody_data') -> AntibodyMetadata:
