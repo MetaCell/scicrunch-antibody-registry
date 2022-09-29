@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import {
   AppBar,
@@ -13,7 +13,6 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { AddAntibodyIcon, DownloadIcon } from "../icons";
 import TableToolbar from "./TableToolbar";
-import SubmissionForm from "../Submit/SubmissionForm";
 
 interface Props {
   /**
@@ -33,7 +32,7 @@ const HideOnScroll = (props: Props) => {
 
 const HomeHeader = (props) => {
   const theme = useTheme();
-  const { activeSelection, handleExport, showFilterMenu } = props;
+  const { activeSelection, handleExport, showFilterMenu, activeTab } = props;
 
   return (
     <Box>
@@ -114,7 +113,10 @@ const HomeHeader = (props) => {
                 </Box>
               </Box>
             </HideOnScroll>
-            <TableToolbar showFilterMenu={showFilterMenu} />
+            <TableToolbar
+              showFilterMenu={showFilterMenu}
+              activeTab={activeTab}
+            />
           </Stack>
         </Container>
       </AppBar>
