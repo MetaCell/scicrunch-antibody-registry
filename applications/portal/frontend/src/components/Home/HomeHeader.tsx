@@ -38,12 +38,14 @@ const HomeHeader = (props) => {
   const fetchRecords = () => {
     getRecords()
       .then((res) => {
+        console.log("res: ",res);
         setRecords(res.total);
       }).catch((err) => {
         console.log("Error: ", err)
       })
   }
   useEffect(fetchRecords,[]);
+
   return (
     <Box>
       <AppBar elevation={0} sx={{ top: "4.5rem" }}>
@@ -70,7 +72,7 @@ const HomeHeader = (props) => {
                           color="common.white"
                           align="left"
                         >
-                          {records} records
+                          {records} {records>1?"records":"record"}
                         </Typography>
                       </Box>
                     </Grid>

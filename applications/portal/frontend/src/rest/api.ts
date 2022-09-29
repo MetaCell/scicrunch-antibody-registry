@@ -890,14 +890,14 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         getRecords: async(options:AxiosRequestConfig={}): Promise<RequestArgs> => {
-            const localVarPath = '/datainfo';
+            const localVarPath = `/datainfo`;
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarRequestOptions = { method: 'GET', ...baseOptions,...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
     
