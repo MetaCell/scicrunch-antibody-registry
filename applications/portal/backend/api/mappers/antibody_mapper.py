@@ -7,6 +7,7 @@ from django.forms.models import model_to_dict
 from django.db import models
 
 from cloudharness import log
+from pydantic import ValidationError
 from api.models import STATUS, Antibody, AntibodyClonality, Gene, CommercialType, Specie, Vendor, VendorDomain, VendorSynonym
 from openapi.models import Antibody as AntibodyDTO
 
@@ -16,11 +17,14 @@ from .mapping_utils import dict_to_snake, dict_to_camel, to_camel, to_snake
 
 dto_fields = {to_snake(f) for f in AntibodyDTO.__fields__}
 
-class AntibodyDataException(Exception): 
+
+class AntibodyDataException(Exception):
     def __init__(self, message, field_name, field_value):
         super().__init__(message)
         self.field_name = field_name
         self.field_value = field_value
+
+
 class AntibodyMapper(IDAOMapper):
 
     def from_dto(self, dto: AntibodyDTO) -> Antibody:
@@ -64,9 +68,11 @@ class AntibodyMapper(IDAOMapper):
                 if dto.vendorName:
                     try:
                         v: Vendor = Vendor.objects.get(name=dto.vendorName)
-                        
-                        log.info("Adding new domain `%s` to vendor `%s`", base_url, v.name)
-                        vd = VendorDomain(vendor=v, base_url=base_url, status=STATUS.QUEUE)
+
+                        log.info(
+                            "Adding new domain `%s` to vendor `%s`", base_url, v.name)
+                        vd = VendorDomain(
+                            vendor=v, base_url=base_url, status=STATUS.QUEUE)
                         vd.save()
                         ab.vendor = v
                     except Vendor.DoesNotExist:
@@ -124,21 +130,28 @@ class AntibodyMapper(IDAOMapper):
 
         dao_dict = dao.__dict__
 
-         
-
         for k, v in dao_dict.items():
             if k == "_state":
                 continue
             if isinstance(v, models.TextChoices):
-                dao_dict[k] =  v.value
+                dao_dict[k] = v.value
             elif isinstance(v, datetime.date):
                 dao_dict[k] = v.isoformat()
-
-        ab = AntibodyDTO(**dict_to_camel(dao_dict), )
+        try:
+            ab = AntibodyDTO(**dict_to_camel(dao_dict), )
+        except ValidationError as e:
+            log.error("Validation error on antibody %s",
+                      dao.ab_id, exc_info=True)
+            from pprint import pprint
+            pprint(dict_to_camel(dao_dict))
+            ab = AntibodyDTO()
         if dao.antigen:
             antigen: Gene = dao.antigen
             ab.abTarget = antigen.symbol
         if dao.vendor:
             ab.vendorName = dao.vendor.name
+        if dao.source_organism:
+            ab.sourceOrganism = dao.source_organism.name
+
         # ab.commercialType = dao.
         return ab

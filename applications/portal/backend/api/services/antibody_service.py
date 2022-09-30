@@ -22,7 +22,8 @@ antibody_mapper = AntibodyMapper()
 
 
 def get_antibodies(page: int = 1, size: int = 50) -> PaginatedAntibodies:
-    p = Paginator(Antibody.objects.all().filter(status=STATUS.CURATED), size)
+    p = Paginator(Antibody.objects.select_related("antigen", "vendor", "source_organism").prefetch_related("species").all().filter(
+        status=STATUS.CURATED).order_by("-ix"), size)
     items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
 

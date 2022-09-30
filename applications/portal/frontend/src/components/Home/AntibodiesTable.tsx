@@ -14,6 +14,7 @@ import {
   Checkbox,
   Popover,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
@@ -305,7 +306,7 @@ const dataGridStyles = {
 const AntibodiesTable = (props) => {
   const user: User = useUser();
   const currentPath = window.location.pathname;
-  const [antibodiesList, setAntibodiesList] = useState([]);
+  const [antibodiesList, setAntibodiesList] = useState<Antibody[]>();
 
   const fetchAntibodies = () => {
     getAntibodies()
@@ -503,7 +504,7 @@ const AntibodiesTable = (props) => {
         ) : (
           <DataGrid
             sx={dataGridStyles}
-            rows={antibodiesList}
+            rows={antibodiesList ?? []}
             getRowId={getRowId}
             columns={columns}
             pageSize={10}
@@ -511,6 +512,7 @@ const AntibodiesTable = (props) => {
             checkboxSelection
             disableSelectionOnClick
             getRowHeight={() => "auto"}
+            loading={!antibodiesList}
             onRowClick={(params) =>
               (window.location.href = `/AB_${params.row.abId}`)
             }
@@ -528,7 +530,7 @@ const AntibodiesTable = (props) => {
             localeText={{
               toolbarColumns: "Table settings",
             }}
-          />
+          /> 
         )}
       </Box>
     </Box>
