@@ -104,7 +104,9 @@ const UserAccountMenu = (props: UserProps) => {
                   <Typography variant="h5" color="grey.500">Admin panel</Typography>
                 </MenuItem> }
                 <Divider />
-                <MenuItem onClick={() => window.location.href = "/oauth/logout"}>
+                <MenuItem onClick={() => 
+                  fetch("/oauth/logout").then(() => window.location.href = "/")
+                }>
                   <ListItemIcon>
                     <LogoutIcon />
                   </ListItemIcon>

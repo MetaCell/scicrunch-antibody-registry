@@ -30,7 +30,7 @@ const App = () => {
           <Route path="/login">
             <Redirect to="/" />
           </Route>
-          <Route path="/oauth/logout">
+          <Route path="/oauth/*">
             <Redirect to="/" />
           </Route>
           <Route path="/:antibody_id(AB_.*)" component={AntibodyDetail} />
@@ -41,6 +41,7 @@ const App = () => {
           <Route path="/submissions">
             <Home activeTab={MYSUBMISSIONS} />
           </Route>
+          
         </Switch>
       </ThemeProvider>
     </BrowserRouter>
