@@ -60,9 +60,9 @@ def create_antibody(body: AddUpdateAntibodyDTO, userid: str) -> AntibodyDTO:
         ).filter(vendor__name=body.vendorName, catalog_num=body.catalogNum)))
 
 
-def get_antibody(antibody_id: int) -> AntibodyDTO:
+def get_antibody(antibody_id: int, status=STATUS.CURATED) -> List[AntibodyDTO]:
     try:
-        return antibody_mapper.to_dto(Antibody.objects.get(ab_id=antibody_id))
+        return [antibody_mapper.to_dto(a) for a in Antibody.objects.all().filter(ab_id=antibody_id, status=status)]
     except Antibody.DoesNotExist:
         return None
 

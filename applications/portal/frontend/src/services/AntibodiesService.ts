@@ -18,7 +18,7 @@ export async function getAntibodies(
   return (await api.getAntibodies(page, size)).data;
 }
 
-export async function getAntibody(id: number): Promise<Antibody> {
+export async function getAntibody(id: number): Promise<Antibody[]> {
   return (await api.getAntibody(id)).data;
 }
 

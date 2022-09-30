@@ -14,7 +14,6 @@ import {
   Checkbox,
   Popover,
   Button,
-  CircularProgress,
 } from "@mui/material";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
@@ -133,7 +132,7 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
         component="div"
       >
         {props.field === "targetAntigen"
-          ? `${props.row.abTarget} ${props.row.targetSpecies}`
+          ? `${props.row.abTarget} ${props.row.targetSpecies.join(", ")}`
           : props.value}
       </Typography>
     </StyledBadge>
@@ -244,7 +243,16 @@ interface ValueProps {
 
 const getValueOrEmpty = (props: ValueProps) => {
   return props.row[props.field] ?? "";
+}
+
+const getList = (props: ValueProps) => {
+  return props.row[props.field]?.join(", ") ?? "";
 };
+
+const getNameAndId = (props: ValueProps) => {
+  return `${props.row.abName} AB_${props.row.abId}`
+};
+
 
 const getValueForCitation = (props: ValueProps) => {
   return getProperCitation(props.row);
@@ -349,6 +357,7 @@ const AntibodiesTable = (props) => {
       headerName: "Name & ID",
       flex: 3,
       renderCell: RenderNameAndId,
+      valueGetter: getNameAndId,
       headerAlign: "left",
       align: "left",
     },
@@ -362,6 +371,7 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "targetSpecies",
       headerName: "Target species",
+      valueGetter: getList,
       hide: true,
     },
     {

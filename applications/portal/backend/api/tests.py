@@ -68,7 +68,7 @@ class AnimalTestCase(TestCase):
         abget = user_abs.items[0]
         assert len(abget.targetSpecies) == 2
 
-        ab3 = get_antibody(ab.abId)
+        ab3 = get_antibody(ab.abId, status=STATUS.QUEUE)[0]
         assert ab.url == ab3.url
 
         a: Antibody = Antibody.objects.get(ab_id=ab.abId)

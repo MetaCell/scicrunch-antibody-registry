@@ -88,7 +88,7 @@ export interface AbstractAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
      * @type {string}
      * @memberof AbstractAntibody
      */
@@ -237,7 +237,7 @@ export interface AddUpdateAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
      * @type {string}
      * @memberof AddUpdateAntibody
      */
@@ -471,7 +471,7 @@ export interface Antibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
      * @type {string}
      * @memberof Antibody
      */
@@ -1062,7 +1062,7 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAntibody(antibodyId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Antibody>> {
+        async getAntibody(antibodyId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Antibody>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getAntibody(antibodyId, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1138,7 +1138,7 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAntibody(antibodyId: number, options?: any): AxiosPromise<Antibody> {
+        getAntibody(antibodyId: number, options?: any): AxiosPromise<Array<Antibody>> {
             return localVarFp.getAntibody(antibodyId, options).then((request) => request(axios, basePath));
         },
         /**

@@ -8,6 +8,7 @@ import {
   Stack,
   Typography,
   CircularProgress,
+  Backdrop,
 } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -112,7 +113,7 @@ export const AntibodyDetail = () => {
   const fetchAntibody = (id) => {
     getAntibody(id)
       .then((res) => {
-        return setAntibody(res);
+        return setAntibody(res[0]);
       })
       .catch((err) => alert(err));
   };
@@ -120,18 +121,10 @@ export const AntibodyDetail = () => {
   useEffect(() => fetchAntibody(antibody_id.slice(3)), []);
   if (!antibody) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          width: "100%",
-          height: "100%",
-          minHeight: "50vh",
-          alignItems: "center",
-          alignContent: "center",
-        }}
+      <Backdrop open={true} sx={{ zIndex: 1000 }}
       >
         <CircularProgress />
-      </Box>
+      </Backdrop>
     );
   }
   const citation = antibody && getProperCitation(antibody);

@@ -79,7 +79,7 @@ const HomeHeader = (props) => {
                           color="common.white"
                           align="left"
                         >
-                          {records} {Pluralize("records",records)}
+                          {records?.toLocaleString('en-US')} {Pluralize("record",records)}
                         </Typography>
                       </Box>
                     </Grid>
@@ -89,7 +89,7 @@ const HomeHeader = (props) => {
                         color="grey.400"
                         align="left"
                       >
-                        Last Updated: {dayOfWeek}, {day} {month}
+                        Last Updated: {date?.toLocaleString('en-US', { day: '2-digit', month:'long', weekday: "long" })}
                       </Typography>
                     </Grid>
                   </Grid>
