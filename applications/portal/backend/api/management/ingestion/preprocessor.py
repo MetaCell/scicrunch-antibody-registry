@@ -10,17 +10,21 @@ from api.management.ingestion.gd_downloader import GDDownloader
 from api.models import AntibodyClonality, CommercialType
 from api.services.filesystem_service import replace_file
 from api.utilities.decorators import timed_class_method
-from areg_portal.settings import RAW_ANTIBODY_DATA, RAW_VENDOR_DATA, RAW_VENDOR_DOMAIN_DATA, CHUNK_SIZE, ANTIBODY_HEADER
+from areg_portal.settings import RAW_ANTIBODY_DATA_BASENAME, RAW_VENDOR_DATA_BASENAME, RAW_VENDOR_DOMAIN_DATA_BASENAME, \
+    CHUNK_SIZE, \
+    ANTIBODY_HEADER, RAW_USERS_DATA_BASENAME
 
 UNKNOWN_VENDORS = {'1669', '1667', '1625', '1633', '1628', '11599', '12068', '12021', '1632', '5455', '1626', '1670',
                    '11278', '(null)', '1684', '11598', '0', '1682', '11434'}
 
 
 class AntibodyMetadata:
-    def __init__(self, antibody_data_paths: List[str], vendor_data_path: str, vendor_domain_data_path: str):
+    def __init__(self, antibody_data_paths: List[str], vendor_data_path: str, vendor_domain_data_path: str,
+                 users_data_path: str):
         self.antibody_data_paths = antibody_data_paths
         self.vendor_data_path = vendor_data_path
         self.vendor_domain_data_path = vendor_domain_data_path
+        self.users_data_path = users_data_path
 
 
 def clean_df(df):
@@ -32,6 +36,15 @@ def update_vendors(csv_path: str):
     df_vendors = pd.read_csv(csv_path)
     clean_df(df_vendors)
     df_vendors.to_csv(csv_path, index=False, mode='w+')
+
+
+def update_users(csv_path: str):
+    logging.info("Updating users")
+    df_users = pd.read_csv(csv_path)
+    df_users = df_users.loc[df_users['banned'] != 1]
+    df_users = df_users.drop(['password', 'salt'], axis=1)
+    clean_df(df_users)
+    df_users.to_csv(csv_path, index=False, mode='w+')
 
 
 def update_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_mapping.json'):
@@ -99,12 +112,15 @@ class Preprocessor:
 
         GDDownloader(self.file_id, self.dest).download()
 
-        metadata = AntibodyMetadata(glob.glob(os.path.join(self.dest, '*', f"{RAW_ANTIBODY_DATA}*.csv")),
-                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DATA}.csv"))[0],
-                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DOMAIN_DATA}.csv"))[0])
+        metadata = AntibodyMetadata(glob.glob(os.path.join(self.dest, '*', f"{RAW_ANTIBODY_DATA_BASENAME}*.csv")),
+                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DATA_BASENAME}.csv"))[0],
+                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DOMAIN_DATA_BASENAME}.csv"))[
+                                        0],
+                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_USERS_DATA_BASENAME}.csv"))[0])
 
-        update_vendor_domains(metadata.vendor_domain_data_path)
-        update_vendors(metadata.vendor_data_path)
-        update_antibodies(metadata.antibody_data_paths)
+        # update_vendor_domains(metadata.vendor_domain_data_path)
+        # update_vendors(metadata.vendor_data_path)
+        # update_antibodies(metadata.antibody_data_paths)
+        # update_users(metadata.users_data_path)
 
         return metadata

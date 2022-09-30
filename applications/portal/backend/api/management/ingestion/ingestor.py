@@ -7,6 +7,7 @@ from django.core.management.color import no_style
 from django.db import connection
 
 from api.management.ingestion.preprocessor import AntibodyMetadata
+from api.management.ingestion.users_ingestor import UsersIngestor
 from api.models import Antibody, Gene, Vendor, VendorDomain, Specie, \
     VendorSynonym, AntibodySpecies
 from api.utilities.decorators import timed_class_method
@@ -60,6 +61,7 @@ class Ingestor:
     def __init__(self, metadata: AntibodyMetadata, cursor):
         self.metadata = metadata
         self.cursor = cursor
+        self.users_ingestor =  UsersIngestor(metadata.users_data_path)
 
     def ingest(self):
         species_map = {}
@@ -114,6 +116,9 @@ class Ingestor:
 
     @timed_class_method('Temporary table filled')
     def _fill_tmp_table(self):
+        users_map = self.users_ingestor.get_users_map()
+        # todo: insert keycloak id and uui_legacy afonsobspinto
+
         self.cursor.execute(get_create_table_stm(self.TMP_TABLE, ANTIBODY_HEADER))
 
         # Insert raw data into tmp table
@@ -166,6 +171,7 @@ class Ingestor:
 
     @timed_class_method('Antibodies added')
     def _insert_antibodies(self):
+
         antibody_stm = f"INSERT INTO {self.ANTIBODY_TABLE} (ix, ab_name, ab_id, accession, commercial_type, uid, catalog_num, cat_alt, " \
                        f"vendor_id, url, antigen_id, target_subregion, target_modification, " \
                        f"epitope, clonality, clone_id, product_isotype, " \
