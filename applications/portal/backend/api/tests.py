@@ -46,6 +46,7 @@ class AnimalTestCase(TestCase):
 
         assert ab.sourceOrganism == "mouse"
         assert len(ab.targetSpecies) == 2
+
         new_ant = AddUpdateAntibodyDTO(**example_ab)
         try:
             ab2 = create_antibody(new_ant, "bbb")
@@ -64,6 +65,8 @@ class AnimalTestCase(TestCase):
         user_abs = get_user_antibodies("aaaa")
         assert user_abs.page == 1
         assert len(user_abs.items) == 1
+        abget = user_abs.items[0]
+        assert len(abget.targetSpecies) == 2
 
         ab3 = get_antibody(ab.abId)
         assert ab.url == ab3.url

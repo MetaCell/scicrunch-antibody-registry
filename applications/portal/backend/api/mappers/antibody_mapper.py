@@ -152,6 +152,8 @@ class AntibodyMapper(IDAOMapper):
             ab.vendorName = dao.vendor.name
         if dao.source_organism:
             ab.sourceOrganism = dao.source_organism.name
+        if dao.species and not ab.targetSpecies:
+            ab.targetSpecies = [s.name for s in dao.species.all()]
 
         # ab.commercialType = dao.
         return ab
