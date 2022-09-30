@@ -5,7 +5,6 @@ import zipfile
 
 
 class GDDownloader:
-
     def __init__(self, file_id, dest):
         self.file_id = file_id
         self.dest = dest

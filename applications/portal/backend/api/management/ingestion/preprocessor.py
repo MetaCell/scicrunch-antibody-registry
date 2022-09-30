@@ -2,18 +2,18 @@ import glob
 import json
 import logging
 import os
-import time
 from typing import List
 
 import pandas as pd
-from timeit import default_timer as timer
-from api.management.gd_downloader import GDDownloader
-from api.models import AntibodyClonality, CommercialType, STATUS
+
+from api.management.ingestion.gd_downloader import GDDownloader
+from api.models import AntibodyClonality, CommercialType
+from api.services.filesystem_service import replace_file
+from api.utilities.decorators import timed_class_method
 from areg_portal.settings import RAW_ANTIBODY_DATA, RAW_VENDOR_DATA, RAW_VENDOR_DOMAIN_DATA, CHUNK_SIZE, ANTIBODY_HEADER
 
 UNKNOWN_VENDORS = {'1669', '1667', '1625', '1633', '1628', '11599', '12068', '12021', '1632', '5455', '1626', '1670',
                    '11278', '(null)', '1684', '11598', '0', '1682', '11434'}
-MAX_TRIES = 10
 
 
 class AntibodyMetadata:
@@ -43,16 +43,6 @@ def update_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_mapp
         df_vendor_domain['vendor_id'] = df_vendor_domain['vendor_id'].map(
             lambda x: vendors_map[str(x)] if str(x) in vendors_map else x)
         df_vendor_domain.to_csv(csv_path, index=False, mode='w+')
-
-
-def replace_file(previous_path, new_path):
-    # replace original file with temp file
-    os.remove(previous_path)
-    tries = 0
-    while not os.path.exists(new_path) and tries < MAX_TRIES:
-        time.sleep(1)
-        tries += 1
-    os.rename(new_path, previous_path)
 
 
 def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibodies_mapping.json'):
@@ -98,26 +88,23 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
             replace_file(antibody_data_path, tmp_antibody_data_path)
 
 
-def preprocess(file_id: str, dest: str = './antibody_data') -> AntibodyMetadata:
-    start = timer()
-    logging.info("Preprocessing started")
+class Preprocessor:
+    def __init__(self, file_id: str, dest: str = './antibody_data'):
+        self.file_id = file_id
+        self.dest = dest
 
-    gd_downloader = GDDownloader(file_id, dest)
-    gd_downloader.download()
+    @timed_class_method('Preprocessing finished')
+    def preprocess(self) -> AntibodyMetadata:
+        logging.info("Preprocessing started")
 
-    metadata = AntibodyMetadata(glob.glob(os.path.join(dest, '*', f"{RAW_ANTIBODY_DATA}*.csv")),
-                                glob.glob(os.path.join(dest, '*', f"{RAW_VENDOR_DATA}.csv"))[0],
-                                glob.glob(os.path.join(dest, '*', f"{RAW_VENDOR_DOMAIN_DATA}.csv"))[0])
+        GDDownloader(self.file_id, self.dest).download()
 
-    update_vendor_domains(metadata.vendor_domain_data_path)
-    update_vendors(metadata.vendor_data_path)
-    update_antibodies(metadata.antibody_data_paths)
+        metadata = AntibodyMetadata(glob.glob(os.path.join(self.dest, '*', f"{RAW_ANTIBODY_DATA}*.csv")),
+                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DATA}.csv"))[0],
+                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DOMAIN_DATA}.csv"))[0])
 
-    end = timer()
-    logging.info(f"Preprocessing finished in {end - start} seconds")
+        update_vendor_domains(metadata.vendor_domain_data_path)
+        update_vendors(metadata.vendor_data_path)
+        update_antibodies(metadata.antibody_data_paths)
 
-    return metadata
-
-
-if __name__ == '__main__':
-    preprocess('1gW5fAGRnmm-6zbVRLYJa_zrpEjD4w500')
+        return metadata

@@ -206,3 +206,12 @@ ANTIBODY_HEADER = {'ab_name': "text", 'ab_target': "text", 'target_species': "te
                    'of_record': "text", 'ix': "int", 'uid': "text", 'status': "text", 'insert_time': "text",
                    'curate_time': "text", 'cat_alt': "text", 'commercial_type': "text",
                    'uniprot_id': "text", 'epitope': "text"}
+
+D_TYPES = ANTIBODY_HEADER.copy()
+for dt in D_TYPES:
+    if dt == 'int':
+        D_TYPES[dt] = 'int64'
+    else:
+        D_TYPES[dt] = 'unicode'
+
+MAX_TRIES = 10
