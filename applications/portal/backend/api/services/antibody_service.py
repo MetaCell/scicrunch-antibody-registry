@@ -11,6 +11,8 @@ from api.mappers.antibody_mapper import AntibodyMapper, AntibodyDataException
 from openapi.models import Antibody as AntibodyDTO, PaginatedAntibodies
 from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO
 
+magic = 64544
+
 
 class DuplicatedAntibody(Exception):
     def __init__(self, ab_id):
@@ -35,9 +37,7 @@ def get_user_antibodies(userid: str, page: int = 1, size: int = 50) -> Paginated
 
 
 def generate_id(antibody: Antibody):
-    # TODO add logic to generate the AB_ID https://github.com/MetaCell/scicrunch-antibody-registry/issues/43
-    import random
-    return random.randint(0, 99999999)
+    return antibody.ix + magic
 
 
 def create_antibody(body: AddUpdateAntibodyDTO, userid: str) -> AntibodyDTO:
@@ -49,6 +49,7 @@ def create_antibody(body: AddUpdateAntibodyDTO, userid: str) -> AntibodyDTO:
     except Antibody.DoesNotExist:
         antibody = antibody_mapper.from_dto(body)
         antibody.ab_id = generate_id(antibody)
+        antibody.accession = antibody.ab_id
         antibody.uid = userid
         antibody.status = STATUS.QUEUE
         antibody.save()
