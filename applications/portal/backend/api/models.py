@@ -21,7 +21,7 @@ class Normalize(Transform):
 
     def as_sql(self, compiler, connection):
         lhs, params = compiler.compile(self.lhs)
-        return (f"UPPER(regexp_replace({lhs}, '[^a-zA-Z0-9]', '', 'g'))", params)
+        return (f"regexp_replace({lhs}, '[^a-zA-Z0-9]', '', 'g')", params)
 
 
 @CharField.register_lookup
@@ -30,16 +30,7 @@ class NormalizeRelaxed(Transform):
 
     def as_sql(self, compiler, connection):
         lhs, params = compiler.compile(self.lhs)
-        return (f"UPPER(regexp_replace({lhs}, '[^a-zA-Z0-9,]', '', 'g'))", params)
-
-
-@CharField.register_lookup
-class SplitOnComma(Transform):
-    lookup_name = 'comma_split'
-
-    def as_sql(self, compiler, connection):
-        lhs, params = compiler.compile(self.lhs)
-        return (f"regexp_replace({lhs}, '[, ]', ' ', 'g')", params)
+        return (f"regexp_replace({lhs}, '[^a-zA-Z0-9, ]', '', 'g')", params)
 
 
 class CommercialType(models.TextChoices):
@@ -76,6 +67,11 @@ class Vendor(models.Model):
     name = models.CharField(max_length=VENDOR_MAX_LEN, db_column='vendor', db_index=True)
     nif_id = models.CharField(max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id', null=True)
 
+    class Meta:
+        indexes = [
+            GinIndex(SearchVector('name', config='english'), name='vendor_name_fts_idx'),
+        ]
+
     def __str__(self):
         return self.name
 
@@ -109,6 +105,11 @@ class Gene(models.Model):
     entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
                                  null=True, db_index=True)
     uniprot_id = models.CharField(unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True)
+
+    class Meta:
+        indexes = [
+            GinIndex(SearchVector('symbol', config='english'), name='gene_symbol_fts_idx'),
+        ]
 
     def __str__(self):
         return self.entrez_id
@@ -181,8 +182,35 @@ class Antibody(models.Model):
                                    name='curated_constraints'),
         ]
         indexes = [
-            GinIndex(SearchVector('catalog_num__normalize', config='english'), name='catalog_num_fts_idx'),
-            GinIndex(SearchVector('cat_alt__normalize_relaxed__comma_split', config='english'), name='cat_alt_fts_idx'),
+            GinIndex(SearchVector('catalog_num__normalize',
+                                  'cat_alt__normalize_relaxed', config='english'), name='antibody_catalog_num_fts_idx'),
+            GinIndex(SearchVector('ab_name',
+                                  'clone_id__normalize_relaxed', config='english'), name='antibody_names_fts_idx'),
+            GinIndex(SearchVector(
+                'ab_id',
+                'accession',
+                'commercial_type',
+                'uid',
+                'uid_legacy',
+                'url',
+                'subregion',
+                'modifications',
+                'epitope',
+                'source_organism',
+                'clonality',
+                'product_isotype',
+                'product_conjugate',
+                'defining_citation',
+                'product_form',
+                'comments',
+                'applications',
+                'kit_contents',
+                'feedback',
+                'curator_comment',
+                'disc_date',
+                'status',
+                config='english'
+            ), name='antibody_all_fts_idx')
         ]
 
 
