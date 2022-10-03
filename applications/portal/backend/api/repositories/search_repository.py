@@ -39,7 +39,6 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
     first_cols = SearchVector('ab_name',
                               'clone_id__normalize_relaxed', config='english', weight='A')
     search_col_names = [
-        'ab_id',
         'accession',
         'commercial_type',
         'uid',
@@ -54,7 +53,6 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
         'defining_citation',
         'product_form',
         'comments',
-        'applications',
         'kit_contents',
         'feedback',
         'curator_comment',
@@ -149,8 +147,6 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
 
     # Please bold the match in the search result in each record.
     # results = top_ranked_search.union(subfields_search.order_by('-nb_citations', '-disc_date'))
-    # import ipdb; ipdb.set_trace()
-
     return subfields_search2
 
 

@@ -230,12 +230,11 @@ class Antibody(models.Model):
             Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
 
             GinIndex(SearchVector('ab_name',
-                              'clone_id__normalize_relaxed', config='english', weight='A'), name='antibody_name_fts,idx'),
+                              'clone_id__normalize_relaxed', config='english', weight='A'), name='antibody_name_fts_idx'),
             GinIndex(
                 SearchVector('ab_name',
                               'clone_id__normalize_relaxed', config='english', weight='A') +
                 SearchVector(
-                'ab_id',
                 'accession',
                 'commercial_type',
                 'uid',
@@ -250,7 +249,6 @@ class Antibody(models.Model):
                 'defining_citation',
                 'product_form',
                 'comments',
-                'applications',
                 'kit_contents',
                 'feedback',
                 'curator_comment',
@@ -262,7 +260,6 @@ class Antibody(models.Model):
 
             GinIndex(
                 SearchVector(
-                'ab_id',
                 'accession',
                 'commercial_type',
                 'uid',
@@ -277,7 +274,6 @@ class Antibody(models.Model):
                 'defining_citation',
                 'product_form',
                 'comments',
-                'applications',
                 'kit_contents',
                 'feedback',
                 'curator_comment',
