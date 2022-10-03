@@ -26,6 +26,7 @@
     "formik": "^2.2.9",
     "keycloak-js": "^19.0.1",
     "pluralize": "^8.0.0",
+    "lodash.debounce": "^4.0.8",
     "react": "^17.0.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^17.0.0",

@@ -5,11 +5,13 @@ import {
   AntibodyApi,
   AddUpdateAntibody,
   AntibodyCommercialTypeEnum,
+  SearchApi
 } from "../rest/api";
 
 import { getToken } from "./UserService";
 
 const api = new AntibodyApi();
+const searchApi = new SearchApi()
 
 export async function getAntibodies(
   page = 1,
@@ -70,5 +72,15 @@ export async function getUserAntibodies(
     await new AntibodyApi(
       new Configuration({ apiKey: getToken(), accessToken: getToken() })
     ).getUserAntibodies(page, size)
+  ).data;
+}
+
+export async function getSearchAtibodies(
+  page = 1,
+  size = 10,
+  query:string
+):Promise<PaginatedAntibodies>{
+  return (
+    await searchApi.ftsAntibodies(page, size, query)
   ).data;
 }

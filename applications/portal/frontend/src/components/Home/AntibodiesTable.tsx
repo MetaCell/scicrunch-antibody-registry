@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 //MUI
 import {
   DataGrid,
@@ -40,6 +40,7 @@ import { useTheme } from "@mui/system";
 import { useUser, User } from "../../services/UserService";
 import ConnectAccount from "./ConnectAccount";
 import { ALLRESULTS } from "../../constants/constants";
+import SearchContext from "../../context/search/SearchContext";
 
 const StyledBadge = (props) => {
   if (props.field === "vendorName") {
@@ -315,13 +316,18 @@ const AntibodiesTable = (props) => {
   const user: User = useUser();
   const currentPath = window.location.pathname;
   const [antibodiesList, setAntibodiesList] = useState<Antibody[]>();
+  const { activeSearch, searchedAntibodies } = useContext(SearchContext)
 
   const fetchAntibodies = () => {
-    getAntibodies()
-      .then((res) => {
-        return setAntibodiesList(res.items);
-      })
-      .catch((err) => alert(err));
+    !activeSearch
+      ? (
+        getAntibodies()
+          .then((res) => {
+            return setAntibodiesList(res.items);
+          })
+          .catch((err) => alert(err))
+      )
+      : setAntibodiesList(searchedAntibodies)
   };
 
   const fetchUserAntibodies = () => {
@@ -336,7 +342,8 @@ const AntibodiesTable = (props) => {
     props.activeTab === ALLRESULTS
       ? fetchAntibodies()
       : user && fetchUserAntibodies();
-  }, []);
+  }, [activeSearch, searchedAntibodies]);
+
 
   const columns: GridColDef[] = [
     {
