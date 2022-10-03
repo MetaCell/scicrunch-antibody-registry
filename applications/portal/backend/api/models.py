@@ -164,6 +164,7 @@ class Antibody(models.Model):
         return "AB_" + str(self.ab_id)
 
     class Meta:
+        verbose_name_plural = "antibodies"
         constraints = [
             models.CheckConstraint(check=~Q(status='curated') | (Q(status='curated') &
                                                                  Q(catalog_num__isnull=False) &
