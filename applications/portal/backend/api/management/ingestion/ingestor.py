@@ -12,7 +12,7 @@ from api.models import Antibody, Gene, Vendor, VendorDomain, Specie, \
     VendorSynonym, AntibodySpecies
 from api.utilities.decorators import timed_class_method
 from areg_portal.settings import ANTIBODY_ANTIBODY_START_SEQ, ANTIBODY_VENDOR_START_SEQ, \
-    ANTIBODY_VENDOR_DOMAIN_START_SEQ, ANTIBODY_HEADER, D_TYPES
+    ANTIBODY_VENDOR_DOMAIN_START_SEQ, ANTIBODY_HEADER, D_TYPES, UID_INDEX
 from areg_portal.settings import CHUNK_SIZE
 
 TRUNCATE_STM = "TRUNCATE TABLE {table_name} CASCADE;"
@@ -61,7 +61,7 @@ class Ingestor:
     def __init__(self, metadata: AntibodyMetadata, cursor):
         self.metadata = metadata
         self.cursor = cursor
-        self.users_ingestor =  UsersIngestor(metadata.users_data_path)
+        self.users_ingestor = UsersIngestor(metadata.users_data_path)
 
     def ingest(self):
         species_map = {}
@@ -117,8 +117,6 @@ class Ingestor:
     @timed_class_method('Temporary table filled')
     def _fill_tmp_table(self):
         users_map = self.users_ingestor.get_users_map()
-        # todo: insert keycloak id and uui_legacy afonsobspinto
-
         self.cursor.execute(get_create_table_stm(self.TMP_TABLE, ANTIBODY_HEADER))
 
         # Insert raw data into tmp table
@@ -127,9 +125,11 @@ class Ingestor:
             len_csv = sum(1 for _ in open(antibody_data_path, 'r'))
             for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype=D_TYPES)):
                 chunk = chunk.where(pd.notnull(chunk), None)
-
+                chunk['uid_legacy'] = chunk['uid']
+                chunk['uid'] = chunk['uid_legacy'].apply(lambda x: users_map.get(x, None))
                 raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, ANTIBODY_HEADER.keys(),
                                                                        len(chunk))
+
                 self.cursor.execute(raw_data_insert_stm, chunk.to_numpy().flatten().tolist())
                 logging.info(f"File progress: {int(min((i + 1) * CHUNK_SIZE, len_csv) / len_csv * 100)}% ")
 

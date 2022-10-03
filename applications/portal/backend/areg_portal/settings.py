@@ -194,6 +194,9 @@ RAW_USERS_DATA_BASENAME = 'users_antibody'
 
 CHUNK_SIZE = 10 ** 5
 
+UID_KEY = 'uid'
+GUID_KEY = 'guid'
+
 ANTIBODY_HEADER = {'ab_name': "text", 'ab_target': "text", 'target_species': "text", 'vendor': "text",
                    'vendor_id': "int", 'catalog_num': "text", 'clonality': "text",
                    'source_organism': "text", 'clone_id': "text", 'url': "text", 'link': "text",
@@ -202,7 +205,7 @@ ANTIBODY_HEADER = {'ab_name': "text", 'ab_target': "text", 'target_species': "te
                    'target_modification': "text", 'comments': "text",
                    'feedback': "text", 'defining_citation': "text", 'disc_date': "text", 'curator_comment': "text",
                    'id': "text", 'ab_id': "text", 'ab_id_old': "text",
-                   'of_record': "text", 'ix': "int", 'uid': "text", 'uid_legacy': "text", 'status': "text",
+                   'of_record': "text", 'ix': "int", UID_KEY: "text", 'uid_legacy': "text", 'status': "text",
                    'insert_time': "text", 'curate_time': "text", 'cat_alt': "text", 'commercial_type': "text",
                    'uniprot_id': "text", 'epitope': "text"}
 
@@ -217,5 +220,8 @@ MAX_TRIES = 10
 
 ORCID_URL = "https://orcid.org/"
 
-USERS_RELEVANT_HEADER = ['id', 'guid', 'email', 'level', 'firstName', 'middleInitial', 'lastName', 'organization',
-               'created', 'orcid_id']
+USERS_RELEVANT_HEADER = ['id', GUID_KEY, 'email', 'level', 'firstName', 'middleInitial', 'lastName', 'organization',
+                         'created', 'orcid_id']
+
+UID_INDEX = list(ANTIBODY_HEADER.keys()).index(UID_KEY)
+GUID_INDEX = USERS_RELEVANT_HEADER.index(GUID_KEY)

@@ -17,6 +17,11 @@ from areg_portal.settings import RAW_ANTIBODY_DATA_BASENAME, RAW_VENDOR_DATA_BAS
 UNKNOWN_VENDORS = {'1669', '1667', '1625', '1633', '1628', '11599', '12068', '12021', '1632', '5455', '1626', '1670',
                    '11278', '(null)', '1684', '11598', '0', '1682', '11434'}
 
+UNKNOWN_USERS = {'3483', '1473', '3208', '3519', '21828', '30083', '7650', '7574', '27908', '3169', '3711', '5627',
+                 '37877', '37922', '669', '30887', '3336', '8293', '1176', '7948', '37896', '8521', '37900', '9540',
+                 '2209', '3082', '31464', '32106', '1282', '3671', '9132', '2892', '22915', '5047', '1175', '1883',
+                 '31166', '8612', '8016', '7706'}
+
 
 class AntibodyMetadata:
     def __init__(self, antibody_data_paths: List[str], vendor_data_path: str, vendor_domain_data_path: str,
@@ -41,8 +46,10 @@ def update_vendors(csv_path: str):
 def update_users(csv_path: str):
     logging.info("Updating users")
     df_users = pd.read_csv(csv_path)
+    # df_users = df_users.drop(['password', 'salt'], axis=1)
+    df_users = df_users.drop_duplicates(['email'], keep='last').loc[~df_users['email'].isnull()]
     df_users = df_users.loc[df_users['banned'] != 1]
-    df_users = df_users.drop(['password', 'salt'], axis=1)
+    df_users = df_users.loc[~df_users['guid'].isnull()]
     clean_df(df_users)
     df_users.to_csv(csv_path, index=False, mode='w+')
 
@@ -76,6 +83,9 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
 
                 # point unknown vendor_id to None
                 chunk['vendor_id'] = chunk['vendor_id'].where(~chunk['vendor_id'].isin(UNKNOWN_VENDORS), None)
+
+                # point unknown user_id to None
+                chunk['uid'] = chunk['uid'].where(~chunk['uid'].isin(UNKNOWN_VENDORS), None)
 
                 # point unknown commercial type to None
                 chunk['commercial_type'] = chunk['commercial_type'].where(
@@ -118,9 +128,9 @@ class Preprocessor:
                                         0],
                                     glob.glob(os.path.join(self.dest, '*', f"{RAW_USERS_DATA_BASENAME}.csv"))[0])
 
-        # update_vendor_domains(metadata.vendor_domain_data_path)
-        # update_vendors(metadata.vendor_data_path)
-        # update_antibodies(metadata.antibody_data_paths)
-        # update_users(metadata.users_data_path)
+        update_vendor_domains(metadata.vendor_domain_data_path)
+        update_vendors(metadata.vendor_data_path)
+        update_antibodies(metadata.antibody_data_paths)
+        update_users(metadata.users_data_path)
 
         return metadata
