@@ -7,7 +7,10 @@ import {
   Popover,
   Stack,
   Typography,
-  CircularProgress
+  CircularProgress,
+  Backdrop,
+  Link,
+  Alert,
 } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -92,8 +95,11 @@ export const AntibodyDetail = () => {
     },
   };
   const { antibody_id } = useParams();
+  const abId = antibody_id.slice(3);
+  const [antibodies, setAntibodies] = useState<Antibody[]>(null);
+  const accession = document.location.hash ? document.location.hash.split("#")[1]: abId;
 
-  const [antibody, setAntibody] = useState<Antibody>(null);
+  const antibody = antibodies && (antibodies.find(a => a.accession === accession) || antibodies[0]);
 
   const [anchorCitationPopover, setAnchorCitationPopover] =
     useState<HTMLButtonElement | null>(null);
@@ -107,27 +113,31 @@ export const AntibodyDetail = () => {
   };
 
   const open = Boolean(anchorCitationPopover);
-  const id = open ? "simple-popover" : undefined;
+
 
   const fetchAntibody = (id) => {
     getAntibody(id)
       .then((res) => {
-        return setAntibody(res);
+        return setAntibodies(res);
       })
       .catch((err) => alert(err));
   };
 
-  useEffect(() => fetchAntibody(antibody_id.slice(3)), []);
-  if(!antibody) {
-    return <Box sx={{ display: 'flex', width: "100%", height: "100%", minHeight: "50vh", alignItems: "center", alignContent: "center" }}>
-      <CircularProgress />
-    </Box>
+  
+  useEffect(() => fetchAntibody(abId), []);
+  if (!antibody) {
+    return (
+      <Backdrop open={true} sx={{ zIndex: 1000 }}
+      >
+        <CircularProgress />
+      </Backdrop>
+    );
   }
-  const citation = antibody && getProperCitation(antibody)
+  const citation = antibody && getProperCitation(antibody);
   return (
     <>
       <SubHeader>AB_{antibody.abId}</SubHeader>
-      <Container maxWidth="lg">
+      <Container id="antibody-detail" maxWidth="lg" sx={{ pb: 2 }}>
         <Grid container>
           <Grid item xs={8}>
             <Stack spacing={3} sx={classes.card}>
@@ -160,7 +170,9 @@ export const AntibodyDetail = () => {
                 </Grid>
                 <Grid item xs={3}>
                   <Typography variant="h4">ID</Typography>
-                  <Typography variant="subtitle2">AB_{antibody.abId}</Typography>
+                  <Typography variant="subtitle2">
+                    AB_{antibody.abId}
+                  </Typography>
                 </Grid>
                 <Grid item xs={3}>
                   <Typography variant="h4">Target antigen</Typography>
@@ -183,7 +195,9 @@ export const AntibodyDetail = () => {
                 </Grid>
                 <Grid item xs={3}>
                   <Typography variant="h4">Host organism</Typography>
-                  <Typography variant="subtitle2">{antibody.sourceOrganism}</Typography>
+                  <Typography variant="subtitle2">
+                    {antibody.sourceOrganism}
+                  </Typography>
                 </Grid>
               </Grid>
               <Divider />
@@ -192,9 +206,7 @@ export const AntibodyDetail = () => {
                   <Typography variant="subtitle1">Proper citation</Typography>
                 </Grid>
                 <Grid item xs={8}>
-                  <Typography variant="subtitle2">
-                    {citation}
-                  </Typography>
+                  <Typography variant="subtitle2">{citation}</Typography>
                   <CopyToClipboard text={citation}>
                     <Button
                       variant="text"
@@ -209,7 +221,6 @@ export const AntibodyDetail = () => {
                     </Button>
                   </CopyToClipboard>
                   <Popover
-                    id={id}
                     open={open}
                     anchorEl={anchorCitationPopover}
                     onClose={handleCloseCitation}
@@ -221,6 +232,7 @@ export const AntibodyDetail = () => {
                       vertical: "center",
                       horizontal: "center",
                     }}
+                    className="copy-citation"
                   >
                     <Typography sx={classes.popover}>
                       Citation copied to clipboard
@@ -245,7 +257,9 @@ export const AntibodyDetail = () => {
                   <Typography variant="subtitle1">Vendor</Typography>
                 </Grid>
                 <Grid item xs={8}>
-                  <Typography variant="subtitle2">{antibody.vendorName}</Typography>
+                  <Typography variant="subtitle2">
+                    {antibody.vendorName}
+                  </Typography>
 
                   <Button
                     variant="text"
@@ -254,7 +268,7 @@ export const AntibodyDetail = () => {
                     endIcon={
                       <ExternalLinkIcon stroke={theme.palette.primary.dark} />
                     }
-                    href={`https://${antibody.url}`}
+                    href={antibody.url}
                   >
                     Open in vendor website
                   </Button>
@@ -292,7 +306,16 @@ export const AntibodyDetail = () => {
             <HistoryStepper classes={classes} antibody={antibody} />
           </Grid>
         </Grid>
+        {antibodies && antibodies.length > 1 && 
+        <Alert severity="info">Multiple antibodies have been found for this id: showing accession AB_{antibody.accession}. Other entries:&nbsp;
+          {antibodies.filter((a) => a.accession != accession).map((a, i, arr) => <>
+          <Link href={"#" + a.accession}>
+            AB_{a.accession}
+          </Link>{i < arr.length - 1 ? ", ": "."}
+            </>)}
+        </Alert>}
       </Container>
+      
     </>
   );
 };

@@ -131,10 +131,10 @@ export interface AbstractAntibody {
     'vendorName'?: string;
     /**
      * 
-     * @type {string}
+     * @type {Array<string>}
      * @memberof AbstractAntibody
      */
-    'applications'?: string;
+    'applications'?: Array<string>;
     /**
      * 
      * @type {string}
@@ -280,10 +280,10 @@ export interface AddUpdateAntibody {
     'vendorName'?: string;
     /**
      * 
-     * @type {string}
+     * @type {Array<string>}
      * @memberof AddUpdateAntibody
      */
-    'applications'?: string;
+    'applications'?: Array<string>;
     /**
      * 
      * @type {string}
@@ -514,10 +514,10 @@ export interface Antibody {
     'vendorName'?: string;
     /**
      * 
-     * @type {string}
+     * @type {Array<string>}
      * @memberof Antibody
      */
-    'applications'?: string;
+    'applications'?: Array<string>;
     /**
      * 
      * @type {string}
@@ -1062,7 +1062,7 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAntibody(antibodyId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Antibody>> {
+        async getAntibody(antibodyId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Antibody>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getAntibody(antibodyId, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1138,7 +1138,7 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAntibody(antibodyId: number, options?: any): AxiosPromise<Antibody> {
+        getAntibody(antibodyId: number, options?: any): AxiosPromise<Array<Antibody>> {
             return localVarFp.getAntibody(antibodyId, options).then((request) => request(axios, basePath));
         },
         /**

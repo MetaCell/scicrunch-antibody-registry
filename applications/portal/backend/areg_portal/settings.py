@@ -13,7 +13,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -49,7 +48,6 @@ MIDDLEWARE = [
     "cloudharness.middleware.django.CloudharnessMiddleware",
 ]
 
-
 ROOT_URLCONF = "areg_portal.urls"
 
 TEMPLATES = [
@@ -70,7 +68,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "areg_portal.wsgi.application"
 
-
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -89,7 +86,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -107,7 +103,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
 
 PROJECT_NAME = "areg_portal".upper()
 
@@ -166,37 +161,50 @@ KC_DEFAULT_USER_ROLE = None  # don't add the user role to the realm default role
 
 # comment refers to max length of column at ingestion time (12/09/2022)
 ANTIBODY_NAME_MAX_LEN = 512  # 352
-ANTIBODY_CATALOG_NUMBER_MAX_LEN = 64  # 33
-ANTIBODY_CLONALITY_MAX_LEN = 255
-ANTIBODY_SOURCE_ORGANISM_MAX_LEN = 64  # 24
-ANTIBODY_CLONE_ID_MAX_LEN = 256  # 100
+ANTIBODY_TARGET_MAX_LEN = 1024  # 783
+ANTIBODY_TARGET_SPECIES_MAX_LEN = 4096  # 2047
+VENDOR_MAX_LEN = 512  # 200
+ANTIBODY_CATALOG_NUMBER_MAX_LEN = 256  # 165
+ANTIBODY_CLONALITY_MAX_LEN = 32
+ANTIBODY_CLONE_ID_MAX_LEN = 256  # 150
+URL_MAX_LEN = 2048  # 938
+ANTIGEN_ENTREZ_ID_MAX_LEN = 2048  # 1383
 ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN = 256  # 150
-ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN = 128  # 94
-ANTIBODY_PRODUCT_FORM_MAX_LEN = 512  # 349
-ANTIBODY_DEFINING_CITATION_MAX_LEN = 2048  # 1156
+ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN = 512  # 285
+ANTIBODY_PRODUCT_FORM_MAX_LEN = 1024  # 802
+ANTIBODY_TARGET_SUBREGION_MAX_LEN = 256  # 221
+ANTIBODY_TARGET_MODIFICATION_MAX_LEN = 128  # 67
+ANTIBODY_DEFINING_CITATION_MAX_LEN = 16384  # 9206
+ANTIBODY_DISC_DATE_MAX_LEN = 128  # 85
 ANTIBODY_ID_MAX_LEN = 32  # 8
-ANTIBODY_CAT_ALT_MAX_LEN = 256  # 103
-ANTIBODY_DISC_DATE_MAX_LEN = 32  # 21
-
-ANTIBODY_TARGET_MAX_LEN = 512  # 323
-ANTIBODY_TARGET_SPECIES_MAX_LEN = 1024  # 800
-ANTIBODY_TARGET_SUBREGION_MAX_LEN = 32  # 6
-ANTIBODY_TARGET_MODIFICATION_MAX_LEN = 64  # 30
-ANTIBODY_TARGET_EPITOPE_MAX_LEN = 128  # 62
-
-VENDOR_MAX_LEN = 256  # 152
-VENDOR_COMMERCIAL_TYPE_MAX_LEN = 128
-VENDOR_NIF_MAX_LEN = 32  # 14
-VENDOR_SYNONYMS_TYPE_MAX_LEN = 512  # 352
-
-ANTIGEN_ENTREZ_ID_MAX_LEN = 1024  # 617
+STATUS_MAX_LEN = 8
+ANTIBODY_CAT_ALT_MAX_LEN = 512  # 334
+VENDOR_COMMERCIAL_TYPE_MAX_LEN = 10  # 10
 ANTIGEN_UNIPROT_ID_MAX_LEN = 64  # 32
+ANTIBODY_TARGET_EPITOPE_MAX_LEN = 1024  # 897
+VENDOR_NIF_MAX_LEN = 32  # 14
+APPLICATION_MAX_LEN = 255
 
-STATUS_MAX_LEN = 32
-URL_MAX_LEN = 2048  # 268
+ANTIBODY_ANTIBODY_START_SEQ = 3000000  # 2858735
+ANTIBODY_VENDOR_DOMAIN_START_SEQ = 1000  # 813
+ANTIBODY_VENDOR_START_SEQ = 20000  # 12233
 
 DEBUG = True
 
-RAW_ANTIBODY_DATA = 'antibody_table.csv'
-RAW_VENDOR_DATA = 'antibody_vendors.csv'
-RAW_VENDOR_DOMAIN_DATA = 'antibody_vendors_domain.csv'
+RAW_ANTIBODY_DATA = 'antibody_table'
+RAW_VENDOR_DATA = 'antibody_vendors'
+RAW_VENDOR_DOMAIN_DATA = 'antibody_vendors_domain'
+
+CHUNK_SIZE = 10 ** 5
+
+ANTIBODY_HEADER = {'ab_name': "text", 'ab_target': "text", 'target_species': "text", 'vendor': "text",
+                   'vendor_id': "int", 'catalog_num': "text", 'clonality': "text",
+                   'source_organism': "text", 'clone_id': "text", 'url': "text", 'link': "text",
+                   'ab_target_entrez_gid': "text", 'product_isotype': "text",
+                   'product_conjugate': "text", 'product_form': "text", 'target_subregion': "text",
+                   'target_modification': "text", 'comments': "text",
+                   'feedback': "text", 'defining_citation': "text", 'disc_date': "text", 'curator_comment': "text",
+                   'id': "text", 'ab_id': "text", 'ab_id_old': "text",
+                   'of_record': "text", 'ix': "int", 'uid': "text", 'status': "text", 'insert_time': "text",
+                   'curate_time': "text", 'cat_alt': "text", 'commercial_type': "text",
+                   'uniprot_id': "text", 'epitope': "text"}

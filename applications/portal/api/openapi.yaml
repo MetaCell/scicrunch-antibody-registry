@@ -214,7 +214,9 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/Antibody'
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Antibody'
                     description: Successful response - returns a single `Antibody`.
             operationId: getAntibody
             summary: Get a Antibody
@@ -585,7 +587,9 @@ components:
                     type: string
                 applications:
                     description: ''
-                    type: string
+                    type: array
+                    items:
+                        type: string
                     example: 'ELISA, IHC, WB'
                 kitContents:
                     description: ''

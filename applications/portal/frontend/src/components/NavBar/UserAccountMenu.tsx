@@ -1,5 +1,6 @@
 import React from "react";
-
+import { Link } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import {
   IconButton,
   Menu,
@@ -11,6 +12,7 @@ import {
   MenuItem,
   Stack
 } from "@mui/material";
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
 import { ThreeDotsIcon, UserIcon, LogoutIcon, CubeIcon } from "../icons";
 
@@ -23,7 +25,10 @@ interface UserProps {
 const UserAccountMenu = (props: UserProps) => {
   const { user } = props;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const history = useHistory();
   const open = Boolean(anchorEl);
+
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -79,7 +84,8 @@ const UserAccountMenu = (props: UserProps) => {
               </ListItem>
               <Divider />
               <MenuList sx={{ "& .MuiMenuItem-root": { paddingTop: "0.4rem" } }}>
-                <MenuItem>
+                <MenuItem onClick={() => {
+                  history.push("/user"); setAnchorEl(null)}} component={Link}>
                   <ListItemIcon>
                     <UserIcon />
                   </ListItemIcon>
@@ -91,8 +97,16 @@ const UserAccountMenu = (props: UserProps) => {
                   </ListItemIcon>
                   <Typography variant="h5" color="grey.500">API Key</Typography>
                 </MenuItem>
+                {user.realm_access.roles.includes("administrator") && <MenuItem onClick={() => window.location.href = "/admin/"}>
+                  <ListItemIcon>
+                    <AdminPanelSettingsIcon fontSize="small" sx={{ pl: 0 }}  />
+                  </ListItemIcon>
+                  <Typography variant="h5" color="grey.500">Admin panel</Typography>
+                </MenuItem> }
                 <Divider />
-                <MenuItem>
+                <MenuItem onClick={() => 
+                  fetch("/oauth/logout").then(() => window.location.href = "/")
+                }>
                   <ListItemIcon>
                     <LogoutIcon />
                   </ListItemIcon>

@@ -5,6 +5,7 @@ export interface User {
   first_name: string;
   last_name: string;
   preferred_username: string;
+  realm_access: {roles: string[]}
 }
 
 function getCookie(name): string {
@@ -68,7 +69,10 @@ export function getToken(): string {
 export function useUser() {
   const [user, setUser] = useState(undefined);
   if (user === undefined) {
-    setUser(getCurrentUser());
+    const u = getCurrentUser()
+    setUser(u);
+    return u;
+
   }
   return user;
 }

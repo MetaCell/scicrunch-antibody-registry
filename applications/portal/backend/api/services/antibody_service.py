@@ -11,6 +11,8 @@ from api.mappers.antibody_mapper import AntibodyMapper, AntibodyDataException
 from openapi.models import Antibody as AntibodyDTO, PaginatedAntibodies
 from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO
 
+magic = 64544
+
 
 class DuplicatedAntibody(Exception):
     def __init__(self, ab_id):
@@ -22,7 +24,8 @@ antibody_mapper = AntibodyMapper()
 
 
 def get_antibodies(page: int = 1, size: int = 50) -> PaginatedAntibodies:
-    p = Paginator(Antibody.objects.all().filter(status=STATUS.CURATED), size)
+    p = Paginator(Antibody.objects.select_related("antigen", "vendor", "source_organism").prefetch_related("species").all().filter(
+        status=STATUS.CURATED).order_by("-ix"), size)
     items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
 
@@ -34,9 +37,7 @@ def get_user_antibodies(userid: str, page: int = 1, size: int = 50) -> Paginated
 
 
 def generate_id(antibody: Antibody):
-    # TODO add logic to generate the AB_ID https://github.com/MetaCell/scicrunch-antibody-registry/issues/43
-    import random
-    return random.randint(0, 99999999)
+    return antibody.ix + magic
 
 
 def create_antibody(body: AddUpdateAntibodyDTO, userid: str) -> AntibodyDTO:
@@ -48,6 +49,7 @@ def create_antibody(body: AddUpdateAntibodyDTO, userid: str) -> AntibodyDTO:
     except Antibody.DoesNotExist:
         antibody = antibody_mapper.from_dto(body)
         antibody.ab_id = generate_id(antibody)
+        antibody.accession = antibody.ab_id
         antibody.uid = userid
         antibody.status = STATUS.QUEUE
         antibody.save()
@@ -59,9 +61,9 @@ def create_antibody(body: AddUpdateAntibodyDTO, userid: str) -> AntibodyDTO:
         ).filter(vendor__name=body.vendorName, catalog_num=body.catalogNum)))
 
 
-def get_antibody(antibody_id: int) -> AntibodyDTO:
+def get_antibody(antibody_id: int, status=STATUS.CURATED) -> List[AntibodyDTO]:
     try:
-        return antibody_mapper.to_dto(Antibody.objects.get(ab_id=antibody_id))
+        return [antibody_mapper.to_dto(a) for a in Antibody.objects.all().filter(ab_id=antibody_id, status=status)]
     except Antibody.DoesNotExist:
         return None
 

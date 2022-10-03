@@ -7,26 +7,29 @@ import {
   AntibodyCommercialTypeEnum,
 } from "../rest/api";
 
-import { getToken } from "./UserService"
+import { getToken } from "./UserService";
 
 const api = new AntibodyApi();
 
 export async function getAntibodies(
   page = 1,
-  size = 10
+  size = 100
 ): Promise<PaginatedAntibodies> {
   return (await api.getAntibodies(page, size)).data;
 }
 
-export async function getAntibody(id: number): Promise<Antibody> {
-  return  (await api.getAntibody(id)).data;
+export async function getAntibody(id: number): Promise<Antibody[]> {
+  return (await api.getAntibody(id)).data;
 }
-
 
 export async function addAntibody(antibodyObj): Promise<any> {
   let ab = mapAntibody(antibodyObj);
   console.log("mappedObj", ab);
-  return (await new AntibodyApi(new Configuration({ apiKey: getToken(), accessToken: getToken() })).createAntibody(ab)).data;
+  return (
+    await new AntibodyApi(
+      new Configuration({ apiKey: getToken(), accessToken: getToken() })
+    ).createAntibody(ab)
+  ).data;
 }
 
 function mapAntibody(antibody): AddUpdateAntibody {
@@ -47,14 +50,25 @@ function mapAntibody(antibody): AddUpdateAntibody {
     targetSpecies: antibody.targetSpecies.split(/\W/),
     uniprotId: antibody.uniprotID,
     vendorName: antibody.vendor,
-    applications: antibody.applications,
+    applications: antibody.applications.split(/\W/),
   };
   if (antibody.type === AntibodyCommercialTypeEnum.Commercial) {
     return commercialAb;
+  } else {
+    return {
+      ...commercialAb,
+      definingCitation: antibody.citation,
+    };
   }
-  else {
-    return { 
-      ...commercialAb, 
-      definingCitation: antibody.citation
-    };}
+}
+
+export async function getUserAntibodies(
+  page = 1,
+  size = 100
+): Promise<PaginatedAntibodies> {
+  return (
+    await new AntibodyApi(
+      new Configuration({ apiKey: getToken(), accessToken: getToken() })
+    ).getUserAntibodies(page, size)
+  ).data;
 }
