@@ -161,7 +161,7 @@ class Antibody(models.Model):
     curate_time = models.DateTimeField(auto_now=True, db_index=True)
 
     def __str__(self):
-        return "AB_" + str(self.id)
+        return "AB_" + str(self.ab_id)
 
     class Meta:
         constraints = [
