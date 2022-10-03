@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import Q
 
-from areg_portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, VENDOR_MAX_LEN, \
+from areg_portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
     ANTIBODY_CLONE_ID_MAX_LEN, ANTIGEN_ENTREZ_ID_MAX_LEN, ANTIGEN_UNIPROT_ID_MAX_LEN, STATUS_MAX_LEN, \
     ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN, ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, ANTIBODY_PRODUCT_FORM_MAX_LEN, \
@@ -67,6 +67,14 @@ class Specie(models.Model):
         return self.name
 
 
+class Application(models.Model):
+    name = models.CharField(
+        max_length=APPLICATION_MAX_LEN, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class VendorDomain(models.Model):
     base_url = models.URLField(unique=True, max_length=URL_MAX_LEN,
                                null=True, db_column='domain_name', db_index=True)
@@ -114,43 +122,45 @@ class Antibody(models.Model):
     uid_legacy = models.IntegerField(null=True)
     catalog_num = models.CharField(
         max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True)
-    cat_alt = models.CharField(max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True)
+    cat_alt = models.CharField(max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True, db_index=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
-    url = models.URLField(max_length=URL_MAX_LEN, null=True)
+    url = models.URLField(max_length=URL_MAX_LEN, null=True, db_index=True)
     antigen = models.ForeignKey(
         Gene, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
                                      through='AntibodySpecies')
     subregion = models.CharField(
-        max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion', null=True)
+        max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion', null=True, db_index=True)
     modifications = models.CharField(max_length=ANTIBODY_TARGET_MODIFICATION_MAX_LEN, db_column='target_modification',
-                                     null=True)
+                                     null=True, db_index=True)
     epitope = models.CharField(
-        max_length=ANTIBODY_TARGET_EPITOPE_MAX_LEN, null=True)
+        max_length=ANTIBODY_TARGET_EPITOPE_MAX_LEN, null=True, db_index=True)
     source_organism = models.ForeignKey(
         Specie, on_delete=models.RESTRICT, related_name="source", null=True)
     clonality = models.CharField(
         max_length=ANTIBODY_CLONALITY_MAX_LEN,
         choices=AntibodyClonality.choices,
         default=AntibodyClonality.UNKNOWN,
+        db_index=True
     )
     clone_id = models.CharField(
-        max_length=ANTIBODY_CLONE_ID_MAX_LEN, null=True)
+        max_length=ANTIBODY_CLONE_ID_MAX_LEN, null=True, db_index=True)
     product_isotype = models.CharField(
-        max_length=ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN, null=True)
+        max_length=ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN, null=True, db_index=True)
     product_conjugate = models.CharField(
-        max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, null=True)
+        max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, null=True, db_index=True)
     defining_citation = models.CharField(
-        max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True)
+        max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True, db_index=True)
     product_form = models.CharField(
-        max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True)
-    comments = models.TextField(null=True)
-    applications = models.TextField(null=True)
-    kit_contents = models.TextField(null=True)
-    feedback = models.TextField(null=True)
-    curator_comment = models.TextField(null=True)
+        max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True, db_index=True)
+    comments = models.TextField(null=True, db_index=True)
+    applications = models.ManyToManyField(
+        Application, through='AntibodyApplications')
+    kit_contents = models.TextField(null=True, db_index=True)
+    feedback = models.TextField(null=True, db_index=True)
+    curator_comment = models.TextField(null=True, db_index=True)
     disc_date = models.CharField(
-        max_length=ANTIBODY_DISC_DATE_MAX_LEN, null=True)
+        max_length=ANTIBODY_DISC_DATE_MAX_LEN, null=True, db_index=True)
     status = models.CharField(
         max_length=STATUS_MAX_LEN,
         choices=STATUS.choices,
@@ -183,3 +193,14 @@ class AntibodySpecies(models.Model):
 
     def __str__(self):
         return "AB_%s->%s" % (self.antibody.ab_id, self.specie.name)
+
+
+class AntibodyApplications(models.Model):
+
+    antibody = models.ForeignKey(
+        Antibody, on_delete=models.CASCADE, db_index=True)
+    application = models.ForeignKey(
+        Application, on_delete=models.CASCADE, db_index=True)
+
+    def __str__(self):
+        return "AB_%s->%s" % (self.antibody.ab_id, self.application.name)

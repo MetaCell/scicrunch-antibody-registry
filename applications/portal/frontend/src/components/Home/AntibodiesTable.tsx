@@ -376,6 +376,13 @@ const AntibodiesTable = (props) => {
     },
     {
       ...columnsDefaultProps,
+      field: "applications",
+      headerName: "Applications",
+      valueGetter: getList,
+      hide: true,
+    },
+    {
+      ...columnsDefaultProps,
       field: "abTarget",
       headerName: "Target antigen",
       flex: 1.5,

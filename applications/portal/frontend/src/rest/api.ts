@@ -88,7 +88,7 @@ export interface AbstractAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
      * @type {string}
      * @memberof AbstractAntibody
      */
@@ -131,10 +131,10 @@ export interface AbstractAntibody {
     'vendorName'?: string;
     /**
      * 
-     * @type {string}
+     * @type {Array<string>}
      * @memberof AbstractAntibody
      */
-    'applications'?: string;
+    'applications'?: Array<string>;
     /**
      * 
      * @type {string}
@@ -237,7 +237,7 @@ export interface AddUpdateAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
      * @type {string}
      * @memberof AddUpdateAntibody
      */
@@ -280,10 +280,10 @@ export interface AddUpdateAntibody {
     'vendorName'?: string;
     /**
      * 
-     * @type {string}
+     * @type {Array<string>}
      * @memberof AddUpdateAntibody
      */
-    'applications'?: string;
+    'applications'?: Array<string>;
     /**
      * 
      * @type {string}
@@ -471,7 +471,7 @@ export interface Antibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
      * @type {string}
      * @memberof Antibody
      */
@@ -514,10 +514,10 @@ export interface Antibody {
     'vendorName'?: string;
     /**
      * 
-     * @type {string}
+     * @type {Array<string>}
      * @memberof Antibody
      */
-    'applications'?: string;
+    'applications'?: Array<string>;
     /**
      * 
      * @type {string}

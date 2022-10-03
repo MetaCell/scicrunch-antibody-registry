@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from api.models import Antibody, Gene, Vendor, Specie, VendorDomain, VendorSynonym
+from api.models import Antibody, Application, Gene, Vendor, Specie, VendorDomain, VendorSynonym
 
 
 class AntibodyAdmin(admin.ModelAdmin):
@@ -21,10 +21,14 @@ class GeneAdmin(admin.ModelAdmin):
 class SpecieAdmin(admin.ModelAdmin):
     search_fields = ('name', )
 
+class ApplicationAdmin(admin.ModelAdmin):
+    search_fields = ('name', )
+
 
 admin.site.register(Antibody, AntibodyAdmin)
 admin.site.register(Gene, GeneAdmin)
 admin.site.register(Vendor, VendorAdmin)
 admin.site.register(Specie, SpecieAdmin)
+admin.site.register(Application, ApplicationAdmin)
 admin.site.register(VendorDomain)
 admin.site.register(VendorSynonym)
