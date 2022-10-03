@@ -150,10 +150,10 @@ class Antibody(models.Model):
     product_conjugate = models.CharField(
         max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, null=True, db_index=True)
     defining_citation = models.CharField(
-        max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True, db_index=True)
+        max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True)
     product_form = models.CharField(
         max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True, db_index=True)
-    comments = models.TextField(null=True, db_index=True)
+    comments = models.TextField(null=True)
     applications = models.ManyToManyField(
         Application, through='AntibodyApplications')
     kit_contents = models.TextField(null=True, db_index=True)
