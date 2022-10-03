@@ -225,3 +225,5 @@ USERS_RELEVANT_HEADER = ['id', GUID_KEY, 'email', 'level', 'firstName', 'middleI
 
 UID_INDEX = list(ANTIBODY_HEADER.keys()).index(UID_KEY)
 GUID_INDEX = USERS_RELEVANT_HEADER.index(GUID_KEY)
+
+DEFAULT_UID = '43'

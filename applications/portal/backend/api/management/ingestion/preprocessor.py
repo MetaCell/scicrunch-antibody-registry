@@ -12,7 +12,7 @@ from api.services.filesystem_service import replace_file
 from api.utilities.decorators import timed_class_method
 from areg_portal.settings import RAW_ANTIBODY_DATA_BASENAME, RAW_VENDOR_DATA_BASENAME, RAW_VENDOR_DOMAIN_DATA_BASENAME, \
     CHUNK_SIZE, \
-    ANTIBODY_HEADER, RAW_USERS_DATA_BASENAME
+    ANTIBODY_HEADER, RAW_USERS_DATA_BASENAME, DEFAULT_UID
 
 UNKNOWN_VENDORS = {'1669', '1667', '1625', '1633', '1628', '11599', '12068', '12021', '1632', '5455', '1626', '1670',
                    '11278', '(null)', '1684', '11598', '0', '1682', '11434'}
@@ -85,7 +85,7 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
                 chunk['vendor_id'] = chunk['vendor_id'].where(~chunk['vendor_id'].isin(UNKNOWN_VENDORS), None)
 
                 # point unknown user_id to None
-                chunk['uid'] = chunk['uid'].where(~chunk['uid'].isin(UNKNOWN_VENDORS), None)
+                chunk['uid'] = chunk['uid'].where(~chunk['uid'].isin(UNKNOWN_USERS), DEFAULT_UID)
 
                 # point unknown commercial type to None
                 chunk['commercial_type'] = chunk['commercial_type'].where(
@@ -128,9 +128,9 @@ class Preprocessor:
                                         0],
                                     glob.glob(os.path.join(self.dest, '*', f"{RAW_USERS_DATA_BASENAME}.csv"))[0])
 
-        update_vendor_domains(metadata.vendor_domain_data_path)
-        update_vendors(metadata.vendor_data_path)
-        update_antibodies(metadata.antibody_data_paths)
-        update_users(metadata.users_data_path)
+        # update_vendor_domains(metadata.vendor_domain_data_path)
+        # update_vendors(metadata.vendor_data_path)
+        # update_antibodies(metadata.antibody_data_paths)
+        # update_users(metadata.users_data_path)
 
         return metadata
