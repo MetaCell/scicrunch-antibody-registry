@@ -92,7 +92,7 @@ class Gene(models.Model):
         unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True)
 
     def __str__(self):
-        return self.symbol
+        return f"{self.symbol}" or "?self.id"
 
 
 class Antibody(models.Model):
