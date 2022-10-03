@@ -1,6 +1,8 @@
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Value
+from django.db.models import Index
 from django.db.models import Transform, CharField
+from django.db.models.functions import Length, Coalesce, Cast
 from django.contrib.postgres.search import SearchVector
 from django.contrib.postgres.indexes import GinIndex
 
@@ -31,6 +33,15 @@ class NormalizeRelaxed(Transform):
     def as_sql(self, compiler, connection):
         lhs, params = compiler.compile(self.lhs)
         return (f"regexp_replace({lhs}, '[^a-zA-Z0-9, ]', '', 'g')", params)
+
+
+@CharField.register_lookup
+class RemoveComa(Transform):
+    lookup_name = 'remove_coma'
+
+    def as_sql(self, compiler, connection):
+        lhs, params = compiler.compile(self.lhs)
+        return (f"replace({lhs}, ',', '')", params)
 
 
 class CommercialType(models.TextChoices):
@@ -84,6 +95,11 @@ class VendorSynonym(models.Model):
 class Specie(models.Model):
     name = models.CharField(max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, unique=True)
 
+    class Meta:
+        indexes = [
+            GinIndex(SearchVector('name', config='english'), name='specie_name_fts_idx'),
+        ]
+
 
 class VendorDomain(models.Model):
     base_url = models.URLField(unique=True, max_length=URL_MAX_LEN, null=True, db_column='domain_name', db_index=True)
@@ -134,16 +150,16 @@ class Antibody(models.Model):
     uid_legacy = models.IntegerField(null=True)
     catalog_num = models.CharField(max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True)
     cat_alt = models.CharField(max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True)
-    vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
+    vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True, db_index=True)
     url = models.URLField(max_length=URL_MAX_LEN, null=True)
-    antigen = models.ForeignKey(Gene, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
+    antigen = models.ForeignKey(Gene, on_delete=models.RESTRICT, db_column='antigen_id', null=True, db_index=True)
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
                                      through='AntibodySpecies')
     subregion = models.CharField(max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion', null=True)
     modifications = models.CharField(max_length=ANTIBODY_TARGET_MODIFICATION_MAX_LEN, db_column='target_modification',
                                      null=True)
     epitope = models.CharField(max_length=ANTIBODY_TARGET_EPITOPE_MAX_LEN, null=True)
-    source_organism = models.ForeignKey(Specie, on_delete=models.RESTRICT, related_name="source", null=True)
+    source_organism = models.ForeignKey(Specie, on_delete=models.RESTRICT, related_name="source", null=True, db_index=True)
     clonality = models.CharField(
         max_length=ANTIBODY_CLONALITY_MAX_LEN,
         choices=AntibodyClonality.choices,
@@ -184,9 +200,16 @@ class Antibody(models.Model):
         indexes = [
             GinIndex(SearchVector('catalog_num__normalize',
                                   'cat_alt__normalize_relaxed', config='english'), name='antibody_catalog_num_fts_idx'),
+            Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma', Value('')))).desc(),     name='antibody_nb_citations_idx'),
+            Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma', Value(''))) - (100 + Length(Coalesce('disc_date', Value(''))))).desc(),     name='antibody_nb_citations_idx2'),
+            Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
+
             GinIndex(SearchVector('ab_name',
-                                  'clone_id__normalize_relaxed', config='english'), name='antibody_names_fts_idx'),
-            GinIndex(SearchVector(
+                              'clone_id__normalize_relaxed', config='english', weight='A'), name='antibody_name_fts,idx'),
+            GinIndex(
+                SearchVector('ab_name',
+                              'clone_id__normalize_relaxed', config='english', weight='A') +
+                SearchVector(
                 'ab_id',
                 'accession',
                 'commercial_type',
@@ -196,7 +219,6 @@ class Antibody(models.Model):
                 'subregion',
                 'modifications',
                 'epitope',
-                'source_organism',
                 'clonality',
                 'product_isotype',
                 'product_conjugate',
@@ -209,8 +231,36 @@ class Antibody(models.Model):
                 'curator_comment',
                 'disc_date',
                 'status',
-                config='english'
-            ), name='antibody_all_fts_idx')
+                config='english',
+                weight='C',
+            ), name='antibody_all_fts_idx'),
+
+            GinIndex(
+                SearchVector(
+                'ab_id',
+                'accession',
+                'commercial_type',
+                'uid',
+                'uid_legacy',
+                'url',
+                'subregion',
+                'modifications',
+                'epitope',
+                'clonality',
+                'product_isotype',
+                'product_conjugate',
+                'defining_citation',
+                'product_form',
+                'comments',
+                'applications',
+                'kit_contents',
+                'feedback',
+                'curator_comment',
+                'disc_date',
+                'status',
+                config='english',
+                weight='C',
+            ), name='antibody_all_fts_idx2'),
         ]
 
 

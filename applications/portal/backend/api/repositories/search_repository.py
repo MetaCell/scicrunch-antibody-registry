@@ -2,43 +2,29 @@ from typing import List
 from functools import reduce
 import re
 
-from django.db.models import Q, Transform, CharField, Lookup, F, Func
-from django.db.models.functions import Length, Concat
+from django.db.models import F, Value
+from django.db.models.functions import Length, Concat, Coalesce
 from django.db.models.expressions import Value
-from django.contrib.postgres.search import SearchVectorField, SearchQuery, SearchVector, SearchHeadline
+from django.contrib.postgres.search import SearchVectorField, SearchQuery, SearchVector, SearchHeadline, SearchRank
 
 from ..models import Antibody
 
-
-# @CharField.register_lookup
-# class FtsStartswith(Lookup):
-#     lookup_name = 'fts_startswith'
-
-#     def as_sql(self, compiler, connection):
-#         lhs, lhs_params = self.process_lhs(compiler, connection)
-#         rhs, rhs_params = self.process_rhs(compiler, connection)
-#         params = lhs_params + rhs_params
-#         return (f"to_tsvector('english', COALESCE({lhs}, '')) @@ "
-#                 f"to_tsquery(regexp_replace({rhs}, '[^a-zA-Z0-9]', '', 'g') || ':*')", params)
 
 def flat(l):
     return [item for sublist in l for item in sublist]
 
 
-@CharField.register_lookup
-class RemoveComa(Transform):
-    lookup_name = 'remove_coma'
-
-    def as_sql(self, compiler, connection):
-        lhs, params = compiler.compile(self.lhs)
-        return (f"replace({lhs}, ',', '')", params)
-
-
 def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Antibody]:
+    # preparing two search terms, one for catalog_num, the other for normal search.
     norm_search = re.sub('[^a-zA-Z0-9]', '', search) + ":*"
+    search = ' & '.join(c + ':*' for c in search.split(' ') if c)
+    norm_search_query = SearchQuery(norm_search, search_type='raw')
+    search_query = SearchQuery(search, search_type='raw')
+    norm_or_search = search_query | norm_search_query
+
     catalog_num_match = (Antibody.objects
                                  .annotate(search=SearchVector('catalog_num__normalize', 'cat_alt__normalize_relaxed', config='english'))
-                                 .filter(search=norm_search)
+                                 .filter(search=norm_search_query)
                                  )
     # if we match catalog_num or cat_alt, we return those results without looking for other fields
     # as the match is a perfect match or a prefix match depending on the search word,
@@ -50,7 +36,9 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
 
     # According to https://github.com/MetaCell/scicrunch-antibody-registry/issues/52
     # If the catalog number is not matched, then return records if the query matches any visible or invisible field.
-    search_cols = [
+    first_cols = SearchVector('ab_name',
+                              'clone_id__normalize_relaxed', config='english', weight='A')
+    search_col_names = [
         'ab_id',
         'accession',
         'commercial_type',
@@ -60,7 +48,6 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
         'subregion',
         'modifications',
         'epitope',
-        'source_organism',
         'clonality',
         'product_isotype',
         'product_conjugate',
@@ -74,56 +61,81 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
         'disc_date',
         'status',
     ]
+    search_cols = SearchVector(*search_col_names, config='english', weight='C')
+
     # In the case that the cat num is not matched,
     # primary ranking:
     # + Additional desirata3: if the name, clone ID, vendor name, match the search string, rank result
     #   higher than other field matches.
-    nb_citation_rank = Length('defining_citation') - Length('defining_citation__remove_coma')
-    no_disc_data_rank = Length('disc_date')
-    search_query = SearchQuery(search)
-    norm_or_search = search_query | SearchQuery(norm_search)
-    names_search = (Antibody.objects
-                            .annotate(search=SearchVector('ab_name',
-                                                          'clone_id__normalize_relaxed', config='english'))
-                            .filter(search=norm_or_search)
-                            .annotate(nb_citations=nb_citation_rank)
-                            .annotate(disc_date_len=no_disc_data_rank)
-                            .annotate(headline=SearchHeadline(
-                                Concat(F('ab_name'), Value(' '), F('clone_id__normalize_relaxed')),
-                                norm_or_search,
-                                highlight_all=True
-                            )))
-    vendor_search = (Antibody.objects
-                            .annotate(search=SearchVector('vendor', config='english'))
-                            .filter(vendor__name__search=search_query)
-                            .annotate(nb_citations=nb_citation_rank)
-                            .annotate(disc_date_len=no_disc_data_rank)
-                            .annotate(headline=SearchHeadline(
-                                'vendor__name',
-                                search_query,
-                                highlight_all=True
-                            ))
-                            )
-    top_ranked_search = names_search.union(vendor_search)
+    nb_citation_rank = Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma', Value('')))
+    ranking = nb_citation_rank - (100 + Length(Coalesce('disc_date', Value(''))))
 
+    highlight_cols = flat((F(f), Value(' ')) for f in search_col_names)[:-1]
+
+    subfields_search = (Antibody.objects
+                                .annotate(
+                                    rank=SearchRank(first_cols + search_cols, norm_or_search),
+                                    search=first_cols + search_cols,
+                                    nb_citations=nb_citation_rank,
+                                    # headline=SearchHeadline(
+                                    #     Concat(*highlight_cols),
+                                    #     search_query,
+                                    #     highlight_all=True
+                                    # )
+                                )
+                                .filter(search=norm_or_search, rank__gte=0.3)
+                                # .order_by('-rank')
+                                )
+
+    subfields_search2 = (Antibody.objects
+                                .annotate(
+                                    search=first_cols + search_cols,
+                                    # nb_citations=nb_citation_rank,
+                                    ranking=ranking,
+                                    # headline=SearchHeadline(
+                                    #     Concat(*highlight_cols),
+                                    #     search_query,
+                                    #     highlight_all=True
+                                    # )
+                                )
+                                .filter(search=norm_or_search)
+                                .order_by('-ranking')
+                                )
+
+    # vendor_search = (Antibody.objects
+    #                         .annotate(search=SearchVector('vendor', config='english'))  # trick to use the index
+    #                         .filter(vendor__name__search=search_query)
+    #                         .annotate(nb_citations=nb_citation_rank)
+    #                         # .annotate(headline=SearchHeadline(
+    #                         #     'vendor__name',
+    #                         #     search_query,
+    #                         #     highlight_all=True
+    #                         # ))
+    #                         )
+    # top_ranked_search = names_search.union(vendor_search)
+    # if top_ranked_search.count() > 1000:
+    #     # currently, if there is more than 1000 results, we directly return them
+    #     # as they are supposed to be ranked first. It doesn't make sense to search
+    #     # over the rest of the DB entries in this case.
+    #     return top_ranked_search.order_by('-nb_citations')
 
     # + Additional desirata: use the number of citations as part of the sorting function
     #   (the higher the citations, the higher the rank)
     # + Additional desirata2: if the record contains string in the "disc_date" field, then downgrade
     #   the result (put on bottom of result set)
 
-    highlight_cols = flat((F(f), Value(' ')) for f in search_cols)[:-1]
 
-    subfields_search = (Antibody.objects
-                                .annotate(search=SearchVector(*search_cols, config='english'))
-                                .filter(search=search_query)
-                                .annotate(nb_citations=nb_citation_rank)
-                                .annotate(disc_date_len=no_disc_data_rank)
-                                .annotate(headline=SearchHeadline(
-                                    Concat(*highlight_cols),
-                                    search_query,
-                                    highlight_all=True
-                                )))
+
+    # subfields_search = (Antibody.objects
+    #                             .annotate(search=search_cols)
+    #                             .filter(search=search_query)
+    #                             .annotate(nb_citations=nb_citation_rank)
+    #                             # .annotate(headline=SearchHeadline(
+    #                             #     Concat(*highlight_cols),
+    #                             #     search_query,
+    #                             #     highlight_all=True
+    #                             # ))
+    #                             )
 
     # index is not used for antigen_search
     # disabled at the moment
@@ -131,16 +143,16 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
     #                           .annotate(search=SearchVector('antigen__symbol', config='english'))
     #                           .filter(search=search)
     #                           .annotate(nb_citations=Length('defining_citation') - Length('defining_citation__remove_coma'))
-    #                           .annotate(disc_date_len=Length('disc_date')))
     # sub_search = (subfields_search.union(antigen_search)
     #                               .distinct()
-    #                               .order_by('nb_citations', 'disc_date_len'))
+    #                               .order_by('nb_citations', 'disc_date'))
 
     # Please bold the match in the search result in each record.
-    results = top_ranked_search.union(subfields_search.order_by('nb_citations', 'disc_date_len'))
-    import ipdb; ipdb.set_trace()
+    # results = top_ranked_search.union(subfields_search.order_by('-nb_citations', '-disc_date'))
+    # import ipdb; ipdb.set_trace()
 
-    return results
+    return subfields_search2
+
 
 def filter_antibodies(page: int = 0, size: int = 50, search: str = '', **kwargs) -> List[Antibody]:
     # todo: implement @afonsobspinto
