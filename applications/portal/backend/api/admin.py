@@ -10,9 +10,21 @@ class AntibodyAdmin(admin.ModelAdmin):
     autocomplete_fields = ['vendor', 'antigen', 'species', 'source_organism']
 
 
+class VendorAdmin(admin.ModelAdmin):
+    search_fields = ('name', )
+
+
+class GeneAdmin(admin.ModelAdmin):
+    search_fields = ('symbol', 'entrez_id', 'uniprot_id')
+
+
+class SpecieAdmin(admin.ModelAdmin):
+    search_fields = ('name', )
+
+
 admin.site.register(Antibody, AntibodyAdmin)
-admin.site.register(Gene)
-admin.site.register(Vendor)
-admin.site.register(Specie)
+admin.site.register(Gene, GeneAdmin)
+admin.site.register(Vendor, VendorAdmin)
+admin.site.register(Specie, SpecieAdmin)
 admin.site.register(VendorDomain)
 admin.site.register(VendorSynonym)
