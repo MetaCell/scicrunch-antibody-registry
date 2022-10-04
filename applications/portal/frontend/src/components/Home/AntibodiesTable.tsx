@@ -528,6 +528,10 @@ const AntibodiesTable = (props) => {
     },
   };
 
+  const NoRowsOverlay = () => activeSearch !== '' && searchedAntibodies.length === 0? <NotFoundMessage/>: <GridNoRowsOverlay/>
+
+  const SortIcon = ({ sortingOrder, ...other }) => <SortingIcon {...other} />
+
   return (
     <Box>
       <Box sx={{ flexGrow: 1, height: "90vh" }}>
@@ -551,13 +555,13 @@ const AntibodiesTable = (props) => {
             components={{
               BaseCheckbox: StyledCheckBox,
               ColumnFilteredIcon: FilteredColumnIcon,
-              ColumnUnsortedIcon: SortingIcon,
+              ColumnUnsortedIcon: SortIcon,
               ColumnSortedAscendingIcon: AscSortedIcon,
               ColumnSortedDescendingIcon: DescSortedIcon,
               Toolbar: CustomToolbar,
               ColumnMenuIcon: FilterIcon,
               ColumnSelectorIcon: SettingsIcon,
-              NoRowsOverlay: activeSearch !== '' && searchedAntibodies.length === 0? NotFoundMessage: GridNoRowsOverlay
+              NoRowsOverlay: NoRowsOverlay
             }}
             componentsProps={compProps}
             localeText={{

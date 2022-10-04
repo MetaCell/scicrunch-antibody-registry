@@ -102,7 +102,7 @@ export default function Searchbar() {
           fullWidth
           clearOnEscape
           renderInput={(params) => { 
-            const  { InputProps,...rest } = params
+            const  { InputProps,InputLabelProps, ...rest } = params
             return(
               <InputBase 
                 inputRef={ref}
