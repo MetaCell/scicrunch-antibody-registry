@@ -1,33 +1,49 @@
 import React, { useContext, useEffect, useRef, useCallback, useMemo } from "react";
-import { styled } from "@mui/material/styles";
+import {  useTheme } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
 import { SearchIcon, SlashIcon } from "../icons";
-import { Box, Stack, Autocomplete } from "@mui/material";
+import { Box, Autocomplete, InputAdornment } from "@mui/material";
 import SearchContext from "../../context/search/SearchContext";
 import { useHistory } from 'react-router-dom';
 import debounce from 'lodash.debounce';
 
-const Search = styled("div")(({ theme }) => ({
-  display: "flex",
-  flexGrow: 1,
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: theme.palette.grey["100"],
-  padding: theme.spacing(0.5),
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: theme.palette.grey["600"],
-  width: "100%",
-  fontSize: "1rem",
-  "& .MuiInputBase-input": {
-    transition: theme.transitions.create("width"),
-    width: "100%",
-  },
-}));
-
-
 
 export default function Searchbar() {
+
+  const theme = useTheme()
+  const classes={
+    input:{
+      display: "flex",
+      borderRadius: theme.shape,
+      backgroundColor: theme.palette.grey["100"],
+      padding: theme.spacing(0.5),
+      "&.Mui-focused":{
+        color:'grey.700',
+        backgroundColor:'common.white',
+        border:'solid 1px',
+        borderColor:'primary.main',
+        boxShadow: '0px 0px 0px 3px #E5E9FC',
+      },
+      "& .MuiInputBase-root.Mui-focused":{ 
+        "& .MuiSvgIcon-fontSizeInherit":{
+          "& path":{
+            stroke:'#344054'
+          }   
+        }
+      }
+    },
+    slashIcon:{
+      bgcolor: "grey.200",
+      maxHeight: "2rem",
+      minWidth: "2rem",
+      borderRadius: "0.375rem",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      p: theme.spacing(1),
+    }
+  }
+
 
   const { getFilteredAntibodies, clearSearch, activeSearch } = useContext(SearchContext)
 
@@ -73,42 +89,43 @@ export default function Searchbar() {
       document.removeEventListener('keydown', handleKeyPress);
     };
   }, [handleKeyPress]);
+
   
   return (<>
-    <Search>
-      <Stack
-        direction="row"
-        spacing={1}
-        display="flex"
-        alignItems="center"
-        width="100%"
-        sx={{ ml: 1 }}
-      >
-        <SearchIcon
-          sx={{ width: "1.125rem", height: "1.125rem", m: "0.125rem" }}
-        />
-        <Autocomplete  sx={{ width:'100%' }} freeSolo options={autocompleteOps.map(option => option)} 
+
+        <Autocomplete  
+          sx={classes.input} 
+          freeSolo 
+          options={autocompleteOps.map(option => option)} 
           onChange={handleChange}
-          onInputChange={debouncedChangeHandler}renderInput={(params) => { const  { InputProps,...rest } = params
-            return(<StyledInputBase inputRef={ref}
-              {...InputProps} {...rest}  placeholder="Search for catalog number"
-            />)}}/>
-        <Box
-          sx={(theme) => ({
-            bgcolor: "grey.200",
-            maxHeight: "2rem",
-            minWidth: "2rem",
-            borderRadius: "0.375rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            p: theme.spacing(1),
-          })}
-        >
-          <SlashIcon sx={{ width: "1rem", height: "1rem" }} />
-        </Box>
-      </Stack>
-    </Search>
+          onInputChange={debouncedChangeHandler}
+          fullWidth
+          clearOnEscape
+          renderInput={(params) => { 
+            const  { InputProps,...rest } = params
+            return(
+              <InputBase 
+                inputRef={ref}
+                {...InputProps}
+                {...rest}  
+                placeholder="Search for catalog number" 
+                startAdornment={<SearchIcon fontSize="inherit"sx={{ mx: "0.65rem" }}/>}
+                endAdornment={
+                  InputProps.endAdornment? InputProps.endAdornment:
+                    <InputAdornment position='end'>
+                      <Box
+                        sx={classes.slashIcon}
+                      >
+                        <SlashIcon  sx={{ width:'1rem', height:'1rem' }}/>
+                      </Box>
+                    </InputAdornment>
+                }
+              />
+            )
+          }
+          }
+        />
+
   </>
   );
 }
