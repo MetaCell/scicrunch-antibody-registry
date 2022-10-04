@@ -225,8 +225,11 @@ class Antibody(models.Model):
         indexes = [
             GinIndex(SearchVector('catalog_num__normalize',
                                   'cat_alt__normalize_relaxed', config='english'), name='antibody_catalog_num_fts_idx'),
+
             Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma', Value('')))).desc(),     name='antibody_nb_citations_idx'),
+
             Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma', Value(''))) - (100 + Length(Coalesce('disc_date', Value(''))))).desc(),     name='antibody_nb_citations_idx2'),
+
             Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
 
             GinIndex(SearchVector('ab_name',

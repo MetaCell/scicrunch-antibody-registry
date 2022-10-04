@@ -15,6 +15,21 @@ def flat(l):
 
 
 def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Antibody]:
+    # According to https://github.com/MetaCell/scicrunch-antibody-registry/issues/52
+    # Match the calalog number (make sure to treat the cat_alt field the same way)
+    # If the catalog number is not matched, then return records if the query matches any visible or invisible field.
+    #
+    # In the case that the cat num is not matched,
+    # primary ranking:
+    # + Additional desirata3: if the name, clone ID, vendor name, match the search string, rank result
+    #   higher than other field matches.
+    # + Additional desirata: use the number of citations as part of the sorting function
+    #   (the higher the citations, the higher the rank)
+    # + Additional desirata2: if the record contains string in the "disc_date" field, then downgrade
+    #   the result (put on bottom of result set)
+
+
+
     # preparing two search terms, one for catalog_num, the other for normal search.
     norm_search = re.sub('[^a-zA-Z0-9]', '', search) + ":*"
     search = ' & '.join(c + ':*' for c in search.split(' ') if c)
@@ -70,26 +85,26 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
 
     highlight_cols = flat((F(f), Value(' ')) for f in search_col_names)[:-1]
 
-    subfields_search = (Antibody.objects
-                                .annotate(
-                                    rank=SearchRank(first_cols + search_cols, norm_or_search),
-                                    search=first_cols + search_cols,
-                                    nb_citations=nb_citation_rank,
-                                    # headline=SearchHeadline(
-                                    #     Concat(*highlight_cols),
-                                    #     search_query,
-                                    #     highlight_all=True
-                                    # )
-                                )
-                                .filter(search=norm_or_search, rank__gte=0.3)
-                                # .order_by('-rank')
-                                )
+    # subfields_search = (Antibody.objects
+    #                             .annotate(
+    #                                 rank=SearchRank(first_cols + search_cols, norm_or_search),
+    #                                 search=first_cols + search_cols,
+    #                                 nb_citations=nb_citation_rank,
+    #                                 # headline=SearchHeadline(
+    #                                 #     Concat(*highlight_cols),
+    #                                 #     search_query,
+    #                                 #     highlight_all=True
+    #                                 # )
+    #                             )
+    #                             .filter(search=norm_or_search)
+    #                             # .order_by('-rank')
+    #                             )
 
-    subfields_search2 = (Antibody.objects
+    subfields_search = (Antibody.objects
                                 .annotate(
                                     search=first_cols + search_cols,
                                     # nb_citations=nb_citation_rank,
-                                    ranking=ranking,
+                                    # ranking=ranking,
                                     # headline=SearchHeadline(
                                     #     Concat(*highlight_cols),
                                     #     search_query,
@@ -97,8 +112,12 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
                                     # )
                                 )
                                 .filter(search=norm_or_search)
-                                .order_by('-ranking')
+                                # .order_by('-ranking')
                                 )
+    if subfields_search.count() > 500:
+        return subfields_search
+
+    return subfields_search.annotate(ranking=ranking).order_by('-ranking')
 
     # vendor_search = (Antibody.objects
     #                         .annotate(search=SearchVector('vendor', config='english'))  # trick to use the index
