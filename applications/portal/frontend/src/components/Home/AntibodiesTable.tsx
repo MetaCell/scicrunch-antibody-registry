@@ -6,6 +6,7 @@ import {
   GridColDef,
   GridRenderCellParams,
   GridCsvExportOptions,
+  GridNoRowsOverlay,
 } from "@mui/x-data-grid";
 import {
   Typography,
@@ -41,6 +42,7 @@ import { useUser, User } from "../../services/UserService";
 import ConnectAccount from "./ConnectAccount";
 import { ALLRESULTS } from "../../constants/constants";
 import SearchContext from "../../context/search/SearchContext";
+import NotFoundMessage from "./NotFoundMessage";
 
 const StyledBadge = (props) => {
   if (props.field === "vendorName") {
@@ -274,6 +276,9 @@ const dataGridStyles = {
     borderColor: "grey.200",
     borderTopLeftRadius: "8px",
     borderTopRightRadius: "8px",
+    "& div":{
+      pointerEvents:'auto'
+    },
   },
   "& .MuiDataGrid-row:hover": {
     backgroundColor: "grey.50",
@@ -319,7 +324,7 @@ const AntibodiesTable = (props) => {
   const { activeSearch, searchedAntibodies } = useContext(SearchContext)
 
   const fetchAntibodies = () => {
-    !activeSearch
+    activeSearch === ''
       ? (
         getAntibodies()
           .then((res) => {
@@ -467,6 +472,9 @@ const AntibodiesTable = (props) => {
     toolbar: {
       activeTab: props.activeTab,
     },
+    noRowsOverlay:{
+      activeSearch: activeSearch
+    },
     panel: {
       sx: {
         "& .MuiTypography-body1": {
@@ -525,7 +533,7 @@ const AntibodiesTable = (props) => {
       <Box sx={{ flexGrow: 1, height: "90vh" }}>
         {currentPath === "/submissions" && !user ? (
           <ConnectAccount />
-        ) : (
+        ) :(
           <DataGrid
             sx={dataGridStyles}
             rows={antibodiesList ?? []}
@@ -549,6 +557,7 @@ const AntibodiesTable = (props) => {
               Toolbar: CustomToolbar,
               ColumnMenuIcon: FilterIcon,
               ColumnSelectorIcon: SettingsIcon,
+              NoRowsOverlay: activeSearch !== '' && searchedAntibodies.length === 0? NotFoundMessage: GridNoRowsOverlay
             }}
             componentsProps={compProps}
             localeText={{

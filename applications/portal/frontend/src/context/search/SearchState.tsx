@@ -6,7 +6,7 @@ import SearchContext from './SearchContext'
 const SearchState = (props) => {
 
   const [searchState, setSearch] = useState({
-    activeSearch:false,
+    activeSearch:'',
     searchedAntibodies:[]
   })
   const getFilteredAntibodies = async(query:string) => {
@@ -15,18 +15,18 @@ const SearchState = (props) => {
     const all = await getAntibodies()
     const filteredAntibodies = all.items.filter((ele) => ele.catalogNum.includes(query))
     setSearch({
-      activeSearch:true,
+      activeSearch:query,
       searchedAntibodies: filteredAntibodies
     })
   }
 
   const clearSearch =() => {
     setSearch({
-      activeSearch:false,
+      activeSearch:'',
       searchedAntibodies:[]
     })
   }
-  
+
   return (
     <SearchContext.Provider value={{
       activeSearch: searchState.activeSearch,
