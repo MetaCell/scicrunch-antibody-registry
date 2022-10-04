@@ -128,9 +128,9 @@ class Preprocessor:
                                         0],
                                     glob.glob(os.path.join(self.dest, '*', f"{RAW_USERS_DATA_BASENAME}.csv"))[0])
 
-        # update_vendor_domains(metadata.vendor_domain_data_path)
-        # update_vendors(metadata.vendor_data_path)
-        # update_antibodies(metadata.antibody_data_paths)
-        # update_users(metadata.users_data_path)
+        update_vendor_domains(metadata.vendor_domain_data_path)
+        update_vendors(metadata.vendor_data_path)
+        update_antibodies(metadata.antibody_data_paths)
+        update_users(metadata.users_data_path)
 
         return metadata

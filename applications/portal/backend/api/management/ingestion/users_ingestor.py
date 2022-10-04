@@ -42,7 +42,7 @@ class UsersIngestor:
                                                     "organization": row['organization'],
                                                     "created": row['created'],
                                                 },
-                                                "requiredActions": ['VERIFY_EMAIL', 'UPDATE_PASSWORD']
+                                                "requiredActions": [KeycloakRequiredActions.UPDATE_PASSWORD]
                                                 }, exist_ok=True)
 
 

@@ -182,8 +182,8 @@ class Ingestor:
                        f"target_subregion, target_modification, epitope, clonality, " \
                        f"clone_id, product_isotype, product_conjugate, defining_citation, product_form, " \
                        f"comments, feedback, curator_comment, disc_date, status, " \
-                       f"to_timestamp(cast(insert_time as BIGINT) / 1000000.0), " \
-                       f"to_timestamp(cast(curate_time as BIGINT) / 1000000.0), SP.id " \
+                       f"to_timestamp(cast(insert_time as BIGINT)), " \
+                       f"to_timestamp(cast(curate_time as BIGINT)), SP.id " \
                        f"FROM {self.TMP_TABLE} as TMP " \
                        f"LEFT JOIN {self.VENDOR_TABLE} as vendor " \
                        f"ON TMP.vendor_id = vendor.id " \
