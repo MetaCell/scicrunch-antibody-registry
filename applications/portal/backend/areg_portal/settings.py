@@ -188,13 +188,15 @@ ANTIBODY_ANTIBODY_START_SEQ = 3000000  # 2858735
 ANTIBODY_VENDOR_DOMAIN_START_SEQ = 1000  # 813
 ANTIBODY_VENDOR_START_SEQ = 20000  # 12233
 
-DEBUG = True
-
-RAW_ANTIBODY_DATA = 'antibody_table'
-RAW_VENDOR_DATA = 'antibody_vendors'
-RAW_VENDOR_DOMAIN_DATA = 'antibody_vendors_domain'
+RAW_ANTIBODY_DATA_BASENAME = 'antibody_table'
+RAW_VENDOR_DATA_BASENAME = 'antibody_vendors'
+RAW_VENDOR_DOMAIN_DATA_BASENAME = 'antibody_vendors_domain'
+RAW_USERS_DATA_BASENAME = 'users_antibody'
 
 CHUNK_SIZE = 10 ** 5
+
+UID_KEY = 'uid'
+GUID_KEY = 'guid'
 
 ANTIBODY_HEADER = {'ab_name': "text", 'ab_target': "text", 'target_species': "text", 'vendor': "text",
                    'vendor_id': "int", 'catalog_num': "text", 'clonality': "text",
@@ -204,6 +206,25 @@ ANTIBODY_HEADER = {'ab_name': "text", 'ab_target': "text", 'target_species': "te
                    'target_modification': "text", 'comments': "text",
                    'feedback': "text", 'defining_citation': "text", 'disc_date': "text", 'curator_comment': "text",
                    'id': "text", 'ab_id': "text", 'ab_id_old': "text",
-                   'of_record': "text", 'ix': "int", 'uid': "text", 'status': "text", 'insert_time': "text",
-                   'curate_time': "text", 'cat_alt': "text", 'commercial_type': "text",
-                   'uniprot_id': "text", 'epitope': "text"}
+                   'of_record': "text", 'ix': "int", UID_KEY: "text", 'status': "text",
+                   'insert_time': "text", 'curate_time': "text", 'cat_alt': "text", 'commercial_type': "text",
+                   'uniprot_id': "text", 'epitope': "text", 'uid_legacy': "text"}
+
+D_TYPES = ANTIBODY_HEADER.copy()
+for dt in D_TYPES:
+    if dt == 'int':
+        D_TYPES[dt] = 'int64'
+    else:
+        D_TYPES[dt] = 'unicode'
+
+MAX_TRIES = 10
+
+ORCID_URL = "https://orcid.org/"
+
+USERS_RELEVANT_HEADER = ['id', GUID_KEY, 'email', 'level', 'firstName', 'middleInitial', 'lastName', 'organization',
+                         'created', 'orcid_id']
+
+UID_INDEX = list(ANTIBODY_HEADER.keys()).index(UID_KEY)
+GUID_INDEX = USERS_RELEVANT_HEADER.index(GUID_KEY)
+
+DEFAULT_UID = '43'

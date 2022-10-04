@@ -2,25 +2,34 @@ import glob
 import json
 import logging
 import os
-import time
 from typing import List
 
 import pandas as pd
-from timeit import default_timer as timer
-from api.management.gd_downloader import GDDownloader
-from api.models import AntibodyClonality, CommercialType, STATUS
-from areg_portal.settings import RAW_ANTIBODY_DATA, RAW_VENDOR_DATA, RAW_VENDOR_DOMAIN_DATA, CHUNK_SIZE, ANTIBODY_HEADER
+
+from api.management.ingestion.gd_downloader import GDDownloader
+from api.models import AntibodyClonality, CommercialType
+from api.services.filesystem_service import replace_file
+from api.utilities.decorators import timed_class_method
+from areg_portal.settings import RAW_ANTIBODY_DATA_BASENAME, RAW_VENDOR_DATA_BASENAME, RAW_VENDOR_DOMAIN_DATA_BASENAME, \
+    CHUNK_SIZE, \
+    ANTIBODY_HEADER, RAW_USERS_DATA_BASENAME, DEFAULT_UID
 
 UNKNOWN_VENDORS = {'1669', '1667', '1625', '1633', '1628', '11599', '12068', '12021', '1632', '5455', '1626', '1670',
                    '11278', '(null)', '1684', '11598', '0', '1682', '11434'}
-MAX_TRIES = 10
+
+UNKNOWN_USERS = {'3483', '1473', '3208', '3519', '21828', '30083', '7650', '7574', '27908', '3169', '3711', '5627',
+                 '37877', '37922', '669', '30887', '3336', '8293', '1176', '7948', '37896', '8521', '37900', '9540',
+                 '2209', '3082', '31464', '32106', '1282', '3671', '9132', '2892', '22915', '5047', '1175', '1883',
+                 '31166', '8612', '8016', '7706'}
 
 
 class AntibodyMetadata:
-    def __init__(self, antibody_data_paths: List[str], vendor_data_path: str, vendor_domain_data_path: str):
+    def __init__(self, antibody_data_paths: List[str], vendor_data_path: str, vendor_domain_data_path: str,
+                 users_data_path: str):
         self.antibody_data_paths = antibody_data_paths
         self.vendor_data_path = vendor_data_path
         self.vendor_domain_data_path = vendor_domain_data_path
+        self.users_data_path = users_data_path
 
 
 def clean_df(df):
@@ -34,6 +43,17 @@ def update_vendors(csv_path: str):
     df_vendors.to_csv(csv_path, index=False, mode='w+')
 
 
+def update_users(csv_path: str):
+    logging.info("Updating users")
+    df_users = pd.read_csv(csv_path)
+    # df_users = df_users.drop(['password', 'salt'], axis=1)
+    df_users = df_users.drop_duplicates(['email'], keep='last').loc[~df_users['email'].isnull()]
+    df_users = df_users.loc[df_users['banned'] != 1]
+    df_users = df_users.loc[~df_users['guid'].isnull()]
+    clean_df(df_users)
+    df_users.to_csv(csv_path, index=False, mode='w+')
+
+
 def update_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_mapping.json'):
     logging.info("Updating vendor domains")
     with open(vendors_map_path, 'r') as f:
@@ -43,16 +63,6 @@ def update_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_mapp
         df_vendor_domain['vendor_id'] = df_vendor_domain['vendor_id'].map(
             lambda x: vendors_map[str(x)] if str(x) in vendors_map else x)
         df_vendor_domain.to_csv(csv_path, index=False, mode='w+')
-
-
-def replace_file(previous_path, new_path):
-    # replace original file with temp file
-    os.remove(previous_path)
-    tries = 0
-    while not os.path.exists(new_path) and tries < MAX_TRIES:
-        time.sleep(1)
-        tries += 1
-    os.rename(new_path, previous_path)
 
 
 def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibodies_mapping.json'):
@@ -73,6 +83,9 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
 
                 # point unknown vendor_id to None
                 chunk['vendor_id'] = chunk['vendor_id'].where(~chunk['vendor_id'].isin(UNKNOWN_VENDORS), None)
+
+                # point unknown user_id to None
+                chunk['uid'] = chunk['uid'].where(~chunk['uid'].isin(UNKNOWN_USERS), DEFAULT_UID)
 
                 # point unknown commercial type to None
                 chunk['commercial_type'] = chunk['commercial_type'].where(
@@ -98,26 +111,26 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
             replace_file(antibody_data_path, tmp_antibody_data_path)
 
 
-def preprocess(file_id: str, dest: str = './antibody_data') -> AntibodyMetadata:
-    start = timer()
-    logging.info("Preprocessing started")
+class Preprocessor:
+    def __init__(self, file_id: str, dest: str = './antibody_data'):
+        self.file_id = file_id
+        self.dest = dest
 
-    gd_downloader = GDDownloader(file_id, dest)
-    gd_downloader.download()
+    @timed_class_method('Preprocessing finished')
+    def preprocess(self) -> AntibodyMetadata:
+        logging.info("Preprocessing started")
 
-    metadata = AntibodyMetadata(glob.glob(os.path.join(dest, '*', f"{RAW_ANTIBODY_DATA}*.csv")),
-                                glob.glob(os.path.join(dest, '*', f"{RAW_VENDOR_DATA}.csv"))[0],
-                                glob.glob(os.path.join(dest, '*', f"{RAW_VENDOR_DOMAIN_DATA}.csv"))[0])
+        GDDownloader(self.file_id, self.dest).download()
 
-    update_vendor_domains(metadata.vendor_domain_data_path)
-    update_vendors(metadata.vendor_data_path)
-    update_antibodies(metadata.antibody_data_paths)
+        metadata = AntibodyMetadata(glob.glob(os.path.join(self.dest, '*', f"{RAW_ANTIBODY_DATA_BASENAME}*.csv")),
+                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DATA_BASENAME}.csv"))[0],
+                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DOMAIN_DATA_BASENAME}.csv"))[
+                                        0],
+                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_USERS_DATA_BASENAME}.csv"))[0])
 
-    end = timer()
-    logging.info(f"Preprocessing finished in {end - start} seconds")
+        update_vendor_domains(metadata.vendor_domain_data_path)
+        update_vendors(metadata.vendor_data_path)
+        update_antibodies(metadata.antibody_data_paths)
+        update_users(metadata.users_data_path)
 
-    return metadata
-
-
-if __name__ == '__main__':
-    preprocess('1gW5fAGRnmm-6zbVRLYJa_zrpEjD4w500')
+        return metadata
