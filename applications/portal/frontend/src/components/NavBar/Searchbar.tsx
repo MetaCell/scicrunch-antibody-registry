@@ -35,19 +35,20 @@ export default function Searchbar() {
   const isInitialRender = useRef(true);
   const ref= useRef(null);
 
-  const autocompleteOps=['0']
+  const autocompleteOps=[]
 
   const handleChange=(e:React.SyntheticEvent, value:string| null) => {
-    value? getFilteredAntibodies(e.target):null
+    !value? clearSearch():getFilteredAntibodies(value)
   }
 
   const handleInputChange =(e) => {
+    if (e.target.matches('li')) {return null}
     !e.target.value? clearSearch():
       getFilteredAntibodies(e.target.value)
   }
 
   const debouncedChangeHandler = useMemo(
-    () => debounce(handleInputChange, 500)
+    () => debounce(handleInputChange, 1000)
     , []);
 
   useEffect(() => {
@@ -87,7 +88,8 @@ export default function Searchbar() {
           sx={{ width: "1.125rem", height: "1.125rem", m: "0.125rem" }}
         />
         <Autocomplete  sx={{ width:'100%' }} freeSolo options={autocompleteOps.map(option => option)} 
-          onChange={handleChange} onInputChange={debouncedChangeHandler}renderInput={(params) => { const  { InputProps,...rest } = params
+          onChange={handleChange}
+          onInputChange={debouncedChangeHandler}renderInput={(params) => { const  { InputProps,...rest } = params
             return(<StyledInputBase inputRef={ref}
               {...InputProps} {...rest}  placeholder="Search for catalog number"
             />)}}/>

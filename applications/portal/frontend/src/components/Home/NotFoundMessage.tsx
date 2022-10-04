@@ -34,7 +34,7 @@ const NotFoundMessage = (props) => {
         </Box>
         <Typography variant="h1">No record found</Typography>
         <Typography variant="subtitle1" align="center" sx={classes.message}>
-        Your search "{props.activeSearch}"" did not match any of our records.
+        Your search "{props.activeSearch}" did not match any of our records.
         </Typography>
         <Box>
           <Button
