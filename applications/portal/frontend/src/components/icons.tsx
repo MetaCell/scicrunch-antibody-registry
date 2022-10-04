@@ -16,7 +16,7 @@ export const HelpIcon = (props: SvgIconProps) => (
 );
 
 export const SearchIcon = (props: SvgIconProps) => {
-  console.log(props)
+
   return(
     <SvgIcon viewBox="0 0 18 18" {...props}>
       <path

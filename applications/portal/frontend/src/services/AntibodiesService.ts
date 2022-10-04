@@ -26,7 +26,6 @@ export async function getAntibody(id: number): Promise<Antibody[]> {
 
 export async function addAntibody(antibodyObj): Promise<any> {
   let ab = mapAntibody(antibodyObj);
-  console.log("mappedObj", ab);
   return (
     await new AntibodyApi(
       new Configuration({ apiKey: getToken(), accessToken: getToken() })

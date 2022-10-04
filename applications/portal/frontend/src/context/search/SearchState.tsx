@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-//import { getSearchAtibodies } from '../../services/AntibodiesService'
-import { getAntibodies } from '../../services/AntibodiesService'
+import { getSearchAtibodies } from '../../services/AntibodiesService'
 import SearchContext from './SearchContext'
 
 const SearchState = (props) => {
@@ -10,13 +9,11 @@ const SearchState = (props) => {
     searchedAntibodies:[]
   })
   const getFilteredAntibodies = async(query:string) => {
-
-    //const filteredAntibodies = await getSearchAtibodies(query)
-    const all = await getAntibodies()
-    const filteredAntibodies = all.items.filter((ele) => ele.catalogNum.includes(query))
+    const _=undefined
+    const filteredAntibodies = await getSearchAtibodies(_,_,query)
     setSearch({
       activeSearch:query,
-      searchedAntibodies: filteredAntibodies
+      searchedAntibodies: filteredAntibodies.items
     })
   }
 
