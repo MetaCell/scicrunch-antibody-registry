@@ -8,25 +8,28 @@ import {
   Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import { Antibody } from "../../rest";
 
-const historySteps = [
-  {
-    label: "07/23/2022 (Current version)",
-    description: "Latest update",
-  },
-  {
-    label: "04/23/2022",
-    description: "Antibody approved",
-  },
-  {
-    label: "04/21/2022",
-    description: "Antibody Submitted",
-  },
-];
 
-const HistoryStepper = (props) => {
+
+const HistoryStepper = (props: {classes: any, antibody: Antibody}) => {
   let { classes, antibody } = props;
   const theme = useTheme();
+
+  const historySteps = [
+    {
+      label: new Date(antibody.lastEditTime ?? antibody.curateTime).toLocaleString() + " (current version)",
+      description: "Latest update",
+    },
+    antibody.curateTime && {
+      label: new Date(antibody.curateTime).toLocaleString(),
+      description: "Antibody approved",
+    },
+    {
+      label: new Date(antibody.insertTime).toLocaleString(),
+      description: "Antibody Submitted",
+    },
+  ];
 
   classes = {
     ...classes,
@@ -66,7 +69,7 @@ const HistoryStepper = (props) => {
       </Box>
 
       <Stepper orientation="vertical" sx={classes.container}>
-        {historySteps.map((step, index) => (
+        {historySteps.filter(step => step).map((step, index) => (
           <Step key={step.label} sx={classes.step}>
             <StepLabel
               optional={

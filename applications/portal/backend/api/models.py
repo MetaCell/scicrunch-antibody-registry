@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
 
 from areg_portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
@@ -168,7 +169,16 @@ class Antibody(models.Model):
         db_index=True
     )
     insert_time = models.DateTimeField(auto_now_add=True, db_index=True)
-    curate_time = models.DateTimeField(auto_now=True, db_index=True)
+    lastedit_time = models.DateTimeField(auto_now=True, db_index=True)
+    curate_time = models.DateTimeField(db_index=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if self.status == STATUS.CURATED:
+            old_version = Antibody.objects.get(ix=self.ix)
+            if old_version.status != STATUS.CURATED:
+                self.curate_time = timezone.now() 
+        
+        super(Antibody, self).save(*args, **kwargs)
 
     def __str__(self):
         return "AB_" + str(self.ab_id)

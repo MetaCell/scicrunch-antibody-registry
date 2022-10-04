@@ -87,7 +87,7 @@ class AntibodyMapper(IDAOMapper):
                 continue
             if isinstance(v, enum.Enum):
                 setattr(ab, k, v.value)
-            else:
+            elif not isinstance(v, (list, tuple)):
                 setattr(ab, k, v)
         ab.ab_id = 0
         ab.save()  # Need to save first to set the manytomany

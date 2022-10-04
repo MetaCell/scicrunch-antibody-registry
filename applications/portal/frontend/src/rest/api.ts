@@ -411,6 +411,12 @@ export interface Antibody {
      */
     'vendorId'?: number;
     /**
+     * 
+     * @type {string}
+     * @memberof Antibody
+     */
+    'lastEditTime'?: string;
+    /**
      * Can include the following options: Unknown, Cocktail, Control, Isotype Control, Monoclonal, Monoclonal Secondary, Polyclonal, Polyclonal Secondary, Oligoclonal, Recombinant, Recombinant Monoclonal, Recombinant Monoclonal Secondary, Recombinant Polyclonal, Recombinant Polyclonal Secondary
      * @type {string}
      * @memberof Antibody
@@ -638,6 +644,12 @@ export interface AntibodyAllOf {
      * @memberof AntibodyAllOf
      */
     'vendorId'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof AntibodyAllOf
+     */
+    'lastEditTime'?: string;
 }
 
 export const AntibodyAllOfStatusEnum = {

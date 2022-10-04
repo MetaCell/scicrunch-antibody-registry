@@ -469,6 +469,10 @@ components:
                         vendorId:
                             description: ''
                             type: integer
+                        lastEditTime:
+                            format: date-time
+                            description: ''
+                            type: string
                 -
                     $ref: '#/components/schemas/AbstractAntibody'
         AbstractAntibody:

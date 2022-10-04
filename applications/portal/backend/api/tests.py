@@ -24,7 +24,7 @@ example_ab = {
     ],
     "uniprotId": "string",
     "vendorName": "string",
-    "applications": "ELISA, IHC, WB",
+    "applications": "ELISA, IHC, WB".split(", "),
     "kitContents": "Sheep polyclonal anti-FSH antibody labeled with acridinium ester. Mouse monoclonal anti-FSH antibody covalently coupled to paramagnetic particles."
 }
 
@@ -41,9 +41,10 @@ class AnimalTestCase(TestCase):
         self.assertEquals(ab.vendorName, "string")
         self.assertEquals(ab.url, example_ab["url"])
         self.assertEquals(ab.status, Status.QUEUE)
-        self.assertIsNotNone(ab.curateTime)
+
         self.assertIsNotNone(ab.insertTime)
 
+        assert ab.curateTime is None
         assert ab.sourceOrganism == "mouse"
         assert len(ab.targetSpecies) == 2
 
@@ -67,6 +68,7 @@ class AnimalTestCase(TestCase):
         assert len(user_abs.items) == 1
         abget = user_abs.items[0]
         assert len(abget.targetSpecies) == 2
+        
 
         ab3 = get_antibody(ab.abId, status=STATUS.QUEUE)[0]
         assert ab.url == ab3.url
@@ -74,6 +76,7 @@ class AnimalTestCase(TestCase):
         a: Antibody = Antibody.objects.get(ab_id=ab.abId)
         a.status = STATUS.CURATED
         a.save()
+        assert a.curate_time 
 
         abs = get_antibodies()
         assert len(abs.items) == 1
