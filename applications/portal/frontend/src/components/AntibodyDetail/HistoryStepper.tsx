@@ -18,15 +18,15 @@ const HistoryStepper = (props: {classes: any, antibody: Antibody}) => {
 
   const historySteps = [
     {
-      label: new Date(antibody.lastEditTime ?? antibody.curateTime).toLocaleString() + " (current version)",
+      label: new Date(antibody.lastEditTime ?? antibody.curateTime).toLocaleDateString() + " (current version)",
       description: "Latest update",
     },
     antibody.curateTime && {
-      label: new Date(antibody.curateTime).toLocaleString(),
+      label: new Date(antibody.curateTime).toLocaleDateString(),
       description: "Antibody approved",
     },
     {
-      label: new Date(antibody.insertTime).toLocaleString(),
+      label: new Date(antibody.insertTime).toLocaleDateString(),
       description: "Antibody Submitted",
     },
   ];

@@ -54,7 +54,7 @@ class AnimalTestCase(TestCase):
             self.fail("Should detect duplicate antibody")
         except DuplicatedAntibody:
             pass
-        new_ant.catalogNum = "new cat num"
+        new_ant.catalogNum = "N176A/36"
         ab2 = create_antibody(new_ant, "bbb")
         self.assertNotEqual(ab.abId, ab2.abId)
         self.assertEquals(ab.vendorName, ab2.vendorName)
@@ -83,3 +83,12 @@ class AnimalTestCase(TestCase):
 
         assert count() == 1
         print(last_update())
+
+        search = search_antibodies_by_catalog("N176A/35").items
+        assert len(search) == 1
+        a: Antibody = Antibody.objects.get(ab_id=ab2.abId)
+        a.status = STATUS.CURATED
+        a.save()
+        assert len(search_antibodies_by_catalog("N176A").items) == 2
+        assert len(search_antibodies_by_catalog("N176A 35").items) == 1
+        assert len(search_antibodies_by_catalog("N176A|35").items) == 1
