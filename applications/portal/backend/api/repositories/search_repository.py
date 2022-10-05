@@ -2,6 +2,7 @@ from typing import List
 from functools import reduce
 import re
 
+from django.conf import settings
 from django.db.models import F, Value
 from django.db.models.functions import Length, Concat, Coalesce
 from django.db.models.expressions import Value
@@ -111,11 +112,31 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
                                     #     highlight_all=True
                                     # )
                                 )
-                                .filter(search=norm_or_search)
+                                .filter(search=norm_or_search)[:settings.LIMIT_NUM_RESULTS]
+                                .select_related('vendor')
                                 # .order_by('-ranking')
                                 )
-    if subfields_search.count() > 500:
+
+    if subfields_search.count() == settings.LIMIT_NUM_RESULTS:
+        # too many results --> return the first settings.LIMIT_NUM_RESULTS without sorting/ranking
         return subfields_search
+
+    # lets apply the ranking
+    subfields_search = (Antibody.objects
+                                .annotate(
+                                    search=first_cols + search_cols,
+                                    nb_citations=nb_citation_rank,
+                                    ranking=ranking,
+                                    headline=SearchHeadline(
+                                        Concat(*highlight_cols),
+                                        search_query,
+                                        highlight_all=True
+                                    )
+                                )
+                                .filter(search=norm_or_search)
+                                .order_by('-ranking')
+                                .select_related('vendor')
+                                )
 
     return subfields_search.annotate(ranking=ranking).order_by('-ranking')
 

@@ -208,3 +208,6 @@ ANTIBODY_HEADER = {'ab_name': "text", 'ab_target': "text", 'target_species': "te
                    'of_record': "text", 'ix': "int", 'uid': "text", 'status': "text", 'insert_time': "text",
                    'curate_time': "text", 'cat_alt': "text", 'commercial_type': "text",
                    'uniprot_id': "text", 'epitope': "text"}
+
+# Search limit for Antibodies for returning without ranking
+LIMIT_NUM_RESULTS = 250
