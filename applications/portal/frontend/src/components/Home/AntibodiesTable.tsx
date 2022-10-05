@@ -73,7 +73,7 @@ const StyledCheckBox = (props) => {
   );
 };
 
-const getRowId = (ab: Antibody) => ab.abId;
+const getRowId = (ab: Antibody) => `${ab.abId}${Math.random()}`
 
 const CustomToolbar = ({ activeTab }) => {
   const [activeSelection, setActiveSelection] = useState(true);
