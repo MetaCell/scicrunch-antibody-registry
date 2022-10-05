@@ -1,6 +1,9 @@
 from django.db import models
-from django.db.models import Q
 from django.utils import timezone
+from django.db.models import Transform, CharField, Index, Q, Value
+from django.db.models.functions import Length, Coalesce, Cast
+from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.indexes import GinIndex
 
 from areg_portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
@@ -10,6 +13,33 @@ from areg_portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN,
     ANTIBODY_ID_MAX_LEN, ANTIBODY_CAT_ALT_MAX_LEN, VENDOR_COMMERCIAL_TYPE_MAX_LEN, ANTIBODY_TARGET_EPITOPE_MAX_LEN, \
     VENDOR_NIF_MAX_LEN, ANTIBODY_TARGET_SPECIES_MAX_LEN, ANTIBODY_DISC_DATE_MAX_LEN, \
     URL_MAX_LEN
+
+
+@CharField.register_lookup
+class Normalize(Transform):
+    lookup_name = 'normalize'
+
+    def as_sql(self, compiler, connection):
+        lhs, params = compiler.compile(self.lhs)
+        return (f"regexp_replace({lhs}, '[^a-zA-Z0-9]', '', 'g')", params)
+
+
+@CharField.register_lookup
+class NormalizeRelaxed(Transform):
+    lookup_name = 'normalize_relaxed'
+
+    def as_sql(self, compiler, connection):
+        lhs, params = compiler.compile(self.lhs)
+        return (f"regexp_replace({lhs}, '[^a-zA-Z0-9, ]', '', 'g')", params)
+
+
+@CharField.register_lookup
+class RemoveComa(Transform):
+    lookup_name = 'remove_coma'
+
+    def as_sql(self, compiler, connection):
+        lhs, params = compiler.compile(self.lhs)
+        return (f"replace({lhs}, ',', '')", params)
 
 
 class CommercialType(models.TextChoices):
@@ -43,10 +73,13 @@ class STATUS(models.TextChoices):
 
 
 class Vendor(models.Model):
-    name = models.CharField(max_length=VENDOR_MAX_LEN,
-                            db_column='vendor', db_index=True)
-    nif_id = models.CharField(
-        max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id', null=True)
+    name = models.CharField(max_length=VENDOR_MAX_LEN, db_column='vendor', db_index=True)
+    nif_id = models.CharField(max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id', null=True)
+
+    class Meta:
+        indexes = [
+            GinIndex(SearchVector('name', config='english'), name='vendor_name_fts_idx'),
+        ]
 
     def __str__(self):
         return self.name
@@ -97,8 +130,12 @@ class Gene(models.Model):
                               db_column='ab_target', null=True, db_index=True)
     entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
                                  null=True, db_index=True)
-    uniprot_id = models.CharField(
-        unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True)
+    uniprot_id = models.CharField(unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True)
+
+    class Meta:
+        indexes = [
+            GinIndex(SearchVector('symbol', config='english'), name='gene_symbol_fts_idx'),
+        ]
 
     def __str__(self):
         return f"{self.symbol}" or "?self.id"
@@ -169,7 +206,7 @@ class Antibody(models.Model):
         db_index=True
     )
     insert_time = models.DateTimeField(auto_now_add=True, db_index=True)
-    lastedit_time = models.DateTimeField(auto_now=True, db_index=True)
+    lastedit_time = models.DateTimeField(auto_now=True, db_index=True, null=True)
     curate_time = models.DateTimeField(db_index=True, null=True)
 
     def save(self, *args, **kwargs):
@@ -192,6 +229,70 @@ class Antibody(models.Model):
                                                                  Q(ab_name__exact='') &
                                                                  Q(vendor__isnull=False)),
                                    name='curated_constraints'),
+        ]
+        indexes = [
+            GinIndex(SearchVector('catalog_num__normalize',
+                                  'cat_alt__normalize_relaxed', config='english'), name='antibody_catalog_num_fts_idx'),
+
+            Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma', Value('')))).desc(),     name='antibody_nb_citations_idx'),
+
+            Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma', Value(''))) - (100 + Length(Coalesce('disc_date', Value(''))))).desc(),     name='antibody_nb_citations_idx2'),
+
+            Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
+
+            GinIndex(SearchVector('ab_name',
+                              'clone_id__normalize_relaxed', config='english', weight='A'), name='antibody_name_fts_idx'),
+            GinIndex(
+                SearchVector('ab_name',
+                              'clone_id__normalize_relaxed', config='english', weight='A') +
+                SearchVector(
+                'accession',
+                'commercial_type',
+                'uid',
+                'uid_legacy',
+                'url',
+                'subregion',
+                'modifications',
+                'epitope',
+                'clonality',
+                'product_isotype',
+                'product_conjugate',
+                'defining_citation',
+                'product_form',
+                'comments',
+                'kit_contents',
+                'feedback',
+                'curator_comment',
+                'disc_date',
+                'status',
+                config='english',
+                weight='C',
+            ), name='antibody_all_fts_idx'),
+
+            GinIndex(
+                SearchVector(
+                'accession',
+                'commercial_type',
+                'uid',
+                'uid_legacy',
+                'url',
+                'subregion',
+                'modifications',
+                'epitope',
+                'clonality',
+                'product_isotype',
+                'product_conjugate',
+                'defining_citation',
+                'product_form',
+                'comments',
+                'kit_contents',
+                'feedback',
+                'curator_comment',
+                'disc_date',
+                'status',
+                config='english',
+                weight='C',
+            ), name='antibody_all_fts_idx2'),
         ]
 
 
