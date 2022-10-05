@@ -76,7 +76,7 @@ export async function getUserAntibodies(
 
 export async function getSearchAtibodies(
   page = 1,
-  size = 10,
+  size = 100,
   query:string
 ):Promise<PaginatedAntibodies>{
   return (
