@@ -223,17 +223,15 @@ class Antibody(models.Model):
                                    name='curated_constraints'),
         ]
         indexes = [
+            # Indexes for the FTS search
+            #  Index for the catalog number + cat_alt
             GinIndex(SearchVector('catalog_num__normalize',
                                   'cat_alt__normalize_relaxed', config='english'), name='antibody_catalog_num_fts_idx'),
 
-            Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma', Value('')))).desc(),     name='antibody_nb_citations_idx'),
-
+            #  Index for the ranking by citation numbers and discdate
             Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma', Value(''))) - (100 + Length(Coalesce('disc_date', Value(''))))).desc(),     name='antibody_nb_citations_idx2'),
 
-            Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
-
-            GinIndex(SearchVector('ab_name',
-                              'clone_id__normalize_relaxed', config='english', weight='A'), name='antibody_name_fts_idx'),
+            #  Index for the FTS on all other fields
             GinIndex(
                 SearchVector('ab_name',
                               'clone_id__normalize_relaxed', config='english', weight='A') +
@@ -260,31 +258,6 @@ class Antibody(models.Model):
                 config='english',
                 weight='C',
             ), name='antibody_all_fts_idx'),
-
-            GinIndex(
-                SearchVector(
-                'accession',
-                'commercial_type',
-                'uid',
-                'uid_legacy',
-                'url',
-                'subregion',
-                'modifications',
-                'epitope',
-                'clonality',
-                'product_isotype',
-                'product_conjugate',
-                'defining_citation',
-                'product_form',
-                'comments',
-                'kit_contents',
-                'feedback',
-                'curator_comment',
-                'disc_date',
-                'status',
-                config='english',
-                weight='C',
-            ), name='antibody_all_fts_idx2'),
         ]
 
 

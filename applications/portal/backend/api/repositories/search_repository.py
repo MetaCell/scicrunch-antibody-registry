@@ -187,7 +187,7 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
 
     # Please bold the match in the search result in each record.
     # results = top_ranked_search.union(subfields_search.order_by('-nb_citations', '-disc_date'))
-    return subfields_search2
+    # return subfields_search2
 
 
 def filter_antibodies(page: int = 0, size: int = 50, search: str = '', **kwargs) -> List[Antibody]:
