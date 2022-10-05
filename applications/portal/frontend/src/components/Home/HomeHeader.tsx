@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Pluralize from "pluralize";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import {
@@ -14,6 +14,7 @@ import { useTheme } from "@mui/material/styles";
 import { AddAntibodyIcon, DownloadIcon } from "../icons";
 import TableToolbar from "./TableToolbar";
 import { getDataInfo } from "../../services/InfoService";
+import searchContext from "../../context/search/SearchContext";
 
 interface Props {
   /**
@@ -36,17 +37,19 @@ const HomeHeader = (props) => {
   const [records, setRecords] = useState<number>();
   const [lastupdate,setLastupdate] = useState<string>();
   const { activeSelection, handleExport, showFilterMenu, activeTab } = props;
-
+  const { activeSearch, totalElements } = useContext(searchContext)
   const fetchRecords = () => {
     getDataInfo()
       .then((res) => {
-        setRecords(res.total);
         setLastupdate(res.lastupdate);
+        activeSearch === ''
+          ? setRecords(res.total)
+          : setRecords(totalElements)
       }).catch((err) => {
         console.log("Error: ", err)
       })
   }
-  useEffect(fetchRecords,[]);
+  useEffect(fetchRecords,[activeSearch]);
 
   const date = new Date(lastupdate);
   const day = date.toLocaleString('en-US', { day: '2-digit' });

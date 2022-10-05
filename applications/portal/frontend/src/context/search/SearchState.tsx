@@ -6,6 +6,7 @@ const SearchState = (props) => {
 
   const [searchState, setSearch] = useState({
     activeSearch:'',
+    totalElements:0,
     searchedAntibodies:[]
   })
   const getFilteredAntibodies = async(query:string) => {
@@ -13,6 +14,7 @@ const SearchState = (props) => {
     const filteredAntibodies = await getSearchAtibodies(_,_,query)
     setSearch({
       activeSearch:query,
+      totalElements: filteredAntibodies.totalElements,
       searchedAntibodies: filteredAntibodies.items
     })
   }
@@ -20,6 +22,7 @@ const SearchState = (props) => {
   const clearSearch =() => {
     setSearch({
       activeSearch:'',
+      totalElements:0,
       searchedAntibodies:[]
     })
   }
@@ -28,6 +31,7 @@ const SearchState = (props) => {
     <SearchContext.Provider value={{
       activeSearch: searchState.activeSearch,
       searchedAntibodies: searchState.searchedAntibodies,
+      totalElements: searchState.totalElements,
       getFilteredAntibodies,
       clearSearch,
     }}>

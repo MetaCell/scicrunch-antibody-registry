@@ -528,7 +528,7 @@ const AntibodiesTable = (props) => {
     },
   };
 
-  const NoRowsOverlay = () => activeSearch !== '' && searchedAntibodies.length === 0? <NotFoundMessage/>: <GridNoRowsOverlay/>
+  const NoRowsOverlay = () => activeSearch !== '' && searchedAntibodies.length === 0? <NotFoundMessage activeSearch={activeSearch}/>: <GridNoRowsOverlay/>
 
   const SortIcon = ({ sortingOrder, ...other }) => <SortingIcon {...other} />
 
