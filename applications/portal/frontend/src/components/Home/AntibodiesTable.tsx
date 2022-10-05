@@ -43,6 +43,7 @@ import ConnectAccount from "./ConnectAccount";
 import { ALLRESULTS } from "../../constants/constants";
 import SearchContext from "../../context/search/SearchContext";
 import NotFoundMessage from "./NotFoundMessage";
+import Error500 from "../UI/Error500";
 
 const StyledBadge = (props) => {
   if (props.field === "vendorName") {
@@ -321,7 +322,7 @@ const AntibodiesTable = (props) => {
   const user: User = useUser();
   const currentPath = window.location.pathname;
   const [antibodiesList, setAntibodiesList] = useState<Antibody[]>();
-  const { activeSearch, searchedAntibodies } = useContext(SearchContext)
+  const { activeSearch, searchedAntibodies, loader } = useContext(SearchContext)
 
   const fetchAntibodies = () => {
     activeSearch === ''
@@ -528,7 +529,7 @@ const AntibodiesTable = (props) => {
     },
   };
 
-  const NoRowsOverlay = () => activeSearch !== '' && searchedAntibodies.length === 0? <NotFoundMessage activeSearch={activeSearch}/>: <GridNoRowsOverlay/>
+  const NoRowsOverlay = () => typeof activeSearch==='string' && activeSearch !== '' && searchedAntibodies.length === 0? <NotFoundMessage activeSearch={activeSearch}/>:typeof activeSearch !== 'string'? <Error500 />: <GridNoRowsOverlay/>
 
   const SortIcon = ({ sortingOrder, ...other }) => <SortingIcon {...other} />
 
@@ -548,7 +549,7 @@ const AntibodiesTable = (props) => {
             checkboxSelection
             disableSelectionOnClick
             getRowHeight={() => "auto"}
-            loading={!antibodiesList}
+            loading={!antibodiesList|| loader}
             onRowClick={(params) =>
               (window.location.href = `/AB_${params.row.abId}`)
             }
