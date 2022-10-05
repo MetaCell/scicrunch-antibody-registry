@@ -9,7 +9,7 @@
     "build": "webpack --config webpack.config.js",
     "build-dev": "webpack --config webpack.config.js --env mode=development",
     "prestart": "eslint . --color --fix",
-    "start": "webpack serve --progress  --env DOMAIN=http://localhost:5000 --config webpack.config.dev.js",
+    "start": "webpack serve --progress  --env DOMAIN=http://localhost:8000 --config webpack.config.dev.js",
     "start:dev": "webpack serve --progress  --env DOMAIN=https://areg.dev.metacell.us --config webpack.config.dev.js",
     "start:local": "webpack serve --progress --env DOMAIN=http://areg.local --config webpack.config.dev.js"
   },

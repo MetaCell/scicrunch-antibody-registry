@@ -6,6 +6,8 @@ import pandas as pd
 from django.core.management.color import no_style
 from django.db import connection
 
+from cloudharness import log
+
 from api.management.ingestion.preprocessor import AntibodyMetadata
 from api.management.ingestion.users_ingestor import UsersIngestor
 from api.models import Antibody, Gene, Vendor, VendorDomain, Specie, \
@@ -61,7 +63,10 @@ class Ingestor:
     def __init__(self, metadata: AntibodyMetadata, cursor):
         self.metadata = metadata
         self.cursor = cursor
-        self.users_ingestor = UsersIngestor(metadata.users_data_path)
+        try:
+            self.users_ingestor = UsersIngestor(metadata.users_data_path)
+        except:
+            log.error("Cannot ingest users", exc_info=True)
 
     def ingest(self):
         species_map = {}
@@ -85,7 +90,10 @@ class Ingestor:
                             self.VENDOR_DOMAIN_TABLE, self.VENDOR_TABLE]
 
         for ttd in tables_to_delete:
-            self.cursor.execute(TRUNCATE_STM.format(table_name=ttd))
+            try:
+                self.cursor.execute(TRUNCATE_STM.format(table_name=ttd))
+            except:
+                log.error("Cannot execute statement %s", TRUNCATE_STM.format(table_name=ttd), exc_info=True)
 
     @timed_class_method('Vendors added ')
     def _insert_vendors(self):
@@ -116,7 +124,11 @@ class Ingestor:
 
     @timed_class_method('Temporary table filled')
     def _fill_tmp_table(self):
-        users_map = self.users_ingestor.get_users_map()
+        try:
+            users_map = self.users_ingestor.get_users_map() if self.users_ingestor else {}
+        except:
+            log.error("Cannot ingest users", exc_info=True)
+            users_map = {}
         self.cursor.execute(get_create_table_stm(self.TMP_TABLE, ANTIBODY_HEADER))
 
         # Insert raw data into tmp table
