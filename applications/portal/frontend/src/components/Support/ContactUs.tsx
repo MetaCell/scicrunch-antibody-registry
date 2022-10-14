@@ -1,12 +1,35 @@
 import React from "react";
 
 import SupportTabs from "../UI/SupportTabs";
+import { Link, Container, Typography } from "@mui/material";
 
 const ContactUs = () => {
-  let text = 'Hello\nAigul\nfiuheuh'
+  const classes = {
+
+    message: {
+      color: "grey.500",
+      maxWidth: "480px",
+      fontSize:'1rem',
+      fontWeight:600
+    },
+    container:{ display:'flex', justifyContent:'center' }
+  }
+  
   return (
     <SupportTabs>
-      <div style={{ "whiteSpace": "pre-wrap" }}>{text}</div>
+      <Container maxWidth='xl' sx={classes.container}>
+     
+        <Typography variant="subtitle1" align="center" sx={classes.message}>
+Have any questions? Please feel free to{" "}
+          <Link
+            target="_blank"
+            href="https://www.scicrunch.com/contact"
+          >
+      contact us
+          </Link>
+        </Typography>
+   
+      </Container>
     </SupportTabs>
   )
 }

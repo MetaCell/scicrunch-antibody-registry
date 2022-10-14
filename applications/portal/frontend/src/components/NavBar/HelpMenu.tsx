@@ -70,7 +70,7 @@ const HelpMenu = () => {
             </Typography>
           </MenuItem>
 
-          <MenuItem>
+          <MenuItem component="a" href="mailto:abr-help@scicrunch.org" >
             <ListItemIcon>
               <EmailIcon />
             </ListItemIcon>
@@ -79,7 +79,7 @@ const HelpMenu = () => {
             </Typography>
           </MenuItem>
           <Divider />
-          <MenuItem>
+          <MenuItem component={Link} to="/terms-and-conditions">
             <ListItemIcon>
               <InfoIcon />
             </ListItemIcon>
