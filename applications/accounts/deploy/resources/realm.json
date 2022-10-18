@@ -37,13 +37,13 @@
         "adminTheme": "keycloak",
         "emailTheme": "keycloak",
         "registrationAllowed": true,
-        "registrationEmailAsUsername": false,
+        "registrationEmailAsUsername": true,
         "rememberMe": true,
         "verifyEmail": false,
         "loginWithEmailAllowed": true,
         "duplicateEmailsAllowed": false,
         "resetPasswordAllowed": true,
-        "editUsernameAllowed": true,
+        "editUsernameAllowed": false,
         "eventsListeners": [
             "metacell-admin-event-listener",
             "jboss-logging"
