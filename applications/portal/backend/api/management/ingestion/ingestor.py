@@ -65,8 +65,8 @@ class Ingestor:
         self.cursor = cursor
         try:
             self.users_ingestor = UsersIngestor(metadata.users_data_path)
-        except:
-            log.error("Cannot ingest users", exc_info=True)
+        except Exception as e:
+            log.error(f"Cannot ingest users: {str(e)}", exc_info=True)
 
     def ingest(self):
         species_map = {}
@@ -123,6 +123,7 @@ class Ingestor:
             int(len(vendor_synonyms_params) / 2))
         self.cursor.execute(vendor_synonyms_insert_stm, vendor_synonyms_params)
 
+    @timed_class_method('Vendor domains added ')
     def _insert_vendor_domains(self):
         # Prepare vendor domains inserts
         df_vendor_domain = pd.read_csv(self.metadata.vendor_domain_data_path)
@@ -182,23 +183,24 @@ class Ingestor:
 
     @timed_class_method('Species added')
     def _insert_species(self, species_map):
-        get_species_stm = f"SELECT DISTINCT target_species FROM {self.TMP_TABLE} " \
-                          f"UNION " \
-                          f"SELECT DISTINCT source_organism FROM {self.TMP_TABLE}"
-        self.cursor.execute(get_species_stm)
-        species_id = 1
-        for row in self.cursor:
-            specie_str = row[0]
-            if specie_str:
-                for specie in specie_str.split(';'):
-                    clean_specie = get_clean_species_str(specie)
-                    if clean_specie not in species_map:
-                        species_map[clean_specie] = species_id
-                        species_id += 1
-        species_insert_stm = get_insert_values_into_table_stm(self.SPECIE_TABLE,
-                                                              ['name', 'id'],
-                                                              len(species_map.keys()))
-        self.cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(species_map.items())))
+            get_species_stm = f"SELECT DISTINCT target_species FROM {self.TMP_TABLE} " \
+                              f"UNION " \
+                              f"SELECT DISTINCT source_organism FROM {self.TMP_TABLE}"
+            self.cursor.execute(get_species_stm)
+            species_id = 1
+            for row in self.cursor:
+                specie_str = row[0]
+                if specie_str:
+                    for specie in specie_str.split(';'):
+                        clean_specie = get_clean_species_str(specie)
+                        if clean_specie not in species_map:
+                            species_map[clean_specie] = species_id
+                            species_id += 1
+            species_insert_stm = get_insert_values_into_table_stm(self.SPECIE_TABLE,
+                                                                  ['name', 'id'],
+                                                                  len(species_map.keys()))
+            if len(species_map) > 0:
+                self.cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(species_map.items())))
 
     @timed_class_method('Antibodies added')
     def _insert_antibodies(self):
