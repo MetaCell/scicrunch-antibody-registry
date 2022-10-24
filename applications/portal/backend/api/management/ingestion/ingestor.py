@@ -73,6 +73,7 @@ class Ingestor:
 
         self._truncate_tables()
         self._insert_vendors()
+        self._insert_vendor_domains()
         self._fill_tmp_table()
         self._insert_genes()
         self._insert_species(species_map)
@@ -121,6 +122,24 @@ class Ingestor:
             ['vendor_id', 'name'],
             int(len(vendor_synonyms_params) / 2))
         self.cursor.execute(vendor_synonyms_insert_stm, vendor_synonyms_params)
+
+    def _insert_vendor_domains(self):
+        # Prepare vendor domains inserts
+        df_vendor_domain = pd.read_csv(self.metadata.vendor_domain_data_path)
+        df_vendor_domain = df_vendor_domain.where(pd.notnull(df_vendor_domain), None)
+
+        vendor_domain_insert_stm = get_insert_values_into_table_stm(self.VENDOR_DOMAIN_TABLE,
+                                                                    ['id', 'domain_name', 'vendor_id', 'status',
+                                                                     'link'],
+                                                                    len(df_vendor_domain))
+        vendor_domain_params = []
+
+        # insert vendor domains
+        for index, row in df_vendor_domain.iterrows():
+            vendor_domain_params.extend(
+                [row['id'], row['domain_name'], row['vendor_id'],
+                 row['status'].upper(), False])
+        self.cursor.execute(vendor_domain_insert_stm, vendor_domain_params)
 
     @timed_class_method('Temporary table filled')
     def _fill_tmp_table(self):
