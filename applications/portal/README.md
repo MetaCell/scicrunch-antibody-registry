@@ -106,3 +106,45 @@ When you create port forwards to microservices in your k8s cluster you want to f
 the AuthService and EventService services.
 This can be done by setting the `KUBERNETES_SERVICE_HOST` environment variable to a dummy or correct k8s service host.
 The `KUBERNETES_SERVICE_HOST` switch will activate the creation of the keycloak client and client roles of this microservice.
+
+## Integration tests
+
+The base command to run tests is `python manage.py test`.
+
+To run tests locally eed to add configure environmental variables to get the 
+correct configuration and a working configure instance of the postgres database running.
+
+If you already have a deployment with the database, first forward it:
+
+```
+kubectl port-forward --namespace areg $(kubectl get po -n areg --field-selector=status.phase==Running | grep portal-db | \awk '{print $1;}') 5432:5432
+```
+And then add the following entry to your hosts file
+
+```
+127.0.0.1     portal-db.areg  portal-db
+```
+
+
+Visual Studio code configuration to run tests:
+```json
+ {
+      "args": [
+        "test"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/applications/portal/backend",
+      "justMyCode": false,
+      "name": "Test",
+      "program": "manage.py",
+      "request": "launch",
+      "type": "python",
+      "env": {
+        "CH_CURRENT_APP_NAME": "portal",
+        "CH_VALUES_PATH": "${workspaceFolder}/deployment/helm/values.yaml",
+
+      },
+      
+}
+
+```
