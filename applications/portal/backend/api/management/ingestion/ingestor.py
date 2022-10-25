@@ -102,14 +102,14 @@ class Ingestor:
         df_vendor = pd.read_csv(self.metadata.vendor_data_path)
         df_vendor = df_vendor.where(pd.notnull(df_vendor), None)
         vendor_insert_stm = get_insert_values_into_table_stm(self.VENDOR_TABLE,
-                                                             ['id', 'nif_id', 'vendor'],
+                                                             ['id', 'nif_id', 'vendor', 'commercial_type'],
                                                              len(df_vendor))
         # insert vendors
         vendor_synonyms_params = []
         vendor_params = []
         for index, row in df_vendor.iterrows():
             vendor_params.extend(
-                [row['id'], row['nifID'], row['vendor']])
+                [row['id'], row['nifID'], row['vendor'], row['commercial_type']])
             synonyms_str = row['synonym']
             if synonyms_str:
                 for s in synonyms_str.split(','):
@@ -210,7 +210,7 @@ class Ingestor:
                        f"epitope, clonality, clone_id, product_isotype, " \
                        f"product_conjugate, defining_citation, product_form, comments, feedback, " \
                        f"curator_comment, disc_date, status, insert_time, curate_time, source_organism_id)" \
-                       f"SELECT DISTINCT ix, ab_name, ab_id, ab_id_old, commercial_type, " \
+                       f"SELECT DISTINCT ix, ab_name, ab_id, ab_id_old, TMP.commercial_type, " \
                        f"uid, catalog_num, cat_alt, vendor_id, url, antigen.id, " \
                        f"target_subregion, target_modification, epitope, clonality, " \
                        f"clone_id, product_isotype, product_conjugate, defining_citation, product_form, " \

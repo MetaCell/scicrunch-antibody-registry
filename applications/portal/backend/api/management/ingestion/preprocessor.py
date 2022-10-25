@@ -40,6 +40,9 @@ def update_vendors(csv_path: str):
     logging.info("Updating vendors")
     df_vendors = pd.read_csv(csv_path)
     clean_df(df_vendors)
+    valid_commercial_types = ('commercial', 'personal', 'other', 'non-profit')
+    mask = (df_vendors['commercial_type'].isin(valid_commercial_types)) | (df_vendors['commercial_type'].isnull())
+    df_vendors = df_vendors[mask]
     df_vendors.to_csv(csv_path, index=False, mode='w+')
 
 
