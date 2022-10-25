@@ -23,12 +23,16 @@ const App = () => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <SearchState>
-          <Navbar />
+          
           <Switch>
             <Route exact path="/">
+              <Navbar />
               <Home activeTab={ALLRESULTS} />
             </Route>
-            <Route exact path="/about" component={About} />
+            <Route exact path="/about" >
+              <Navbar />
+              <About />
+            </Route>
             <Route exact path="/add" component={Submit} />
             <Route path="/login">
               <Redirect to="/" />
@@ -36,12 +40,28 @@ const App = () => {
             <Route path="/oauth/logout">
               <Redirect to="/" />
             </Route>
-            <Route path="/:antibody_id(AB_.*)" component={AntibodyDetail} />
-            <Route path="/user" component={AccountDetails} />
-            <Route path="/faq" component={FAQs} />
-            <Route path="/contact-us" component={ContactUs} />
-            <Route path="/terms-and-conditions" component={TermsAndConditions} />
+            <Route path="/:antibody_id(AB_.*)">
+              <Navbar />
+              <AntibodyDetail />
+            </Route>
+            <Route path="/user" >
+              <Navbar />
+              <AccountDetails />
+            </Route>
+            <Route path="/faq">
+              <Navbar />
+              <FAQs />
+            </Route>
+            <Route path="/contact-us">
+              <Navbar />
+              <ContactUs />
+            </Route>
+            <Route path="/terms-and-conditions" >
+              <Navbar />
+              <TermsAndConditions />
+            </Route>
             <Route path="/submissions">
+              <Navbar />
               <Home activeTab={MYSUBMISSIONS} />
             </Route>
           </Switch>
