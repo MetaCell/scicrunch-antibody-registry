@@ -105,7 +105,8 @@ const CustomToolbar = ({ activeTab }) => {
 
 const RenderNameAndId = (props: GridRenderCellParams<String>) => {
   return (
-    <Box>
+    <Link href ={`/AB_${props.row.abId}`}>
+    
       <Typography
         variant="body2"
         align="left"
@@ -122,7 +123,7 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
       >
         AB_{props.row.abId}
       </Typography>
-    </Box>
+    </Link>
   );
 };
 
@@ -142,6 +143,24 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
     </StyledBadge>
   );
 };
+
+
+const RenderHtml= (props: GridRenderCellParams<String>) => {
+  return (
+    <StyledBadge {...props}>
+      <Typography
+        variant="caption"
+        align="left"
+        color="grey.500"
+        component="div" 
+        dangerouslySetInnerHTML={{ __html: props.value }}
+      />
+    </StyledBadge>
+  );
+};
+
+
+
 const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   const theme = useTheme();
   const classes = {
@@ -313,9 +332,6 @@ const dataGridStyles = {
   "& .MuiDataGrid-iconButtonContainer": {
     visibility: "visible",
   },
-  "& .MuiDataGrid-cell": {
-    cursor: "pointer",
-  },
 };
 
 const AntibodiesTable = (props) => {
@@ -426,6 +442,7 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "comments",
       headerName: "Comments",
+      renderCell: RenderHtml,
       flex: 3,
       align: "left",
     },
@@ -550,9 +567,7 @@ const AntibodiesTable = (props) => {
             disableSelectionOnClick
             getRowHeight={() => "auto"}
             loading={!antibodiesList|| loader}
-            onRowClick={(params) =>
-              (window.location.href = `/AB_${params.row.abId}`)
-            }
+  
             components={{
               BaseCheckbox: StyledCheckBox,
               ColumnFilteredIcon: FilteredColumnIcon,
