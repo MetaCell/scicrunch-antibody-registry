@@ -50,6 +50,7 @@ def update_users(csv_path: str):
     df_users = df_users.drop_duplicates(['email'], keep='last').loc[~df_users['email'].isnull()]
     df_users = df_users.loc[df_users['banned'] != 1]
     df_users = df_users.loc[~df_users['guid'].isnull()]
+    df_users['email'] = df_users['email'].str.strip()
     clean_df(df_users)
     df_users.to_csv(csv_path, index=False, mode='w+')
 
