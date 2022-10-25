@@ -183,24 +183,24 @@ class Ingestor:
 
     @timed_class_method('Species added')
     def _insert_species(self, species_map):
-            get_species_stm = f"SELECT DISTINCT target_species FROM {self.TMP_TABLE} " \
-                              f"UNION " \
-                              f"SELECT DISTINCT source_organism FROM {self.TMP_TABLE}"
-            self.cursor.execute(get_species_stm)
-            species_id = 1
-            for row in self.cursor:
-                specie_str = row[0]
-                if specie_str:
-                    for specie in specie_str.split(';'):
-                        clean_specie = get_clean_species_str(specie)
-                        if clean_specie not in species_map:
-                            species_map[clean_specie] = species_id
-                            species_id += 1
-            species_insert_stm = get_insert_values_into_table_stm(self.SPECIE_TABLE,
-                                                                  ['name', 'id'],
-                                                                  len(species_map.keys()))
-            if len(species_map) > 0:
-                self.cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(species_map.items())))
+        get_species_stm = f"SELECT DISTINCT target_species FROM {self.TMP_TABLE} " \
+                          f"UNION " \
+                          f"SELECT DISTINCT source_organism FROM {self.TMP_TABLE}"
+        self.cursor.execute(get_species_stm)
+        species_id = 1
+        for row in self.cursor:
+            specie_str = row[0]
+            if specie_str:
+                for specie in specie_str.split(';'):
+                    clean_specie = get_clean_species_str(specie)
+                    if clean_specie not in species_map:
+                        species_map[clean_specie] = species_id
+                        species_id += 1
+        species_insert_stm = get_insert_values_into_table_stm(self.SPECIE_TABLE,
+                                                              ['name', 'id'],
+                                                              len(species_map.keys()))
+        if len(species_map) > 0:
+            self.cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(species_map.items())))
 
     @timed_class_method('Antibodies added')
     def _insert_antibodies(self):
