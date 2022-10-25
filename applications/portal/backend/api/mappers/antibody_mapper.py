@@ -25,6 +25,10 @@ class AntibodyDataException(Exception):
         self.field_value = field_value
 
 
+def extract_base_url(url):
+    return urlsplit(url).hostname
+
+
 class AntibodyMapper(IDAOMapper):
 
     def from_dto(self, dto: AntibodyDTO) -> Antibody:
@@ -36,7 +40,7 @@ class AntibodyMapper(IDAOMapper):
 
         if dto.abTarget:
             antigen_symbol = dto.abTarget
-            del dto.abTarget
+            # del dto.abTarget
             try:
                 ab.antigen = Gene.objects.get(symbol=antigen_symbol)
             except Gene.DoesNotExist:
@@ -48,7 +52,7 @@ class AntibodyMapper(IDAOMapper):
 
         if dto.sourceOrganism:
             specie = dto.sourceOrganism
-            del dto.sourceOrganism
+            # del dto.sourceOrganism
             try:
                 ab.source_organism = Specie.objects.get(name=specie)
             except Specie.DoesNotExist:
@@ -57,28 +61,9 @@ class AntibodyMapper(IDAOMapper):
                 sp.save()
                 ab.source_organism = sp
         if dto.url:
-            # Vendor url check workflows https://github.com/MetaCell/scicrunch-antibody-registry/issues/51
-
-            base_url = urlsplit(dto.url).hostname
-            if not base_url:
-                raise AntibodyDataException("Not a valid url", "url", dto.url)
-            try:
-                ab.vendor = VendorDomain.objects.get(base_url=base_url).vendor
-            except VendorDomain.DoesNotExist:
-                if dto.vendorName:
-                    try:
-                        v: Vendor = Vendor.objects.get(name=dto.vendorName)
-
-                        log.info(
-                            "Adding new domain `%s` to vendor `%s`", base_url, v.name)
-                        vd = VendorDomain(
-                            vendor=v, base_url=base_url, status=STATUS.QUEUE)
-                        vd.save()
-                        ab.vendor = v
-                    except Vendor.DoesNotExist:
-                        ab.vendor = self.vendor_from_name(dto)
-        elif dto.vendorName:
-            ab.vendor = self.vendor_from_name(dto)
+            ab.vendor = self.vendor_from_antibody(dto)
+        else:
+            raise AntibodyDataException("Vendor url is mandatory")
 
         ab_dict = dict_to_snake(dto.dict())
 
@@ -87,7 +72,7 @@ class AntibodyMapper(IDAOMapper):
                 continue
             if isinstance(v, enum.Enum):
                 setattr(ab, k, v.value)
-            elif not isinstance(v, (list, tuple)):
+            elif not isinstance(v, (list, tuple)) and not getattr(ab, k, None):
                 setattr(ab, k, v)
         ab.ab_id = 0
         ab.save()  # Need to save first to set the manytomany
@@ -108,22 +93,25 @@ class AntibodyMapper(IDAOMapper):
         return ab
 
     @staticmethod
-    def vendor_from_name(dto):
+    def vendor_from_antibody(dto: AntibodyDTO):
+        # Vendor url check workflows https://github.com/MetaCell/scicrunch-antibody-registry/issues/51
 
-        vendor_name = dto.vendorName
-        del dto.vendorName
+        base_url = extract_base_url(dto.url)
+        if not base_url:
+            raise AntibodyDataException("Not a valid url", "url", dto.url)
         try:
-            return Vendor.objects.get(name=vendor_name)
-        except Vendor.DoesNotExist:
-            try:
-                vendor_synonym: VendorSynonym = VendorSynonym.objects.get(
-                    name=vendor_name)
-                return vendor_synonym.vendor
-            except VendorSynonym.DoesNotExist:
-                log.warn("Adding vendor: %s", vendor_name)
-                v = Vendor(name=vendor_name, )
-                v.save()
-                return v
+            return VendorDomain.objects.get(base_url=base_url).vendor
+        except VendorDomain.DoesNotExist:
+            vendor_name = dto.vendorName or base_url
+            log.info("Creating new Vendor `%s` on domain  to `%s`",
+                     vendor_name, base_url)
+
+            v = Vendor(name=vendor_name,
+                       commercial_type=dto.commercialType.value)
+            v.save()
+            vd = VendorDomain(vendor=v, base_url=base_url, status=STATUS.QUEUE)
+            vd.save()
+            return v
 
     def to_dto(self, dao: Antibody) -> AntibodyDTO:
         # todo: implement @afonsobspinto

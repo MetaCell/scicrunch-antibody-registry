@@ -73,12 +73,23 @@ class STATUS(models.TextChoices):
 
 
 class Vendor(models.Model):
-    name = models.CharField(max_length=VENDOR_MAX_LEN, db_column='vendor', db_index=True)
-    nif_id = models.CharField(max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id', null=True)
+    name = models.CharField(max_length=VENDOR_MAX_LEN,
+                            db_column='vendor', db_index=True)
+    nif_id = models.CharField(
+        max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id', null=True)
+    eu_id = models.CharField(
+        max_length=255, db_column='euid', null=True)
+    commercial_type = models.CharField(
+        max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
+        choices=CommercialType.choices,
+        default=CommercialType.OTHER,
+        null=True
+    )
 
     class Meta:
         indexes = [
-            GinIndex(SearchVector('name', config='english'), name='vendor_name_fts_idx'),
+            GinIndex(SearchVector('name', config='english'),
+                     name='vendor_name_fts_idx'),
         ]
 
     def __str__(self):
@@ -130,15 +141,17 @@ class Gene(models.Model):
                               db_column='ab_target', null=True, db_index=True)
     entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
                                  null=True, db_index=True)
-    uniprot_id = models.CharField(unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True)
+    uniprot_id = models.CharField(
+        unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True)
 
     class Meta:
         indexes = [
-            GinIndex(SearchVector('symbol', config='english'), name='gene_symbol_fts_idx'),
+            GinIndex(SearchVector('symbol', config='english'),
+                     name='gene_symbol_fts_idx'),
         ]
 
     def __str__(self):
-        return f"{self.symbol}" or "?self.id"
+        return f"{self.symbol or '?' + self.id}"
 
 
 class Antibody(models.Model):
@@ -160,7 +173,8 @@ class Antibody(models.Model):
     uid_legacy = models.IntegerField(null=True)
     catalog_num = models.CharField(
         max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True)
-    cat_alt = models.CharField(max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True, db_index=True)
+    cat_alt = models.CharField(
+        max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True, db_index=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
     url = models.URLField(max_length=URL_MAX_LEN, null=True, db_index=True)
     antigen = models.ForeignKey(
@@ -206,15 +220,16 @@ class Antibody(models.Model):
         db_index=True
     )
     insert_time = models.DateTimeField(auto_now_add=True, db_index=True)
-    lastedit_time = models.DateTimeField(auto_now=True, db_index=True, null=True)
+    lastedit_time = models.DateTimeField(
+        auto_now=True, db_index=True, null=True)
     curate_time = models.DateTimeField(db_index=True, null=True)
 
     def save(self, *args, **kwargs):
         if self.status == STATUS.CURATED:
             old_version = Antibody.objects.get(ix=self.ix)
             if old_version.status != STATUS.CURATED:
-                self.curate_time = timezone.now() 
-        
+                self.curate_time = timezone.now()
+
         super(Antibody, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -234,65 +249,67 @@ class Antibody(models.Model):
             GinIndex(SearchVector('catalog_num__normalize',
                                   'cat_alt__normalize_relaxed', config='english'), name='antibody_catalog_num_fts_idx'),
 
-            Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma', Value('')))).desc(),     name='antibody_nb_citations_idx'),
+            Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce(
+                'defining_citation__remove_coma', Value('')))).desc(),     name='antibody_nb_citations_idx'),
 
-            Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma', Value(''))) - (100 + Length(Coalesce('disc_date', Value(''))))).desc(),     name='antibody_nb_citations_idx2'),
+            Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma',
+                  Value(''))) - (100 + Length(Coalesce('disc_date', Value(''))))).desc(),     name='antibody_nb_citations_idx2'),
 
             Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
 
             GinIndex(SearchVector('ab_name',
-                              'clone_id__normalize_relaxed', config='english', weight='A'), name='antibody_name_fts_idx'),
+                                  'clone_id__normalize_relaxed', config='english', weight='A'), name='antibody_name_fts_idx'),
             GinIndex(
                 SearchVector('ab_name',
-                              'clone_id__normalize_relaxed', config='english', weight='A') +
+                             'clone_id__normalize_relaxed', config='english', weight='A') +
                 SearchVector(
-                'accession',
-                'commercial_type',
-                'uid',
-                'uid_legacy',
-                'url',
-                'subregion',
-                'modifications',
-                'epitope',
-                'clonality',
-                'product_isotype',
-                'product_conjugate',
-                'defining_citation',
-                'product_form',
-                'comments',
-                'kit_contents',
-                'feedback',
-                'curator_comment',
-                'disc_date',
-                'status',
-                config='english',
-                weight='C',
-            ), name='antibody_all_fts_idx'),
+                    'accession',
+                    'commercial_type',
+                    'uid',
+                    'uid_legacy',
+                    'url',
+                    'subregion',
+                    'modifications',
+                    'epitope',
+                    'clonality',
+                    'product_isotype',
+                    'product_conjugate',
+                    'defining_citation',
+                    'product_form',
+                    'comments',
+                    'kit_contents',
+                    'feedback',
+                    'curator_comment',
+                    'disc_date',
+                    'status',
+                    config='english',
+                    weight='C',
+                ), name='antibody_all_fts_idx'),
 
             GinIndex(
                 SearchVector(
-                'accession',
-                'commercial_type',
-                'uid',
-                'uid_legacy',
-                'url',
-                'subregion',
-                'modifications',
-                'epitope',
-                'clonality',
-                'product_isotype',
-                'product_conjugate',
-                'defining_citation',
-                'product_form',
-                'comments',
-                'kit_contents',
-                'feedback',
-                'curator_comment',
-                'disc_date',
-                'status',
-                config='english',
-                weight='C',
-            ), name='antibody_all_fts_idx2'),
+                    'accession',
+                    'commercial_type',
+                    'uid',
+                    'uid_legacy',
+                    'url',
+                    'subregion',
+                    'modifications',
+                    'epitope',
+                    'clonality',
+                    'product_isotype',
+                    'product_conjugate',
+                    'defining_citation',
+                    'product_form',
+                    'comments',
+                    'kit_contents',
+                    'feedback',
+                    'curator_comment',
+                    'disc_date',
+                    'status',
+                    config='english',
+                    weight='C',
+                ), name='antibody_all_fts_idx2'),
         ]
 
 

@@ -51,9 +51,14 @@ class AnimalTestCase(TestCase):
         new_ant = AddUpdateAntibodyDTO(**example_ab)
         try:
             ab2 = create_antibody(new_ant, "bbb")
-            self.fail("Should detect duplicate antibody")
-        except DuplicatedAntibody:
-            pass
+            
+        except DuplicatedAntibody as e:
+            self.fail("No duplicate antibody because none is curated")
+
+    
+        
+
+
         new_ant.catalogNum = "N176A/36"
         ab2 = create_antibody(new_ant, "bbb")
         self.assertNotEqual(ab.abId, ab2.abId)
@@ -92,3 +97,13 @@ class AnimalTestCase(TestCase):
         assert len(search_antibodies_by_catalog("N176A").items) == 2
         assert len(search_antibodies_by_catalog("N176A 35").items) == 1
         assert len(search_antibodies_by_catalog("N176A|35").items) == 1
+
+
+        try:
+            create_antibody(AddUpdateAntibodyDTO(**example_ab), "bbb")
+            self.fail("Should detect duplicate antibody")
+        except DuplicatedAntibody as e:
+            da = e.antibody
+            assert da.accession != da.abId
+            assert da.status == Status.REJECTED
+            assert da.abId == ab.abId

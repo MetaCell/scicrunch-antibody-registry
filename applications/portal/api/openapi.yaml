@@ -4,9 +4,8 @@ info:
     version: 1.0.0
     description: Antibody Registry API
 servers:
-    -
-        url: /api
-        description: ''
+    - url: /api
+      description: ""
 paths:
     /antibodies:
         summary: Path used to manage the list of antibodies.
@@ -17,30 +16,28 @@ paths:
             tags:
                 - antibody
             parameters:
-                -
-                    examples:
-                        first:
-                            value: '1'
-                    name: page
-                    description: 'Represents the page requested, considering the size parameter'
-                    schema:
-                        type: integer
-                    in: query
-                -
-                    examples:
-                        default:
-                            value: '10'
-                    name: size
-                    description: Corresponds to the cardinality of antibodies requested
-                    schema:
-                        type: integer
-                    in: query
+                - examples:
+                      first:
+                          value: "1"
+                  name: page
+                  description: "Represents the page requested, considering the size parameter"
+                  schema:
+                      type: integer
+                  in: query
+                - examples:
+                      default:
+                          value: "10"
+                  name: size
+                  description: Corresponds to the cardinality of antibodies requested
+                  schema:
+                      type: integer
+                  in: query
             responses:
-                '200':
+                "200":
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/PaginatedAntibodies'
+                                $ref: "#/components/schemas/PaginatedAntibodies"
                     description: Successful response - returns an array of `Antibody` entities.
             operationId: getAntibodies
             summary: List Antibodies
@@ -51,30 +48,32 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/AddUpdateAntibody'
+                            $ref: "#/components/schemas/AddUpdateAntibody"
                 required: true
             tags:
                 - antibody
             responses:
-                '201':
+                "201":
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/Antibody'
+                                $ref: "#/components/schemas/Antibody"
                     description: Successful response.
-                '400':
+                "400":
                     content:
                         application/json: {}
                     description: some valiidation error. The name of the errored field is returned
-                '409':
+                "409":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Antibody"
                     description: >-
                         Raised when the antibody is duplicated (catalog number already present for the same
                         vendor)
             security:
-                -
-                    cookieAuth: []
-                -
-                    bearerAuth: []
+                - cookieAuth: []
+                - bearerAuth: []
             operationId: createAntibody
             summary: Create a Antibody
             description: Creates a new instance of a `Antibody`.
@@ -87,27 +86,24 @@ paths:
             tags:
                 - search
             parameters:
-                -
-                    name: page
-                    description: 'Represents the page requested, considering the size parameter'
-                    schema:
-                        type: integer
-                    in: query
-                -
-                    name: size
-                    description: Corresponds to the cardinality of antibodies requested
-                    schema:
-                        type: integer
-                    in: query
-                -
-                    name: search
-                    description: The string to use for full text search on Antibodies
-                    schema:
-                        type: string
-                    in: query
+                - name: page
+                  description: "Represents the page requested, considering the size parameter"
+                  schema:
+                      type: integer
+                  in: query
+                - name: size
+                  description: Corresponds to the cardinality of antibodies requested
+                  schema:
+                      type: integer
+                  in: query
+                - name: search
+                  description: The string to use for full text search on Antibodies
+                  schema:
+                      type: string
+                  in: query
             responses:
-                '200':
-                    $ref: '#/components/responses/PaginatedAntibodies'
+                "200":
+                    $ref: "#/components/responses/PaginatedAntibodies"
             operationId: ftsAntibodies
             summary: Full text search on Antibodies
             description: Gets a list of `Antibody` entities related with the search query
@@ -117,18 +113,16 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/FilterRequest'
+                            $ref: "#/components/schemas/FilterRequest"
                 required: true
             tags:
                 - search
             responses:
-                '200':
+                "200":
                     content:
                         application/json:
                             schema:
-                                type: array
-                                items:
-                                    $ref: '#/components/schemas/Antibody'
+                                $ref: "#/components/schemas/PaginatedAntibodies"
                     description: Successful response - returns an array of `Antibody` entities.
             operationId: filterAntibodies
             summary: Search on Antibodies with custom filters
@@ -140,7 +134,7 @@ paths:
             tags:
                 - test
             responses:
-                '200':
+                "200":
                     content:
                         application/json:
                             schema:
@@ -156,7 +150,7 @@ paths:
             tags:
                 - test
             responses:
-                '200':
+                "200":
                     content:
                         application/json:
                             schema:
@@ -172,7 +166,7 @@ paths:
             tags:
                 - test
             responses:
-                '200':
+                "200":
                     content:
                         application/json:
                             schema:
@@ -195,12 +189,12 @@ paths:
             tags:
                 - ingest
             responses:
-                '200':
+                "200":
                     description: Successful response - returns an 200.
             operationId: ingest
             summary: Ingest antibody's csv data into the database
             description: Ingest antibody's csv data into the database
-    '/antibodies/{antibody_id}':
+    "/antibodies/{antibody_id}":
         summary: Path used to manage a single Antibody.
         description: >-
             The REST endpoint/path used to get, update, and delete single instances of an `Antibody`.  This
@@ -210,13 +204,13 @@ paths:
             tags:
                 - antibody
             responses:
-                '200':
+                "200":
                     content:
                         application/json:
                             schema:
                                 type: array
                                 items:
-                                    $ref: '#/components/schemas/Antibody'
+                                    $ref: "#/components/schemas/Antibody"
                     description: Successful response - returns a single `Antibody`.
             operationId: getAntibody
             summary: Get a Antibody
@@ -227,16 +221,15 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/AddUpdateAntibody'
+                            $ref: "#/components/schemas/AddUpdateAntibody"
                 required: true
             tags:
                 - antibody
             responses:
-                '202':
+                "202":
                     description: Successful response.
             security:
-                -
-                    cookieAuth: []
+                - cookieAuth: []
             operationId: updateAntibody
             summary: Update a Antibody
             description: Updates an existing `Antibody`.
@@ -244,22 +237,21 @@ paths:
             tags:
                 - antibody
             responses:
-                '204':
+                "204":
                     description: Successful response.
             operationId: deleteAntibody
             summary: Delete a Antibody
             description: Deletes an existing `Antibody`.
         parameters:
-            -
-                examples:
-                    ex1:
-                        value: '1234567'
-                name: antibody_id
-                description: The unique identifier for a `Antibody` -- stripped from "AB_"
-                schema:
-                    type: integer
-                in: path
-                required: true
+            - examples:
+                  ex1:
+                      value: "1234567"
+              name: antibody_id
+              description: The unique identifier for a `Antibody` -- stripped from "AB_"
+              schema:
+                  type: integer
+              in: path
+              required: true
     /antibodies/user:
         summary: Path used to manage the list of antibodies.
         description: >-
@@ -269,47 +261,43 @@ paths:
             tags:
                 - antibody
             parameters:
-                -
-                    examples:
-                        first:
-                            value: '1'
-                    name: page
-                    description: 'Represents the page requested, considering the size parameter'
-                    schema:
-                        type: integer
-                    in: query
-                -
-                    examples:
-                        default:
-                            value: '10'
-                    name: size
-                    description: Corresponds to the cardinality of antibodies requested
-                    schema:
-                        type: integer
-                    in: query
+                - examples:
+                      first:
+                          value: "1"
+                  name: page
+                  description: "Represents the page requested, considering the size parameter"
+                  schema:
+                      type: integer
+                  in: query
+                - examples:
+                      default:
+                          value: "10"
+                  name: size
+                  description: Corresponds to the cardinality of antibodies requested
+                  schema:
+                      type: integer
+                  in: query
             responses:
-                '200':
+                "200":
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/PaginatedAntibodies'
+                                $ref: "#/components/schemas/PaginatedAntibodies"
                     description: Successful response - returns an array of `Antibody` entities.
             security:
-                -
-                    cookieAuth: []
-                -
-                    bearerAuth: []
+                - cookieAuth: []
+                - bearerAuth: []
             operationId: getUserAntibodies
             summary: List Antibodies
             description: Gets a list of `Antibody` entities.
     /datainfo:
         get:
             responses:
-                '200':
+                "200":
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/DataInfo'
+                                $ref: "#/components/schemas/DataInfo"
                     description: Returns info
 components:
     schemas:
@@ -317,16 +305,14 @@ components:
             description: The data type associated with the POST and PUT methods of the antibody resource
             type: object
             allOf:
-                -
-                    required:
-                        - url
-                    type: object
-                    properties:
-                        url:
-                            description: ''
-                            type: string
-                -
-                    $ref: '#/components/schemas/AbstractAntibody'
+                - required:
+                      - url
+                  type: object
+                  properties:
+                      url:
+                          description: ""
+                          type: string
+                - $ref: "#/components/schemas/AbstractAntibody"
         FilterRequest:
             description: The search request body that allows filtering combinations over multiple columns
             type: object
@@ -337,16 +323,16 @@ components:
                         should be contained
                     type: array
                     items:
-                        $ref: '#/components/schemas/KeyValuePair'
+                        $ref: "#/components/schemas/KeyValuePair"
                 equals:
                     description: >-
                         Array of key-value pairs, where key represents the column and value the string that
                         should be equalled to
                     type: array
                     items:
-                        $ref: '#/components/schemas/KeyValuePair'
+                        $ref: "#/components/schemas/KeyValuePair"
                 page:
-                    description: 'Represents the page requested, considering the size parameter'
+                    description: "Represents the page requested, considering the size parameter"
                     type: integer
                 size:
                     description: Corresponds to the cardinality of antibodies requested
@@ -360,7 +346,7 @@ components:
                         should be ending with
                     type: array
                     items:
-                        $ref: '#/components/schemas/KeyValuePair'
+                        $ref: "#/components/schemas/KeyValuePair"
                 sortOn:
                     description: >-
                         Array of key-value pairs, where key represents the column and value the string
@@ -371,14 +357,14 @@ components:
                         sort first
                     type: array
                     items:
-                        $ref: '#/components/schemas/KeyValuePair'
+                        $ref: "#/components/schemas/KeyValuePair"
                 startsWith:
                     description: >-
                         Array of key-value pairs, where key represents the column and value the string that
                         should be starting with
                     type: array
                     items:
-                        $ref: '#/components/schemas/KeyValuePair'
+                        $ref: "#/components/schemas/KeyValuePair"
         KeyValuePair:
             description: Utility type to represent a key-value object
             required:
@@ -393,7 +379,7 @@ components:
                     description: String representation of the value
                     type: string
         PaginatedAntibodies:
-            description: ''
+            description: ""
             required:
                 - page
                 - totalElements
@@ -401,80 +387,78 @@ components:
             type: object
             properties:
                 page:
-                    description: ''
+                    description: ""
                     type: number
                 totalElements:
-                    description: ''
+                    description: ""
                     type: integer
                 items:
-                    description: ''
+                    description: ""
                     type: array
                     items:
-                        $ref: '#/components/schemas/Antibody'
+                        $ref: "#/components/schemas/Antibody"
         Antibody:
             description: The data type associated with the antibody resource
             type: object
             allOf:
-                -
-                    required:
-                        - abId
-                        - insertTime
-                    type: object
-                    properties:
-                        accession:
-                            description: >
-                                Thus value is the same as the Antibody identifier for newly added antibodies,
-                                different if antibody records have been consolidated or are not unique.
-                            type: string
-                        status:
-                            description: |
-                                Can include: curated, rejected, queue
-                            enum:
-                                - CURATED
-                                - REJECTED
-                                - QUEUE
-                            type: string
-                        feedback:
-                            description: Feedback to the submitted stored here
-                            type: string
-                        abId:
-                            description: Antibody identifier
-                            type: string
-                        catAlt:
-                            description: >-
-                                The alternative catalog numbers for this product, delimited by comma, e.g.,
-                                9101S, 9101P, 9191L
-                            type: string
-                        curateTime:
-                            format: date-time
-                            description: Unix time stamp when the row was last updated
-                            type: string
-                        curatorComment:
-                            description: |
-                                Curator comment about this reagent
-                            type: string
-                        discDate:
-                            description: The date on which the antibody product was found to be discontinued
-                            type: string
-                        insertTime:
-                            format: date-time
-                            description: Unix time stamp when the row was inserted.
-                            type: string
-                        targetModification:
-                            description: Any modification to the target protein
-                            type: string
-                        targetSubregion:
-                            description: The subregion of the target protein that the epitope is contained in
-                            type: string
-                        vendorId:
-                            description: ''
-                            type: integer
-                        lastEditTime:
-                            format: date-time
-                            description: ''
-                            type: string
-                -
-                    $ref: '#/components/schemas/AbstractAntibody'
+                - required:
+                      - abId
+                      - insertTime
+                  type: object
+                  properties:
+                      accession:
+                          description: >
+                              Thus value is the same as the Antibody identifier for newly added antibodies,
+                              different if antibody records have been consolidated or are not unique.
+                          type: string
+                      status:
+                          description: |
+                              Can include: curated, rejected, queue
+                          enum:
+                              - CURATED
+                              - REJECTED
+                              - QUEUE
+                          type: string
+                      feedback:
+                          description: Feedback to the submitted stored here
+                          type: string
+                      abId:
+                          description: Antibody identifier
+                          type: string
+                      catAlt:
+                          description: >-
+                              The alternative catalog numbers for this product, delimited by comma, e.g.,
+                              9101S, 9101P, 9191L
+                          type: string
+                      curateTime:
+                          format: date-time
+                          description: Unix time stamp when the row was last updated
+                          type: string
+                      curatorComment:
+                          description: |
+                              Curator comment about this reagent
+                          type: string
+                      discDate:
+                          description: The date on which the antibody product was found to be discontinued
+                          type: string
+                      insertTime:
+                          format: date-time
+                          description: Unix time stamp when the row was inserted.
+                          type: string
+                      targetModification:
+                          description: Any modification to the target protein
+                          type: string
+                      targetSubregion:
+                          description: The subregion of the target protein that the epitope is contained in
+                          type: string
+                      vendorId:
+                          description: ""
+                          type: integer
+                      lastEditTime:
+                          format: date-time
+                          description: ""
+                          type: string
+                - $ref: "#/components/schemas/AbstractAntibody"
         AbstractAntibody:
             description: The common fields between all REST operations for the antibody resource.
             required:
@@ -540,7 +524,7 @@ components:
                     type: string
                     example: N176A/35
                 commercialType:
-                    description: 'Can include the following: commercial, non-profit, personal, other'
+                    description: "Can include the following: commercial, non-profit, personal, other"
                     enum:
                         - commercial
                         - non-profit
@@ -549,13 +533,13 @@ components:
                     type: string
                     example: commercial
                 definingCitation:
-                    description: 'The manuscript that describes the creation of the antibody. '
+                    description: "The manuscript that describes the creation of the antibody. "
                     type: string
                 productConjugate:
                     description: >
                         The molecule that the antibody is conjugated to. This is generally used for secondary
                         antibodies but the field is not restricted as there can be various tags on primary
-                        antibodies as well. 
+                        antibodies as well.
                     type: string
                 productForm:
                     description: >-
@@ -563,7 +547,7 @@ components:
                         Liquid
                     type: string
                 productIsotype:
-                    description: 'Can include the following: IgG, IgY, IgA, IgM as well as the IgG subtypes'
+                    description: "Can include the following: IgG, IgY, IgA, IgM as well as the IgG subtypes"
                     type: string
                 sourceOrganism:
                     description: >
@@ -590,13 +574,13 @@ components:
                         The principal investigator name for personal/other antibodies.
                     type: string
                 applications:
-                    description: ''
+                    description: ""
                     type: array
                     items:
                         type: string
-                    example: 'ELISA, IHC, WB'
+                    example: "ELISA, IHC, WB"
                 kitContents:
-                    description: ''
+                    description: ""
                     type: string
                     example: >-
                         Sheep polyclonal anti-FSH antibody labeled with acridinium ester. Mouse monoclonal
@@ -614,15 +598,15 @@ components:
                     type: integer
                 lastupdate:
                     format: date
-                    description: ''
+                    description: ""
                     type: string
     responses:
         PaginatedAntibodies:
             content:
                 application/json:
                     schema:
-                        $ref: '#/components/schemas/PaginatedAntibodies'
-            description: ''
+                        $ref: "#/components/schemas/PaginatedAntibodies"
+            description: ""
     securitySchemes:
         cookieAuth:
             type: apiKey

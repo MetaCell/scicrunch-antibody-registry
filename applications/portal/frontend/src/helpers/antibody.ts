@@ -16,12 +16,11 @@ export function postNewAntibody(
     .catch((err) => {
       const { status, data } = err.response;
       if (status === 409) {
-        let id = data.detail.split(" ")[7].match(/\d/g).join("");
         setApiResponse({
           status: 409,
-          detail: data.detail,
+          detail: data.abId,
         });
-        setAntibodyId(id);
+        setAntibodyId(data.abId);
       } else {
         setApiResponse({
           status,

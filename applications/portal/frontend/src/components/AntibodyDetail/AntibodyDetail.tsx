@@ -175,12 +175,19 @@ export const AntibodyDetail = () => {
                   </Typography>
                 </Grid>
                 <Grid item xs={3}>
+                  <Typography variant="h4">Catalog number</Typography>
+                  <Typography variant="subtitle2">
+                    {antibody.catalogNum}
+                  </Typography>
+                </Grid>
+                <Grid item xs={3} />
+                <Grid item xs={3}>
                   <Typography variant="h4">Target antigen</Typography>
                   <Typography variant="subtitle2">
                     {antibody.abTarget} {antibody.targetSpecies}
                   </Typography>
                 </Grid>
-                <Grid item xs={3}></Grid>
+                
                 <Grid item xs={3}>
                   <Typography variant="h4">Clonality</Typography>
                   <Typography variant="subtitle2">
@@ -190,13 +197,14 @@ export const AntibodyDetail = () => {
                 <Grid item xs={3}>
                   <Typography variant="h4">Clone ID</Typography>
                   <Typography variant="subtitle2">
-                    {antibody.cloneId}
+                    {antibody.cloneId || "N/A"}
                   </Typography>
                 </Grid>
+                <Grid item xs={3} />
                 <Grid item xs={3}>
                   <Typography variant="h4">Host organism</Typography>
                   <Typography variant="subtitle2">
-                    {antibody.sourceOrganism}
+                    {antibody.sourceOrganism || "N/A"}
                   </Typography>
                 </Grid>
               </Grid>
@@ -246,9 +254,8 @@ export const AntibodyDetail = () => {
                   <Typography variant="subtitle1">Comments</Typography>
                 </Grid>
                 <Grid item xs={8}>
-                  <Typography variant="subtitle2">
-                    {antibody.comments}
-                  </Typography>
+                  <Typography variant="subtitle2" dangerouslySetInnerHTML={{ __html: antibody.comments }} />
+
                 </Grid>
               </Grid>
               <Divider />

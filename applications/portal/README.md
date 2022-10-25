@@ -94,7 +94,8 @@ On Visual Studio Code, can use the following run configuration:
       "type": "python",
       "env": {
         "CH_CURRENT_APP_NAME": "portal",
-        "CH_VALUES_PATH": "${workspaceFolder}/deployment/helm/values.yaml"
+        "CH_VALUES_PATH": "${workspaceFolder}/deployment/helm/values.yaml",
+        "KUBERNETES_SERVICE_HOST": "localhost"
       }
     },
 ```
