@@ -88,7 +88,7 @@ export interface AbstractAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
      * @type {string}
      * @memberof AbstractAntibody
      */
@@ -237,7 +237,7 @@ export interface AddUpdateAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
      * @type {string}
      * @memberof AddUpdateAntibody
      */
@@ -477,7 +477,7 @@ export interface Antibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
      * @type {string}
      * @memberof Antibody
      */
@@ -1567,7 +1567,7 @@ export const SearchApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async filterAntibodies(filterRequest: FilterRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Antibody>>> {
+        async filterAntibodies(filterRequest: FilterRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAntibodies>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.filterAntibodies(filterRequest, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1601,7 +1601,7 @@ export const SearchApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        filterAntibodies(filterRequest: FilterRequest, options?: any): AxiosPromise<Array<Antibody>> {
+        filterAntibodies(filterRequest: FilterRequest, options?: any): AxiosPromise<PaginatedAntibodies> {
             return localVarFp.filterAntibodies(filterRequest, options).then((request) => request(axios, basePath));
         },
         /**

@@ -74,7 +74,7 @@ export async function getUserAntibodies(
   ).data;
 }
 
-export async function getSearchAtibodies(
+export async function getSearchAntibodies(
   page = 1,
   size = 100,
   query:string

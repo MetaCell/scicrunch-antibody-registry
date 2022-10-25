@@ -341,7 +341,7 @@ const AntibodiesTable = (props) => {
   const { activeSearch, searchedAntibodies, loader } = useContext(SearchContext)
 
   const fetchAntibodies = () => {
-    activeSearch === ''
+    !activeSearch
       ? (
         getAntibodies()
           .then((res) => {

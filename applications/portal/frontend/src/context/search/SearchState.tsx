@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { getSearchAtibodies } from '../../services/AntibodiesService'
+import { getSearchAntibodies } from '../../services/AntibodiesService'
 import SearchContext from './SearchContext'
 
 const SearchState = (props) => {
@@ -10,14 +10,14 @@ const SearchState = (props) => {
     totalElements:0,
     searchedAntibodies:[]
   })
-  const getFilteredAntibodies = async(query:string) => {
+  const getFilteredAntibodies = async (query:string) => {
     setSearch((prev) => ({
       ...prev,
       loader:true
     }))
     const _=undefined
     try {
-      const filteredAntibodies = await getSearchAtibodies(_,_,query)
+      const filteredAntibodies = await getSearchAntibodies(_,_,query)
       setSearch({
         loader:false,
         activeSearch:query,

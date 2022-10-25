@@ -48,31 +48,29 @@ export default function Searchbar() {
   const { getFilteredAntibodies, clearSearch, activeSearch } = useContext(SearchContext)
 
   const history = useHistory();
-  const isInitialRender = useRef(true);
+
   const ref= useRef(null);
 
   const autocompleteOps=[]
 
   const handleChange=(e:React.SyntheticEvent, value:string| null) => {
-    !value? clearSearch():getFilteredAntibodies(value)
+    if(!value){
+      clearSearch()
+    } else {
+      history.push('/');
+      getFilteredAntibodies(value)
+    }
   }
 
-  const handleInputChange =(e) => {
+  const handleInputChange = (e: any) => {
     if (e.target.matches('li')) {return null}
-    !e.target.value? clearSearch():
-      getFilteredAntibodies(e.target.value)
+    return handleChange(null, e.target.value);
   }
 
   const debouncedChangeHandler = useMemo(
-    () => debounce(handleInputChange, 1000)
+    () => debounce(handleInputChange, 300)
     , []);
 
-  useEffect(() => {
-    !isInitialRender.current?
-      history.push('/'):
-      isInitialRender.current = false
-      
-  }, [activeSearch])
 
   const handleKeyPress = useCallback((event) => {
     if(event.key==='/'){
@@ -102,7 +100,7 @@ export default function Searchbar() {
           fullWidth
           clearOnEscape
           renderInput={(params) => { 
-            const  { InputProps,InputLabelProps, ...rest } = params
+            const  { InputProps, ...rest } = params
             return(
               <InputBase 
                 inputRef={ref}
