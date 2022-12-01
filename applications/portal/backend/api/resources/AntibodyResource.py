@@ -1,0 +1,79 @@
+from import_export.fields import Field
+from import_export.instance_loaders import ModelInstanceLoader
+from import_export.resources import ModelResource
+
+from api.models import Antibody
+
+
+class AntibodyInstanceLoaderClass(ModelInstanceLoader):
+    def get_instance(self, row):
+        try:
+            params = {}
+            for field in self.resource.get_import_mandatory_id_fields():
+                params[field.attribute] = field.clean(row)
+            for field in self.resource.get_import_alternative_id_fields():
+                if field.column_name in row:
+                    params[field.attribute] = field.clean(row)
+            if params:
+                return self.get_queryset().get(**params)
+            else:
+                return None
+        except self.resource._meta.model.DoesNotExist:
+            return None
+
+
+class AntibodyResource(ModelResource):
+    name = Field(attribute='ab_name', column_name='NAME')
+    vendor = Field(attribute='vendor__name', column_name='VENDOR', readonly=True)
+    catalog_num = Field(attribute='catalog_num', column_name='base cat')
+    url = Field(attribute='url', column_name='URL')
+    target = Field(attribute='antigen__symbol', column_name='TARGET', readonly=True)
+    species = Field(attribute='species__name', column_name='SPECIES', readonly=True)
+    clonality = Field(attribute='clonality', column_name='CLONALITY')
+    host = Field(attribute='source_organism__name', column_name='HOST', readonly=True)
+    clone_id = Field(attribute='clone_id', column_name='clone')
+    product_isotype = Field(attribute='product_isotype', column_name='ISOTYPE')
+    product_conjugate = Field(attribute='product_conjugate', column_name='CONJUGATE')
+    product_form = Field(attribute='product_form', column_name='FORM')
+    comments = Field(attribute='comments', column_name='COMMENTS')
+    defining_citation = Field(attribute='defining_citation', column_name='CITATION')
+    subregion = Field(attribute='subregion', column_name='SUBREGION')
+    modifications = Field(attribute='modifications', column_name='MODIFICATION')
+    gid = Field(attribute='antigen__entrez_id', column_name='GID', readonly=True)
+    disc_date = Field(attribute='disc_date', column_name='DISC')
+    commercial_type = Field(attribute='commercial_type', column_name='TYPE')
+    uniprot = Field(attribute='antigen__uniprot_id', column_name='UNIPROT', readonly=True)
+    epitope = Field(attribute='epitope', column_name='EPITOPE')
+    cat_alt = Field(attribute='cat_alt', column_name='CAT ALT')
+    ab_id = Field(attribute='ab_id', column_name='id')
+    accession = Field(attribute='accession', column_name='ab_id_old')
+    ix = Field(attribute='ix', column_name='ix')
+
+    class Meta:
+        model = Antibody
+        fields = (
+            'name', 'vendor', 'catalog_num', 'url', 'target', 'species', 'clonality', 'host', 'clone_id',
+            'product_isotype', 'product_conjugate', 'product_form', 'comments', 'defining_citation', 'subregion',
+            'modifications', 'gid', 'disc_date', 'commercial_type', 'uniprot', 'epitope', 'cat_alt', 'ab_id',
+            'accession', 'ix')
+        import_id_fields = ('id', 'old_id', 'ix')
+        instance_loader_class = AntibodyInstanceLoaderClass
+        mandatory_id_fields = ['ab_id']
+        alternative_id_fields = ['accession', 'ix']
+
+    def get_import_mandatory_id_fields(self):
+        return [self.fields[f] for f in self._meta.mandatory_id_fields]
+
+    def get_import_alternative_id_fields(self):
+        return [self.fields[f] for f in self._meta.alternative_id_fields]
+
+    def get_instance(self, instance_loader, row):
+        # If any of the mandatory_id_fields is missing we return
+        # If all the alternative_id_fields are missing we return
+        if any([field.column_name not in row for field in self.get_import_mandatory_id_fields()]) or \
+                all([field.column_name not in row for field in self.get_import_alternative_id_fields()]):
+            return
+        return instance_loader.get_instance(row)
+
+    def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+        pass

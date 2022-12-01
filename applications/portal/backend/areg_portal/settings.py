@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    "import_export"
 ]
 
 MIDDLEWARE = [
@@ -162,6 +163,7 @@ KC_PRIVILEGED_ROLES = [
 KC_DEFAULT_USER_ROLE = None  # don't add the user role to the realm default role
 
 # Database models settings
+IMPORT_EXPORT_USE_TRANSACTIONS = True
 
 # comment refers to max length of column at ingestion time (12/09/2022)
 ANTIBODY_NAME_MAX_LEN = 512  # 352
@@ -233,7 +235,6 @@ UID_INDEX = list(ANTIBODY_HEADER.keys()).index(UID_KEY)
 GUID_INDEX = USERS_RELEVANT_HEADER.index(GUID_KEY)
 
 DEFAULT_UID = '43'
-
 
 # Search limit for Antibodies for returning without ranking
 LIMIT_NUM_RESULTS = 250
