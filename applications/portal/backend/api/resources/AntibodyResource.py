@@ -103,13 +103,15 @@ class AntibodyResource(ModelResource):
         if ignore_new:
             mandatory_id_field = self.get_import_mandatory_id_field()
             # If there's no mandatory id field it means all the entries are new
-            if mandatory_id_field.column_name not in dataset:
+            if mandatory_id_field.column_name not in dataset.headers:
                 dataset.df = dataset.df[0:0]
                 return
 
             # if the mandatory id fields exists we need to query database with dataset['id']
             # and remove from dataset the ones that are new
-            q = Q(**{"%s__in" % mandatory_id_field.column_name: dataset[mandatory_id_field.column_name]})
+            q = Q(**{"%s__in" % mandatory_id_field.attribute: dataset[mandatory_id_field.column_name]})
             existent_antibodies = [antibody.ab_id for antibody in Antibody.objects.filter(q)]
             # removing the new is equivalent to leaving only the existent
-            dataset.df = dataset.df[dataset.df[mandatory_id_field.column_name] in existent_antibodies]
+
+            dataset.df = dataset.df.where(~dataset.df[mandatory_id_field.column_name].isin(existent_antibodies))
+            dataset.df = dataset.df.dropna(axis=0, how='all')
