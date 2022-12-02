@@ -4,6 +4,7 @@ from import_export.admin import ImportMixin
 from api.forms.AntibodyImportForm import AntibodyImportForm
 from api.models import Antibody, Application, Gene, Vendor, Specie, VendorDomain, VendorSynonym
 from api.resources.AntibodyResource import AntibodyResource
+from areg_portal.settings import FOR_NEW, FOR_EXTANT, METHOD
 
 
 @admin.register(Antibody)
@@ -18,10 +19,15 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     list_display = ('ab_id', 'ab_name', 'status')
     autocomplete_fields = ['vendor', 'antigen', 'species', 'source_organism']
 
+    def get_resource_kwargs(self, request, *args, **kwargs):
+        rk = super().get_resource_kwargs(request, *args, **kwargs)
+        rk['request'] = request
+        return rk
+
     def get_import_data_kwargs(self, request, *args, **kwargs):
-        kwargs['for_new'] = request.POST.get('for_new', None)
-        kwargs['for_extant'] = request.POST.get('for_extant', None)
-        kwargs['method'] = request.POST.get('method', None)
+        kwargs[FOR_NEW] = request.POST.get(FOR_NEW, None)
+        kwargs[FOR_EXTANT] = request.POST.get(FOR_EXTANT, None)
+        kwargs[METHOD] = request.POST.get(METHOD, None)
         return super().get_import_data_kwargs(request, *args, **kwargs)
 
 

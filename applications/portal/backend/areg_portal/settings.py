@@ -238,3 +238,14 @@ DEFAULT_UID = '43'
 
 # Search limit for Antibodies for returning without ranking
 LIMIT_NUM_RESULTS = 250
+
+FOR_NEW = 'for_new'
+FOR_EXTANT = 'for_extant'
+METHOD = 'method'
+IGNORE = 'ignore'
+INSERT = 'insert'
+UPDATE = 'update'
+DUPLICATE = 'duplicate'
+OVERRIDE = 'override'
+FILL = 'fill'
+SKIP = 'skip'

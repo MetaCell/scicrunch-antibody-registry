@@ -1,16 +1,18 @@
+from django.db.models import Q
 from import_export.fields import Field
 from import_export.instance_loaders import ModelInstanceLoader
 from import_export.resources import ModelResource
 
 from api.models import Antibody
+from areg_portal.settings import FOR_NEW, IGNORE, FOR_EXTANT, METHOD
 
 
 class AntibodyInstanceLoaderClass(ModelInstanceLoader):
     def get_instance(self, row):
         try:
             params = {}
-            for field in self.resource.get_import_mandatory_id_fields():
-                params[field.attribute] = field.clean(row)
+            mandatory_id_field = self.resource.get_import_mandatory_id_field()
+            params[mandatory_id_field.attribute] = mandatory_id_field.clean(row)
             for field in self.resource.get_import_alternative_id_fields():
                 if field.column_name in row:
                     params[field.attribute] = field.clean(row)
@@ -49,6 +51,10 @@ class AntibodyResource(ModelResource):
     accession = Field(attribute='accession', column_name='ab_id_old')
     ix = Field(attribute='ix', column_name='ix')
 
+    def __init__(self, request=None):
+        super()
+        self.request = request
+
     class Meta:
         model = Antibody
         fields = (
@@ -58,22 +64,52 @@ class AntibodyResource(ModelResource):
             'accession', 'ix')
         import_id_fields = ('id', 'old_id', 'ix')
         instance_loader_class = AntibodyInstanceLoaderClass
-        mandatory_id_fields = ['ab_id']
+        mandatory_id_field = 'ab_id'
         alternative_id_fields = ['accession', 'ix']
 
-    def get_import_mandatory_id_fields(self):
-        return [self.fields[f] for f in self._meta.mandatory_id_fields]
+    def get_import_mandatory_id_field(self):
+        return self.fields[self._meta.mandatory_id_field]
 
     def get_import_alternative_id_fields(self):
         return [self.fields[f] for f in self._meta.alternative_id_fields]
 
     def get_instance(self, instance_loader, row):
-        # If any of the mandatory_id_fields is missing we return
+        # If the mandatory_id_fields is missing we return
         # If all the alternative_id_fields are missing we return
-        if any([field.column_name not in row for field in self.get_import_mandatory_id_fields()]) or \
+        if self.get_import_mandatory_id_field().column_name not in row or \
                 all([field.column_name not in row for field in self.get_import_alternative_id_fields()]):
             return
         return instance_loader.get_instance(row)
 
     def before_import(self, dataset, using_transactions, dry_run, **kwargs):
-        pass
+        # FIXME: The following is a hacky way to have the kwargs from the Import Form to carry on to
+        # the Confirm Import Form using django sessions based on:
+        # https://stackoverflow.com/questions/52335510/extend-django-import-exports-import-form-to-specify-fixed-value-for-each-import
+
+        # if we are in the confirmation import request we read the values from session and reset the session after
+        if kwargs[FOR_NEW] is None:
+            kwargs[FOR_NEW] = self.request.session[FOR_NEW]
+            kwargs[FOR_EXTANT] = self.request.session[FOR_EXTANT]
+            kwargs[METHOD] = self.request.session[METHOD]
+            self.request.session[FOR_NEW] = None
+            self.request.session[FOR_EXTANT] = None
+            self.request.session[METHOD] = None
+        else:  # if we are in the import form request we set the values in session using the request values
+            self.request.session[FOR_NEW] = kwargs[FOR_NEW]
+            self.request.session[FOR_EXTANT] = kwargs[FOR_EXTANT]
+            self.request.session[METHOD] = kwargs[METHOD]
+
+        ignore_new = kwargs.get(FOR_NEW, IGNORE) == IGNORE
+        if ignore_new:
+            mandatory_id_field = self.get_import_mandatory_id_field()
+            # If there's no mandatory id field it means all the entries are new
+            if mandatory_id_field.column_name not in dataset:
+                dataset.df = dataset.df[0:0]
+                return
+
+            # if the mandatory id fields exists we need to query database with dataset['id']
+            # and remove from dataset the ones that are new
+            q = Q(**{"%s__in" % mandatory_id_field.column_name: dataset[mandatory_id_field.column_name]})
+            existent_antibodies = [antibody.ab_id for antibody in Antibody.objects.filter(q)]
+            # removing the new is equivalent to leaving only the existent
+            dataset.df = dataset.df[dataset.df[mandatory_id_field.column_name] in existent_antibodies]

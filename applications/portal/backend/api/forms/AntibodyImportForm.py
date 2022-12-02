@@ -1,20 +1,22 @@
-from import_export.forms import ImportForm
 from django import forms
+from import_export.forms import ImportForm
+
+from areg_portal.settings import IGNORE, INSERT, DUPLICATE, UPDATE, FILL, OVERRIDE
 
 FOR_NEW_CHOICES = (
-    ("ignore", "Don't Insert New Antibodies"),
-    ("insert", "Insert New Antibodies"),
+    (IGNORE, "Don't Insert New Antibodies"),
+    (INSERT, "Insert New Antibodies"),
 )
 
 FOR_EXTANT_CHOICES = (
-    ("ignore", "Do Nothing with Duplicates"),
-    ("update", "Update"),
-    ("duplicate", "Make duplicate"),
+    (IGNORE, "Do Nothing with Duplicates"),
+    (UPDATE, "Update"),
+    (DUPLICATE, "Make duplicate"),
 )
 
 METHOD_CHOICES = (
-    ("fill", "Update filled columns in CSV"),
-    ("overwrite", "Overwrite"),
+    (FILL, "Update filled columns in CSV"),
+    (OVERRIDE, "Overwrite"),
 )
 
 
