@@ -121,6 +121,9 @@ class AntibodyResource(ModelResource):
                 dataset.df = dataset.df.where(~dataset.df[mandatory_id_field.column_name].isin(existent_antibodies))
             # if both options are active we ignore entries with ab_id + other that do not exist in the db
             else:
+                # we need to check if the dataset has the id columns (required for update)
+                if mandatory_id_field.column_name not in dataset.headers:
+                    return
                 new_antibodies_with_ids = self._get_new_antibodies_with_id_references(dataset)
                 dataset.df = dataset.df.where(~dataset.df[mandatory_id_field.column_name].isin(new_antibodies_with_ids))
         # removes empty nan line when the full dataset is removed
@@ -143,8 +146,9 @@ class AntibodyResource(ModelResource):
 
     def before_import_row(self, row, row_number=None, **kwargs):
         mandatory_id_field = self.get_import_mandatory_id_field()
-        if row[mandatory_id_field.column_name] == '':
-            row[mandatory_id_field.column_name] = None
+        if mandatory_id_field.column_name in row:
+            if row[mandatory_id_field.column_name] == '':
+                row[mandatory_id_field.column_name] = None
         for field in self.get_import_alternative_id_fields():
             if field.column_name in row:
                 if row[field.column_name] == '':
