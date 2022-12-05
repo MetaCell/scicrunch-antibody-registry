@@ -100,18 +100,52 @@ class AntibodyResource(ModelResource):
             self.request.session[METHOD_KEY] = kwargs[METHOD_KEY]
 
         ignore_new = kwargs.get(FOR_NEW_KEY, IGNORE_KEY) == IGNORE_KEY
+        ignore_update = kwargs.get(FOR_EXTANT_KEY, IGNORE_KEY) == IGNORE_KEY
+        mandatory_id_field = self.get_import_mandatory_id_field()
+
         if ignore_new:
-            mandatory_id_field = self.get_import_mandatory_id_field()
             # If there's no mandatory id field it means all the entries are new
-            if mandatory_id_field.column_name not in dataset.headers:
+            # If ignore_update is also selected there's no entry to be considered
+            if mandatory_id_field.column_name not in dataset.headers or ignore_update:
                 dataset.df = dataset.df[0:0]
                 return
+            # if new entries are not meant to be considered but update ones are not
+            # we need keep the existing entries only
+            existent_antibodies = self._get_existent_antibodies(dataset)
+            dataset.df = dataset.df.where(dataset.df[mandatory_id_field.column_name].isin(existent_antibodies))
+        else:
+            # if new entries are meant to be considered but update ones are not
+            # we need to remove existing entries
+            if ignore_update:
+                existent_antibodies = self._get_existent_antibodies(dataset)
+                dataset.df = dataset.df.where(~dataset.df[mandatory_id_field.column_name].isin(existent_antibodies))
+            # if both options are active we ignore entries with ab_id + other that do not exist in the db
+            else:
+                new_antibodies_with_ids = self._get_new_antibodies_with_id_references(dataset)
+                dataset.df = dataset.df.where(~dataset.df[mandatory_id_field.column_name].isin(new_antibodies_with_ids))
+        # removes empty nan line when the full dataset is removed
+        dataset.df = dataset.df.dropna(axis=0, how='all')
 
-            # if the mandatory id fields exists we need to query database with dataset['id']
-            # and remove from dataset the ones that are new
-            q = Q(**{"%s__in" % mandatory_id_field.attribute: dataset[mandatory_id_field.column_name]})
-            existent_antibodies = [antibody.ab_id for antibody in Antibody.objects.filter(q)]
-            # removing the new is equivalent to leaving only the existent
+    def _get_existent_antibodies(self, dataset):
+        mandatory_id_field = self.get_import_mandatory_id_field()
+        # todo: update query to use alternative ids
+        q = Q(**{"%s__in" % mandatory_id_field.attribute: dataset[mandatory_id_field.column_name]})
+        return [antibody.ab_id for antibody in Antibody.objects.filter(q)]
 
-            dataset.df = dataset.df.where(~dataset.df[mandatory_id_field.column_name].isin(existent_antibodies))
-            dataset.df = dataset.df.dropna(axis=0, how='all')
+    def _get_new_antibodies_with_id_references(self, dataset):
+        mandatory_id_field = self.get_import_mandatory_id_field()
+
+        existent_antibodies = self._get_existent_antibodies(dataset)
+        # trick to remove empty string from the results
+        existent_antibodies.append('')
+        # todo: update to use alternative ids
+        return set(dataset[mandatory_id_field.column_name]) - set(existent_antibodies)
+
+    def before_import_row(self, row, row_number=None, **kwargs):
+        mandatory_id_field = self.get_import_mandatory_id_field()
+        if row[mandatory_id_field.column_name] == '':
+            row[mandatory_id_field.column_name] = None
+        for field in self.get_import_alternative_id_fields():
+            if field.column_name in row:
+                if row[field.column_name] == '':
+                    row[field.column_name] = None
