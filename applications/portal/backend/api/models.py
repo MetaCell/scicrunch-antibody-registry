@@ -1,10 +1,11 @@
-from django.db import models
-from django.utils import timezone
-from django.db.models import Transform, CharField, Index, Q, Value
-from django.db.models.functions import Length, Coalesce, Cast
-from django.contrib.postgres.search import SearchVector
 from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVector
+from django.db import models
+from django.db.models import Transform, CharField, Index, Q, Value
+from django.db.models.functions import Length, Coalesce
+from django.utils import timezone
 
+from api.utilities.functions import generate_id_aux
 from areg_portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
     ANTIBODY_CLONE_ID_MAX_LEN, ANTIGEN_ENTREZ_ID_MAX_LEN, ANTIGEN_UNIPROT_ID_MAX_LEN, STATUS_MAX_LEN, \
@@ -208,6 +209,9 @@ class Antibody(models.Model):
                 self.curate_time = timezone.now()
 
         super(Antibody, self).save(*args, **kwargs)
+        if self.ab_id is None:
+            self.ab_id = generate_id_aux(self.ix)
+            super(Antibody, self).save(*args, **kwargs)
 
     def __str__(self):
         return "AB_" + str(self.ab_id)

@@ -4,7 +4,7 @@ from import_export.instance_loaders import ModelInstanceLoader
 from import_export.resources import ModelResource
 
 from api.models import Antibody
-from areg_portal.settings import FOR_NEW, IGNORE, FOR_EXTANT, METHOD
+from areg_portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY
 
 
 class AntibodyInstanceLoaderClass(ModelInstanceLoader):
@@ -87,19 +87,19 @@ class AntibodyResource(ModelResource):
         # https://stackoverflow.com/questions/52335510/extend-django-import-exports-import-form-to-specify-fixed-value-for-each-import
 
         # if we are in the confirmation import request we read the values from session and reset the session after
-        if kwargs[FOR_NEW] is None:
-            kwargs[FOR_NEW] = self.request.session[FOR_NEW]
-            kwargs[FOR_EXTANT] = self.request.session[FOR_EXTANT]
-            kwargs[METHOD] = self.request.session[METHOD]
-            self.request.session[FOR_NEW] = None
-            self.request.session[FOR_EXTANT] = None
-            self.request.session[METHOD] = None
+        if kwargs[FOR_NEW_KEY] is None:
+            kwargs[FOR_NEW_KEY] = self.request.session[FOR_NEW_KEY]
+            kwargs[FOR_EXTANT_KEY] = self.request.session[FOR_EXTANT_KEY]
+            kwargs[METHOD_KEY] = self.request.session[METHOD_KEY]
+            self.request.session[FOR_NEW_KEY] = None
+            self.request.session[FOR_EXTANT_KEY] = None
+            self.request.session[METHOD_KEY] = None
         else:  # if we are in the import form request we set the values in session using the request values
-            self.request.session[FOR_NEW] = kwargs[FOR_NEW]
-            self.request.session[FOR_EXTANT] = kwargs[FOR_EXTANT]
-            self.request.session[METHOD] = kwargs[METHOD]
+            self.request.session[FOR_NEW_KEY] = kwargs[FOR_NEW_KEY]
+            self.request.session[FOR_EXTANT_KEY] = kwargs[FOR_EXTANT_KEY]
+            self.request.session[METHOD_KEY] = kwargs[METHOD_KEY]
 
-        ignore_new = kwargs.get(FOR_NEW, IGNORE) == IGNORE
+        ignore_new = kwargs.get(FOR_NEW_KEY, IGNORE_KEY) == IGNORE_KEY
         if ignore_new:
             mandatory_id_field = self.get_import_mandatory_id_field()
             # If there's no mandatory id field it means all the entries are new

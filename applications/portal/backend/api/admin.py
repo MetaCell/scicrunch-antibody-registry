@@ -4,7 +4,7 @@ from import_export.admin import ImportMixin
 from api.forms.AntibodyImportForm import AntibodyImportForm
 from api.models import Antibody, Application, Gene, Vendor, Specie, VendorDomain, VendorSynonym
 from api.resources.AntibodyResource import AntibodyResource
-from areg_portal.settings import FOR_NEW, FOR_EXTANT, METHOD
+from areg_portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 
 
 @admin.register(Antibody)
@@ -25,9 +25,9 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         return rk
 
     def get_import_data_kwargs(self, request, *args, **kwargs):
-        kwargs[FOR_NEW] = request.POST.get(FOR_NEW, None)
-        kwargs[FOR_EXTANT] = request.POST.get(FOR_EXTANT, None)
-        kwargs[METHOD] = request.POST.get(METHOD, None)
+        kwargs[FOR_NEW_KEY] = request.POST.get(FOR_NEW_KEY, None)
+        kwargs[FOR_EXTANT_KEY] = request.POST.get(FOR_EXTANT_KEY, None)
+        kwargs[METHOD_KEY] = request.POST.get(METHOD_KEY, None)
         return super().get_import_data_kwargs(request, *args, **kwargs)
 
 
