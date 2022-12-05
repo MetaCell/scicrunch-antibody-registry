@@ -56,10 +56,8 @@ def create_antibody(body: AddUpdateAntibodyDTO, userid: str) -> AntibodyDTO:
     antibody.accession = antibody.ab_id
     antibody.uid = userid
     antibody.status = STATUS.QUEUE
-
     if antibody.commercial_type != CommercialType.PERSONAL:
         try:
-
             existing: Antibody = Antibody.objects.get(vendor__id=antibody.vendor.id, catalog_num=body.catalogNum,
                                                       status=STATUS.CURATED)
             antibody.ab_id = existing.ab_id
@@ -71,13 +69,12 @@ def create_antibody(body: AddUpdateAntibodyDTO, userid: str) -> AntibodyDTO:
         except Antibody.MultipleObjectsReturned:
             log.error("Unexpectedly found multiple antibodies with catalog number %s and vendor %s",
                       body.vendorName, body.catalogNum)
-            existing = Antibody.objects.filter(
-                vendor__name=body.vendorName, catalog_num=body.catalogNum, status=STATUS.CURATED).first()
+            existing = Antibody.objects.filter(vendor__name=body.vendorName, catalog_num=body.catalogNum,
+                                               status=STATUS.CURATED).first()
             antibody.ab_id = existing.ab_id
             antibody.status = STATUS.REJECTED
             antibody.save()
             raise DuplicatedAntibody(antibody_mapper.to_dto(antibody))
-
     antibody.save()
     return antibody_mapper.to_dto(antibody)
 

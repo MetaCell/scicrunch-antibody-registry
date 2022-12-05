@@ -114,8 +114,6 @@ class AntibodyMapper(IDAOMapper):
             return v
 
     def to_dto(self, dao: Antibody) -> AntibodyDTO:
-        # todo: implement @afonsobspinto
-
         dao_dict = dao.__dict__
 
         for k, v in dao_dict.items():
