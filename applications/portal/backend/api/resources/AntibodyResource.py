@@ -4,6 +4,7 @@ from import_export.instance_loaders import ModelInstanceLoader
 from import_export.resources import ModelResource
 
 from api.models import Antibody
+from api.utilities.functions import remove_empty_string
 from areg_portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY
 
 
@@ -131,20 +132,18 @@ class AntibodyResource(ModelResource):
 
     def _get_existent_antibodies(self, dataset):
         mandatory_id_field = self.get_import_mandatory_id_field()
-        q = Q(**{"%s__in" % mandatory_id_field.attribute: dataset[mandatory_id_field.column_name]})
+        q = Q(**{"%s__in" % mandatory_id_field.attribute: remove_empty_string(dataset[mandatory_id_field.column_name])})
         alternative_q = Q()
         for field in self.get_import_alternative_id_fields():
             if field.column_name in dataset.headers:
-                alternative_q.add(Q(**{"%s__in" % field.attribute: dataset[field.column_name]}), Q.OR)
+                alternative_q.add(Q(**{"%s__in" % field.attribute: remove_empty_string(dataset[field.column_name])}), Q.OR)
         q.add(alternative_q, Q.OR)
         return [antibody.ab_id for antibody in Antibody.objects.filter(q)]
 
     def _get_new_antibodies_with_id_references(self, dataset):
         mandatory_id_field = self.get_import_mandatory_id_field()
         existent_antibodies = self._get_existent_antibodies(dataset)
-        # trick to remove empty string from the results
-        existent_antibodies.append('')
-        return set(dataset[mandatory_id_field.column_name]) - set(existent_antibodies)
+        return set(remove_empty_string(dataset[mandatory_id_field.column_name])) - set(existent_antibodies)
 
     def before_import_row(self, row, row_number=None, **kwargs):
         mandatory_id_field = self.get_import_mandatory_id_field()
