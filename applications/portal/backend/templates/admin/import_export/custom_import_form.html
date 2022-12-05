@@ -1,0 +1,18 @@
+{% extends 'admin/import_export/import.html' %}
+{% block content %}
+{{ block.super }}
+<script>
+    let method_select = document.getElementById('id_method')?.parentElement
+    method_select.style.display = 'none'
+    let for_extant_select = document.getElementById('id_for_extant')
+    for_extant_select.addEventListener("change", function () {
+        console.log(for_extant_select.value)
+        if (for_extant_select.value === 'update') {
+            method_select.style.display = 'block'
+        } else {
+            method_select.style.display = 'none'
+        }
+    })
+</script>
+{% endblock %}
+

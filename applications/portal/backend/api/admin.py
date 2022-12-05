@@ -9,6 +9,9 @@ from areg_portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 
 @admin.register(Antibody)
 class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
+
+    import_template_name = 'admin/import_export/custom_import_form.html'
+
     # todo set tmp_storage_class
     # https://django-import-export.readthedocs.io/en/latest/getting_started.html#import-confirmation
     import_form_class = AntibodyImportForm
