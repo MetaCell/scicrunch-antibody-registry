@@ -132,9 +132,11 @@ class AntibodyResource(ModelResource):
     def _get_existent_antibodies(self, dataset):
         mandatory_id_field = self.get_import_mandatory_id_field()
         q = Q(**{"%s__in" % mandatory_id_field.attribute: dataset[mandatory_id_field.column_name]})
+        alternative_q = Q()
         for field in self.get_import_alternative_id_fields():
             if field.column_name in dataset.headers:
-                q.add(Q(**{"%s__in" % field.attribute: dataset[field.column_name]}), Q.AND)
+                alternative_q.add(Q(**{"%s__in" % field.attribute: dataset[field.column_name]}), Q.OR)
+        q.add(alternative_q, Q.OR)
         return [antibody.ab_id for antibody in Antibody.objects.filter(q)]
 
     def _get_new_antibodies_with_id_references(self, dataset):
