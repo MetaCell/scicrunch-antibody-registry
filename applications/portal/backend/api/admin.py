@@ -1,5 +1,12 @@
 from django.contrib import admin
 from django.utils.html import format_html, format_html_join
+from django.db.models import Q
+from django.contrib.admin.options import (
+    unquote,
+    csrf_protect_m,
+    HttpResponseRedirect,
+)
+
 
 from api.models import (
     STATUS,
@@ -82,6 +89,7 @@ class VendorDomainAdmin(admin.ModelAdmin):
 
 @admin.register(Vendor)
 class VendorAdmin(admin.ModelAdmin):
+    delete_confirmation_template = "admin/vendor/delete_confirmation.html"
     list_filter = ("vendordomain__status",)
     search_fields = ("name",)
     fields = (
@@ -111,6 +119,35 @@ class VendorAdmin(admin.ModelAdmin):
         return format_html_join(
             "\n", "<li>{}</li>", ((id_with_ab(a),) for a in antibodies)
         )
+
+    def delete_view(self, request, object_id, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context["vendors"] = list(Vendor.objects.filter(~Q(id=object_id)))
+        return super().delete_view(
+            request,
+            object_id,
+            extra_context,
+        )
+
+    def get_deleted_objects(self, objs, request):
+        # This case is only for deleting single vendor
+        if request.method == "POST" and "_swap_ownership" in request.POST:
+            if not objs:
+                return super().get_deleted_objects(objs, request)
+            src_vendor = objs[0]
+            target_vendor = Vendor.objects.filter(id=request._post["vendors"]).first()
+
+            # We transfer the antibodies to the new vendor
+            target_vendor.antibody_set.set(src_vendor.antibody_set.all())
+            target_vendor.vendordomain_set.set(src_vendor.vendordomain_set.all())
+            src_vendor.antibody_set.remove()
+            src_vendor.vendordomain_set.remove()
+
+            # We save the updated model
+            src_vendor.save()
+            target_vendor.save()
+            return super().get_deleted_objects(objs, request)
+        return super().get_deleted_objects(objs, request)
 
 
 admin.site.register(VendorSynonym)
