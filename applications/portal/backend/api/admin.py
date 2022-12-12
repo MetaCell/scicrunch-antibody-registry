@@ -42,6 +42,17 @@ class AntibodyAdmin(admin.ModelAdmin):
     autocomplete_fields = ("vendor", "antigen", "species", "source_organism")
     inlines = (AntibodySpeciesInline, AntibodyApplicationsInline)
 
+    def get_search_results(self, request, queryset, search_term):
+        queryset, may_have_duplicates = super().get_search_results(
+            request,
+            queryset,
+            search_term,
+        )
+        search_term = search_term.strip()
+        if search_term.lower().startswith("ab_"):
+            queryset |= self.model.objects.filter(ab_id=search_term[3:])
+        return queryset, may_have_duplicates
+
 
 @admin.register(Gene)
 class GeneAdmin(admin.ModelAdmin):
@@ -138,7 +149,7 @@ class VendorAdmin(admin.ModelAdmin):
 
     def delete_view(self, request, object_id, extra_context=None):
         extra_context = extra_context or {}
-        extra_context["vendors"] = list(Vendor.objects.filter(~Q(id=object_id)))
+        extra_context["vendors"] = list(self.model.objects.filter(~Q(id=object_id)))
         extra_context["nb_antibodies"] = list(Antibody.objects.filter(vendor=object_id))
         return super().delete_view(
             request,
@@ -171,7 +182,7 @@ class VendorAdmin(admin.ModelAdmin):
             src_vendor = objs[0]
             # This case is only for deleting single vendor
             if "_swap_ownership" in request.POST:
-                target_vendor = Vendor.objects.filter(
+                target_vendor = self.model.objects.filter(
                     id=request._post["vendors"]
                 ).first()
                 self._swap_ownership(src_vendor, target_vendor)
