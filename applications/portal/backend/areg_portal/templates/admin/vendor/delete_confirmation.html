@@ -1,21 +1,24 @@
 {% extends "admin/delete_confirmation.html" %}
 
 {% block content %}
-    {% if vendors|length > 0 %}
+    {% if nb_antibodies|length > 0 %}
     <h2>Swap antibodies vendor</h2>
     <p>There is antibodies or domains linked to your vendor.</p>
     <p>Please select another vendor to which transfer antibodies and domains.</p>
+    <div class="submit-row">
     <form method="post">{% csrf_token %}
-        <div>
         <select name="vendors" id="vendors">
             {% for vendor in vendors %}
             <option value="{{ vendor.id }}">{{ vendor.name }}</option>
             {% endfor %}
         </select>
-        <input type="submit" name="_swap_ownership" value="Delete and transfer owernship">
-        <a href="#" class="button cancel-link">Take me back</a>
+        <div>
+            <input type="submit" name="_swap_ownership" value="Delete and transfer owernship">
+            <input type="submit" name="_force_delete" value="Delete vendor and antibodies">
+            <a href="#" class="button cancel-link">Take me back</a>
         </div>
-        </form>
+    </form>
+    </div>
     {% endif %}
     {{ block.super }}
 {% endblock %}

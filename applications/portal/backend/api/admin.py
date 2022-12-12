@@ -123,30 +123,47 @@ class VendorAdmin(admin.ModelAdmin):
     def delete_view(self, request, object_id, extra_context=None):
         extra_context = extra_context or {}
         extra_context["vendors"] = list(Vendor.objects.filter(~Q(id=object_id)))
+        extra_context["nb_antibodies"] = list(Antibody.objects.filter(vendor=object_id))
         return super().delete_view(
             request,
             object_id,
             extra_context,
         )
 
+    def _force_delete(self, src_vendor: Vendor):
+        # We make copies of the iterables, just in case
+        to_delete = [a for a in src_vendor.antibody_set.all()]
+        to_delete.extend(d for d in src_vendor.vendordomain_set.all())
+        for entity in to_delete:
+            entity.delete()
+
+    def _swap_ownership(self, src_vendor, target_vendor):
+        # We transfer the antibodies to the new vendor
+        target_vendor.antibody_set.set(src_vendor.antibody_set.all())
+        target_vendor.vendordomain_set.set(src_vendor.vendordomain_set.all())
+        src_vendor.antibody_set.remove()
+        src_vendor.vendordomain_set.remove()
+
+        # We save the updated model
+        src_vendor.save()
+        target_vendor.save()
+
     def get_deleted_objects(self, objs, request):
-        # This case is only for deleting single vendor
-        if request.method == "POST" and "_swap_ownership" in request.POST:
+        if request.method == "POST":
             if not objs:
                 return super().get_deleted_objects(objs, request)
             src_vendor = objs[0]
-            target_vendor = Vendor.objects.filter(id=request._post["vendors"]).first()
-
-            # We transfer the antibodies to the new vendor
-            target_vendor.antibody_set.set(src_vendor.antibody_set.all())
-            target_vendor.vendordomain_set.set(src_vendor.vendordomain_set.all())
-            src_vendor.antibody_set.remove()
-            src_vendor.vendordomain_set.remove()
-
-            # We save the updated model
-            src_vendor.save()
-            target_vendor.save()
-            return super().get_deleted_objects(objs, request)
+            # This case is only for deleting single vendor
+            if "_swap_ownership" in request.POST:
+                target_vendor = Vendor.objects.filter(
+                    id=request._post["vendors"]
+                ).first()
+                self._swap_ownership(src_vendor, target_vendor)
+                return super().get_deleted_objects(objs, request)
+            # This case if for deleting a vendor, forcing antibody deletion also
+            if "_force_delete" in request.POST:
+                self._force_delete(src_vendor)
+                return super().get_deleted_objects(objs, request)
         return super().get_deleted_objects(objs, request)
 
 
