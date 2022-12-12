@@ -1,11 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html, format_html_join
 from django.db.models import Q
-from django.contrib.admin.options import (
-    unquote,
-    csrf_protect_m,
-    HttpResponseRedirect,
-)
+from django.utils.translation import gettext_lazy as _
 
 
 from api.models import (
@@ -62,6 +58,25 @@ class ApplicationAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
+class NonCuratedDomains(admin.SimpleListFilter):
+    title = "Vendor Domain Status"
+
+    # Parameter for the filter that will be used in the URL query.
+    parameter_name = "curated_domain"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("Non-curated", ("Vendors with non-curated domains")),
+            ("Curated", ("Vendors with curated domains")),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == "Non-curated":
+            return queryset.filter(~Q(vendordomain__status=STATUS.CURATED))
+        if self.value() == "Curated":
+            return queryset.filter(vendordomain__status=STATUS.CURATED)
+
+
 class VendorSynonymInline(admin.TabularInline):
     model = VendorSynonym
     show_change_link = True
@@ -76,21 +91,22 @@ class VendorDomainInline(admin.TabularInline):
     extra = 0
 
 
-@admin.register(VendorDomain)
-class VendorDomainAdmin(admin.ModelAdmin):
-    list_display = (
-        "base_url",
-        "vendor",
-        "status",
-        "is_domain_visible",
-    )
-    list_editable = ("is_domain_visible",)
+# @admin.register(VendorDomain)
+# class VendorDomainAdmin(admin.ModelAdmin):
+#     list_display = (
+#         "base_url",
+#         "vendor",
+#         "status",
+#         "is_domain_visible",
+#     )
+#     list_editable = ("is_domain_visible",)
 
 
 @admin.register(Vendor)
 class VendorAdmin(admin.ModelAdmin):
     delete_confirmation_template = "admin/vendor/delete_confirmation.html"
-    list_filter = ("vendordomain__status",)
+    # list_filter = ("vendordomain__status",)
+    list_filter = (NonCuratedDomains,)
     search_fields = ("name",)
     fields = (
         "nb_antibodies",
@@ -167,4 +183,4 @@ class VendorAdmin(admin.ModelAdmin):
         return super().get_deleted_objects(objs, request)
 
 
-admin.site.register(VendorSynonym)
+# admin.site.register(VendorSynonym)
