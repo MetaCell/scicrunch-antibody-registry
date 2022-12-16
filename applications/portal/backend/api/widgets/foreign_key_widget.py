@@ -12,7 +12,7 @@ class ForeignKeyWidgetWithCreation(ForeignKeyWidget):
 
     def clean(self, value, row=None, **kwargs):
         try:
-            super().clean(value, row, **kwargs)
+            return super().clean(value, row, **kwargs)
         except self.model.DoesNotExist:
             params = {self.field: value}
             if row is not None:
