@@ -1,3 +1,5 @@
+from typing import Callable
+
 from django.db.models import Q
 from import_export.fields import Field
 
@@ -6,8 +8,21 @@ from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
 
 from api.models import Antibody, Vendor
+from api.services.vendor_service import create_vendor
 from api.utilities.functions import remove_empty_string
 from areg_portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY
+
+
+class ForeignKeyWidgetWithCreation(ForeignKeyWidget):
+    def __init__(self, model, field='pk', use_natural_foreign_keys=False, create: Callable = None, **kwargs):
+        super().__init__(model, field, use_natural_foreign_keys, **kwargs)
+        self.create = create
+
+    def clean(self, value, row=None, **kwargs):
+        try:
+            super().clean(value, row, **kwargs)
+        except self.model.DoesNotExist:
+            return self.create(**{self.field: value})
 
 
 class AntibodyInstanceLoaderClass(ModelInstanceLoader):
@@ -29,7 +44,10 @@ class AntibodyInstanceLoaderClass(ModelInstanceLoader):
 
 class AntibodyResource(ModelResource):
     name = Field(attribute='ab_name', column_name='NAME')
-    vendor = Field(attribute='vendor__name', column_name='VENDOR', readonly=True)
+    vendor = Field(
+        column_name='VENDOR',
+        attribute='vendor',
+        widget=ForeignKeyWidgetWithCreation(model=Vendor, field='name', create=create_vendor))
     catalog_num = Field(attribute='catalog_num', column_name='base cat')
     url = Field(attribute='url', column_name='URL')
     target = Field(attribute='antigen__symbol', column_name='TARGET', readonly=True)
@@ -60,12 +78,8 @@ class AntibodyResource(ModelResource):
 
     class Meta:
         model = Antibody
-        vendor = Field(
-            column_name='vendor',
-            attribute='vendor',
-            widget=ForeignKeyWidget(Vendor, 'name'))
         fields = (
-            'name', 'catalog_num', 'url', 'target', 'species', 'clonality', 'host', 'clone_id',
+            'name', 'vendor', 'catalog_num', 'url', 'target', 'species', 'clonality', 'host', 'clone_id',
             'product_isotype', 'product_conjugate', 'product_form', 'comments', 'defining_citation', 'subregion',
             'modifications', 'gid', 'disc_date', 'commercial_type', 'uniprot', 'epitope', 'cat_alt', 'ab_id',
             'accession', 'ix')
@@ -141,7 +155,8 @@ class AntibodyResource(ModelResource):
         alternative_q = Q()
         for field in self.get_import_alternative_id_fields():
             if field.column_name in dataset.headers:
-                alternative_q.add(Q(**{"%s__in" % field.attribute: remove_empty_string(dataset[field.column_name])}), Q.OR)
+                alternative_q.add(Q(**{"%s__in" % field.attribute: remove_empty_string(dataset[field.column_name])}),
+                                  Q.OR)
         q.add(alternative_q, Q.OR)
         return [antibody.ab_id for antibody in Antibody.objects.filter(q)]
 
