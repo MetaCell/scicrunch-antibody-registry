@@ -161,7 +161,7 @@ class AntibodyResource(ModelResource):
             if field.column_name in dataset.headers:
                 alternative_q.add(Q(**{"%s__in" % field.attribute: remove_empty_string(dataset[field.column_name])}),
                                   Q.OR)
-        q.add(alternative_q, Q.OR)
+        q.add(alternative_q, Q.AND)
         return [antibody.ab_id for antibody in Antibody.objects.filter(q)]
 
     def _get_new_antibodies_with_id_references(self, dataset):
