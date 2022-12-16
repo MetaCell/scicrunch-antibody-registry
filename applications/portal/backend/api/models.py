@@ -13,7 +13,7 @@ from areg_portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN,
     ANTIBODY_TARGET_MODIFICATION_MAX_LEN, ANTIBODY_TARGET_SUBREGION_MAX_LEN, ANTIBODY_DEFINING_CITATION_MAX_LEN, \
     ANTIBODY_ID_MAX_LEN, ANTIBODY_CAT_ALT_MAX_LEN, VENDOR_COMMERCIAL_TYPE_MAX_LEN, ANTIBODY_TARGET_EPITOPE_MAX_LEN, \
     VENDOR_NIF_MAX_LEN, ANTIBODY_TARGET_SPECIES_MAX_LEN, ANTIBODY_DISC_DATE_MAX_LEN, \
-    URL_MAX_LEN
+    URL_MAX_LEN, VENDOR_EU_ID_MAX_LEN, ANTIBODY_UID_MAX_LEN
 
 
 @CharField.register_lookup
@@ -76,7 +76,7 @@ class STATUS(models.TextChoices):
 class Vendor(models.Model):
     name = models.CharField(max_length=VENDOR_MAX_LEN, db_column='vendor', db_index=True)
     nif_id = models.CharField(max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id', null=True)
-    eu_id = models.CharField(max_length=255, db_column='euid', null=True)
+    eu_id = models.CharField(max_length=VENDOR_EU_ID_MAX_LEN, db_column='euid', null=True)
     commercial_type = models.CharField(
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
         choices=CommercialType.choices,
@@ -159,7 +159,7 @@ class Antibody(models.Model):
         null=True
     )
     # This user id maps the users in keycloak
-    uid = models.CharField(max_length=256, null=True, db_index=True)
+    uid = models.CharField(max_length=ANTIBODY_UID_MAX_LEN, null=True, db_index=True)
     # Maps to old users -- used only for migration purpose
     uid_legacy = models.IntegerField(null=True)
     catalog_num = models.CharField(max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True)

@@ -14,6 +14,7 @@ from openapi.models import Antibody as AntibodyDTO
 from openapi import models as api_models
 from api.mappers.imapper import IDAOMapper
 from .mapping_utils import dict_to_snake, dict_to_camel, to_camel, to_snake
+from ..services.gene_service import get_or_create_gene
 
 dto_fields = {to_snake(f) for f in AntibodyDTO.__fields__}
 
@@ -41,14 +42,11 @@ class AntibodyMapper(IDAOMapper):
         if dto.abTarget:
             antigen_symbol = dto.abTarget
             # del dto.abTarget
-            try:
-                ab.antigen = Gene.objects.get(symbol=antigen_symbol)
-            except Gene.DoesNotExist:
+            gene, new = get_or_create_gene(symbol=antigen_symbol)
+            ab.antigen = gene
+            if new:
                 # TODO what to do for non existing antigens? Create one? Should fill the table of antigens from a real data source?
                 log.warn("No antigen: %s", antigen_symbol)
-                ag = Gene(symbol=antigen_symbol)
-                ag.save()
-                ab.antigen = ag
 
         if dto.sourceOrganism:
             specie = dto.sourceOrganism

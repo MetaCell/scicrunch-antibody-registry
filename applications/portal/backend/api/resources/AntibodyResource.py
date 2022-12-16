@@ -7,22 +7,28 @@ from import_export.instance_loaders import ModelInstanceLoader
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
 
-from api.models import Antibody, Vendor
+from api.models import Antibody, Vendor, Gene
+from api.services.gene_service import get_or_create_gene
 from api.services.vendor_service import create_vendor
 from api.utilities.functions import remove_empty_string
 from areg_portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY
 
 
 class ForeignKeyWidgetWithCreation(ForeignKeyWidget):
-    def __init__(self, model, field='pk', use_natural_foreign_keys=False, create: Callable = None, **kwargs):
+    def __init__(self, model, field='pk', use_natural_foreign_keys=False, create: Callable = None, other_cols_map=None,
+                 **kwargs):
         super().__init__(model, field, use_natural_foreign_keys, **kwargs)
+        self.other_cols = other_cols_map if other_cols_map is not None else {}
         self.create = create
 
     def clean(self, value, row=None, **kwargs):
         try:
             super().clean(value, row, **kwargs)
         except self.model.DoesNotExist:
-            return self.create(**{self.field: value})
+            params = {self.field: value}
+            if row is not None:
+                params = {**params, **{self.other_cols[p]: row[p] for p in self.other_cols if row[p] != ''}}
+            return self.create(**params)
 
 
 class AntibodyInstanceLoaderClass(ModelInstanceLoader):
@@ -47,10 +53,17 @@ class AntibodyResource(ModelResource):
     vendor = Field(
         column_name='VENDOR',
         attribute='vendor',
-        widget=ForeignKeyWidgetWithCreation(model=Vendor, field='name', create=create_vendor))
+        widget=ForeignKeyWidgetWithCreation(model=Vendor, field='name', create=create_vendor)
+    )
     catalog_num = Field(attribute='catalog_num', column_name='base cat')
     url = Field(attribute='url', column_name='URL')
-    target = Field(attribute='antigen__symbol', column_name='TARGET', readonly=True)
+    target = Field(
+        column_name='TARGET',
+        attribute='antigen',
+        widget=ForeignKeyWidgetWithCreation(model=Gene, field='symbol',
+                                            create=lambda **kwargs: get_or_create_gene(**kwargs)[0],
+                                            other_cols_map={'GID': 'entrez_id', 'UNIPROT': 'uniprot_id'})
+    )
     species = Field(attribute='species__name', column_name='SPECIES', readonly=True)
     clonality = Field(attribute='clonality', column_name='CLONALITY')
     host = Field(attribute='source_organism__name', column_name='HOST', readonly=True)
@@ -62,10 +75,8 @@ class AntibodyResource(ModelResource):
     defining_citation = Field(attribute='defining_citation', column_name='CITATION')
     subregion = Field(attribute='subregion', column_name='SUBREGION')
     modifications = Field(attribute='modifications', column_name='MODIFICATION')
-    gid = Field(attribute='antigen__entrez_id', column_name='GID', readonly=True)
     disc_date = Field(attribute='disc_date', column_name='DISC')
     commercial_type = Field(attribute='commercial_type', column_name='TYPE')
-    uniprot = Field(attribute='antigen__uniprot_id', column_name='UNIPROT', readonly=True)
     epitope = Field(attribute='epitope', column_name='EPITOPE')
     cat_alt = Field(attribute='cat_alt', column_name='CAT ALT')
     ab_id = Field(attribute='ab_id', column_name='id')
