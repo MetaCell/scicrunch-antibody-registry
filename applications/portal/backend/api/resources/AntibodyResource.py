@@ -7,8 +7,9 @@ from import_export.instance_loaders import ModelInstanceLoader
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
 
-from api.models import Antibody, Vendor, Gene
+from api.models import Antibody, Vendor, Gene, Specie
 from api.services.gene_service import get_or_create_gene
+from api.services.specie_service import get_or_create_specie
 from api.services.vendor_service import create_vendor
 from api.utilities.functions import remove_empty_string
 from areg_portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY
@@ -66,7 +67,12 @@ class AntibodyResource(ModelResource):
     )
     species = Field(attribute='species__name', column_name='SPECIES', readonly=True)
     clonality = Field(attribute='clonality', column_name='CLONALITY')
-    host = Field(attribute='source_organism__name', column_name='HOST', readonly=True)
+    host = Field(
+        column_name='HOST',
+        attribute='source_organism',
+        widget=ForeignKeyWidgetWithCreation(model=Specie, field='name',
+                                            create=lambda **kwargs: get_or_create_specie(**kwargs)[0])
+    )
     clone_id = Field(attribute='clone_id', column_name='clone')
     product_isotype = Field(attribute='product_isotype', column_name='ISOTYPE')
     product_conjugate = Field(attribute='product_conjugate', column_name='CONJUGATE')
