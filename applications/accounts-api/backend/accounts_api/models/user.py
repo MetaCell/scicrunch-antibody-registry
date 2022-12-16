@@ -206,6 +206,7 @@ class User(Model):
     def groups(self):
         """Gets the groups of this User.
 
+          # noqa: E501
 
         :return: The groups of this User.
         :rtype: List[str]
@@ -216,6 +217,7 @@ class User(Model):
     def groups(self, groups):
         """Sets the groups of this User.
 
+          # noqa: E501
 
         :param groups: The groups of this User.
         :type groups: List[str]
@@ -227,7 +229,7 @@ class User(Model):
     def profiles(self):
         """Gets the profiles of this User.
 
-        sddssd  # noqa: E501
+          # noqa: E501
 
         :return: The profiles of this User.
         :rtype: Dict[str, object]
@@ -238,7 +240,7 @@ class User(Model):
     def profiles(self, profiles):
         """Sets the profiles of this User.
 
-        sddssd  # noqa: E501
+          # noqa: E501
 
         :param profiles: The profiles of this User.
         :type profiles: Dict[str, object]
@@ -250,6 +252,7 @@ class User(Model):
     def registration_date(self):
         """Gets the registration_date of this User.
 
+          # noqa: E501
 
         :return: The registration_date of this User.
         :rtype: date
@@ -260,6 +263,7 @@ class User(Model):
     def registration_date(self, registration_date):
         """Sets the registration_date of this User.
 
+          # noqa: E501
 
         :param registration_date: The registration_date of this User.
         :type registration_date: date
@@ -271,6 +275,7 @@ class User(Model):
     def avatar(self):
         """Gets the avatar of this User.
 
+          # noqa: E501
 
         :return: The avatar of this User.
         :rtype: str
@@ -281,6 +286,7 @@ class User(Model):
     def avatar(self, avatar):
         """Sets the avatar of this User.
 
+          # noqa: E501
 
         :param avatar: The avatar of this User.
         :type avatar: str
@@ -292,6 +298,7 @@ class User(Model):
     def website(self):
         """Gets the website of this User.
 
+          # noqa: E501
 
         :return: The website of this User.
         :rtype: str
@@ -302,6 +309,7 @@ class User(Model):
     def website(self, website):
         """Sets the website of this User.
 
+          # noqa: E501
 
         :param website: The website of this User.
         :type website: str

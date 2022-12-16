@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 
-from cloudharness.utils.server import init_flask, main
+import connexion
 
-app = init_flask(
-    title="Accounts middleware API",
-    webapp=False,
-)
+from accounts_api import encoder
+
+
+def main():
+    app = connexion.App(__name__, specification_dir='./openapi/')
+    app.app.json_encoder = encoder.JSONEncoder
+    app.add_api('openapi.yaml',
+                arguments={'title': 'accounts_api'},
+                pythonic_params=True)
+
+    app.run(port=8080)
 
 
 if __name__ == '__main__':

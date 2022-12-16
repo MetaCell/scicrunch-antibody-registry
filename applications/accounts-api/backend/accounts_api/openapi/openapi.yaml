@@ -10,8 +10,10 @@ info:
 servers:
 - url: /api
 tags:
-- name: infrastructure
-- name: users
+- description: ""
+  name: infrastructure
+- description: ""
+  name: users
 paths:
   /live:
     get:
@@ -47,29 +49,26 @@ paths:
       x-openapi-router-controller: accounts_api.controllers.infrastructure_controller
   /users:
     get:
-      summary: Get list of users based on query
       operationId: get_users
       parameters:
       - description: query filter
+        explode: true
         in: query
         name: query_string
         required: false
         schema:
           type: string
-      security:
-      - bearerAuth: []
+        style: form
       responses:
         "200":
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  users:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/get_users_200_response'
           description: Get list of users
+      security:
+      - bearerAuth: []
+      summary: Get list of users based on query
       tags:
       - users
       x-openapi-router-controller: accounts_api.controllers.users_controller
@@ -144,6 +143,35 @@ paths:
       tags:
       - users
       x-openapi-router-controller: accounts_api.controllers.users_controller
+  /users/{username}/password:
+    put:
+      description: ""
+      operationId: users_username_password_put
+      parameters:
+      - description: user name or email
+        explode: false
+        in: path
+        name: username
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePassword'
+        required: true
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: incorrect old password
+      security:
+      - bearerAuth: []
+      tags:
+      - users
+      x-openapi-router-controller: accounts_api.controllers.users_controller
 components:
   schemas:
     Valid:
@@ -152,6 +180,7 @@ components:
           type: string
       type: object
     Url:
+      description: ""
       type: string
     User:
       additionalProperties: true
@@ -161,7 +190,7 @@ components:
         lastName: lastName
         website: website
         profiles:
-          key: '{}'
+          key: ""
         registrationDate: 2000-01-23
         groups:
         - groups
@@ -187,26 +216,80 @@ components:
           description: Last Name of the keycloak user
           type: string
         groups:
+          description: ""
           items:
             type: string
           readOnly: true
           type: array
         profiles:
           additionalProperties: true
-          description: sddssd
+          description: ""
           type: object
         registrationDate:
+          description: ""
           format: date
           type: string
         avatar:
+          description: ""
           type: string
         website:
+          description: ""
           type: string
       title: User
       type: object
     Profiles:
       additionalProperties: true
-      description: sddssd
+      description: ""
+      type: object
+    UpdatePassword:
+      example:
+        old_password: old_password
+        new_password: new_password
+      properties:
+        old_password:
+          title: old_password
+          type: string
+        new_password:
+          title: new_password
+          type: string
+      title: UpdatePassword
+      type: object
+    get_users_200_response:
+      example:
+        users:
+        - firstName: firstName
+          lastName: lastName
+          website: website
+          profiles:
+            key: ""
+          registrationDate: 2000-01-23
+          groups:
+          - groups
+          - groups
+          id: id
+          avatar: avatar
+          email: email
+          username: username
+        - firstName: firstName
+          lastName: lastName
+          website: website
+          profiles:
+            key: ""
+          registrationDate: 2000-01-23
+          groups:
+          - groups
+          - groups
+          id: id
+          avatar: avatar
+          email: email
+          username: username
+      properties:
+        users:
+          items:
+            $ref: '#/components/schemas/User'
+          title: users
+          type: array
+      title: get_users_200_response
       type: object
   securitySchemes:
     bearerAuth:

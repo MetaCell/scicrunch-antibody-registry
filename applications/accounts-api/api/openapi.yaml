@@ -134,18 +134,28 @@ paths:
         in: path
         required: true
 
-  /users/{userid}/password:
+  /users/{username}/password:
     put:
       description: ""
+      security:
+        - bearerAuth: []
+      tags:
+        - users
       parameters:
-        - name: old_password
+        - name: username
+          description: user name or email
           schema:
             type: string
-        - name: new_password
-          schema:
-            type: string
+          in: path
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePassword"
+        required: true
       responses:
-        "200":
+        "204":
           description: OK
         "400":
           description: incorrect old password
@@ -202,6 +212,13 @@ components:
       description: ""
       type: object
       additionalProperties: true
+    UpdatePassword:
+      type: object
+      properties:
+        old_password:
+          type: string
+        new_password:
+          type: string
   securitySchemes:
     bearerAuth:
       scheme: bearer

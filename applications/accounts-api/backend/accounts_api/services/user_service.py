@@ -1,15 +1,23 @@
 from datetime import datetime
 from keycloak.exceptions import KeycloakGetError, KeycloakError
+from keycloak import KeycloakOpenID
 from accounts_api.models import User
-from cloudharness.auth import AuthClient
+from cloudharness.auth import AuthClient, get_server_url, get_auth_realm
 from cloudharness import log
+from cloudharness.applications import get_configuration
 import typing
+
 # from cloudharness.models import User as CHUser # Cloudharness 2.0.0
 
-class UserNotFound(Exception): pass
+accounts_app = get_configuration('accounts')
 
 
-class UserNotAuthorized(Exception): pass
+class UserNotFound(Exception):
+    pass
+
+
+class UserNotAuthorized(Exception):
+    pass
 
 
 def get_user(userid: str) -> User:
@@ -50,18 +58,20 @@ def get_users(query: str) -> typing.List[User]:
 
 
 def map_user(kc_user) -> User:
-    user = kc_user if isinstance(kc_user, dict) else User.from_dict(kc_user._raw_dict)
+    user = kc_user if isinstance(
+        kc_user, dict) else User.from_dict(kc_user._raw_dict)
     if 'attributes' not in kc_user or not kc_user['attributes']:
         kc_user['attributes'] = {}
 
     user.profiles = {k[len('profile--')::]: kc_user['attributes'][k][0]
-                     for k in kc_user['attributes'] if kc_user['attributes'][k] and len(k) > len('profile--') and k.startswith('profile--') }
+                     for k in kc_user['attributes'] if kc_user['attributes'][k] and len(k) > len('profile--') and k.startswith('profile--')}
     try:
         user.avatar = kc_user['attributes'].get('avatar', [None])[0]
     except (IndexError, TypeError):
         # no avatar is set or is empty
         pass
-    user.registration_date = datetime.fromtimestamp(kc_user['createdTimestamp'] / 1000)
+    user.registration_date = datetime.fromtimestamp(
+        kc_user['createdTimestamp'] / 1000)
     try:
         user.website = kc_user['attributes'].get('website', [None])[0]
     except (IndexError, TypeError):
@@ -73,7 +83,7 @@ def map_user(kc_user) -> User:
     return user
 
 
-def update_user(userid, user: User):    
+def update_user(userid, user: User):
     client = AuthClient()
 
     try:
@@ -98,3 +108,29 @@ def update_user(userid, user: User):
         if e.response_code == 404:
             raise UserNotFound(userid)
         raise Exception("Unhandled Keycloak exception") from e
+
+
+def validate_password(username: str, old_password: str):
+    keycloak_openid = KeycloakOpenID(server_url=get_server_url(),
+                                     client_id=accounts_app.webclient.id,
+                                     realm_name=get_auth_realm(),
+                                     client_secret_key=accounts_app.webclient.secret)
+    try:
+        keycloak_openid.token(username, old_password)
+    except KeycloakError as e:
+        if e.response_code == 401:
+            raise UserNotAuthorized()
+        raise Exception("Unhandled Keycloak exception") from e
+
+
+def update_password(username: str, new_password: str):
+    client = AuthClient()
+    admin_client = client.get_admin_client()
+    try:
+        admin_client.set_user_password(
+            admin_client.get_user_id(username=username),
+            new_password, temporary=False
+        )
+    except KeycloakError as e:
+        raise Exception(
+            "Unhandled Keycloak exception while updating user") from e
