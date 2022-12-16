@@ -1,35 +1,16 @@
-from typing import Callable
-
 from django.db.models import Q
 from import_export.fields import Field
-
 from import_export.instance_loaders import ModelInstanceLoader
 from import_export.resources import ModelResource
-from import_export.widgets import ForeignKeyWidget
 
 from api.models import Antibody, Vendor, Gene, Specie
 from api.services.gene_service import get_or_create_gene
 from api.services.specie_service import get_or_create_specie
-from api.services.vendor_service import create_vendor
+from api.services.vendor_service import get_or_create_vendor
 from api.utilities.functions import remove_empty_string
+from api.widgets.foreign_key_widget import ForeignKeyWidgetWithCreation
+from api.widgets.many_to_many_widget import ManyToManyWidgetWithCreation
 from areg_portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY
-
-
-class ForeignKeyWidgetWithCreation(ForeignKeyWidget):
-    def __init__(self, model, field='pk', use_natural_foreign_keys=False, create: Callable = None, other_cols_map=None,
-                 **kwargs):
-        super().__init__(model, field, use_natural_foreign_keys, **kwargs)
-        self.other_cols = other_cols_map if other_cols_map is not None else {}
-        self.create = create
-
-    def clean(self, value, row=None, **kwargs):
-        try:
-            super().clean(value, row, **kwargs)
-        except self.model.DoesNotExist:
-            params = {self.field: value}
-            if row is not None:
-                params = {**params, **{self.other_cols[p]: row[p] for p in self.other_cols if row[p] != ''}}
-            return self.create(**params)
 
 
 class AntibodyInstanceLoaderClass(ModelInstanceLoader):
@@ -54,7 +35,8 @@ class AntibodyResource(ModelResource):
     vendor = Field(
         column_name='VENDOR',
         attribute='vendor',
-        widget=ForeignKeyWidgetWithCreation(model=Vendor, field='name', create=create_vendor)
+        widget=ForeignKeyWidgetWithCreation(model=Vendor, field='name',
+                                            get_or_create=lambda **kwargs: get_or_create_vendor(**kwargs)[0])
     )
     catalog_num = Field(attribute='catalog_num', column_name='base cat')
     url = Field(attribute='url', column_name='URL')
@@ -62,16 +44,21 @@ class AntibodyResource(ModelResource):
         column_name='TARGET',
         attribute='antigen',
         widget=ForeignKeyWidgetWithCreation(model=Gene, field='symbol',
-                                            create=lambda **kwargs: get_or_create_gene(**kwargs)[0],
+                                            get_or_create=lambda **kwargs: get_or_create_gene(**kwargs)[0],
                                             other_cols_map={'GID': 'entrez_id', 'UNIPROT': 'uniprot_id'})
     )
-    species = Field(attribute='species__name', column_name='SPECIES', readonly=True)
+    species = Field(
+        column_name='SPECIES',
+        attribute='species',
+        widget=ManyToManyWidgetWithCreation(model=Specie, separator=';', field='name',
+                                            get_or_create=lambda **kwargs: get_or_create_specie(**kwargs)[0])
+    )
     clonality = Field(attribute='clonality', column_name='CLONALITY')
     host = Field(
         column_name='HOST',
         attribute='source_organism',
         widget=ForeignKeyWidgetWithCreation(model=Specie, field='name',
-                                            create=lambda **kwargs: get_or_create_specie(**kwargs)[0])
+                                            get_or_create=lambda **kwargs: get_or_create_specie(**kwargs)[0])
     )
     clone_id = Field(attribute='clone_id', column_name='clone')
     product_isotype = Field(attribute='product_isotype', column_name='ISOTYPE')

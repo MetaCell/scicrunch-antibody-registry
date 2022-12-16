@@ -7,16 +7,11 @@ from django.core.paginator import Paginator
 
 from api.mappers.antibody_mapper import AntibodyMapper
 from api.models import STATUS, Antibody, CommercialType
+from api.utilities.exceptions import DuplicatedAntibody
 from api.utilities.functions import generate_id_aux
 from cloudharness import log
 from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO, PaginatedAntibodies
-
-
-class DuplicatedAntibody(Exception):
-    def __init__(self, antibody: AntibodyDTO):
-        super().__init__("Antibody exists")
-        self.antibody = antibody
 
 
 antibody_mapper = AntibodyMapper()
