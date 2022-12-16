@@ -1,9 +1,11 @@
 from django.db.models import Q
 from import_export.fields import Field
+
 from import_export.instance_loaders import ModelInstanceLoader
 from import_export.resources import ModelResource
+from import_export.widgets import ForeignKeyWidget
 
-from api.models import Antibody
+from api.models import Antibody, Vendor
 from api.utilities.functions import remove_empty_string
 from areg_portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY
 
@@ -58,8 +60,12 @@ class AntibodyResource(ModelResource):
 
     class Meta:
         model = Antibody
+        vendor = Field(
+            column_name='vendor',
+            attribute='vendor',
+            widget=ForeignKeyWidget(Vendor, 'name'))
         fields = (
-            'name', 'vendor', 'catalog_num', 'url', 'target', 'species', 'clonality', 'host', 'clone_id',
+            'name', 'catalog_num', 'url', 'target', 'species', 'clonality', 'host', 'clone_id',
             'product_isotype', 'product_conjugate', 'product_form', 'comments', 'defining_citation', 'subregion',
             'modifications', 'gid', 'disc_date', 'commercial_type', 'uniprot', 'epitope', 'cat_alt', 'ab_id',
             'accession', 'ix')
@@ -108,25 +114,24 @@ class AntibodyResource(ModelResource):
             # If there's no mandatory id field it means all the entries are new
             # If ignore_update is also selected there's no entry to be considered
             if mandatory_id_field.column_name not in dataset.headers or ignore_update:
+                # NONE
                 dataset.df = dataset.df[0:0]
                 return
-            # if new entries are not meant to be considered but update ones are not
+            # if new entries are not meant to be considered but update ones are
             # we need keep the existing entries only
+            # ONLY UPDATE
             existent_antibodies = self._get_existent_antibodies(dataset)
             dataset.df = dataset.df.where(dataset.df[mandatory_id_field.column_name].isin(existent_antibodies))
         else:
             # if new entries are meant to be considered but update ones are not
-            # we need to remove existing entries
             if ignore_update:
-                existent_antibodies = self._get_existent_antibodies(dataset)
-                dataset.df = dataset.df.where(~dataset.df[mandatory_id_field.column_name].isin(existent_antibodies))
-            # if both options are active we ignore entries with ab_id + other that do not exist in the db
-            else:
-                # we need to check if the dataset has the id columns (required for update)
-                if mandatory_id_field.column_name not in dataset.headers:
-                    return
-                new_antibodies_with_ids = self._get_new_antibodies_with_id_references(dataset)
-                dataset.df = dataset.df.where(~dataset.df[mandatory_id_field.column_name].isin(new_antibodies_with_ids))
+                # we need to remove existing entries
+                if mandatory_id_field.column_name in dataset.headers:
+                    existent_antibodies = self._get_existent_antibodies(dataset)
+                    # ONLY_NEW
+                    dataset.df = dataset.df.where(~dataset.df[mandatory_id_field.column_name].isin(existent_antibodies))
+            # BOTH
+            # if both new entries and current entries are to be considered then all the dataset is relevant
         # removes empty nan line when the full dataset is removed
         dataset.df = dataset.df.dropna(axis=0, how='all')
 
