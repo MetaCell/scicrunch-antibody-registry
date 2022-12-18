@@ -10,7 +10,7 @@ from api.services.vendor_service import get_or_create_vendor
 from api.utilities.functions import remove_empty_string
 from api.widgets.foreign_key_widget import ForeignKeyWidgetWithCreation
 from api.widgets.many_to_many_widget import ManyToManyWidgetWithCreation
-from areg_portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY
+from areg_portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY, FILL_KEY
 
 
 class AntibodyInstanceLoaderClass(ModelInstanceLoader):
@@ -106,7 +106,8 @@ class AntibodyResource(ModelResource):
             return
         return instance_loader.get_instance(row)
 
-    def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+    def import_data_inner(self, dataset, dry_run, raise_errors, using_transactions,
+                          collect_failed_rows, rollback_on_validation_errors=False, **kwargs):
         # FIXME: The following is a hacky way to have the kwargs from the Import Form to carry on to
         # the Confirm Import Form using django sessions based on:
         # https://stackoverflow.com/questions/52335510/extend-django-import-exports-import-form-to-specify-fixed-value-for-each-import
@@ -123,6 +124,11 @@ class AntibodyResource(ModelResource):
             self.request.session[FOR_NEW_KEY] = kwargs[FOR_NEW_KEY]
             self.request.session[FOR_EXTANT_KEY] = kwargs[FOR_EXTANT_KEY]
             self.request.session[METHOD_KEY] = kwargs[METHOD_KEY]
+
+        return super().import_data_inner(dataset, dry_run, raise_errors, using_transactions, collect_failed_rows,
+                                         rollback_on_validation_errors, **kwargs)
+
+    def before_import(self, dataset, using_transactions, dry_run, **kwargs):
 
         ignore_new = kwargs.get(FOR_NEW_KEY, IGNORE_KEY) == IGNORE_KEY
         ignore_update = kwargs.get(FOR_EXTANT_KEY, IGNORE_KEY) == IGNORE_KEY
@@ -178,3 +184,12 @@ class AntibodyResource(ModelResource):
             if field.column_name in row:
                 if row[field.column_name] == '':
                     row[field.column_name] = None
+
+    def import_field(self, field, obj, data, is_m2m=False, **kwargs):
+        is_fill = kwargs.get(METHOD_KEY, FILL_KEY) == FILL_KEY
+        if field.attribute and field.column_name in data:
+            # If we are only updating the filled columns and the column is empty we do nothing
+            if is_fill and data[field.column_name] == '':
+                return
+            # Otherwise we save the field
+            field.save(obj, data, is_m2m, **kwargs)
