@@ -86,7 +86,7 @@ class AntibodyResource(ModelResource):
                 lambda dataset: get_antibody_q1(dataset, self.fields['ab_id'],
                                                 [self.fields['ix'], self.fields['accession']]),
                 lambda dataset, negate, antibodies: filter_dataset_c1(dataset, negate, antibodies, self.fields['ab_id'],
-                                                                      [self.fields['ix'], self.fields['accession']])
+                                                                      self.fields['ix'], self.fields['accession'])
             ),
             AntibodyIdentifier(
                 [self.fields['vendor'], self.fields['catalog_num']],
@@ -146,14 +146,13 @@ class AntibodyResource(ModelResource):
         ignore_update = kwargs.get(FOR_EXTANT_KEY, IGNORE_KEY) == IGNORE_KEY
 
         if ignore_new:
-            # if new entries are not meant to be considered but update ones are
+            # if new entries are not meant to be considered
             # we need keep the existing entries only
             self._filter_dataset(dataset, False)
-        else:
-            # if new entries are meant to be considered but update ones are not
-            if ignore_update:
-                # we need to remove existing entries
-                self._filter_dataset(dataset, True)
+
+        if ignore_update:
+            # we need to remove existing entries
+            self._filter_dataset(dataset, True)
             # BOTH
             # if both new entries and current entries are to be considered then all the dataset is relevant
         # removes empty nan line when the full dataset is removed

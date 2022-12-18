@@ -31,16 +31,26 @@ def get_antibody_q2(dataset, catalog_number_field, vendor_field) -> Q:
             dataset[catalog_number_field.column_name])})
 
 
-def filter_dataset_c1(dataset, negate, antibodies, mandatory_field, alternative_id_fields):
-    assert len(alternative_id_fields) == 2
-    condition = dataset.df[mandatory_field.column_name].isin(antibodies) & \
-                (dataset.df[alternative_id_fields[0].column_name].isin(antibodies) |
-                 dataset.df[alternative_id_fields[1].column_name].isin(antibodies))
+def filter_dataset_c1(dataset, negate, antibodies, ab_id_field, ix_field, accession_field):
+    antibody_ids = []
+    antibody_ixs = []
+    antibody_accessions = []
+    for antibody in antibodies:
+        antibody_ids.append(antibody.ab_id)
+        antibody_ixs.append(str(antibody.ix))
+        antibody_accessions.append(str(antibody.accession))
+    condition = dataset.df[ab_id_field.column_name].isin(antibody_ids) & \
+                (dataset.df[ix_field.column_name].isin(antibody_ixs) |
+                 dataset.df[accession_field.column_name].isin(antibody_accessions))
     return ~condition if negate else condition
 
 
-def filter_dataset_c2(dataset, negate, antibodies, mandatory_fields):
-    assert len(mandatory_fields) == 2
-    condition = dataset.df[mandatory_fields[0].column_name].isin(antibodies) & \
-                dataset.df[mandatory_fields[1].column_name].isin(antibodies)
+def filter_dataset_c2(dataset, negate, antibodies, catalog_number_field, vendor_field):
+    antibody_catalog_numbers = []
+    antibody_vendor_names = []
+    for antibody in antibodies:
+        antibody_catalog_numbers.append(antibody.catalog_number)
+        antibody_vendor_names.append(antibody.vendor.name)
+    condition = dataset.df[catalog_number_field.column_name].isin(antibody_catalog_numbers) & \
+                dataset.df[vendor_field.column_name].isin(antibody_vendor_names)
     return ~condition if negate else condition
