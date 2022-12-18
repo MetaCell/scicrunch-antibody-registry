@@ -11,7 +11,8 @@ from api.services.specie_service import get_or_create_specie
 from api.services.vendor_service import get_or_create_vendor
 from api.widgets.foreign_key_widget import ForeignKeyWidgetWithCreation
 from api.widgets.many_to_many_widget import ManyToManyWidgetWithCreation
-from areg_portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY, FILL_KEY
+from areg_portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY, FILL_KEY, UPDATE_KEY, \
+    DUPLICATE_KEY
 
 
 class AntibodyIdentifier:
@@ -24,8 +25,7 @@ class AntibodyIdentifier:
 
 class AntibodyInstanceLoaderClass(ModelInstanceLoader):
     def get_instance(self, q):
-        instances = self.get_queryset().filter(q)
-        # todo: sort by creation date
+        instances = self.get_queryset().filter(q).order_by('insert_time')
         return instances[0] if len(instances) > 0 else None
 
 
@@ -114,6 +114,25 @@ class AntibodyResource(ModelResource):
                 return antibody_identifier
         return None
 
+    def get_or_init_instance(self, instance_loader, row):
+        """
+        Either fetches an already existing instance or initializes a new one.
+        """
+        create_duplicate = self.request.session.get(FOR_EXTANT_KEY, UPDATE_KEY) == DUPLICATE_KEY
+
+        if not self._meta.force_init_instance:
+            instance = self.get_instance(instance_loader, row)
+            if instance:
+                if not create_duplicate:
+                    return (instance, False)
+                row[self.fields['accession'].column_name] = instance.ab_id
+                # todo: confirm if the following is suppose to happen
+                if self.fields['ab_id'].column_name in row:
+                    del row[self.fields['ab_id'].column_name]
+                if self.fields['ix'].column_name in row:
+                    del row[self.fields['ix'].column_name]
+        return (self.init_instance(row), True)
+
     def get_instance(self, instance_loader, row):
         antibody_identifier = self.get_antibody_identifier(row)
         return instance_loader.get_instance(antibody_identifier.q(row)) if antibody_identifier else None
@@ -129,9 +148,7 @@ class AntibodyResource(ModelResource):
             kwargs[FOR_NEW_KEY] = self.request.session[FOR_NEW_KEY]
             kwargs[FOR_EXTANT_KEY] = self.request.session[FOR_EXTANT_KEY]
             kwargs[METHOD_KEY] = self.request.session[METHOD_KEY]
-            self.request.session[FOR_NEW_KEY] = None
-            self.request.session[FOR_EXTANT_KEY] = None
-            self.request.session[METHOD_KEY] = None
+
         else:  # if we are in the import form request we set the values in session using the request values
             self.request.session[FOR_NEW_KEY] = kwargs[FOR_NEW_KEY]
             self.request.session[FOR_EXTANT_KEY] = kwargs[FOR_EXTANT_KEY]
@@ -141,15 +158,12 @@ class AntibodyResource(ModelResource):
                                          rollback_on_validation_errors, **kwargs)
 
     def before_import(self, dataset, using_transactions, dry_run, **kwargs):
-
         ignore_new = kwargs.get(FOR_NEW_KEY, IGNORE_KEY) == IGNORE_KEY
         ignore_update = kwargs.get(FOR_EXTANT_KEY, IGNORE_KEY) == IGNORE_KEY
-
         if ignore_new:
             # if new entries are not meant to be considered
             # we need keep the existing entries only
             self._filter_dataset(dataset, False)
-
         if ignore_update:
             # we need to remove existing entries
             self._filter_dataset(dataset, True)
@@ -157,6 +171,13 @@ class AntibodyResource(ModelResource):
             # if both new entries and current entries are to be considered then all the dataset is relevant
         # removes empty nan line when the full dataset is removed
         dataset.df = dataset.df.dropna(axis=0, how='all')
+
+    def after_import(self, dataset, result, using_transactions, dry_run, **kwargs):
+        # clear session values
+        # self.request.session[FOR_NEW_KEY] = None
+        # self.request.session[FOR_EXTANT_KEY] = None
+        # self.request.session[METHOD_KEY] = None
+        pass
 
     def _filter_dataset(self, dataset, negate_filter_condition=False):
         ic = self.get_antibody_identifier(dataset.headers)

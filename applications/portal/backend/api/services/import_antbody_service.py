@@ -39,9 +39,11 @@ def filter_dataset_c1(dataset, negate, antibodies, ab_id_field, ix_field, access
         antibody_ids.append(antibody.ab_id)
         antibody_ixs.append(str(antibody.ix))
         antibody_accessions.append(str(antibody.accession))
-    condition = dataset.df[ab_id_field.column_name].isin(antibody_ids) & \
-                (dataset.df[ix_field.column_name].isin(antibody_ixs) |
-                 dataset.df[accession_field.column_name].isin(antibody_accessions))
+    base_condition = dataset.df[ab_id_field.column_name].isin(antibody_ids)
+    if ix_field.column_name in dataset.df:
+        condition = base_condition & dataset.df[ix_field.column_name].isin(antibody_ixs)
+    else:
+        condition = base_condition & dataset.df[accession_field.column_name].isin(antibody_accessions)
     return ~condition if negate else condition
 
 

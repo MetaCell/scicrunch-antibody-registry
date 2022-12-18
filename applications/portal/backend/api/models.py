@@ -198,7 +198,7 @@ class Antibody(models.Model):
         default=STATUS.QUEUE,
         db_index=True
     )
-    insert_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    insert_time = models.DateTimeField(auto_now_add=True, db_index=True, null=True)
     lastedit_time = models.DateTimeField(auto_now=True, db_index=True, null=True)
     curate_time = models.DateTimeField(db_index=True, null=True)
 

@@ -4,7 +4,7 @@ magic = 64544
 
 
 def generate_id_aux(base: int) -> int:
-    return base + magic
+    return int(base) + magic
 
 
 def remove_empty_string(str_list) -> List[str]:
