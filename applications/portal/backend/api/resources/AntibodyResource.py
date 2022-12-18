@@ -93,8 +93,8 @@ class AntibodyResource(ModelResource):
                 lambda row: self.fields['vendor'].column_name in row and self.fields['catalog_num'].column_name in row,
                 lambda dataset: get_antibody_q2(dataset, self.fields['catalog_num'], self.fields['vendor']),
                 lambda dataset, negate, antibodies: filter_dataset_c2(dataset, negate, antibodies,
-                                                                      [self.fields['catalog_num'],
-                                                                       self.fields['vendor']])
+                                                                      self.fields['catalog_num'],
+                                                                      self.fields['vendor'])
             )
         ]
         self.request = request
