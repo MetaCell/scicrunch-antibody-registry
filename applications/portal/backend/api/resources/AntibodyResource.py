@@ -1,33 +1,32 @@
-from django.db.models import Q
+from typing import Callable
+
 from import_export.fields import Field
 from import_export.instance_loaders import ModelInstanceLoader
 from import_export.resources import ModelResource
 
 from api.models import Antibody, Vendor, Gene, Specie
 from api.services.gene_service import get_or_create_gene
+from api.services.import_antbody_service import filter_dataset_c1, filter_dataset_c2, get_antibody_q1, get_antibody_q2
 from api.services.specie_service import get_or_create_specie
 from api.services.vendor_service import get_or_create_vendor
-from api.utilities.functions import remove_empty_string
 from api.widgets.foreign_key_widget import ForeignKeyWidgetWithCreation
 from api.widgets.many_to_many_widget import ManyToManyWidgetWithCreation
 from areg_portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY, FILL_KEY
 
 
+class AntibodyIdentifier:
+    def __init__(self, fields, condition: Callable, q: Callable, filter_dataset: Callable):
+        self.fields = fields
+        self.condition = condition
+        self.q = q
+        self.filter_dataset = filter_dataset
+
+
 class AntibodyInstanceLoaderClass(ModelInstanceLoader):
-    def get_instance(self, row):
-        try:
-            params = {}
-            mandatory_id_field = self.resource.get_import_mandatory_id_field()
-            params[mandatory_id_field.attribute] = mandatory_id_field.clean(row)
-            for field in self.resource.get_import_alternative_id_fields():
-                if field.column_name in row:
-                    params[field.attribute] = field.clean(row)
-            if params:
-                return self.get_queryset().get(**params)
-            else:
-                return None
-        except self.resource._meta.model.DoesNotExist:
-            return None
+    def get_instance(self, q):
+        instances = self.get_queryset().filter(q)
+        # todo: sort by creation date
+        return instances[0] if len(instances) > 0 else None
 
 
 class AntibodyResource(ModelResource):
@@ -78,6 +77,26 @@ class AntibodyResource(ModelResource):
 
     def __init__(self, request=None):
         super()
+        super().__init__()
+        self.antibody_identifiers = [
+            AntibodyIdentifier(
+                [self.fields['ab_id'], self.fields['ix'], self.fields['accession']],
+                lambda row: self.fields['ab_id'].column_name in row and (
+                        self.fields['ix'].column_name in row or self.fields['accession'].column_name in row),
+                lambda dataset: get_antibody_q1(dataset, self.fields['ab_id'],
+                                                [self.fields['ix'], self.fields['accession']]),
+                lambda dataset, negate, antibodies: filter_dataset_c1(dataset, negate, antibodies, self.fields['ab_id'],
+                                                                      [self.fields['ix'], self.fields['accession']])
+            ),
+            AntibodyIdentifier(
+                [self.fields['vendor'], self.fields['catalog_num']],
+                lambda row: self.fields['vendor'].column_name in row and self.fields['catalog_num'].column_name in row,
+                lambda dataset: get_antibody_q2(dataset, self.fields['catalog_num'], self.fields['vendor']),
+                lambda dataset, negate, antibodies: filter_dataset_c2(dataset, negate, antibodies,
+                                                                      [self.fields['catalog_num'],
+                                                                       self.fields['vendor']])
+            )
+        ]
         self.request = request
 
     class Meta:
@@ -87,24 +106,17 @@ class AntibodyResource(ModelResource):
             'product_isotype', 'product_conjugate', 'product_form', 'comments', 'defining_citation', 'subregion',
             'modifications', 'gid', 'disc_date', 'commercial_type', 'uniprot', 'epitope', 'cat_alt', 'ab_id',
             'accession', 'ix')
-        import_id_fields = ('id', 'old_id', 'ix')
         instance_loader_class = AntibodyInstanceLoaderClass
-        mandatory_id_field = 'ab_id'
-        alternative_id_fields = ['accession', 'ix']
 
-    def get_import_mandatory_id_field(self):
-        return self.fields[self._meta.mandatory_id_field]
-
-    def get_import_alternative_id_fields(self):
-        return [self.fields[f] for f in self._meta.alternative_id_fields]
+    def get_antibody_identifier(self, row):
+        for antibody_identifier in self.antibody_identifiers:
+            if antibody_identifier.condition(row):
+                return antibody_identifier
+        return None
 
     def get_instance(self, instance_loader, row):
-        # If the mandatory_id_fields is missing we return
-        # If all the alternative_id_fields are missing we return
-        if self.get_import_mandatory_id_field().column_name not in row or \
-                all([field.column_name not in row for field in self.get_import_alternative_id_fields()]):
-            return
-        return instance_loader.get_instance(row)
+        antibody_identifier = self.get_antibody_identifier(row)
+        return instance_loader.get_instance(antibody_identifier.q(row)) if antibody_identifier else None
 
     def import_data_inner(self, dataset, dry_run, raise_errors, using_transactions,
                           collect_failed_rows, rollback_on_validation_errors=False, **kwargs):
@@ -132,55 +144,32 @@ class AntibodyResource(ModelResource):
 
         ignore_new = kwargs.get(FOR_NEW_KEY, IGNORE_KEY) == IGNORE_KEY
         ignore_update = kwargs.get(FOR_EXTANT_KEY, IGNORE_KEY) == IGNORE_KEY
-        mandatory_id_field = self.get_import_mandatory_id_field()
 
         if ignore_new:
-            # If there's no mandatory id field it means all the entries are new
-            # If ignore_update is also selected there's no entry to be considered
-            if mandatory_id_field.column_name not in dataset.headers or ignore_update:
-                # NONE
-                dataset.df = dataset.df[0:0]
-                return
             # if new entries are not meant to be considered but update ones are
             # we need keep the existing entries only
-            # ONLY UPDATE
-            existent_antibodies = self._get_existent_antibodies(dataset)
-            dataset.df = dataset.df.where(dataset.df[mandatory_id_field.column_name].isin(existent_antibodies))
+            self._filter_dataset(dataset, False)
         else:
             # if new entries are meant to be considered but update ones are not
             if ignore_update:
                 # we need to remove existing entries
-                if mandatory_id_field.column_name in dataset.headers:
-                    existent_antibodies = self._get_existent_antibodies(dataset)
-                    # ONLY_NEW
-                    dataset.df = dataset.df.where(~dataset.df[mandatory_id_field.column_name].isin(existent_antibodies))
+                self._filter_dataset(dataset, True)
             # BOTH
             # if both new entries and current entries are to be considered then all the dataset is relevant
         # removes empty nan line when the full dataset is removed
         dataset.df = dataset.df.dropna(axis=0, how='all')
 
-    def _get_existent_antibodies(self, dataset):
-        mandatory_id_field = self.get_import_mandatory_id_field()
-        q = Q(**{"%s__in" % mandatory_id_field.attribute: remove_empty_string(dataset[mandatory_id_field.column_name])})
-        alternative_q = Q()
-        for field in self.get_import_alternative_id_fields():
-            if field.column_name in dataset.headers:
-                alternative_q.add(Q(**{"%s__in" % field.attribute: remove_empty_string(dataset[field.column_name])}),
-                                  Q.OR)
-        q.add(alternative_q, Q.AND)
-        return [antibody.ab_id for antibody in Antibody.objects.filter(q)]
-
-    def _get_new_antibodies_with_id_references(self, dataset):
-        mandatory_id_field = self.get_import_mandatory_id_field()
-        existent_antibodies = self._get_existent_antibodies(dataset)
-        return set(remove_empty_string(dataset[mandatory_id_field.column_name])) - set(existent_antibodies)
+    def _filter_dataset(self, dataset, negate_filter_condition=False):
+        ic = self.get_antibody_identifier(dataset.headers)
+        if ic is None:
+            return
+        existent_antibodies = Antibody.objects.filter(ic.q(dataset))
+        dataset.df = dataset.df.where(ic.filter_dataset(dataset, negate_filter_condition, existent_antibodies))
 
     def before_import_row(self, row, row_number=None, **kwargs):
-        mandatory_id_field = self.get_import_mandatory_id_field()
-        if mandatory_id_field.column_name in row:
-            if row[mandatory_id_field.column_name] == '':
-                row[mandatory_id_field.column_name] = None
-        for field in self.get_import_alternative_id_fields():
+        antibody_identifier = self.get_antibody_identifier(row)
+        # modify empty strings to none on identifier columns
+        for field in antibody_identifier.fields:
             if field.column_name in row:
                 if row[field.column_name] == '':
                     row[field.column_name] = None
