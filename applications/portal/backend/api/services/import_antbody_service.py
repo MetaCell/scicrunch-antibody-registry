@@ -28,7 +28,7 @@ def get_antibody_q2(dataset, catalog_number_field, vendor_field) -> Q:
     return Q(**{"%s__in" % catalog_number_field.attribute: remove_empty_string(
         dataset[catalog_number_field.column_name])}) & Q(
         **{"%s__%s__in" % (vendor_field.attribute, vendor_field.widget.field): remove_empty_string(
-            dataset[catalog_number_field.column_name])})
+            dataset[vendor_field.column_name])})
 
 
 def filter_dataset_c1(dataset, negate, antibodies, ab_id_field, ix_field, accession_field):
