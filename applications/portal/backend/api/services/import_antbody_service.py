@@ -51,7 +51,7 @@ def filter_dataset_c2(dataset, negate, antibodies, catalog_number_field, vendor_
     antibody_catalog_numbers = []
     antibody_vendor_names = []
     for antibody in antibodies:
-        antibody_catalog_numbers.append(antibody.catalog_number)
+        antibody_catalog_numbers.append(antibody.catalog_num)
         antibody_vendor_names.append(antibody.vendor.name)
     condition = dataset.df[catalog_number_field.column_name].isin(antibody_catalog_numbers) & \
                 dataset.df[vendor_field.column_name].isin(antibody_vendor_names)
