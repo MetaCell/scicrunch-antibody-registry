@@ -132,7 +132,6 @@ class AntibodyResource(ModelResource):
                 if not create_duplicate:
                     return (instance, False)
                 row[self.fields['accession'].column_name] = instance.ab_id
-                # todo: confirm if the following is suppose to happen
                 if self.fields['ab_id'].column_name in row:
                     del row[self.fields['ab_id'].column_name]
                 if self.fields['ix'].column_name in row:
@@ -145,7 +144,7 @@ class AntibodyResource(ModelResource):
 
     def import_data_inner(self, dataset, dry_run, raise_errors, using_transactions,
                           collect_failed_rows, rollback_on_validation_errors=False, **kwargs):
-        # FIXME: The following is a hacky way to have the kwargs from the Import Form to carry on to
+        # The following is a hacky way to have the kwargs from the Import Form to carry on to
         # the Confirm Import Form using django sessions based on:
         # https://stackoverflow.com/questions/52335510/extend-django-import-exports-import-form-to-specify-fixed-value-for-each-import
 
