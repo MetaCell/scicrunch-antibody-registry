@@ -3,7 +3,7 @@ from typing import Dict
 import pandas as pd
 
 from api.utilities.decorators import refresh_keycloak_client, timed_class_method
-from areg_portal.settings import ORCID_URL, USERS_RELEVANT_HEADER, GUID_INDEX
+from portal.settings import ORCID_URL, USERS_RELEVANT_HEADER, GUID_INDEX
 from cloudharness.auth import AuthClient
 
 from enum import Enum
@@ -41,9 +41,9 @@ class UsersIngestor:
                                                     "middleInitial": row['middleInitial'],
                                                     "organization": row['organization'],
                                                     "created": row['created'],
-                                                },
-                                                "requiredActions": [KeycloakRequiredActions.UPDATE_PASSWORD.value]
-                                                }, exist_ok=True)
+        },
+            "requiredActions": [KeycloakRequiredActions.UPDATE_PASSWORD.value]
+        }, exist_ok=True)
 
 
 def _get_orcid_id(row) -> str:

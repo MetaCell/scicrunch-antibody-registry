@@ -1,5 +1,11 @@
 import { useState } from "react";
+import {
+  UsersApi
+} from "../rest/accounts-api/api";
 
+import { Configuration } from "../rest/accounts-api";
+
+const api = new UsersApi();
 export interface User {
   email: string;
   first_name: string;
@@ -58,6 +64,15 @@ export function getCurrentUser() {
     );
   }
   return parseJwt(getToken());
+}
+
+export async function updateUser(user: User) {
+  return await api.updateUser(getCurrentUser().email, user, new Configuration({ apiKey: getToken(), accessToken: getToken() }));
+}
+
+
+export function updateUserPassword(oldPassword: string, newPassword: string) {
+  
 }
 
 

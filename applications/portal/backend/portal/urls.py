@@ -19,14 +19,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, re_path
 
-from areg_portal.views import index
+from portal.views import index
 
 
 urlpatterns = [path("admin/", admin.site.urls)]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
-               static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += [re_path(r"^(?P<path>.*)$", index, name="index")]
 
-admin.site.site_header = "areg_portal Admin"
-admin.site.site_title = "areg_portal Admin"
+admin.site.site_header = "portal Admin"
+admin.site.site_title = "portal Admin"
 admin.site.index_title = "Index"

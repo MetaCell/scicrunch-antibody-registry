@@ -10,7 +10,7 @@ from api.management.ingestion.gd_downloader import GDDownloader
 from api.models import AntibodyClonality, CommercialType
 from api.services.filesystem_service import replace_file
 from api.utilities.decorators import timed_class_method
-from areg_portal.settings import RAW_ANTIBODY_DATA_BASENAME, RAW_VENDOR_DATA_BASENAME, RAW_VENDOR_DOMAIN_DATA_BASENAME, \
+from portal.settings import RAW_ANTIBODY_DATA_BASENAME, RAW_VENDOR_DATA_BASENAME, RAW_VENDOR_DOMAIN_DATA_BASENAME, \
     CHUNK_SIZE, \
     ANTIBODY_HEADER, RAW_USERS_DATA_BASENAME, DEFAULT_UID
 
@@ -41,7 +41,8 @@ def update_vendors(csv_path: str):
     df_vendors = pd.read_csv(csv_path)
     clean_df(df_vendors)
     valid_commercial_types = ('commercial', 'personal', 'other', 'non-profit')
-    mask = (df_vendors['commercial_type'].isin(valid_commercial_types)) | (df_vendors['commercial_type'].isnull())
+    mask = (df_vendors['commercial_type'].isin(valid_commercial_types)) | (
+        df_vendors['commercial_type'].isnull())
     df_vendors = df_vendors[mask]
     df_vendors.to_csv(csv_path, index=False, mode='w+')
 
@@ -50,7 +51,8 @@ def update_users(csv_path: str):
     logging.info("Updating users")
     df_users = pd.read_csv(csv_path)
     # df_users = df_users.drop(['password', 'salt'], axis=1)
-    df_users = df_users.drop_duplicates(['email'], keep='last').loc[~df_users['email'].isnull()]
+    df_users = df_users.drop_duplicates(
+        ['email'], keep='last').loc[~df_users['email'].isnull()]
     df_users = df_users.loc[df_users['banned'] != 1]
     df_users = df_users.loc[~df_users['guid'].isnull()]
     df_users['email'] = df_users['email'].str.strip()
@@ -63,7 +65,8 @@ def update_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_mapp
     with open(vendors_map_path, 'r') as f:
         vendors_map = json.load(f)
         df_vendor_domain = pd.read_csv(csv_path)
-        df_vendor_domain = df_vendor_domain.drop_duplicates(subset=["domain_name"])
+        df_vendor_domain = df_vendor_domain.drop_duplicates(
+            subset=["domain_name"])
         df_vendor_domain['vendor_id'] = df_vendor_domain['vendor_id'].map(
             lambda x: vendors_map[str(x)] if str(x) in vendors_map else x)
         df_vendor_domain.to_csv(csv_path, index=False, mode='w+')
@@ -75,7 +78,8 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
         antibodies_map = json.load(f)
         for antibody_data_path in csv_paths:
             logging.info(f"Processing {antibody_data_path} file")
-            tmp_antibody_data_path = antibody_data_path.replace('.csv', '_tmp.csv')
+            tmp_antibody_data_path = antibody_data_path.replace(
+                '.csv', '_tmp.csv')
             for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode')):
 
                 # converge null values to None
@@ -86,14 +90,17 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
                 chunk["link"] = chunk["link"].str.lower()
 
                 # point unknown vendor_id to None
-                chunk['vendor_id'] = chunk['vendor_id'].where(~chunk['vendor_id'].isin(UNKNOWN_VENDORS), None)
+                chunk['vendor_id'] = chunk['vendor_id'].where(
+                    ~chunk['vendor_id'].isin(UNKNOWN_VENDORS), None)
 
                 # point unknown user_id to None
-                chunk['uid'] = chunk['uid'].where(~chunk['uid'].isin(UNKNOWN_USERS), DEFAULT_UID)
+                chunk['uid'] = chunk['uid'].where(
+                    ~chunk['uid'].isin(UNKNOWN_USERS), DEFAULT_UID)
 
                 # point unknown commercial type to None
                 chunk['commercial_type'] = chunk['commercial_type'].where(
-                    chunk['commercial_type'].isin({c[0] for c in CommercialType.choices}),
+                    chunk['commercial_type'].isin(
+                        {c[0] for c in CommercialType.choices}),
                     None)
 
                 # point unknown clonality to 'unknown'
@@ -101,12 +108,14 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
                     chunk['clonality'].isin({c[0] for c in AntibodyClonality.choices}), 'unknown')
 
                 # get rows that need custom update
-                relevant_rows = chunk.loc[chunk['ix'].isin(antibodies_map.keys())]
+                relevant_rows = chunk.loc[chunk['ix'].isin(
+                    antibodies_map.keys())]
 
                 # apply custom update to relevant rows
                 for index, row in relevant_rows.iterrows():
                     for atr in antibodies_map[row['ix']]:
-                        chunk.loc[chunk['ix'] == row['ix'], atr] = antibodies_map[row['ix']][atr]
+                        chunk.loc[chunk['ix'] == row['ix'],
+                                  atr] = antibodies_map[row['ix']][atr]
 
                 # save chunk temp file
                 chunk.to_csv(tmp_antibody_data_path, mode='a',
@@ -127,7 +136,8 @@ class Preprocessor:
         GDDownloader(self.file_id, self.dest).download()
 
         metadata = AntibodyMetadata(glob.glob(os.path.join(self.dest, '*', f"{RAW_ANTIBODY_DATA_BASENAME}*.csv")),
-                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DATA_BASENAME}.csv"))[0],
+                                    glob.glob(os.path.join(
+                                        self.dest, '*', f"{RAW_VENDOR_DATA_BASENAME}.csv"))[0],
                                     glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DOMAIN_DATA_BASENAME}.csv"))[
                                         0],
                                     glob.glob(os.path.join(self.dest, '*', f"{RAW_USERS_DATA_BASENAME}.csv"))[0])

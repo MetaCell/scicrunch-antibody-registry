@@ -13,3 +13,4 @@ def remove_empty_string(str_list) -> List[str]:
     if type(str_list) is str:
         return [str_list]
     return list(filter(None, set(str_list)))
+

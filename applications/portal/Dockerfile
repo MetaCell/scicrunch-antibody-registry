@@ -17,6 +17,8 @@ RUN npm run build
 
 FROM $CLOUDHARNESS_DJANGO
 
+
+
 WORKDIR ${APP_DIR}
 RUN mkdir -p ${APP_DIR}/static/www
 
@@ -30,5 +32,5 @@ COPY backend ${APP_DIR}
 RUN python3 manage.py collectstatic --noinput
 
 COPY --from=frontend /app/dist ${APP_DIR}/static/www
-
+ENV DJANGO_SETTINGS_MODULE=portal.settings
 ENTRYPOINT uvicorn --workers ${WORKERS} --host 0.0.0.0 --port ${PORT} main:app
