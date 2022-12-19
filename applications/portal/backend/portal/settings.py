@@ -49,7 +49,7 @@ MIDDLEWARE = [
     "cloudharness.middleware.django.CloudharnessMiddleware",
 ]
 
-ROOT_URLCONF = "areg_portal.urls"
+ROOT_URLCONF = "portal.urls"
 
 TEMPLATES = [
     {
@@ -67,7 +67,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "areg_portal.wsgi.application"
+WSGI_APPLICATION = "portal.wsgi.application"
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -105,13 +105,13 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-PROJECT_NAME = "areg_portal".upper()
+PROJECT_NAME = "portal".upper()
 
 # Persistent storage
 PERSISTENT_ROOT = os.path.join(BASE_DIR, "persistent")
 
 # ***********************************************************************
-# * areg_portal settings
+# * portal settings
 # ***********************************************************************
 from cloudharness.applications import get_configuration
 from cloudharness.utils.config import ALLVALUES_PATH, CloudharnessConfig
@@ -124,7 +124,7 @@ from cloudharness_django.settings import *
 # add the local apps
 INSTALLED_APPS += [
     "api",
-    "areg_portal"
+    "portal"
 ]
 
 # override django admin base template with a local template
@@ -144,11 +144,11 @@ if not os.path.exists(STATIC_ROOT):
 # KC Client & roles
 KC_CLIENT_NAME = PROJECT_NAME.lower()
 
-# areg_portal specific roles
+# portal specific roles
 
 # Default KC roles
-KC_ADMIN_ROLE = f"administrator"  # admin user
-KC_MANAGER_ROLE = f"manager"  # manager user
+KC_ADMIN_ROLE = f"portal:administrator"  # admin user
+KC_MANAGER_ROLE = f"portal:manager"  # manager user
 KC_USER_ROLE = f"user"  # customer user
 KC_ALL_ROLES = [
     KC_ADMIN_ROLE,

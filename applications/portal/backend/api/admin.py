@@ -4,7 +4,7 @@ from import_export.admin import ImportMixin
 from api.forms.AntibodyImportForm import AntibodyImportForm
 from api.models import Antibody, Application, Gene, Vendor, Specie, VendorDomain, VendorSynonym
 from api.resources.AntibodyResource import AntibodyResource
-from areg_portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
+from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 
 
 @admin.register(Antibody)

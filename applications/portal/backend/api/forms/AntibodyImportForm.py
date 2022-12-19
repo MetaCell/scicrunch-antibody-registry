@@ -1,7 +1,7 @@
 from django import forms
 from import_export.forms import ImportForm
 
-from areg_portal.settings import IGNORE_KEY, INSERT_KEY, DUPLICATE_KEY, UPDATE_KEY, FILL_KEY, OVERRIDE_KEY
+from portal.settings import IGNORE_KEY, INSERT_KEY, DUPLICATE_KEY, UPDATE_KEY, FILL_KEY, OVERRIDE_KEY
 
 FOR_NEW_CHOICES = (
     (IGNORE_KEY, "Don't Insert New Antibodies"),

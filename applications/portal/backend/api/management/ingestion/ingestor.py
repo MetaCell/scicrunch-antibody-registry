@@ -13,9 +13,9 @@ from api.management.ingestion.users_ingestor import UsersIngestor
 from api.models import Antibody, Gene, Vendor, VendorDomain, Specie, \
     VendorSynonym, AntibodySpecies
 from api.utilities.decorators import timed_class_method
-from areg_portal.settings import ANTIBODY_ANTIBODY_START_SEQ, ANTIBODY_VENDOR_START_SEQ, \
+from portal.settings import ANTIBODY_ANTIBODY_START_SEQ, ANTIBODY_VENDOR_START_SEQ, \
     ANTIBODY_VENDOR_DOMAIN_START_SEQ, ANTIBODY_HEADER, D_TYPES, UID_INDEX
-from areg_portal.settings import CHUNK_SIZE
+from portal.settings import CHUNK_SIZE
 
 TRUNCATE_STM = "TRUNCATE TABLE {table_name} CASCADE;"
 INSERT_INTO_VALUES_STM = "INSERT INTO {table_name} ({columns}) VALUES {} ;"
@@ -30,7 +30,8 @@ def get_restart_seq_stm(table_name, value):
 
 
 def get_create_table_stm(table_name, columns_dict):
-    columns_str = ", ".join([f"{column} {columns_dict[column]}" for column in columns_dict])
+    columns_str = ", ".join(
+        [f"{column} {columns_dict[column]}" for column in columns_dict])
     return CREATE_TABLE_STM.format(table_name=table_name, columns=columns_str)
 
 
@@ -42,7 +43,8 @@ def get_insert_into_table_select_stm(to_table_name, to_columns, distinct, from_c
 
 def get_insert_values_into_table_stm(table_name, columns, entries):
     return INSERT_INTO_VALUES_STM.format(
-        ', '.join([f"({', '.join(['%s' for _ in range(0, len(columns))])})"] * entries),
+        ', '.join(
+            [f"({', '.join(['%s' for _ in range(0, len(columns))])})"] * entries),
         table_name=table_name,
         columns=', '.join(columns))
 
@@ -94,7 +96,8 @@ class Ingestor:
             try:
                 self.cursor.execute(TRUNCATE_STM.format(table_name=ttd))
             except:
-                log.error("Cannot execute statement %s", TRUNCATE_STM.format(table_name=ttd), exc_info=True)
+                log.error("Cannot execute statement %s",
+                          TRUNCATE_STM.format(table_name=ttd), exc_info=True)
 
     @timed_class_method('Vendors added ')
     def _insert_vendors(self):
@@ -102,7 +105,8 @@ class Ingestor:
         df_vendor = pd.read_csv(self.metadata.vendor_data_path)
         df_vendor = df_vendor.where(pd.notnull(df_vendor), None)
         vendor_insert_stm = get_insert_values_into_table_stm(self.VENDOR_TABLE,
-                                                             ['id', 'nif_id', 'vendor', 'commercial_type'],
+                                                             ['id', 'nif_id', 'vendor',
+                                                                 'commercial_type'],
                                                              len(df_vendor))
         # insert vendors
         vendor_synonyms_params = []
@@ -127,7 +131,8 @@ class Ingestor:
     def _insert_vendor_domains(self):
         # Prepare vendor domains inserts
         df_vendor_domain = pd.read_csv(self.metadata.vendor_domain_data_path)
-        df_vendor_domain = df_vendor_domain.where(pd.notnull(df_vendor_domain), None)
+        df_vendor_domain = df_vendor_domain.where(
+            pd.notnull(df_vendor_domain), None)
 
         vendor_domain_insert_stm = get_insert_values_into_table_stm(self.VENDOR_DOMAIN_TABLE,
                                                                     ['id', 'domain_name', 'vendor_id', 'status',
@@ -149,7 +154,8 @@ class Ingestor:
         except:
             log.error("Cannot ingest users", exc_info=True)
             users_map = {}
-        self.cursor.execute(get_create_table_stm(self.TMP_TABLE, ANTIBODY_HEADER))
+        self.cursor.execute(get_create_table_stm(
+            self.TMP_TABLE, ANTIBODY_HEADER))
 
         # Insert raw data into tmp table
         for antibody_data_path in self.metadata.antibody_data_paths:
@@ -158,12 +164,15 @@ class Ingestor:
             for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype=D_TYPES)):
                 chunk = chunk.where(pd.notnull(chunk), None)
                 chunk['uid_legacy'] = chunk['uid']
-                chunk['uid'] = chunk['uid_legacy'].apply(lambda x: users_map.get(x, None))
+                chunk['uid'] = chunk['uid_legacy'].apply(
+                    lambda x: users_map.get(x, None))
                 raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, ANTIBODY_HEADER.keys(),
                                                                        len(chunk))
 
-                self.cursor.execute(raw_data_insert_stm, chunk.to_numpy().flatten().tolist())
-                logging.info(f"File progress: {int(min((i + 1) * CHUNK_SIZE, len_csv) / len_csv * 100)}% ")
+                self.cursor.execute(raw_data_insert_stm,
+                                    chunk.to_numpy().flatten().tolist())
+                logging.info(
+                    f"File progress: {int(min((i + 1) * CHUNK_SIZE, len_csv) / len_csv * 100)}% ")
 
     @timed_class_method('Genes added')
     def _insert_genes(self):
@@ -200,7 +209,8 @@ class Ingestor:
                                                               ['name', 'id'],
                                                               len(species_map.keys()))
         if len(species_map) > 0:
-            self.cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(species_map.items())))
+            self.cursor.execute(species_insert_stm, list(
+                itertools.chain.from_iterable(species_map.items())))
 
     @timed_class_method('Antibodies added')
     def _insert_antibodies(self):
@@ -239,13 +249,16 @@ class Ingestor:
                     if target_species:
                         for specie in row['target_species'].split(';'):
                             clean_specie = get_clean_species_str(specie)
-                            species_params.extend([row['ix'], species_map[clean_specie]])
+                            species_params.extend(
+                                [row['ix'], species_map[clean_specie]])
 
                 antibody_species_insert_stm = get_insert_values_into_table_stm(
-                    AntibodySpecies.objects.model._meta.db_table, ['antibody_id', 'specie_id'],
+                    AntibodySpecies.objects.model._meta.db_table, [
+                        'antibody_id', 'specie_id'],
                     int(len(species_params) / 2))
 
-                self.cursor.execute(antibody_species_insert_stm, species_params)
+                self.cursor.execute(
+                    antibody_species_insert_stm, species_params)
 
     @timed_class_method('Vendor domain links updated')
     def _update_vendor_domains(self):
@@ -265,7 +278,8 @@ class Ingestor:
         }
 
         for ttr in tables_to_restart_seq:
-            self.cursor.execute(get_restart_seq_stm(ttr, tables_to_restart_seq[ttr]))
+            self.cursor.execute(get_restart_seq_stm(
+                ttr, tables_to_restart_seq[ttr]))
 
         reset_sequence_sql = connection.ops.sequence_reset_sql(no_style(),
                                                                [Specie, Gene, AntibodySpecies, VendorSynonym])

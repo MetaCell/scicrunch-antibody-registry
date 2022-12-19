@@ -1,7 +1,7 @@
 import os
 import time
 
-from areg_portal.settings import MAX_TRIES
+from portal.settings import MAX_TRIES
 
 
 def replace_file(previous_path, new_path, max_tries=MAX_TRIES):

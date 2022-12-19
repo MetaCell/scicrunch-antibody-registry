@@ -11,7 +11,7 @@ from api.services.specie_service import get_or_create_specie
 from api.services.vendor_service import get_or_create_vendor
 from api.widgets.foreign_key_widget import ForeignKeyWidgetWithCreation
 from api.widgets.many_to_many_widget import ManyToManyWidgetWithCreation
-from areg_portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY, FILL_KEY, UPDATE_KEY, \
+from portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY, FILL_KEY, UPDATE_KEY, \
     DUPLICATE_KEY
 
 
@@ -43,7 +43,8 @@ class AntibodyResource(ModelResource):
         column_name='TARGET',
         attribute='antigen',
         widget=ForeignKeyWidgetWithCreation(model=Gene, field='symbol',
-                                            get_or_create=lambda **kwargs: get_or_create_gene(**kwargs)[0],
+                                            get_or_create=lambda **kwargs: get_or_create_gene(**kwargs)[
+                                                0],
                                             other_cols_map={'GID': 'entrez_id', 'UNIPROT': 'uniprot_id'})
     )
     species = Field(
@@ -61,12 +62,15 @@ class AntibodyResource(ModelResource):
     )
     clone_id = Field(attribute='clone_id', column_name='clone')
     product_isotype = Field(attribute='product_isotype', column_name='ISOTYPE')
-    product_conjugate = Field(attribute='product_conjugate', column_name='CONJUGATE')
+    product_conjugate = Field(
+        attribute='product_conjugate', column_name='CONJUGATE')
     product_form = Field(attribute='product_form', column_name='FORM')
     comments = Field(attribute='comments', column_name='COMMENTS')
-    defining_citation = Field(attribute='defining_citation', column_name='CITATION')
+    defining_citation = Field(
+        attribute='defining_citation', column_name='CITATION')
     subregion = Field(attribute='subregion', column_name='SUBREGION')
-    modifications = Field(attribute='modifications', column_name='MODIFICATION')
+    modifications = Field(attribute='modifications',
+                          column_name='MODIFICATION')
     disc_date = Field(attribute='disc_date', column_name='DISC')
     commercial_type = Field(attribute='commercial_type', column_name='TYPE')
     epitope = Field(attribute='epitope', column_name='EPITOPE')
@@ -82,7 +86,7 @@ class AntibodyResource(ModelResource):
             AntibodyIdentifier(
                 [self.fields['ab_id'], self.fields['ix'], self.fields['accession']],
                 lambda row: self.fields['ab_id'].column_name in row and (
-                        self.fields['ix'].column_name in row or self.fields['accession'].column_name in row),
+                    self.fields['ix'].column_name in row or self.fields['accession'].column_name in row),
                 lambda dataset: get_antibody_q1(dataset, self.fields['ab_id'],
                                                 [self.fields['ix'], self.fields['accession']]),
                 lambda dataset, negate, antibodies: filter_dataset_c1(dataset, negate, antibodies, self.fields['ab_id'],
@@ -91,7 +95,8 @@ class AntibodyResource(ModelResource):
             AntibodyIdentifier(
                 [self.fields['vendor'], self.fields['catalog_num']],
                 lambda row: self.fields['vendor'].column_name in row and self.fields['catalog_num'].column_name in row,
-                lambda dataset: get_antibody_q2(dataset, self.fields['catalog_num'], self.fields['vendor']),
+                lambda dataset: get_antibody_q2(
+                    dataset, self.fields['catalog_num'], self.fields['vendor']),
                 lambda dataset, negate, antibodies: filter_dataset_c2(dataset, negate, antibodies,
                                                                       self.fields['catalog_num'],
                                                                       self.fields['vendor'])
@@ -118,7 +123,8 @@ class AntibodyResource(ModelResource):
         """
         Either fetches an already existing instance or initializes a new one.
         """
-        create_duplicate = self.request.session.get(FOR_EXTANT_KEY, UPDATE_KEY) == DUPLICATE_KEY
+        create_duplicate = self.request.session.get(
+            FOR_EXTANT_KEY, UPDATE_KEY) == DUPLICATE_KEY
 
         if not self._meta.force_init_instance:
             instance = self.get_instance(instance_loader, row)
@@ -184,7 +190,8 @@ class AntibodyResource(ModelResource):
         if ic is None:
             return
         existent_antibodies = Antibody.objects.filter(ic.q(dataset))
-        dataset.df = dataset.df.where(ic.filter_dataset(dataset, negate_filter_condition, existent_antibodies))
+        dataset.df = dataset.df.where(ic.filter_dataset(
+            dataset, negate_filter_condition, existent_antibodies))
 
     def before_import_row(self, row, row_number=None, **kwargs):
         antibody_identifier = self.get_antibody_identifier(row)
