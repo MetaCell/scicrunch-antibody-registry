@@ -1,9 +1,19 @@
 from django.test import TestCase
+from django.contrib.admin.sites import AdminSite
 
 from api.services.antibody_service import *
 from api.services.search_service import fts_antibodies
 from api.models import Vendor, VendorDomain
-from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO, Status, CommercialType, Clonality
+from openapi.models import (
+    AddUpdateAntibody as AddUpdateAntibodyDTO,
+    Status,
+    CommercialType,
+    Clonality,
+)
+
+from .admin import VendorAdmin
+from .models import Vendor, Antibody, VendorDomain
+
 
 example_ab = {
     "clonality": "cocktail",
@@ -20,14 +30,11 @@ example_ab = {
     "productForm": "string",
     "productIsotype": "string",
     "sourceOrganism": "mouse",
-    "targetSpecies": [
-        "mouse",
-        "human"
-    ],
+    "targetSpecies": ["mouse", "human"],
     "uniprotId": "string",
     "vendorName": "My vendor",
     "applications": "ELISA, IHC, WB".split(", "),
-    "kitContents": "Sheep polyclonal anti-FSH antibody labeled with acridinium ester. Mouse monoclonal anti-FSH antibody covalently coupled to paramagnetic particles."
+    "kitContents": "Sheep polyclonal anti-FSH antibody labeled with acridinium ester. Mouse monoclonal anti-FSH antibody covalently coupled to paramagnetic particles.",
 }
 
 
@@ -109,3 +116,60 @@ class AntibodiesTestCase(TestCase):
         assert len(fts_antibodies(search="N176A").items) == 2
         assert len(fts_antibodies(search="N176A 35").items) == 1
         assert len(fts_antibodies(search="N176A|35").items) == 1
+
+
+class VendorAdminTests(TestCase):
+    def setUp(self):
+        self.site = AdminSite()
+
+    def test_force_delete_vendor(self):
+        # Create data
+        vendor = Vendor.objects.create()
+        ab1 = Antibody.objects.create(vendor=vendor)
+        ab2 = Antibody.objects.create(vendor=vendor)
+        domain = VendorDomain.objects.create(vendor=vendor)
+
+        self.assertEquals(ab1.vendor, vendor)
+        self.assertEquals(ab2.vendor, vendor)
+        self.assertEquals(domain.vendor, vendor)
+        self.assertEquals(len(Antibody.objects.all()), 2)
+        self.assertEquals(len(Vendor.objects.all()), 1)
+        self.assertEquals(len(VendorDomain.objects.all()), 1)
+
+        # Instanciante and tests
+        va = VendorAdmin(Vendor, self.site)
+        va._force_delete(vendor)
+        self.assertEquals(len(Antibody.objects.all()), 0)
+        self.assertEquals(len(VendorDomain.objects.all()), 0)
+        self.assertEquals(len(Vendor.objects.all()), 1)
+
+    def test_swap_ownership_antibodies(self):
+        # Create data
+        v1 = Vendor.objects.create(name="v1")
+        v2 = Vendor.objects.create(name="v2")
+        ab1 = Antibody.objects.create(vendor=v1)
+        ab2 = Antibody.objects.create(vendor=v1)
+        domain = VendorDomain.objects.create(vendor=v1)
+
+        self.assertEquals(ab1.vendor, v1)
+        self.assertIn(ab1, v1.antibody_set.all())
+        self.assertEquals(ab2.vendor, v1)
+        self.assertIn(ab2, v1.antibody_set.all())
+        self.assertEquals(domain.vendor, v1)
+        self.assertEquals(len(Antibody.objects.all()), 2)
+        self.assertEquals(len(Vendor.objects.all()), 2)
+        self.assertEquals(len(VendorDomain.objects.all()), 1)
+
+        # Instanciante and tests
+        va = VendorAdmin(Vendor, self.site)
+        va._swap_ownership(v1, v2)
+
+        self.assertIn(ab1, v2.antibody_set.all())
+        self.assertIn(ab2, v2.antibody_set.all())
+        self.assertNotIn(ab1, v1.antibody_set.all())
+        self.assertNotIn(ab2, v1.antibody_set.all())
+        self.assertIn(domain, v2.vendordomain_set.all())
+        self.assertNotIn(domain, v1.vendordomain_set.all())
+        self.assertEquals(len(Antibody.objects.all()), 2)
+        self.assertEquals(len(Vendor.objects.all()), 2)
+        self.assertEquals(len(VendorDomain.objects.all()), 1)
