@@ -172,13 +172,6 @@ class AntibodyResource(ModelResource):
         # removes empty nan line when the full dataset is removed
         dataset.df = dataset.df.dropna(axis=0, how='all')
 
-    def after_import(self, dataset, result, using_transactions, dry_run, **kwargs):
-        # clear session values
-        # self.request.session[FOR_NEW_KEY] = None
-        # self.request.session[FOR_EXTANT_KEY] = None
-        # self.request.session[METHOD_KEY] = None
-        pass
-
     def _filter_dataset(self, dataset, negate_filter_condition=False):
         ic = self.get_antibody_identifier(dataset.headers)
         if ic is None:
