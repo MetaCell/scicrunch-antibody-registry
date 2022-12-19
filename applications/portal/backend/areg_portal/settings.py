@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    "import_export"
 ]
 
 MIDDLEWARE = [
@@ -162,6 +163,7 @@ KC_PRIVILEGED_ROLES = [
 KC_DEFAULT_USER_ROLE = None  # don't add the user role to the realm default role
 
 # Database models settings
+IMPORT_EXPORT_USE_TRANSACTIONS = True
 
 # comment refers to max length of column at ingestion time (12/09/2022)
 ANTIBODY_NAME_MAX_LEN = 512  # 352
@@ -181,12 +183,14 @@ ANTIBODY_TARGET_MODIFICATION_MAX_LEN = 128  # 67
 ANTIBODY_DEFINING_CITATION_MAX_LEN = 16384  # 9206
 ANTIBODY_DISC_DATE_MAX_LEN = 128  # 85
 ANTIBODY_ID_MAX_LEN = 32  # 8
+ANTIBODY_UID_MAX_LEN = 256
 STATUS_MAX_LEN = 8
 ANTIBODY_CAT_ALT_MAX_LEN = 512  # 334
 VENDOR_COMMERCIAL_TYPE_MAX_LEN = 10  # 10
 ANTIGEN_UNIPROT_ID_MAX_LEN = 64  # 32
 ANTIBODY_TARGET_EPITOPE_MAX_LEN = 1024  # 897
 VENDOR_NIF_MAX_LEN = 32  # 14
+VENDOR_EU_ID_MAX_LEN = 255
 APPLICATION_MAX_LEN = 255
 
 ANTIBODY_ANTIBODY_START_SEQ = 3000000  # 2858735
@@ -234,6 +238,18 @@ GUID_INDEX = USERS_RELEVANT_HEADER.index(GUID_KEY)
 
 DEFAULT_UID = '43'
 
-
 # Search limit for Antibodies for returning without ranking
 LIMIT_NUM_RESULTS = 250
+
+FOR_NEW_KEY = 'for_new'
+FOR_EXTANT_KEY = 'for_extant'
+METHOD_KEY = 'method'
+IGNORE_KEY = 'ignore'
+INSERT_KEY = 'insert'
+UPDATE_KEY = 'update'
+DUPLICATE_KEY = 'duplicate'
+OVERRIDE_KEY = 'override'
+FILL_KEY = 'fill'
+SKIP_KEY = 'skip'
+ID_KEY = 'id'
+IX_KEY = 'ix'

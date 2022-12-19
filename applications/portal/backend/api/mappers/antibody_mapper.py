@@ -1,19 +1,18 @@
-from email.mime import base
 import enum
 import datetime
+import enum
 from urllib.parse import urlsplit
 
-from django.forms.models import model_to_dict
 from django.db import models
-
-from cloudharness import log
 from pydantic import ValidationError
-from api.models import STATUS, Antibody, AntibodyClonality, Gene, CommercialType, Specie, Vendor, VendorDomain, VendorSynonym
-from openapi.models import Antibody as AntibodyDTO
 
-from openapi import models as api_models
 from api.mappers.imapper import IDAOMapper
-from .mapping_utils import dict_to_snake, dict_to_camel, to_camel, to_snake
+from api.models import STATUS, Antibody, Gene, Specie, Vendor, VendorDomain
+from cloudharness import log
+from openapi.models import Antibody as AntibodyDTO
+from .mapping_utils import dict_to_snake, dict_to_camel, to_snake
+from ..services.gene_service import get_or_create_gene
+from ..services.specie_service import get_or_create_specie
 
 dto_fields = {to_snake(f) for f in AntibodyDTO.__fields__}
 
@@ -41,29 +40,24 @@ class AntibodyMapper(IDAOMapper):
         if dto.abTarget:
             antigen_symbol = dto.abTarget
             # del dto.abTarget
-            try:
-                ab.antigen = Gene.objects.get(symbol=antigen_symbol)
-            except Gene.DoesNotExist:
+            gene, new = get_or_create_gene(symbol=antigen_symbol)
+            ab.antigen = gene
+            if new:
                 # TODO what to do for non existing antigens? Create one? Should fill the table of antigens from a real data source?
                 log.warn("No antigen: %s", antigen_symbol)
-                ag = Gene(symbol=antigen_symbol)
-                ag.save()
-                ab.antigen = ag
 
         if dto.sourceOrganism:
-            specie = dto.sourceOrganism
+            specie_name = dto.sourceOrganism
             # del dto.sourceOrganism
-            try:
-                ab.source_organism = Specie.objects.get(name=specie)
-            except Specie.DoesNotExist:
-                log.info("Adding specie: %s", antigen_symbol)
-                sp = Specie(name=specie)
-                sp.save()
-                ab.source_organism = sp
+            specie, new = get_or_create_specie(name=specie_name)
+            ab.source_organism = specie
+            if new:
+                log.info("Adding specie: %s", specie_name)
+
         if dto.url:
             ab.vendor = self.vendor_from_antibody(dto)
         else:
-            raise AntibodyDataException("Vendor url is mandatory")
+            raise AntibodyDataException("Vendor url is mandatory", 'url', None)
 
         ab_dict = dict_to_snake(dto.dict())
 
@@ -79,15 +73,11 @@ class AntibodyMapper(IDAOMapper):
 
         if dto.targetSpecies:
             species = []
-            for specie in dto.targetSpecies:
-                try:
-                    species.append(Specie.objects.get(name=specie))
-                except Specie.DoesNotExist:
-                    # TODO what to do for non existing antigens? Create one? Should fill the table of antigens from a real data source?
-                    log.warn("Adding specie: %s", specie)
-                    sp = Specie(name=specie)
-                    sp.save()
-                    species.append(sp)
+            for specie_name in dto.targetSpecies:
+                specie, new = get_or_create_specie(name=specie_name)
+                species.append(specie)
+                if new:
+                    log.info("Adding specie: %s", specie_name)
             ab.species.set(species)
 
         return ab
@@ -114,8 +104,6 @@ class AntibodyMapper(IDAOMapper):
             return v
 
     def to_dto(self, dao: Antibody) -> AntibodyDTO:
-        # todo: implement @afonsobspinto
-
         dao_dict = dao.__dict__
 
         for k, v in dao_dict.items():
