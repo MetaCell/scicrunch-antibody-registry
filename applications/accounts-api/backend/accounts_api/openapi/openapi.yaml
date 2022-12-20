@@ -195,6 +195,7 @@ components:
         groups:
         - groups
         - groups
+        orcid: orcid
         id: id
         avatar: avatar
         email: email
@@ -235,6 +236,9 @@ components:
         website:
           description: ""
           type: string
+        orcid:
+          description: ""
+          type: string
       title: User
       type: object
     Profiles:
@@ -266,6 +270,7 @@ components:
           groups:
           - groups
           - groups
+          orcid: orcid
           id: id
           avatar: avatar
           email: email
@@ -279,6 +284,7 @@ components:
           groups:
           - groups
           - groups
+          orcid: orcid
           id: id
           avatar: avatar
           email: email

@@ -8,8 +8,9 @@ import {
   Divider,
   TextField,
   InputAdornment,
+  Alert,
 } from "@mui/material";
-import { CheckIcon, EmailIcon, ExternalLinkIcon } from "../icons";
+import { CheckIcon, EmailIcon } from "../icons";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import * as  UserService from "../../services/UserService";
@@ -25,7 +26,18 @@ const AccountDetailsForm = (props: UserProps) => {
   const [isPassOrigShown, setIsPassOrigShown] = React.useState(false);
   const [isPassNewShown, setIsPassNewShown] = React.useState(false);
   const [isPassConfirmShown, setIsPassConfirmShown] = React.useState(false);
-  const classes = {
+
+  const [user, setUser] = React.useState<User>({ firstName: props.user.firstName, lastName: props.user.lastName, email: props.user.email, orcid: props.user.orcid });
+
+  const [passwordOrig, setPasswordOrig] = React.useState("");
+  const [passwordNew, setPasswordNew] = React.useState("");
+  const [passwordConfirm, setPasswordConfirm] = React.useState("");
+  const [orcid, setOrcid] = React.useState<string>(props.user.orcid || "");
+  const [orcidMsg, setOrcidMsg] = React.useState<string>("");
+
+  const [updateResult, setUpdateResult] = React.useState<Boolean|string>(null);
+
+  const styles = {
     saveButton: {
       border: `1px solid ${theme.palette.primary.contrastText}`,
       boxShadow:
@@ -53,9 +65,43 @@ const AccountDetailsForm = (props: UserProps) => {
       },
     },
   };
+
+  const saveUser = () => {
+    UserService.updateUser({ ...user }).then((res) => {
+      console.log(res);
+    });
+    if(passwordNew && passwordConfirm && passwordOrig && !passwordError) {
+      UserService.updateUserPassword(passwordOrig, passwordNew).then(() => {
+        setUpdateResult(true);
+      }, (res) => {
+        console.error(res)
+        setUpdateResult(res);
+      });
+    }
+  }
+
+  const handleOrigPasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordOrig(event.target.value);
+  }
+
+  const handleConfirmPasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordConfirm(event.target.value);
+  }
+  const handleNewPasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordNew(event.target.value);
+  }
+
+  const passwordError = Boolean(passwordNew !== passwordConfirm && passwordNew && passwordConfirm);
+
+
+  function handleAssociateOrcid(): void {
+    setOrcidMsg("ORCID association failed: TBD");
+    
+  }
+
   return (
     <form>
-      <Grid container p={3} gap={3} direction="column" sx={classes.main}>
+      <Grid container p={3} gap={3} direction="column" sx={styles.main}>
         <Grid
           item
           display="flex"
@@ -74,13 +120,16 @@ const AccountDetailsForm = (props: UserProps) => {
           <Button
             variant="contained"
             startIcon={<CheckIcon />}
-            disabled
-            sx={classes.saveButton}
+            disabled={Boolean(passwordError || ((!passwordConfirm || !passwordNew) && passwordOrig))}
+            sx={styles.saveButton}
+            onClick={saveUser}
           >
             Save changes
           </Button>
         </Grid>
         <Divider />
+        {updateResult === true && <Alert severity="info">Password updated successfully</Alert>}
+        {updateResult !== true && updateResult !== null && <Alert severity="error"><>Password update failed</></Alert>}
         <Grid item p={0} textAlign="left" display="flex" gap={4}>
           <Grid item lg={3}>
             <Typography color="grey.500">Personal details</Typography>
@@ -90,13 +139,21 @@ const AccountDetailsForm = (props: UserProps) => {
               <Typography variant="subtitle1" color="grey.700" pb={0.75}>
                 First Name
               </Typography>
-              <TextField value={props.user.first_name} fullWidth />
+              <TextField 
+                value={user.firstName} 
+                fullWidth 
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUser({ ...user, firstName: e.target.value })} />
             </Grid>
             <Grid item lg={5.9}>
               <Typography variant="subtitle1" color="grey.700" pb={0.75}>
                 Last Name
               </Typography>
-              <TextField value={props.user.last_name} fullWidth />
+              <TextField value={user.lastName} 
+                fullWidth 
+                
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUser({ ...user, lastName: e.target.value })}
+                
+              />
             </Grid>
           </Grid>
         </Grid>
@@ -143,6 +200,7 @@ const AccountDetailsForm = (props: UserProps) => {
                 fullWidth
                 type={isPassOrigShown ? "text" : "password"}
                 placeholder="Type your original password"
+                onChange={handleOrigPasswordChange}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
@@ -154,7 +212,7 @@ const AccountDetailsForm = (props: UserProps) => {
                             <VisibilityOutlinedIcon sx={{ color: "#000" }} />
                           )
                         }
-                        sx={classes.showButton}
+                        sx={styles.showButton}
                         color="inherit"
                         onClick={() => setIsPassOrigShown(!isPassOrigShown)}
                       >
@@ -173,6 +231,7 @@ const AccountDetailsForm = (props: UserProps) => {
                 fullWidth
                 placeholder="Create a new password"
                 type={isPassNewShown ? "text" : "password"}
+                onChange={handleNewPasswordChange}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
@@ -184,7 +243,7 @@ const AccountDetailsForm = (props: UserProps) => {
                             <VisibilityOutlinedIcon sx={{ color: "#000" }} />
                           )
                         }
-                        sx={classes.showButton}
+                        sx={styles.showButton}
                         color="inherit"
                         onClick={() => setIsPassNewShown(!isPassNewShown)}
                       >
@@ -202,7 +261,10 @@ const AccountDetailsForm = (props: UserProps) => {
               <TextField
                 fullWidth
                 placeholder="Confirm your new password"
+                error={passwordError} 
                 type={isPassConfirmShown ? "text" : "password"}
+                onChange={handleConfirmPasswordChange}
+                helperText={passwordError ? "Passwords do not match" : ""}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
@@ -214,7 +276,7 @@ const AccountDetailsForm = (props: UserProps) => {
                             <VisibilityOutlinedIcon sx={{ color: "#000" }} />
                           )
                         }
-                        sx={classes.showButton}
+                        sx={styles.showButton}
                         color="inherit"
                         onClick={() =>
                           setIsPassConfirmShown(!isPassConfirmShown)
@@ -230,6 +292,7 @@ const AccountDetailsForm = (props: UserProps) => {
           </Grid>
         </Grid>
         <Divider />
+        {orcidMsg && <Alert severity={orcidMsg.includes("fail") ? "error": "info"}>{orcidMsg}</Alert>}
         <Grid item p={0} textAlign="left" display="flex" gap={4}>
           <Grid item lg={3}>
             <Typography color="grey.500">ORCID ID</Typography>
@@ -237,14 +300,25 @@ const AccountDetailsForm = (props: UserProps) => {
               You can associate your ORCID ID to your account.
             </Typography>
           </Grid>
-          <Button
-            variant="outlined"
-            color="inherit"
-            endIcon={<ExternalLinkIcon stroke="#344054" />}
-            sx={classes.orcidButton}
-          >
+
+          
+          <Grid item lg={9} columnSpacing={2} justifyContent="space-between" display="flex">
+            <TextField 
+              value={orcid} 
+              sx={{ pr: 2, flex: 1 }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOrcid(e.target.value)} />
+          
+          
+            {<Button
+              variant="outlined"
+              color="inherit"
+              sx={styles.orcidButton}
+              onClick={handleAssociateOrcid}
+            >
             Associate ORCID ID
-          </Button>
+            </Button>
+            }
+          </Grid>
         </Grid>
       </Grid>
     </form>

@@ -121,6 +121,12 @@ export interface User {
      * @memberof User
      */
     'website'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    'orcid'?: string;
 }
 /**
  * 

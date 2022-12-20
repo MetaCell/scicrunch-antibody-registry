@@ -1,17 +1,17 @@
 import { useState } from "react";
 import {
-  UsersApi
+  UsersApi, 
+  User as ApiUser,
 } from "../rest/accounts-api/api";
+
 
 import { Configuration } from "../rest/accounts-api";
 
-const api = new UsersApi();
-export interface User {
-  email: string;
-  first_name: string;
-  last_name: string;
-  preferred_username: string;
-  realm_access: {roles: string[]}
+const getUserApi = () => new UsersApi(new Configuration({ apiKey: getToken(), accessToken: getToken(), basePath: "/proxy/accounts-api/api" }));
+
+export interface User extends ApiUser{
+  preferredUsername?: string;
+  realmAccess?: {roles: string[]};
 }
 
 function getCookie(name): string {
@@ -21,6 +21,17 @@ function getCookie(name): string {
     return parts.pop().split(";").shift();
   }
   return null;
+}
+
+
+function mapUser(jwtUser: any): User {
+  return jwtUser && {
+    ...jwtUser,
+    firstName: jwtUser.given_name,
+    lastName: jwtUser.family_name,
+    preferredUsername: jwtUser.preferred_username,
+    realmAccess: jwtUser.realm_access,
+  };
 }
 
 function parseJwt(token: string): User {
@@ -63,16 +74,16 @@ export function getCurrentUser() {
       1
     );
   }
-  return parseJwt(getToken());
+  return mapUser(parseJwt(getToken()));
 }
 
 export async function updateUser(user: User) {
-  return await api.updateUser(getCurrentUser().email, user, new Configuration({ apiKey: getToken(), accessToken: getToken() }));
+  return await getUserApi().updateUser(getCurrentUser().sub, user, );
 }
 
 
-export function updateUserPassword(oldPassword: string, newPassword: string) {
-  
+export async function updateUserPassword(oldPassword: string, newPassword: string) {
+  return await getUserApi().usersUsernamePasswordPut(getCurrentUser().preferredUsername, { old_password: oldPassword, new_password: newPassword });
 }
 
 

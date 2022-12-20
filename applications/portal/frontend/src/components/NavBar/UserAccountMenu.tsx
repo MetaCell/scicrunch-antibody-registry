@@ -40,7 +40,7 @@ const UserAccountMenu = (props: UserProps) => {
             <Stack direction="row" spacing={1}>
               <div>
                 <Typography variant="subtitle1" color="grey.400" align="left">Account</Typography>
-                <Typography variant="subtitle2" color="grey.700" align="left">{user.preferred_username}</Typography>
+                <Typography variant="subtitle2" color="grey.700" align="left">{user.firstName ? `${user.firstName} ${user.lastName}` : user.email}</Typography>
               </div>
               <IconButton
                 disableRipple
@@ -75,7 +75,7 @@ const UserAccountMenu = (props: UserProps) => {
               <ListItem sx={{ py: 1.5, pr: 20 }}>
                 <Stack spacing={0}>
                   <Typography variant="subtitle2" color="grey.600">
-                    {user.preferred_username}
+                    {user.firstName ? `${user.firstName} ${user.lastName}` : user.preferredUsername}
                   </Typography>
                   <Typography variant="subtitle1" color="grey.400">
                     {user.email}
@@ -97,7 +97,7 @@ const UserAccountMenu = (props: UserProps) => {
                   </ListItemIcon>
                   <Typography variant="h5" color="grey.500">API Key</Typography>
                 </MenuItem>
-                {user.realm_access.roles.includes("administrator") && <MenuItem onClick={() => window.location.href = "/admin/"}>
+                {user.realmAccess.roles.includes("administrator") && <MenuItem onClick={() => window.location.href = "/admin/"}>
                   <ListItemIcon>
                     <AdminPanelSettingsIcon fontSize="small" sx={{ pl: 0 }}  />
                   </ListItemIcon>
@@ -105,7 +105,7 @@ const UserAccountMenu = (props: UserProps) => {
                 </MenuItem> }
                 <Divider />
                 <MenuItem onClick={() => 
-                  fetch("/oauth/logout").then(() => window.location.href = "/")
+                  fetch("/oauth/logout").then(() => window.location.href = "/", () => window.location.href = "/oauth/logout")
                 }>
                   <ListItemIcon>
                     <LogoutIcon />

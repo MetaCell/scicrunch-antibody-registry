@@ -166,6 +166,22 @@ steps:
         image_name: areg/common
         title: Common
         working_directory: ./cloud-harness/applications/common/server
+      accounts-api:
+        type: build
+        stage: build
+        tag: '${{CF_BUILD_ID}}'
+        dockerfile: Dockerfile
+        registry: '${{CODEFRESH_REGISTRY}}'
+        buildkit: true
+        build_arguments:
+        - TAG=${{CF_BUILD_ID}}
+        - DOMAIN=${{DOMAIN}}
+        - NOCACHE=${{CF_BUILD_ID}}
+        - REGISTRY=${{REGISTRY}}/areg/
+        - CLOUDHARNESS_FLASK=${{REGISTRY}}/areg/cloudharness-flask:${{CF_BUILD_ID}}
+        image_name: areg/accounts-api
+        title: Accounts api
+        working_directory: ./applications/accounts-api
       portal:
         type: build
         stage: build
@@ -237,6 +253,7 @@ steps:
     - kubectl rollout status deployment/accounts
     - kubectl rollout status deployment/argo-server-gk
     - kubectl rollout status deployment/common
+    - kubectl rollout status deployment/accounts-api
     - kubectl rollout status deployment/portal
     - kubectl rollout status deployment/portal-gk
     - sleep 60

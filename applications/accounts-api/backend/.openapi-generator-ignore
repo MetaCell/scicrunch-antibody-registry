@@ -28,3 +28,4 @@ src/__main__.py
 requirements.txt
 test-requirements.txt
 */test/*
+*/__main__.py

@@ -207,6 +207,9 @@ components:
         website:
           $ref: "#/components/schemas/Url"
           description: ""
+        orcid:
+          $ref: "#/components/schemas/Url"
+          description: ""
       additionalProperties: true
     Profiles:
       description: ""

@@ -15,7 +15,7 @@ class User(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, username=None, email=None, first_name=None, last_name=None, groups=None, profiles=None, registration_date=None, avatar=None, website=None):  # noqa: E501
+    def __init__(self, id=None, username=None, email=None, first_name=None, last_name=None, groups=None, profiles=None, registration_date=None, avatar=None, website=None, orcid=None):  # noqa: E501
         """User - a model defined in OpenAPI
 
         :param id: The id of this User.  # noqa: E501
@@ -38,6 +38,8 @@ class User(Model):
         :type avatar: str
         :param website: The website of this User.  # noqa: E501
         :type website: str
+        :param orcid: The orcid of this User.  # noqa: E501
+        :type orcid: str
         """
         self.openapi_types = {
             'id': str,
@@ -49,7 +51,8 @@ class User(Model):
             'profiles': Dict[str, object],
             'registration_date': date,
             'avatar': str,
-            'website': str
+            'website': str,
+            'orcid': str
         }
 
         self.attribute_map = {
@@ -62,7 +65,8 @@ class User(Model):
             'profiles': 'profiles',
             'registration_date': 'registrationDate',
             'avatar': 'avatar',
-            'website': 'website'
+            'website': 'website',
+            'orcid': 'orcid'
         }
 
         self._id = id
@@ -75,6 +79,7 @@ class User(Model):
         self._registration_date = registration_date
         self._avatar = avatar
         self._website = website
+        self._orcid = orcid
 
     @classmethod
     def from_dict(cls, dikt) -> 'User':
@@ -316,3 +321,26 @@ class User(Model):
         """
 
         self._website = website
+
+    @property
+    def orcid(self):
+        """Gets the orcid of this User.
+
+          # noqa: E501
+
+        :return: The orcid of this User.
+        :rtype: str
+        """
+        return self._orcid
+
+    @orcid.setter
+    def orcid(self, orcid):
+        """Sets the orcid of this User.
+
+          # noqa: E501
+
+        :param orcid: The orcid of this User.
+        :type orcid: str
+        """
+
+        self._orcid = orcid

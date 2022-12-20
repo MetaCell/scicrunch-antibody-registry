@@ -1,4 +1,8 @@
 harness:
+  database:
+    auto: true
+    type: postgres
+    size: 10Gi
   accounts:
     roles:
       - portal:administrator

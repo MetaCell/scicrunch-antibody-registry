@@ -71,7 +71,7 @@ def update_user(userid, user=None):  # noqa: E501
         return "User not authorized", 401
 
 
-def users_userid_password_put(username, update_password: UpdatePassword = None):  # noqa: E501
+def users_username_password_put(username, update_password: UpdatePassword = None):  # noqa: E501
     """users_userid_password_put
 
      # noqa: E501

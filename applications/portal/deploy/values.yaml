@@ -15,19 +15,17 @@ harness:
     build:
       - cloudharness-frontend-build
       - cloudharness-django
-
     hard:
       - common
       - events
       - accounts
       - argo
-
     soft:
       - pgadmin
-  #      - accounts-api
+      - accounts-api
   use_services:
     - name: common
-  #    - name: accounts_api
+    - name: accounts_api
   uri_role_mapping:
     - uri: /admin/*
       roles:

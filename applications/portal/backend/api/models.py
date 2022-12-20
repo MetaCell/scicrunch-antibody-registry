@@ -77,9 +77,9 @@ class Vendor(models.Model):
     name = models.CharField(max_length=VENDOR_MAX_LEN,
                             db_column='vendor', db_index=True)
     nif_id = models.CharField(
-        max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id', null=True)
+        max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id', null=True, blank=True)
     eu_id = models.CharField(
-        max_length=VENDOR_EU_ID_MAX_LEN, db_column='euid', null=True)
+        max_length=VENDOR_EU_ID_MAX_LEN, db_column='euid', null=True, blank=True)
     commercial_type = models.CharField(
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
         choices=CommercialType.choices,
@@ -161,7 +161,7 @@ class Antibody(models.Model):
         max_length=ANTIBODY_NAME_MAX_LEN, null=True, db_index=True)
     ab_id = models.CharField(
         max_length=ANTIBODY_ID_MAX_LEN, null=True, db_index=True)
-    accession = models.CharField(max_length=ANTIBODY_ID_MAX_LEN, null=True)
+    accession = models.CharField(max_length=ANTIBODY_ID_MAX_LEN, null=True, blank=True)
     commercial_type = models.CharField(
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
         choices=CommercialType.choices,
@@ -172,49 +172,51 @@ class Antibody(models.Model):
     uid = models.CharField(
         max_length=ANTIBODY_UID_MAX_LEN, null=True, db_index=True)
     # Maps to old users -- used only for migration purpose
-    uid_legacy = models.IntegerField(null=True)
+    uid_legacy = models.IntegerField(null=True, blank=True)
     catalog_num = models.CharField(
         max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True)
     cat_alt = models.CharField(
-        max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True, db_index=True)
+        max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True, db_index=True, blank=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
-    url = models.URLField(max_length=URL_MAX_LEN, null=True, db_index=True)
+    url = models.URLField(max_length=URL_MAX_LEN, null=True, db_index=True, blank=True)
     antigen = models.ForeignKey(
         Gene, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
-                                     through='AntibodySpecies')
+                                     through='AntibodySpecies', blank=True)
     subregion = models.CharField(max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion', null=True,
-                                 db_index=True)
+                                 db_index=True, blank=True)
     modifications = models.CharField(max_length=ANTIBODY_TARGET_MODIFICATION_MAX_LEN, db_column='target_modification',
-                                     null=True, db_index=True)
+                                     null=True, db_index=True, blank=True)
     epitope = models.CharField(
-        max_length=ANTIBODY_TARGET_EPITOPE_MAX_LEN, null=True, db_index=True)
+        max_length=ANTIBODY_TARGET_EPITOPE_MAX_LEN, null=True, db_index=True, blank=True)
     source_organism = models.ForeignKey(
-        Specie, on_delete=models.RESTRICT, related_name="source", null=True)
+        Specie, on_delete=models.RESTRICT, related_name="source", null=True, blank=True)
     clonality = models.CharField(
         max_length=ANTIBODY_CLONALITY_MAX_LEN,
         choices=AntibodyClonality.choices,
         default=AntibodyClonality.UNKNOWN,
-        db_index=True
+        db_index=True,
+        null=True,
+        blank=True
     )
     clone_id = models.CharField(
-        max_length=ANTIBODY_CLONE_ID_MAX_LEN, null=True, db_index=True)
+        max_length=ANTIBODY_CLONE_ID_MAX_LEN, null=True, db_index=True, blank=True)
     product_isotype = models.CharField(
-        max_length=ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN, null=True, db_index=True)
+        max_length=ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN, null=True, db_index=True, blank=True)
     product_conjugate = models.CharField(
-        max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, null=True, db_index=True)
+        max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, null=True, db_index=True, blank=True)
     defining_citation = models.CharField(
-        max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True)
+        max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True, blank=True, db_index=True)
     product_form = models.CharField(
-        max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True, db_index=True)
-    comments = models.TextField(null=True)
+        max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True, db_index=True, blank=True)
+    comments = models.TextField(null=True,  blank=True)
     applications = models.ManyToManyField(
-        Application, through='AntibodyApplications')
-    kit_contents = models.TextField(null=True, db_index=True)
-    feedback = models.TextField(null=True, db_index=True)
-    curator_comment = models.TextField(null=True, db_index=True)
+        Application, through='AntibodyApplications', blank=True)
+    kit_contents = models.TextField(null=True, db_index=True, blank=True)
+    feedback = models.TextField(null=True, db_index=True, blank=True)
+    curator_comment = models.TextField(null=True, db_index=True, blank=True)
     disc_date = models.CharField(
-        max_length=ANTIBODY_DISC_DATE_MAX_LEN, null=True, db_index=True)
+        max_length=ANTIBODY_DISC_DATE_MAX_LEN, null=True, db_index=True, blank=True)
     status = models.CharField(
         max_length=STATUS_MAX_LEN,
         choices=STATUS.choices,
@@ -222,10 +224,10 @@ class Antibody(models.Model):
         db_index=True
     )
     insert_time = models.DateTimeField(
-        auto_now_add=True, db_index=True, null=True)
+        auto_now_add=True, db_index=True, null=True, blank=True)
     lastedit_time = models.DateTimeField(
         auto_now=True, db_index=True, null=True)
-    curate_time = models.DateTimeField(db_index=True, null=True)
+    curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.status == STATUS.CURATED:

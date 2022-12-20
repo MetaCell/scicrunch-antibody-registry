@@ -70,10 +70,15 @@ def map_user(kc_user) -> User:
     except (IndexError, TypeError):
         # no avatar is set or is empty
         pass
-    user.registration_date = datetime.fromtimestamp(
-        kc_user['createdTimestamp'] / 1000)
+
     try:
         user.website = kc_user['attributes'].get('website', [None])[0]
+    except (IndexError, TypeError):
+        # no website is set or is empty
+        pass
+
+    try:
+        user.orcid = kc_user['attributes'].get('orcid', [None])[0]
     except (IndexError, TypeError):
         # no website is set or is empty
         pass
@@ -94,11 +99,13 @@ def update_user(userid, user: User):
         updated_user = {
             'firstName': user.first_name or current_user['firstName'],
             'lastName': user.last_name or current_user['lastName'],
+            'username': user.username or current_user['username'],
             'attributes': {
                 **(current_user.get('attributes') or {}),
                 **({('profile--' + k): user.profiles[k] for k in user.profiles} if user.profiles else {}),
                 'avatar': user.avatar,
-                'website': user.website
+                'website': user.website,
+                'orcid': user.orcid
             }
         }
 
