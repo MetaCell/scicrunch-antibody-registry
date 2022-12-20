@@ -1,9 +1,9 @@
 from django.contrib import admin
-from django.utils.html import format_html, format_html_join
 from django.db.models import Q
-from django.utils.translation import gettext_lazy as _
+from django.utils.html import format_html, format_html_join
+from import_export.admin import ImportMixin
 
-
+from api.forms.AntibodyImportForm import AntibodyImportForm
 from api.models import (
     STATUS,
     Antibody,
@@ -16,6 +16,8 @@ from api.models import (
     VendorDomain,
     VendorSynonym,
 )
+from api.resources.AntibodyResource import AntibodyResource
+from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 
 
 @admin.display(description="ab_id")
@@ -34,13 +36,28 @@ class AntibodyApplicationsInline(admin.TabularInline):
 
 
 @admin.register(Antibody)
-class AntibodyAdmin(admin.ModelAdmin):
+class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
+    import_template_name = 'admin/import_export/custom_import_form.html'
+    import_form_class = AntibodyImportForm
+    resource_classes = [AntibodyResource]
     list_filter = ("status",)
     list_display = (id_with_ab, "ab_name", "status")
     search_fields = ("ab_id", "ab_name", "catalog_num")
     # readonly_fields = ("ab_id", "catalog_num", "accession")
     autocomplete_fields = ("vendor", "antigen", "species", "source_organism")
     inlines = (AntibodySpeciesInline, AntibodyApplicationsInline)
+
+    def get_resource_kwargs(self, request, *args, **kwargs):
+        rk = super().get_resource_kwargs(request, *args, **kwargs)
+        rk['request'] = request
+        return rk
+
+    def get_import_data_kwargs(self, request, *args, **kwargs):
+        kwargs[FOR_NEW_KEY] = request.POST.get(FOR_NEW_KEY, None)
+        kwargs[FOR_EXTANT_KEY] = request.POST.get(FOR_EXTANT_KEY, None)
+        kwargs[METHOD_KEY] = request.POST.get(METHOD_KEY, None)
+        return super().get_import_data_kwargs(request, *args, **kwargs)
+
 
     def get_search_results(self, request, queryset, search_term):
         queryset, may_have_duplicates = super().get_search_results(
