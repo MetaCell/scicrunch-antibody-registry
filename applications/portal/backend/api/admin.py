@@ -1,6 +1,12 @@
 from django.contrib import admin
+from django.contrib.admin.widgets import ManyToManyRawIdWidget, FilteredSelectMultiple
 from django.db.models import Q
-from django.utils.html import format_html, format_html_join
+from django.db.models.functions import Length
+from django.utils.encoding import smart_str
+from django.utils.html import escape, format_html, format_html_join, mark_safe
+from django.utils.text import format_lazy
+from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
 from import_export.admin import ImportMixin
 
 from api.forms.AntibodyImportForm import AntibodyImportForm
@@ -25,6 +31,41 @@ def id_with_ab(obj: Antibody):
     return f"AB_{obj.ab_id}"
 
 
+class VerboseManyToManyRawIdWidget(ManyToManyRawIdWidget):
+    """
+    A Widget for displaying ManyToMany ids in the "raw_id" interface rather
+    than in a <select multiple> box. Display user-friendly value like the ForeignKeyRawId widget
+    """
+
+    def label_and_url_for_value(self, value):
+        values = value
+        str_values = []
+        field = self.rel.get_related_field()
+        key = field.name
+        fk_model = self.rel.model
+        app_label = fk_model._meta.app_label
+        class_name = fk_model._meta.object_name.lower()
+        for the_value in values:
+            try:
+                obj = fk_model._default_manager.using(self.db).get(**{key: the_value})
+                url = reverse(
+                    "admin:{0}_{1}_change".format(app_label, class_name), args=[obj.id]
+                )
+                label = escape(smart_str(obj))
+                elt = '<a href="{0}" {1}>{2}</a>'.format(
+                    url,
+                    'onclick="return showAddAnotherPopup(this);" target="_blank"',
+                    label,
+                )
+                str_values.append(elt)
+            except fk_model.DoesNotExist:
+                str_values.append("???")
+        return mark_safe(", ".join(str_values)), ""
+
+    def format_value(self, value):
+        return ",".join(str(v) for v in value) if value else ""
+
+
 class AntibodySpeciesInline(admin.TabularInline):
     model = AntibodySpecies
     extra = 0
@@ -38,7 +79,7 @@ class AntibodyApplicationsInline(admin.TabularInline):
 
 @admin.register(Antibody)
 class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
-    import_template_name = 'admin/import_export/custom_import_form.html'
+    import_template_name = "admin/import_export/custom_import_form.html"
     import_form_class = AntibodyImportForm
     resource_classes = [AntibodyResource]
     list_filter = ("status",)
@@ -46,11 +87,11 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     search_fields = ("ab_id", "ab_name", "catalog_num")
     # readonly_fields = ("ab_id", "catalog_num", "accession")
     autocomplete_fields = ("vendor", "antigen", "species", "source_organism")
-    inlines = (AntibodySpeciesInline, AntibodyApplicationsInline)
+    # inlines = (AntibodySpeciesInline, AntibodyApplicationsInline)
 
     def get_resource_kwargs(self, request, *args, **kwargs):
         rk = super().get_resource_kwargs(request, *args, **kwargs)
-        rk['request'] = request
+        rk["request"] = request
         return rk
 
     def get_import_data_kwargs(self, request, *args, **kwargs):
@@ -58,7 +99,6 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         kwargs[FOR_EXTANT_KEY] = request.POST.get(FOR_EXTANT_KEY, None)
         kwargs[METHOD_KEY] = request.POST.get(METHOD_KEY, None)
         return super().get_import_data_kwargs(request, *args, **kwargs)
-
 
     def get_search_results(self, request, queryset, search_term):
         queryset, may_have_duplicates = super().get_search_results(
@@ -71,6 +111,30 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
             queryset |= self.model.objects.filter(ab_id=search_term[3:])
         return queryset, may_have_duplicates
 
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name not in ("species", "applications"):
+            return super().formfield_for_manytomany(db_field, request, **kwargs)
+        if db_field.name == "applications":
+            kwargs["widget"] = FilteredSelectMultiple(
+                db_field.verbose_name, is_stacked=False
+            )
+            if "queryset" not in kwargs:
+                queryset = db_field.related_model.objects.all()
+                if queryset is not None:
+                    kwargs["queryset"] = queryset
+            form_field = db_field.formfield(**kwargs)
+            msg = "Hold down “Control”, or “Command” on a Mac, to select more than one."
+            help_text = form_field.help_text
+            form_field.help_text = (
+                format_lazy("{} {}", help_text, msg) if help_text else msg
+            )
+            return form_field
+        if db_field.name == "species":
+            kwargs["widget"] = VerboseManyToManyRawIdWidget(
+                db_field.remote_field, self.admin_site
+            )
+            return db_field.formfield(**kwargs)
+
 
 @admin.register(Gene)
 class GeneAdmin(admin.ModelAdmin):
@@ -80,6 +144,19 @@ class GeneAdmin(admin.ModelAdmin):
 @admin.register(Specie)
 class SpecieAdmin(admin.ModelAdmin):
     search_fields = ("name",)
+
+    def get_search_results(self, request, queryset, search_term):
+        queryset, may_have_duplicates = super().get_search_results(
+            request,
+            queryset,
+            search_term,
+        )
+        search_term = search_term.strip()
+        if search_term:
+            queryset = queryset.filter(name__icontains=search_term).order_by(
+                Length("name").asc()
+            )
+        return queryset, may_have_duplicates
 
 
 @admin.register(Application)
