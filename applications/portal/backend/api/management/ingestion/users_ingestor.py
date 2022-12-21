@@ -3,7 +3,7 @@ from typing import Dict
 import pandas as pd
 
 from api.utilities.decorators import refresh_keycloak_client, timed_class_method
-from portal.settings import ORCID_URL, USERS_RELEVANT_HEADER, GUID_INDEX
+from portal.settings import ORCID_URL, USERS_RELEVANT_HEADER, GUID_INDEX, PROVIDER_ID
 from cloudharness.auth import AuthClient
 
 from enum import Enum
@@ -28,7 +28,7 @@ class UsersIngestor:
     @refresh_keycloak_client
     def _create_keycloak_user_from_row(self, *args):
         row = dict(zip(USERS_RELEVANT_HEADER, args))
-        return self.keycloak_admin.create_user({"email": row['email'],
+        user = self.keycloak_admin.create_user({"email": row['email'],
                                                 "username": row['email'],
                                                 "enabled": True,
                                                 "firstName": row['firstName'],
@@ -44,6 +44,9 @@ class UsersIngestor:
         },
             "requiredActions": [KeycloakRequiredActions.UPDATE_PASSWORD.value]
         }, exist_ok=True)
+        if row['orcid_id'] != '':
+            self.keycloak_admin.add_user_social_login(row['email'], PROVIDER_ID, row['orcid_id'], row['orcid_id'])
+        return user
 
 
 def _get_orcid_id(row) -> str:

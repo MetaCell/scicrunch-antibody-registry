@@ -229,6 +229,7 @@ for dt in D_TYPES:
 MAX_TRIES = 10
 
 ORCID_URL = "https://orcid.org/"
+PROVIDER_ID = 'orcid'
 
 USERS_RELEVANT_HEADER = ['id', GUID_KEY, 'email', 'level', 'firstName', 'middleInitial', 'lastName', 'organization',
                          'created', 'orcid_id']
