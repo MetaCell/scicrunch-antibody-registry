@@ -5,7 +5,6 @@ from django.db.models.functions import Length
 from django.utils.encoding import smart_str
 from django.utils.html import escape, format_html, format_html_join, mark_safe
 from django.utils.text import format_lazy
-from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 from import_export.admin import ImportMixin
 
