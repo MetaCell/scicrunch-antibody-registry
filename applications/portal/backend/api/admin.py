@@ -65,17 +65,6 @@ class VerboseManyToManyRawIdWidget(ManyToManyRawIdWidget):
         return ",".join(str(v) for v in value) if value else ""
 
 
-class AntibodySpeciesInline(admin.TabularInline):
-    model = AntibodySpecies
-    extra = 0
-    raw_id_fields = ("specie",)
-
-
-class AntibodyApplicationsInline(admin.TabularInline):
-    model = AntibodyApplications
-    extra = 0
-
-
 @admin.register(Antibody)
 class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     import_template_name = "admin/import_export/custom_import_form.html"
@@ -86,7 +75,6 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     search_fields = ("ab_id", "ab_name", "catalog_num")
     # readonly_fields = ("ab_id", "catalog_num", "accession")
     autocomplete_fields = ("vendor", "antigen", "species", "source_organism")
-    # inlines = (AntibodySpeciesInline, AntibodyApplicationsInline)
 
     def get_resource_kwargs(self, request, *args, **kwargs):
         rk = super().get_resource_kwargs(request, *args, **kwargs)
