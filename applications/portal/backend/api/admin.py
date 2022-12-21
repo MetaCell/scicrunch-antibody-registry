@@ -28,6 +28,7 @@ def id_with_ab(obj: Antibody):
 class AntibodySpeciesInline(admin.TabularInline):
     model = AntibodySpecies
     extra = 0
+    raw_id_fields = ("specie",)
 
 
 class AntibodyApplicationsInline(admin.TabularInline):
