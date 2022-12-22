@@ -6,6 +6,7 @@ from cloudharness.auth import AuthClient, get_server_url, get_auth_realm
 from cloudharness import log
 from cloudharness.applications import get_configuration
 import typing
+import re
 
 # from cloudharness.models import User as CHUser # Cloudharness 2.0.0
 
@@ -19,6 +20,8 @@ class UserNotFound(Exception):
 class UserNotAuthorized(Exception):
     pass
 
+class ValidationError(Exception):
+    pass
 
 def get_user(userid: str) -> User:
     try:
@@ -141,3 +144,23 @@ def update_password(username: str, new_password: str):
     except KeycloakError as e:
         raise Exception(
             "Unhandled Keycloak exception while updating user") from e
+
+def associate_orcid_id(userid: str, orcid: str):
+    client = AuthClient()
+    admin_client = client.get_admin_client()
+    try:
+        orcid_no_prefix = orcid.replace("https://orcid.org/", "")
+
+        admin_client.update_user(userid,  {"attributes": {"orcid": orcid}})
+        admin_client.add_user_social_login(userid, "orcid", orcid_no_prefix, orcid_no_prefix)
+    except KeycloakError as e:
+        try:
+            admin_client.delete_user_social_login(userid, "orcid")
+            admin_client.add_user_social_login(userid, "orcid", orcid_no_prefix, orcid_no_prefix)
+        except KeycloakError as e:
+            raise Exception(
+                "Unhandled Keycloak exception while updating user") from e
+
+def validate_orcid_id( orcid: str) -> bool:
+    return re.match(r'^https://orcid.org/\d{4}-\d{4}-\d{4}-\d{3}[0-9X]$', orcid)
+    

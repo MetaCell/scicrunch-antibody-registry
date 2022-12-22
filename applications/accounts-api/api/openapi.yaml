@@ -92,6 +92,8 @@ paths:
     get:
       tags:
         - users
+      security:
+        - bearerAuth: []
       parameters:
         - name: userid
           description: user id
@@ -159,6 +161,32 @@ paths:
           description: OK
         "400":
           description: incorrect old password
+  /users/{username}/orcid:
+    put:
+      description: ""
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      parameters:
+        - name: username
+          description: user name or email
+          schema:
+            type: string
+          in: path
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+        required: true
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: malformed orcid id
+
 components:
   schemas:
     Valid:

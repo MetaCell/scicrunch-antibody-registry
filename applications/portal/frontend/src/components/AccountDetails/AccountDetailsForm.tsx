@@ -14,28 +14,37 @@ import { CheckIcon, EmailIcon } from "../icons";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import * as  UserService from "../../services/UserService";
+import { useEffect } from "react";
 
-import { User } from "../../services/UserService";
 
-interface UserProps {
-  user: User;
+function mapUser(user: UserService.User) {
+  return { firstName: user.firstName, lastName: user.lastName, email: user.email, orcid: user.orcid };
 }
 
-const AccountDetailsForm = (props: UserProps) => {
+const AccountDetailsForm = () => {
   const theme = useTheme();
   const [isPassOrigShown, setIsPassOrigShown] = React.useState(false);
   const [isPassNewShown, setIsPassNewShown] = React.useState(false);
   const [isPassConfirmShown, setIsPassConfirmShown] = React.useState(false);
-
-  const [user, setUser] = React.useState<User>({ firstName: props.user.firstName, lastName: props.user.lastName, email: props.user.email, orcid: props.user.orcid });
+  const [loggedUser, refreshUser] = React.useContext(UserService.UserContext);
+  const [user, setUser] = React.useState<UserService.User>(mapUser(loggedUser));
 
   const [passwordOrig, setPasswordOrig] = React.useState("");
   const [passwordNew, setPasswordNew] = React.useState("");
   const [passwordConfirm, setPasswordConfirm] = React.useState("");
-  const [orcid, setOrcid] = React.useState<string>(props.user.orcid || "");
+  const [orcid, setOrcid] = React.useState<string>(user.orcid || "");
   const [orcidMsg, setOrcidMsg] = React.useState<string>("");
+  const [orcidErr, setOrcidErr] = React.useState<string>("");
 
-  const [updateResult, setUpdateResult] = React.useState<Boolean|string>(null);
+
+  useEffect(() => {
+    setUser(mapUser(loggedUser));
+    setOrcid(loggedUser.orcid || "")
+  }, [loggedUser]
+  );
+
+  const [updateResult, setUpdateResult] = React.useState<string>(null);
+  const [updatePasswordResult, setUpdatePasswordResult] = React.useState<string>(null);
 
   const styles = {
     saveButton: {
@@ -67,15 +76,19 @@ const AccountDetailsForm = (props: UserProps) => {
   };
 
   const saveUser = () => {
-    UserService.updateUser({ ...user }).then((res) => {
-      console.log(res);
-    });
+    if(user.firstName !== loggedUser.firstName || user.lastName !== loggedUser.lastName || user.email !== loggedUser.email) {
+      UserService.updateUser({ ...user }).then(() => {
+        setUpdateResult("User updated successfully");
+        refreshUser();
+      }, (res) => setUpdateResult("User update failed: " + res.response.data.description));
+    }
+
     if(passwordNew && passwordConfirm && passwordOrig && !passwordError) {
       UserService.updateUserPassword(passwordOrig, passwordNew).then(() => {
-        setUpdateResult(true);
+        setUpdatePasswordResult("User updated successfully");
       }, (res) => {
         console.error(res)
-        setUpdateResult(res);
+        setUpdatePasswordResult("Password update failed: " + res.response.data.description);
       });
     }
   }
@@ -95,9 +108,23 @@ const AccountDetailsForm = (props: UserProps) => {
 
 
   function handleAssociateOrcid(): void {
-    setOrcidMsg("ORCID association failed: TBD");
-    
+    UserService.associateOrcid(orcid).then(() => {
+      setOrcidMsg("ORCID ID associated successfully");
+      refreshUser();
+    }, (res) => {
+      setOrcidMsg("ORCID association failed");
+      if(res.status === 400) {
+        setOrcidMsg("ORCID association failed: ORCID not found");
+      }
+        
+    })
   }
+
+  const handleSetOrcid = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const orcidValue = e.target.value.includes("https://orcid.org/") ? e.target.value : "https://orcid.org/" + e.target.value;
+    setOrcid(orcidValue);
+    setOrcidErr("");
+  };
 
   return (
     <form>
@@ -128,8 +155,9 @@ const AccountDetailsForm = (props: UserProps) => {
           </Button>
         </Grid>
         <Divider />
-        {updateResult === true && <Alert severity="info">Password updated successfully</Alert>}
-        {updateResult !== true && updateResult !== null && <Alert severity="error"><>Password update failed</></Alert>}
+
+        {updateResult !== null && <Alert severity={updateResult.includes("fail") ? "error": "info"}><>{updateResult + ""}</></Alert>}
+        {updatePasswordResult !== null && <Alert severity={updatePasswordResult.includes("fail") ? "error": "info"}><>{updatePasswordResult + ""}</></Alert>}
         <Grid item p={0} textAlign="left" display="flex" gap={4}>
           <Grid item lg={3}>
             <Typography color="grey.500">Personal details</Typography>
@@ -148,7 +176,8 @@ const AccountDetailsForm = (props: UserProps) => {
               <Typography variant="subtitle1" color="grey.700" pb={0.75}>
                 Last Name
               </Typography>
-              <TextField value={user.lastName} 
+              <TextField 
+                value={user.lastName} 
                 fullWidth 
                 
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUser({ ...user, lastName: e.target.value })}
@@ -172,7 +201,8 @@ const AccountDetailsForm = (props: UserProps) => {
             </Typography>
             <TextField
               fullWidth
-              value={props.user.email}
+              value={user.email}
+              disabled
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start" sx={{ pl: 2 }}>
@@ -306,9 +336,10 @@ const AccountDetailsForm = (props: UserProps) => {
             <TextField 
               value={orcid} 
               sx={{ pr: 2, flex: 1 }}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOrcid(e.target.value)} />
-          
-          
+              onChange={handleSetOrcid} 
+              error={Boolean(orcidErr)}
+              helperText={orcidErr ? "Malformed ORCID" : ""}
+            />
             {<Button
               variant="outlined"
               color="inherit"
@@ -325,3 +356,5 @@ const AccountDetailsForm = (props: UserProps) => {
   );
 };
 export default AccountDetailsForm;
+
+

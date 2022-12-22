@@ -111,6 +111,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
           description: Get a user's public information
+      security:
+      - bearerAuth: []
       tags:
       - users
       x-openapi-router-controller: accounts_api.controllers.users_controller
@@ -138,6 +140,35 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
           description: The user as just saved
+      security:
+      - bearerAuth: []
+      tags:
+      - users
+      x-openapi-router-controller: accounts_api.controllers.users_controller
+  /users/{username}/orcid:
+    put:
+      description: ""
+      operationId: users_username_orcid_put
+      parameters:
+      - description: user name or email
+        explode: false
+        in: path
+        name: username
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+        required: true
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: malformed orcid id
       security:
       - bearerAuth: []
       tags:

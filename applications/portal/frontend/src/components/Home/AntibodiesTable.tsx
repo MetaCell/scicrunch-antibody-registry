@@ -38,7 +38,7 @@ import HomeHeader from "./HomeHeader";
 import { Antibody } from "../../rest";
 import { getProperCitation } from "../../utils/antibody";
 import { useTheme } from "@mui/system";
-import { useUser, User } from "../../services/UserService";
+import { UserContext } from "../../services/UserService";
 import ConnectAccount from "./ConnectAccount";
 import { ALLRESULTS } from "../../constants/constants";
 import SearchContext from "../../context/search/SearchContext";
@@ -335,7 +335,7 @@ const dataGridStyles = {
 };
 
 const AntibodiesTable = (props) => {
-  const user: User = useUser();
+  const user = useContext(UserContext)[0];
   const currentPath = window.location.pathname;
   const [antibodiesList, setAntibodiesList] = useState<Antibody[]>();
   const { activeSearch, searchedAntibodies, loader } = useContext(SearchContext)

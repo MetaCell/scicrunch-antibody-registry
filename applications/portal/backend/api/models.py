@@ -141,9 +141,9 @@ class Gene(models.Model):
     symbol = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN,
                               db_column='ab_target', null=True, db_index=True)
     entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
-                                 null=True, db_index=True)
+                                 null=True, db_index=True, blank=True)
     uniprot_id = models.CharField(
-        unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True)
+        unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True, blank=True)
 
     class Meta:
         indexes = [
@@ -154,6 +154,7 @@ class Gene(models.Model):
     def __str__(self):
         return f"{self.symbol or '?' + self.id}"
 
+    
 
 class Antibody(models.Model):
     ix = models.AutoField(primary_key=True, unique=True, null=False)
@@ -170,7 +171,7 @@ class Antibody(models.Model):
     )
     # This user id maps the users in keycloak
     uid = models.CharField(
-        max_length=ANTIBODY_UID_MAX_LEN, null=True, db_index=True)
+        max_length=ANTIBODY_UID_MAX_LEN, null=True, db_index=True, blank=True)
     # Maps to old users -- used only for migration purpose
     uid_legacy = models.IntegerField(null=True, blank=True)
     catalog_num = models.CharField(

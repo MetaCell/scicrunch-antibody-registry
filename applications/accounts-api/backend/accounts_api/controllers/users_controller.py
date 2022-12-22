@@ -92,3 +92,21 @@ def users_username_password_put(username, update_password: UpdatePassword = None
 
     user_service.update_password(username, update_password.new_password)
     return "OK", 204
+
+def users_username_orcid_put(username, body):  # noqa: E501
+    """users_username_orcid_put
+
+     # noqa: E501
+
+    :param username: user name or email
+    :type username: str
+    :param body: 
+    :type body: str
+
+    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
+    """
+    if not user_service.validate_orcid_id(body):
+        return "Invalid ORCID ID", 400
+    user_service.associate_orcid_id(username, body)
+    
+    return "OK", 204

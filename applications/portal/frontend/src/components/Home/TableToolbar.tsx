@@ -3,11 +3,11 @@ import { Box, Button, Stack, Tab, Tabs } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { GridToolbarColumnsButton } from "@mui/x-data-grid";
 import { HouseIcon, SendIcon, FilteringIcon } from "../icons";
-import { useUser, User } from "../../services/UserService";
+import { UserContext } from "../../services/UserService";
 import { ALLRESULTS } from "../../constants/constants";
 
 const TableToolbar = ({ showFilterMenu, activeTab }) => {
-  const user: User = useUser();
+  const user = React.useContext(UserContext)[0];
   const theme = useTheme();
   return (
     <Box
