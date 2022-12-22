@@ -23,7 +23,10 @@ const App = () => {
 
   function refreshUser() {
     const u = UserService.getCurrentUserFromCookie();
-    UserService.fetchUser(u.sub).then((res: any) => setUser({ ...u, ...res.data }), () => setUser(null));
+    if(u && u.sub) {
+      UserService.fetchUser(u.sub).then((res: any) => setUser({ ...u, ...res.data }), () => setUser(null));
+    }
+    
     setUser(u);
     return u;
   }
