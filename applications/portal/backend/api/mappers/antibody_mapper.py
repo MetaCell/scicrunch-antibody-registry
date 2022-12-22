@@ -7,7 +7,7 @@ from django.db import models
 from pydantic import ValidationError
 
 from api.mappers.imapper import IDAOMapper
-from api.models import STATUS, Antibody, Gene, Specie, Vendor, VendorDomain
+from api.models import STATUS, Antibody, Antigen, Specie, Vendor, VendorDomain
 from cloudharness import log
 from openapi.models import Antibody as AntibodyDTO
 from .mapping_utils import dict_to_snake, dict_to_camel, to_snake
@@ -122,7 +122,7 @@ class AntibodyMapper(IDAOMapper):
             pprint(dict_to_camel(dao_dict))
             ab = AntibodyDTO()
         if dao.antigen:
-            antigen: Gene = dao.antigen
+            antigen: Antigen = dao.antigen
             ab.abTarget = antigen.symbol
         if dao.vendor:
             ab.vendorName = dao.vendor.name

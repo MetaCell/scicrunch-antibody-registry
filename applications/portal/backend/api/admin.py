@@ -15,7 +15,7 @@ from api.models import (
     AntibodyApplications,
     AntibodySpecies,
     Application,
-    Gene,
+    Antigen,
     Vendor,
     Specie,
     VendorDomain,
@@ -123,7 +123,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
             return db_field.formfield(**kwargs)
 
 
-@admin.register(Gene)
+@admin.register(Antigen)
 class GeneAdmin(admin.ModelAdmin):
     search_fields = ("symbol", "entrez_id", "uniprot_id")
 

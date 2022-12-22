@@ -10,7 +10,7 @@ from cloudharness import log
 
 from api.management.ingestion.preprocessor import AntibodyMetadata
 from api.management.ingestion.users_ingestor import UsersIngestor
-from api.models import Antibody, Gene, Vendor, VendorDomain, Specie, \
+from api.models import Antibody, Antigen, Vendor, VendorDomain, Specie, \
     VendorSynonym, AntibodySpecies
 from api.utilities.decorators import timed_class_method
 from portal.settings import ANTIBODY_ANTIBODY_START_SEQ, ANTIBODY_VENDOR_START_SEQ, \
@@ -55,7 +55,7 @@ def get_clean_species_str(specie: str):
 
 class Ingestor:
     ANTIBODY_TABLE = Antibody.objects.model._meta.db_table
-    ANTIGEN_TABLE = Gene.objects.model._meta.db_table
+    ANTIGEN_TABLE = Antigen.objects.model._meta.db_table
     SPECIE_TABLE = Specie.objects.model._meta.db_table
     VENDOR_DOMAIN_TABLE = VendorDomain.objects.model._meta.db_table
     VENDOR_SYNONYM_TABLE = VendorSynonym.objects.model._meta.db_table
@@ -282,7 +282,7 @@ class Ingestor:
                 ttr, tables_to_restart_seq[ttr]))
 
         reset_sequence_sql = connection.ops.sequence_reset_sql(no_style(),
-                                                               [Specie, Gene, AntibodySpecies, VendorSynonym])
+                                                               [Specie, Antigen, AntibodySpecies, VendorSynonym])
         for rss in reset_sequence_sql:
             self.cursor.execute(rss)
 
