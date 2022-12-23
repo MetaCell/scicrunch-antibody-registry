@@ -182,6 +182,9 @@ class Antibody(models.Model):
     url = models.URLField(max_length=URL_MAX_LEN, null=True, db_index=True, blank=True)
     antigen = models.ForeignKey(
         Antigen, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
+    target_species_raw = models.CharField(
+        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, db_index=True)
+    
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
                                      through='AntibodySpecies', blank=True)
     subregion = models.CharField(max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion', null=True,

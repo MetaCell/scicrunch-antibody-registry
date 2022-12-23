@@ -207,8 +207,9 @@ CHUNK_SIZE = 10 ** 5
 UID_KEY = 'uid'
 GUID_KEY = 'guid'
 
+# Used for data import/export processing
 ANTIBODY_HEADER = {'ab_name': "text", 'ab_target': "text", 'target_species': "text", 'vendor': "text",
-                   'vendor_id': "int", 'catalog_num': "text", 'clonality': "text",
+                   'vendor_id': "int", 'catalog_num': "text", 'clonality': "text", 
                    'source_organism': "text", 'clone_id': "text", 'url': "text", 'link': "text",
                    'ab_target_entrez_gid': "text", 'product_isotype': "text",
                    'product_conjugate': "text", 'product_form': "text", 'target_subregion': "text",

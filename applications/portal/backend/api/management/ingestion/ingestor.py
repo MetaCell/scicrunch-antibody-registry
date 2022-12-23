@@ -1,6 +1,7 @@
 import itertools
 import logging
 import string
+import re
 
 import pandas as pd
 from django.core.management.color import no_style
@@ -50,8 +51,12 @@ def get_insert_values_into_table_stm(table_name, columns, entries):
 
 
 def get_clean_species_str(specie: str):
+    
     return specie.translate(str.maketrans('', '', string.punctuation)).strip().lower()
 
+def is_valid_specie(specie: str):
+    # valid if has less than 3 spaces
+    return len(specie.split(' ')) < 3
 
 class Ingestor:
     ANTIBODY_TABLE = Antibody.objects.model._meta.db_table
@@ -73,16 +78,16 @@ class Ingestor:
     def ingest(self):
         species_map = {}
 
-        # self._truncate_tables()
-        # self._insert_vendors()
-        # self._insert_vendor_domains()
+        self._truncate_tables()
+        self._insert_vendors()
+        self._insert_vendor_domains()
         self._fill_tmp_table()
-        # self._insert_genes()
-        # self._insert_species(species_map)
-        # self._insert_antibodies()
-        # self._insert_antibody_species(species_map)
-        # self._update_vendor_domains()
-        # self._reset_auto_increment()
+        self._insert_genes()
+        self._insert_species(species_map)
+        self._insert_antibodies()
+        self._insert_antibody_species(species_map)
+        self._update_vendor_domains()
+        self._reset_auto_increment()
         self._drop_tmp_table()
 
     @timed_class_method('Tables truncated')
@@ -200,7 +205,9 @@ class Ingestor:
         for row in self.cursor:
             specie_str = row[0]
             if specie_str:
-                for specie in specie_str.split(';'):
+                for specie in self.get_species_from_targets(specie_str):
+                    if not is_valid_specie(specie): continue
+
                     clean_specie = get_clean_species_str(specie)
                     if clean_specie not in species_map:
                         species_map[clean_specie] = species_id
@@ -212,28 +219,32 @@ class Ingestor:
             self.cursor.execute(species_insert_stm, list(
                 itertools.chain.from_iterable(species_map.items())))
 
+    def get_species_from_targets(self, specie_str):
+        # split by comma or semicolon
+        return re.split(r',|;', specie_str)
+
     @timed_class_method('Antibodies added')
     def _insert_antibodies(self):
 
-        antibody_stm = f"INSERT INTO {self.ANTIBODY_TABLE} (ix, ab_name, ab_id, accession, commercial_type, uid, catalog_num, cat_alt, " \
-                       f"vendor_id, url, antigen_id, target_subregion, target_modification, " \
-                       f"epitope, clonality, clone_id, product_isotype, " \
-                       f"product_conjugate, defining_citation, product_form, comments, feedback, " \
-                       f"curator_comment, disc_date, status, insert_time, curate_time, source_organism_id)" \
-                       f"SELECT DISTINCT ix, ab_name, ab_id, ab_id_old, TMP.commercial_type, " \
-                       f"uid, catalog_num, cat_alt, vendor_id, url, antigen.id, " \
-                       f"target_subregion, target_modification, epitope, clonality, " \
-                       f"clone_id, product_isotype, product_conjugate, defining_citation, product_form, " \
-                       f"comments, feedback, curator_comment, disc_date, status, " \
-                       f"to_timestamp(cast(insert_time as BIGINT)), " \
-                       f"to_timestamp(cast(curate_time as BIGINT)), SP.id " \
-                       f"FROM {self.TMP_TABLE} as TMP " \
-                       f"LEFT JOIN {self.VENDOR_TABLE} as vendor " \
-                       f"ON TMP.vendor_id = vendor.id " \
-                       f"LEFT JOIN {self.ANTIGEN_TABLE} as antigen " \
-                       f"ON TMP.ab_target = antigen.ab_target " \
-                       f"LEFT JOIN {self.SPECIE_TABLE} as SP " \
-                       f"ON TMP.source_organism = SP.name "
+        antibody_stm = f"INSERT INTO {self.ANTIBODY_TABLE} (ix, ab_name, ab_id, accession, commercial_type, uid, catalog_num, cat_alt,  \
+                       vendor_id, url, antigen_id, target_subregion, target_modification, \
+                       epitope, clonality, clone_id, product_isotype, target_species_raw, \
+                       product_conjugate, defining_citation, product_form, comments, feedback, \
+                       curator_comment, disc_date, status, insert_time, curate_time, source_organism_id)\
+                       SELECT DISTINCT ix, ab_name, ab_id, ab_id_old, TMP.commercial_type, \
+                       uid, catalog_num, cat_alt, vendor_id, url, antigen.id, target_species AS target_species_raw \
+                       target_subregion, target_modification, epitope, clonality, \
+                       clone_id, product_isotype, product_conjugate, defining_citation, product_form, \
+                       comments, feedback, curator_comment, disc_date, status, \
+                       to_timestamp(cast(insert_time as BIGINT)), \
+                       to_timestamp(cast(curate_time as BIGINT)), SP.id \
+                       FROM {self.TMP_TABLE} as TMP \
+                       LEFT JOIN {self.VENDOR_TABLE} as vendor \
+                       ON TMP.vendor_id = vendor.id \
+                       LEFT JOIN {self.ANTIGEN_TABLE} as antigen \
+                       ON TMP.ab_target = antigen.ab_target \
+                       LEFT JOIN {self.SPECIE_TABLE} as SP \
+                       ON TMP.source_organism = SP.name "
 
         self.cursor.execute(antibody_stm)
 
@@ -247,7 +258,8 @@ class Ingestor:
                 for index, row in chunk.iterrows():
                     target_species = row['target_species']
                     if target_species:
-                        for specie in row['target_species'].split(';'):
+                        for specie in self.get_species_from_targets(row['target_species']):
+                            if not is_valid_specie(specie): continue
                             clean_specie = get_clean_species_str(specie)
                             species_params.extend(
                                 [row['ix'], species_map[clean_specie]])
