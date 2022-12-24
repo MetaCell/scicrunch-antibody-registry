@@ -183,7 +183,7 @@ class Antibody(models.Model):
     antigen = models.ForeignKey(
         Antigen, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
     target_species_raw = models.CharField(
-        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, db_index=True)
+        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True)
     
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
                                      through='AntibodySpecies', blank=True)
