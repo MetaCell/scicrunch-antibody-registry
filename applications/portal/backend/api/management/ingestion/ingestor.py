@@ -232,9 +232,9 @@ class Ingestor:
                        product_conjugate, defining_citation, product_form, comments, feedback, \
                        curator_comment, disc_date, status, insert_time, curate_time, source_organism_id)\
                        SELECT DISTINCT ix, ab_name, ab_id, ab_id_old, TMP.commercial_type, \
-                       uid, catalog_num, cat_alt, vendor_id, url, antigen.id, target_species AS target_species_raw, \
+                       uid, catalog_num, cat_alt, vendor_id, url, antigen.id, \
                        target_subregion, target_modification, epitope, clonality, \
-                       clone_id, product_isotype, product_conjugate, defining_citation, product_form, \
+                       clone_id, product_isotype, target_species AS target_species_raw, product_conjugate, defining_citation, product_form, \
                        comments, feedback, curator_comment, disc_date, status, \
                        to_timestamp(cast(insert_time as BIGINT)), \
                        to_timestamp(cast(curate_time as BIGINT)), SP.id \
