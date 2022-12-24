@@ -1,5 +1,5 @@
 from typing import Dict
-
+import logging
 import pandas as pd
 
 from api.utilities.decorators import refresh_keycloak_client, timed_class_method
@@ -45,7 +45,10 @@ class UsersIngestor:
             "requiredActions": [KeycloakRequiredActions.UPDATE_PASSWORD.value]
         }, exist_ok=True)
         if row['orcid_id'] != '':
-            self.keycloak_admin.add_user_social_login(row['email'], PROVIDER_ID, row['orcid_id'], row['orcid_id'])
+            try:
+                self.keycloak_admin.add_user_social_login(row['email'], PROVIDER_ID, row['orcid_id'], row['orcid_id'])
+            except:
+                logging.error(f"Cannot add social login for user {row['email']}")
         return user
 
 
