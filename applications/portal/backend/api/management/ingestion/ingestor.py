@@ -73,16 +73,16 @@ class Ingestor:
     def ingest(self):
         species_map = {}
 
-        # self._truncate_tables()
-        # self._insert_vendors()
-        # self._insert_vendor_domains()
+        self._truncate_tables()
+        self._insert_vendors()
+        self._insert_vendor_domains()
         self._fill_tmp_table()
-        # self._insert_genes()
-        # self._insert_species(species_map)
-        # self._insert_antibodies()
-        # self._insert_antibody_species(species_map)
-        # self._update_vendor_domains()
-        # self._reset_auto_increment()
+        self._insert_genes()
+        self._insert_species(species_map)
+        self._insert_antibodies()
+        self._insert_antibody_species(species_map)
+        self._update_vendor_domains()
+        self._reset_auto_increment()
         self._drop_tmp_table()
 
     @timed_class_method('Tables truncated')

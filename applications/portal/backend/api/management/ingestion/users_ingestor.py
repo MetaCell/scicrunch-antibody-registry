@@ -45,7 +45,7 @@ class UsersIngestor:
             "requiredActions": [KeycloakRequiredActions.UPDATE_PASSWORD.value]
         }, exist_ok=True)
         if row['orcid_id'] != '':
-            self.keycloak_admin.add_user_social_login(row['email'], PROVIDER_ID, row['orcid_id'], row['orcid_id'])
+            self.keycloak_admin.add_user_social_login(user, PROVIDER_ID, row['orcid_id'], row['orcid_id'])
         return user
 
 
