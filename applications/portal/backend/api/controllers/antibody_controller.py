@@ -22,7 +22,7 @@ def get_antibodies(page: int = 0, size: int = 50) -> List[AntibodyDTO]:
 def get_user_id():
     token = get_authentication_token()
     try:
-        return jwt.decode(token, verify=False, algorithms='RS256')['sub']
+        return jwt.decode(token, options={"verify_signature": False}, algorithms='RS256')['sub']
     except Exception as e:
         raise HTTPException(status_code=401, detail="Unrecognized user")
 

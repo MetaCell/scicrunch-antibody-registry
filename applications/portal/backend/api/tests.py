@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.admin.sites import AdminSite
-
+import jwt
 from api.services.antibody_service import *
 from api.services.search_service import fts_antibodies
 from api.models import Vendor, VendorDomain
@@ -37,7 +37,14 @@ example_ab = {
     "kitContents": "Sheep polyclonal anti-FSH antibody labeled with acridinium ester. Mouse monoclonal anti-FSH antibody covalently coupled to paramagnetic particles.",
 }
 
+token = 'eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJrVmp2XzE1N0JNcUVqOEZjZGk1X3c1Qkp6empaanBzUXNKRXduRUd2NnpVIn0.eyJleHAiOjE2NzMzNDQ0MzUsImlhdCI6MTY3MzM0NDEzNSwiYXV0aF90aW1lIjoxNjczMzQzODIzLCJqdGkiOiI5OGE2MTQzNS05M2UxLTRhYzEtYThmZC0wODMwNTkyNjI5NmQiLCJpc3MiOiJodHRwOi8vYWNjb3VudHMuYXJlZy9hdXRoL3JlYWxtcy9hcmVnIiwiYXVkIjpbIndlYi1jbGllbnQiLCJhY2NvdW50Il0sInN1YiI6IjljMTc3NzZiLTNlNzgtNGUzMC04MGMzLWUyOTBiMDYxMTU5MyIsInR5cCI6IkJlYXJlciIsImF6cCI6IndlYi1jbGllbnQiLCJzZXNzaW9uX3N0YXRlIjoiMzM1NzdjNmYtMDA4NC00OWE1LWFlY2EtYWZkNWI1MWVlZmVmIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIqIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJkZWZhdWx0LXJvbGVzLWFyZWciXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGFkbWluaXN0cmF0b3Itc2NvcGUgZW1haWwiLCJzaWQiOiIzMzU3N2M2Zi0wMDg0LTQ5YTUtYWVjYS1hZmQ1YjUxZWVmZWYiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJhIGEiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhQGFhLml0IiwiZ2l2ZW5fbmFtZSI6ImEiLCJmYW1pbHlfbmFtZSI6ImEiLCJlbWFpbCI6ImFAYWEuaXQifQ.F_OKUgJn4lMGpHBBEIWfIjg6r5BaiGTtNUHTRwRhq2vT9EI4Qg-JE5WiutvxjNwih27kmwkwVkN62TWPLq32TGDueSiOQjhTZzJSBKscVGLunaQqt1PGUh4uh_Z2Y-KTaOKc_1edVmwgOKqWVQaSc_71Egdh5nDjsUDOzo5761y0fIR1Xh5O_sMImPh4iv3iEZRE25GrBB6NrMVamJ09zLoRyLsvYjaU8V0oDsabg_gtyoxlUG5Gq8p_-UkruXtLQxDhpCKV6_XnQrfEwGVaD-MqNhY1lO9czFD6aLng2wtSANHozwmBHg5uHkn7gZYedn5XmsYD3tCjLPoE9S_13Q'
 
+class UserTestCase(TestCase):
+    def setUp(self):
+        pass
+
+    def test_create(self):
+        user = jwt.decode(token, options={"verify_exp": False}, algorithms='RS256')
 class AntibodiesTestCase(TestCase):
     def setUp(self):
         pass
