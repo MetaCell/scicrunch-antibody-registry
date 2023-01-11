@@ -28,25 +28,25 @@ class UsersIngestor:
     @refresh_keycloak_client
     def _create_keycloak_user_from_row(self, *args):
         row = dict(zip(USERS_RELEVANT_HEADER, args))
-        user = self.keycloak_admin.create_user({"email": row['email'],
-                                                "username": row['email'],
-                                                "enabled": True,
-                                                "firstName": row['firstName'],
-                                                "lastName": row['lastName'],
-                                                "attributes": {
-                                                    "orcid": _get_orcid_id(row),
-                                                    "id": row['id'],
-                                                    "guid": row['guid'],
-                                                    "level": row['level'],
-                                                    "middleInitial": row['middleInitial'],
-                                                    "organization": row['organization'],
-                                                    "created": row['created'],
-        },
-            "requiredActions": [KeycloakRequiredActions.UPDATE_PASSWORD.value]
-        }, exist_ok=True)
+        user_id = self.keycloak_admin.create_user({"email": row['email'],
+                                                   "username": row['email'],
+                                                   "enabled": True,
+                                                   "firstName": row['firstName'],
+                                                   "lastName": row['lastName'],
+                                                   "attributes": {
+                                                       "orcid": _get_orcid_id(row),
+                                                       "id": row['id'],
+                                                       "guid": row['guid'],
+                                                       "level": row['level'],
+                                                       "middleInitial": row['middleInitial'],
+                                                       "organization": row['organization'],
+                                                       "created": row['created'],
+                                                   },
+                                                   "requiredActions": [KeycloakRequiredActions.UPDATE_PASSWORD.value]
+                                                   }, exist_ok=True)
         if row['orcid_id'] != '':
-            self.keycloak_admin.add_user_social_login(user, PROVIDER_ID, row['orcid_id'], row['orcid_id'])
-        return user
+            self.keycloak_admin.add_user_social_login(user_id, PROVIDER_ID, row['orcid_id'], row['orcid_id'])
+        return user_id
 
 
 def _get_orcid_id(row) -> str:
