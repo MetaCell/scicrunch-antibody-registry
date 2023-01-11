@@ -2,12 +2,13 @@ import enum
 import datetime
 import enum
 from urllib.parse import urlsplit
+from api.utilities.exceptions import AntibodyDataException
 
 from django.db import models
 from pydantic import ValidationError
 
 from api.mappers.imapper import IDAOMapper
-from api.models import STATUS, Antibody, Gene, Specie, Vendor, VendorDomain
+from api.models import STATUS, Antibody, Antigen, Specie, Vendor, VendorDomain
 from cloudharness import log
 from openapi.models import Antibody as AntibodyDTO
 from .mapping_utils import dict_to_snake, dict_to_camel, to_snake
@@ -17,11 +18,7 @@ from ..services.specie_service import get_or_create_specie
 dto_fields = {to_snake(f) for f in AntibodyDTO.__fields__}
 
 
-class AntibodyDataException(Exception):
-    def __init__(self, message, field_name, field_value):
-        super().__init__(message)
-        self.field_name = field_name
-        self.field_value = field_value
+
 
 
 def extract_base_url(url):
@@ -122,7 +119,7 @@ class AntibodyMapper(IDAOMapper):
             pprint(dict_to_camel(dao_dict))
             ab = AntibodyDTO()
         if dao.antigen:
-            antigen: Gene = dao.antigen
+            antigen: Antigen = dao.antigen
             ab.abTarget = antigen.symbol
         if dao.vendor:
             ab.vendorName = dao.vendor.name

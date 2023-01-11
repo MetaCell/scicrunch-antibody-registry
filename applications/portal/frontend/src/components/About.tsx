@@ -210,7 +210,7 @@ const About = () => {
           </Typography>
 
           <Typography align='center' marginBottom={8}>
-            We would like to thank our partners, who submit data to us regularly making author's jobs easier. Would you like to become a partner? <Link>Inquire here</Link>.
+            We would like to thank our partners, who submit data to us regularly making author's jobs easier. Would you like to become a partner? <Link href="#">Inquire here</Link>.
           </Typography>
 
           <Slider {...settings}>

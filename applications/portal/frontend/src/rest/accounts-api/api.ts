@@ -367,6 +367,10 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -454,6 +458,49 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(requestBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} username user name or email
+         * @param {string} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersUsernameOrcidPut: async (username: string, body: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'username' is not null or undefined
+            assertParamExists('usersUsernameOrcidPut', 'username', username)
+            // verify required parameter 'body' is not null or undefined
+            assertParamExists('usersUsernameOrcidPut', 'body', body)
+            const localVarPath = `/users/{username}/orcid`
+                .replace(`{${"username"}}`, encodeURIComponent(String(username)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -558,6 +605,17 @@ export const UsersApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @param {string} username user name or email
+         * @param {string} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async usersUsernameOrcidPut(username: string, body: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.usersUsernameOrcidPut(username, body, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @param {string} username user name or email
          * @param {UpdatePassword} updatePassword 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -613,6 +671,16 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          */
         updateUser(userid: string, requestBody: { [key: string]: any; }, options?: any): AxiosPromise<User> {
             return localVarFp.updateUser(userid, requestBody, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {string} username user name or email
+         * @param {string} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersUsernameOrcidPut(username: string, body: string, options?: any): AxiosPromise<void> {
+            return localVarFp.usersUsernameOrcidPut(username, body, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -678,6 +746,18 @@ export class UsersApi extends BaseAPI {
      */
     public updateUser(userid: string, requestBody: { [key: string]: any; }, options?: AxiosRequestConfig) {
         return UsersApiFp(this.configuration).updateUser(userid, requestBody, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {string} username user name or email
+     * @param {string} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersUsernameOrcidPut(username: string, body: string, options?: AxiosRequestConfig) {
+        return UsersApiFp(this.configuration).usersUsernameOrcidPut(username, body, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

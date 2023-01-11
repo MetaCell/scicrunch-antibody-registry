@@ -1,4 +1,5 @@
 
+from api.utilities.exceptions import AntibodyDataException
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -21,7 +22,7 @@ def get_antibodies(page: int = 0, size: int = 50) -> List[AntibodyDTO]:
 def get_user_id():
     token = get_authentication_token()
     try:
-        return jwt.decode(token, verify=False, algorithms='RS256')['sub']
+        return jwt.decode(token, options={"verify_signature": False}, algorithms='RS256')['sub']
     except Exception as e:
         raise HTTPException(status_code=401, detail="Unrecognized user")
 
@@ -34,7 +35,7 @@ def get_user_antibodies(page: int = 1, size: int = 50) -> List[AntibodyDTO]:
 def create_antibody(body: AddUpdateAntibodyDTO) -> None:
     try:
         return antibody_service.create_antibody(body, get_user_id())
-    except antibody_service.AntibodyDataException as e:
+    except AntibodyDataException as e:
         raise HTTPException(status_code=400, detail=dict(
             name=e.field_name, value=e.field_value))
     except antibody_service.DuplicatedAntibody as e:

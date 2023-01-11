@@ -4,7 +4,7 @@ from import_export.fields import Field
 from import_export.instance_loaders import ModelInstanceLoader
 from import_export.resources import ModelResource
 
-from api.models import Antibody, Vendor, Gene, Specie
+from api.models import Antibody, Vendor, Antigen, Specie
 from api.services.gene_service import get_or_create_gene
 from api.services.import_antbody_service import filter_dataset_c1, filter_dataset_c2, get_antibody_q1, get_antibody_q2
 from api.services.specie_service import get_or_create_specie
@@ -42,7 +42,7 @@ class AntibodyResource(ModelResource):
     target = Field(
         column_name='TARGET',
         attribute='antigen',
-        widget=ForeignKeyWidgetWithCreation(model=Gene, field='symbol',
+        widget=ForeignKeyWidgetWithCreation(model=Antigen, field='symbol',
                                             get_or_create=lambda **kwargs: get_or_create_gene(**kwargs)[
                                                 0],
                                             other_cols_map={'GID': 'entrez_id', 'UNIPROT': 'uniprot_id'})

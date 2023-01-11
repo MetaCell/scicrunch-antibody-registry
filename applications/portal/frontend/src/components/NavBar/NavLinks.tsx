@@ -15,6 +15,7 @@ const LinkButton = (props: LinkButtonProps) => {
       component="button"
       underline="none"
       variant="body2"
+      href="#"
       sx={(theme) => ({
         fontWeight: 500,
         color: theme.palette.grey[700],
@@ -33,27 +34,22 @@ const LinkButton = (props: LinkButtonProps) => {
   );
 };
 
+const LINKS = [{ label: "Home", href: ["/", "/submissions"] }, { label: "About", href: ["/about"] }, { label: "FAQ", href:  ["/faq"] }];
+
 const NavLinks = () => {
   const history = useHistory();
   const location = useLocation();
 
-  const isHomeViewActive =
-    location.pathname == "/" || location.pathname == "/submissions";
-  const isAboutViewActive = location.pathname == "/about";
-
   return (
     <>
-      <LinkButton
-        className={isHomeViewActive ? "selected" : ""}
-        label="Home"
-        onClick={() => history.push("/")}
-      />
-      <LinkButton
-        className={isAboutViewActive ? "selected" : ""}
-        label="About"
-        onClick={() => history.push("/about")}
-      />
-    </>
+      {LINKS.map((link) => (
+        <LinkButton key={link.label}
+          className={link.href.includes(location.pathname) ? "selected" : ""}
+          label={link.label}
+          onClick={() => history.push(link.href[0])}
+        />
+      ))} 
+          </>
   );
 };
 

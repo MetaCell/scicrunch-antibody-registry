@@ -137,13 +137,13 @@ class VendorDomain(models.Model):
         return self.base_url
 
 
-class Gene(models.Model):
+class Antigen(models.Model):
     symbol = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN,
                               db_column='ab_target', null=True, db_index=True)
     entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
-                                 null=True, db_index=True)
+                                 null=True, db_index=True, blank=True)
     uniprot_id = models.CharField(
-        unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True)
+        unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True, blank=True)
 
     class Meta:
         indexes = [
@@ -154,6 +154,7 @@ class Gene(models.Model):
     def __str__(self):
         return f"{self.symbol or '?' + self.id}"
 
+    
 
 class Antibody(models.Model):
     ix = models.AutoField(primary_key=True, unique=True, null=False)
@@ -170,7 +171,7 @@ class Antibody(models.Model):
     )
     # This user id maps the users in keycloak
     uid = models.CharField(
-        max_length=ANTIBODY_UID_MAX_LEN, null=True, db_index=True)
+        max_length=ANTIBODY_UID_MAX_LEN, null=True, db_index=True, blank=True)
     # Maps to old users -- used only for migration purpose
     uid_legacy = models.IntegerField(null=True, blank=True)
     catalog_num = models.CharField(
@@ -180,7 +181,10 @@ class Antibody(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
     url = models.URLField(max_length=URL_MAX_LEN, null=True, db_index=True, blank=True)
     antigen = models.ForeignKey(
-        Gene, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
+        Antigen, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
+    target_species_raw = models.CharField(
+        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True)
+    
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
                                      through='AntibodySpecies', blank=True)
     subregion = models.CharField(max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion', null=True,
@@ -206,7 +210,7 @@ class Antibody(models.Model):
     product_conjugate = models.CharField(
         max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, null=True, db_index=True, blank=True)
     defining_citation = models.CharField(
-        max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True, blank=True, db_index=True)
+        max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True, blank=True)
     product_form = models.CharField(
         max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True, db_index=True, blank=True)
     comments = models.TextField(null=True,  blank=True)

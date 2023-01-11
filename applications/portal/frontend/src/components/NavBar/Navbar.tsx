@@ -13,11 +13,11 @@ import {
 import Searchbar from "./Searchbar";
 import NavLinks from "./NavLinks";
 import HelpMenu from "./HelpMenu";
-import { useUser, User } from "../../services/UserService";
+import { UserContext, User } from "../../services/UserService";
 import UserAccountMenu from "./UserAccountMenu";
 
 const Navbar = () => {
-  const user: User = useUser();
+  const user: User = React.useContext(UserContext)[0];
   const login = () => {
     window.location.href = "/login";
   };
