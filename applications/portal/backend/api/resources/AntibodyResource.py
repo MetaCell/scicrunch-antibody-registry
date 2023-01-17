@@ -202,9 +202,3 @@ class AntibodyResource(ModelResource):
                 return
             # Otherwise we save the field
             field.save(obj, data, is_m2m, **kwargs)
-
-    def save_instance(self, instance, is_create, using_transactions=True, dry_run=False):
-        try:
-            super().save_instance(instance, is_create, using_transactions, dry_run)
-        except DuplicatedAntibody:
-            pass

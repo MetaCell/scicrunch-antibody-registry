@@ -41,9 +41,9 @@ def get_user_antibodies(userid: str, page: int = 1, size: int = 50) -> Paginated
 def create_antibody(body: AddUpdateAntibodyDTO, userid: str) -> AntibodyDTO:
     antibody = antibody_mapper.from_dto(body)
     antibody.uid = userid
-    try:
-        antibody.save()
-    except DuplicatedAntibody:
+    antibody.save()
+
+    if antibody.get_duplicate():
         raise DuplicatedAntibody(antibody_mapper.to_dto(antibody))
 
     return antibody_mapper.to_dto(antibody)

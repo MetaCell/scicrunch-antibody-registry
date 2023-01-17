@@ -239,10 +239,8 @@ class Antibody(models.Model):
     def save(self, *args, **kwargs):
         self._handle_status_changes()
         self._generate_automatic_attributes(*args, **kwargs)
-        has_duplicate = self._handle_duplicates()
+        self._handle_duplicates()
         super(Antibody, self).save(*args, **kwargs)
-        if has_duplicate:
-            raise DuplicatedAntibody()
 
     def _generate_automatic_attributes(self, *args, **kwargs):
         """
@@ -263,19 +261,18 @@ class Antibody(models.Model):
             if old_version.status != STATUS.CURATED:
                 self.curate_time = timezone.now()
 
-    def _handle_duplicates(self) -> bool:
+    def _handle_duplicates(self):
         """
         Verifies if instance meets the duplicate criteria and acts accordingly
         """
-        duplicate = self._get_duplicate()
+        duplicate = self.get_duplicate()
         if duplicate:
             self.ab_id = duplicate.ab_id
-        return duplicate is not None
 
     def _generate_ab_id(self) -> int:
         return generate_id_aux(self.ix)
 
-    def _get_duplicate(self) -> Optional['Antibody']:
+    def get_duplicate(self) -> Optional['Antibody']:
         """
         Returns a non-personal antibody with the same vendor_id and same catalog_number if exists
         """
