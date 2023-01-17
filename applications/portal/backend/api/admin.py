@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin.widgets import ManyToManyRawIdWidget, FilteredSelectMultiple
+from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.db.models.functions import Length
 from django.utils.encoding import smart_str
@@ -12,8 +13,6 @@ from api.forms.AntibodyImportForm import AntibodyImportForm
 from api.models import (
     STATUS,
     Antibody,
-    AntibodyApplications,
-    AntibodySpecies,
     Application,
     Antigen,
     Vendor,
@@ -71,10 +70,30 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     import_form_class = AntibodyImportForm
     resource_classes = [AntibodyResource]
     list_filter = ("status",)
-    list_display = (id_with_ab, "ab_name", "status")
+    list_display = (id_with_ab, "ab_name", "submitter_name", "status")
     search_fields = ("ab_id", "ab_name", "catalog_num")
-    # readonly_fields = ("ab_id", "catalog_num", "accession")
+    readonly_fields = ("submitter_name", "submitter_email", "ab_id", "insert_time", "lastedit_time", "curate_time")
     autocomplete_fields = ("vendor", "antigen", "species", "source_organism")
+
+    def __init__(self, *args, **kwargs):
+        disabled_fields = {"uid", "ix"}
+        added_fields = ["submitter_name", "submitter_email"]
+        all_fields = [field.name for field in Antibody._meta.concrete_fields if field.name not in disabled_fields]
+        all_fields[1:2] = added_fields
+        self.fields = all_fields
+        super().__init__(*args, **kwargs)
+
+    @admin.display(description="Submitter name")
+    def submitter_name(self, obj: Antibody):
+        User = get_user_model()
+        submitter = User.objects.filter(id=obj.uid).first()
+        return f"{submitter.first_name} {submitter.last_name} ({submitter.username})" if submitter else "Unknown"
+
+    @admin.display(description="Submitter email")
+    def submitter_email(self, obj: Antibody):
+        User = get_user_model()
+        submitter = User.objects.filter(id=obj.uid).first()
+        return f"{submitter.email}" if submitter else "Unknown"
 
     def get_resource_kwargs(self, request, *args, **kwargs):
         rk = super().get_resource_kwargs(request, *args, **kwargs)
