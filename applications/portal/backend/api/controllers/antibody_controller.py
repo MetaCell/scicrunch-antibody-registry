@@ -1,18 +1,16 @@
 
-from api.utilities.exceptions import AntibodyDataException
-from fastapi import HTTPException
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
-
 from typing import List
-import jwt
-from api.services import antibody_service
 
+import jwt
+from fastapi import HTTPException
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
+
+from api.services import antibody_service
+from api.utilities.exceptions import AntibodyDataException
+from cloudharness.middleware import get_authentication_token
 from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO
-
-from cloudharness.auth import AuthClient
-from cloudharness.middleware import get_authentication_token
 
 
 def get_antibodies(page: int = 0, size: int = 50) -> List[AntibodyDTO]:

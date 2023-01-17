@@ -1,14 +1,13 @@
-import enum
 import datetime
 import enum
 from urllib.parse import urlsplit
-from api.utilities.exceptions import AntibodyDataException
 
 from django.db import models
 from pydantic import ValidationError
 
 from api.mappers.imapper import IDAOMapper
-from api.models import STATUS, Antibody, Antigen, Specie, Vendor, VendorDomain
+from api.models import STATUS, Antibody, Antigen, Vendor, VendorDomain
+from api.utilities.exceptions import AntibodyDataException
 from cloudharness import log
 from openapi.models import Antibody as AntibodyDTO
 from .mapping_utils import dict_to_snake, dict_to_camel, to_snake
@@ -16,9 +15,6 @@ from ..services.gene_service import get_or_create_gene
 from ..services.specie_service import get_or_create_specie
 
 dto_fields = {to_snake(f) for f in AntibodyDTO.__fields__}
-
-
-
 
 
 def extract_base_url(url):

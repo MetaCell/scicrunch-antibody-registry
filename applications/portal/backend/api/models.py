@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector
 from django.db import models
@@ -5,7 +7,9 @@ from django.db.models import Transform, CharField, Index, Q, Value
 from django.db.models.functions import Length, Coalesce
 from django.utils import timezone
 
+from api.utilities.exceptions import DuplicatedAntibody
 from api.utilities.functions import generate_id_aux
+from cloudharness import log
 from portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
     ANTIBODY_CLONE_ID_MAX_LEN, ANTIGEN_ENTREZ_ID_MAX_LEN, ANTIGEN_UNIPROT_ID_MAX_LEN, STATUS_MAX_LEN, \
@@ -154,7 +158,6 @@ class Antigen(models.Model):
     def __str__(self):
         return f"{self.symbol or '?' + self.id}"
 
-    
 
 class Antibody(models.Model):
     ix = models.AutoField(primary_key=True, unique=True, null=False)
@@ -184,7 +187,7 @@ class Antibody(models.Model):
         Antigen, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
     target_species_raw = models.CharField(
         max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True)
-    
+
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
                                      through='AntibodySpecies', blank=True)
     subregion = models.CharField(max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion', null=True,
@@ -213,7 +216,7 @@ class Antibody(models.Model):
         max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True, blank=True)
     product_form = models.CharField(
         max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True, db_index=True, blank=True)
-    comments = models.TextField(null=True,  blank=True)
+    comments = models.TextField(null=True, blank=True)
     applications = models.ManyToManyField(
         Application, through='AntibodyApplications', blank=True)
     kit_contents = models.TextField(null=True, db_index=True, blank=True)
@@ -234,18 +237,60 @@ class Antibody(models.Model):
     curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
 
     def save(self, *args, **kwargs):
+        self._handle_status_changes()
+        self._generate_automatic_attributes(*args, **kwargs)
+        has_duplicate = self._handle_duplicates()
+        super(Antibody, self).save(*args, **kwargs)
+        if has_duplicate:
+            raise DuplicatedAntibody()
+
+    def _generate_automatic_attributes(self, *args, **kwargs):
+        """
+        Generates ab_id, accession and status for newly created instances
+        """
+        if not self.ix:  # Newly instantiated instances have ix = None
+            super(Antibody, self).save(*args, **kwargs)
+            self.ab_id = self._generate_ab_id()
+            self.accession = self.ab_id
+            self.status = STATUS.QUEUE
+
+    def _handle_status_changes(self):
+        """
+        Updates curate_time on status changes to CURATED
+        """
         if self.status == STATUS.CURATED:
             old_version = Antibody.objects.get(ix=self.ix)
             if old_version.status != STATUS.CURATED:
                 self.curate_time = timezone.now()
 
-        super(Antibody, self).save(*args, **kwargs)
-        if self.ab_id is None:
-            self.ab_id = generate_id_aux(self.ix)
-            super(Antibody, self).save(*args, **kwargs)
+    def _handle_duplicates(self) -> bool:
+        """
+        Verifies if instance meets the duplicate criteria and acts accordingly
+        """
+        duplicate = self._get_duplicate()
+        if duplicate:
+            self.ab_id = duplicate.ab_id
+        return duplicate is not None
+
+    def _generate_ab_id(self) -> int:
+        return generate_id_aux(self.ix)
+
+    def _get_duplicate(self) -> Optional['Antibody']:
+        """
+        Returns a non-personal antibody with the same vendor_id and same catalog_number if exists
+        """
+        duplicate_antibodies = Antibody.objects.filter(vendor__id=self.vendor.id, catalog_num=self.catalog_num) \
+            .exclude(commercial_type=CommercialType.PERSONAL)
+        duplicates_length = len(duplicate_antibodies)
+        if duplicates_length == 1:  # Because the save happened before there will always be one antibody in the database
+            return None
+        if duplicates_length > 2:
+            log.error("Unexpectedly found multiple antibodies with catalog number %s and vendor %s", self.vendor.name,
+                      self.catalog_num)
+        return duplicate_antibodies[0]
 
     def __str__(self):
-        return "AB_" + str(self.ab_id)
+        return 'AB_' + str(self.ab_id)
 
     class Meta:
         verbose_name_plural = "antibodies"
@@ -266,8 +311,8 @@ class Antibody(models.Model):
 
             Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma',
                                                                                       Value(''))) - (
-                100 + Length(Coalesce('disc_date', Value(''))))).desc(),
-                name='antibody_nb_citations_idx2'),
+                           100 + Length(Coalesce('disc_date', Value(''))))).desc(),
+                  name='antibody_nb_citations_idx2'),
 
             Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
 
@@ -329,8 +374,7 @@ class Antibody(models.Model):
 
 
 class AntibodySpecies(models.Model):
-    antibody = models.ForeignKey(
-        Antibody, on_delete=models.CASCADE, db_index=True)
+    antibody = models.ForeignKey(Antibody, on_delete=models.CASCADE, db_index=True)
     specie = models.ForeignKey(Specie, on_delete=models.CASCADE, db_index=True)
 
     def __str__(self):
@@ -338,10 +382,8 @@ class AntibodySpecies(models.Model):
 
 
 class AntibodyApplications(models.Model):
-    antibody = models.ForeignKey(
-        Antibody, on_delete=models.CASCADE, db_index=True)
-    application = models.ForeignKey(
-        Application, on_delete=models.CASCADE, db_index=True)
+    antibody = models.ForeignKey(Antibody, on_delete=models.CASCADE, db_index=True)
+    application = models.ForeignKey(Application, on_delete=models.CASCADE, db_index=True)
 
     def __str__(self):
         return "AB_%s->%s" % (self.antibody.ab_id, self.application.name)
