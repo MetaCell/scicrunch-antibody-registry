@@ -281,7 +281,9 @@ class Antibody(models.Model):
         duplicates_length = len(duplicate_antibodies)
         if duplicates_length == 1:  # Because the save happened before there will always be one antibody in the database
             return None
-        if duplicates_length > 2:
+        if duplicates_length > 3 or duplicate_antibodies == 2 and \
+                all([ab.ab_id is not None for ab in duplicate_antibodies]):  # Work around to handle the temporary
+            # creation of entities on the confirmation step of django-import-export
             log.error("Unexpectedly found multiple antibodies with catalog number %s and vendor %s", self.vendor.name,
                       self.catalog_num)
         return duplicate_antibodies[0]
