@@ -7,8 +7,7 @@ from django.db.models import Transform, CharField, Index, Q, Value
 from django.db.models.functions import Length, Coalesce
 from django.utils import timezone
 
-from api.utilities.exceptions import DuplicatedAntibody
-from api.utilities.functions import generate_id_aux
+from api.utilities.functions import generate_id_aux, extract_base_url
 from cloudharness import log
 from portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
@@ -237,9 +236,10 @@ class Antibody(models.Model):
     curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        self._handle_status_changes()
+        self._handle_status_changes(*args, **kwargs)
         self._generate_automatic_attributes(*args, **kwargs)
-        self._handle_duplicates()
+        self._handle_duplicates(*args, **kwargs)
+        self._generate_related_fields(*args, **kwargs)
         super(Antibody, self).save(*args, **kwargs)
 
     def _generate_automatic_attributes(self, *args, **kwargs):
@@ -252,7 +252,7 @@ class Antibody(models.Model):
             self.accession = self.ab_id
             self.status = STATUS.QUEUE
 
-    def _handle_status_changes(self):
+    def _handle_status_changes(self, *args, **kwargs):
         """
         Updates curate_time on status changes to CURATED
         """
@@ -261,7 +261,7 @@ class Antibody(models.Model):
             if old_version.status != STATUS.CURATED:
                 self.curate_time = timezone.now()
 
-    def _handle_duplicates(self):
+    def _handle_duplicates(self, *args, **kwargs):
         """
         Verifies if instance meets the duplicate criteria and acts accordingly
         """
@@ -287,6 +287,21 @@ class Antibody(models.Model):
             log.error("Unexpectedly found multiple antibodies with catalog number %s and vendor %s", self.vendor.name,
                       self.catalog_num)
         return duplicate_antibodies[0]
+
+    def _generate_related_fields(self, *args, **kwargs):
+        """
+        Creates VendorDomain entity from current vendor content if non-existent
+        """
+        assert self.url is not None
+        base_url = extract_base_url(self.url)
+        try:
+            VendorDomain.objects.get(base_url=base_url)
+        except VendorDomain.DoesNotExist:
+            vendor_name = self.vendor.name or base_url
+            log.info("Creating new Vendor `%s` on domain  to `%s`", vendor_name, base_url)
+            assert self.vendor is not None
+            vd = VendorDomain(vendor=self.vendor, base_url=base_url, status=STATUS.QUEUE)
+            vd.save()
 
     def __str__(self):
         return 'AB_' + str(self.ab_id)

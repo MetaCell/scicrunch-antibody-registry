@@ -1,6 +1,5 @@
 import datetime
 import enum
-from urllib.parse import urlsplit
 
 from django.db import models
 from pydantic import ValidationError
@@ -13,12 +12,9 @@ from openapi.models import Antibody as AntibodyDTO
 from .mapping_utils import dict_to_snake, dict_to_camel, to_snake
 from ..services.gene_service import get_or_create_gene
 from ..services.specie_service import get_or_create_specie
+from ..utilities.functions import extract_base_url
 
 dto_fields = {to_snake(f) for f in AntibodyDTO.__fields__}
-
-
-def extract_base_url(url):
-    return urlsplit(url).hostname
 
 
 class AntibodyMapper(IDAOMapper):
@@ -92,8 +88,6 @@ class AntibodyMapper(IDAOMapper):
             v = Vendor(name=vendor_name,
                        commercial_type=dto.commercialType.value)
             v.save()
-            vd = VendorDomain(vendor=v, base_url=base_url, status=STATUS.QUEUE)
-            vd.save()
             return v
 
     def to_dto(self, dao: Antibody) -> AntibodyDTO:
