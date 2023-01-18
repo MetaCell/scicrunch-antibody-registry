@@ -2,7 +2,7 @@ from openapi.models import Antibody as AntibodyDTO
 
 
 class DuplicatedAntibody(Exception):
-    def __init__(self, antibody: AntibodyDTO = None):
+    def __init__(self, antibody: AntibodyDTO):
         super().__init__("Antibody exists")
         self.antibody = antibody
 

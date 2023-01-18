@@ -9,7 +9,6 @@ from api.services.gene_service import get_or_create_gene
 from api.services.import_antbody_service import filter_dataset_c1, filter_dataset_c2, get_antibody_q1, get_antibody_q2
 from api.services.specie_service import get_or_create_specie
 from api.services.vendor_service import get_or_create_vendor
-from api.utilities.exceptions import DuplicatedAntibody
 from api.widgets.foreign_key_widget import ForeignKeyWidgetWithCreation
 from api.widgets.many_to_many_widget import ManyToManyWidgetWithCreation
 from portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY, FILL_KEY, UPDATE_KEY, \
