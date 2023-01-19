@@ -1,4 +1,4 @@
-from cloudharness.auth import AuthClient
+from functools import cache, cached_property
 from django.contrib import admin
 from django.contrib.admin.widgets import ManyToManyRawIdWidget, FilteredSelectMultiple
 from django.db.models import Q
@@ -93,12 +93,22 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         all_fields[1:2] = added_fields
         self.fields = all_fields
         super().__init__(*args, **kwargs)
-        self.keycloak_admin = AuthClient().get_admin_client()
+
+
+    @cached_property
+    def keycloak_admin(self):
+        from cloudharness.auth import AuthClient
+        return AuthClient().get_admin_client()
+
+    
+    @cache
+    def get_user(self, user_id):
+        return self.keycloak_admin.get_user(user_id=user_id)
 
     @admin.display(description="Submitter name")
     def submitter_name(self, obj: Antibody):
         try:
-            submitter = self.keycloak_admin.get_user(user_id=obj.uid)
+            submitter = self.get_user(user_id=obj.uid)
             return (
                 f"{submitter.first_name} {submitter.last_name} ({submitter.username})"
             )
@@ -108,7 +118,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     @admin.display(description="Submitter email")
     def submitter_email(self, obj: Antibody):
         try:
-            submitter = self.keycloak_admin.get_user(user_id=obj.uid)
+            submitter = self.get_user(user_id=obj.uid)
             return f"{submitter.email}"
         except Exception:
             return "Unknown"
