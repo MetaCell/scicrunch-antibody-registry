@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector
 from django.db import models
@@ -13,7 +14,7 @@ from portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPL
     ANTIBODY_TARGET_MODIFICATION_MAX_LEN, ANTIBODY_TARGET_SUBREGION_MAX_LEN, ANTIBODY_DEFINING_CITATION_MAX_LEN, \
     ANTIBODY_ID_MAX_LEN, ANTIBODY_CAT_ALT_MAX_LEN, VENDOR_COMMERCIAL_TYPE_MAX_LEN, ANTIBODY_TARGET_EPITOPE_MAX_LEN, \
     VENDOR_NIF_MAX_LEN, ANTIBODY_TARGET_SPECIES_MAX_LEN, ANTIBODY_DISC_DATE_MAX_LEN, \
-    URL_MAX_LEN, VENDOR_EU_ID_MAX_LEN, ANTIBODY_UID_MAX_LEN
+    URL_MAX_LEN, VENDOR_EU_ID_MAX_LEN
 
 
 @CharField.register_lookup
@@ -154,7 +155,7 @@ class Antigen(models.Model):
     def __str__(self):
         return f"{self.symbol or '?' + self.id}"
 
-    
+
 
 class Antibody(models.Model):
     ix = models.AutoField(primary_key=True, unique=True, null=False)
@@ -170,8 +171,10 @@ class Antibody(models.Model):
         null=True
     )
     # This user id maps the users in keycloak
-    uid = models.CharField(
-        max_length=ANTIBODY_UID_MAX_LEN, null=True, db_index=True, blank=True)
+    # uid = models.CharField(
+    #     max_length=ANTIBODY_UID_MAX_LEN, null=True, db_index=True, blank=True)
+    uid = models.ForeignKey(
+        User, on_delete=models.RESTRICT, null=True, db_index=True, blank=True)
     # Maps to old users -- used only for migration purpose
     uid_legacy = models.IntegerField(null=True, blank=True)
     catalog_num = models.CharField(
@@ -184,7 +187,7 @@ class Antibody(models.Model):
         Antigen, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
     target_species_raw = models.CharField(
         max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True)
-    
+
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
                                      through='AntibodySpecies', blank=True)
     subregion = models.CharField(max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion', null=True,
@@ -280,7 +283,7 @@ class Antibody(models.Model):
                 SearchVector(
                     'accession',
                     'commercial_type',
-                    'uid',
+                    # 'uid',
                     'uid_legacy',
                     'url',
                     'subregion',
@@ -305,7 +308,7 @@ class Antibody(models.Model):
                 SearchVector(
                     'accession',
                     'commercial_type',
-                    'uid',
+                    # 'uid',
                     'uid_legacy',
                     'url',
                     'subregion',
