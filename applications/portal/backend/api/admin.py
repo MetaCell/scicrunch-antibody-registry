@@ -115,9 +115,8 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
             return "Unknown"
         try:
             submitter = self.get_user(user_id=obj.uid)
-            return (
-                f"{submitter.first_name} {submitter.last_name} ({submitter.username})"
-            )
+            submitter = self.keycloak_admin.get_user(user_id=obj.uid)
+            return f"{submitter['firstName']} {submitter['lastName']} ({submitter['username']})"
         except KeycloakGetError:
             log.error(f"User {obj.uid} lookup error", exc_info=True)
             return "Error"
@@ -128,7 +127,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
             return "Unknown"
         try:
             submitter = self.get_user(user_id=obj.uid)
-            return f"{submitter.email}"
+            return f"{submitter['email']}"
         except KeycloakGetError:
             log.error(f"User {obj.uid} lookup error", exc_info=True)
             return "Error"

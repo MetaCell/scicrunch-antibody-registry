@@ -255,3 +255,15 @@ FILL_KEY = 'fill'
 SKIP_KEY = 'skip'
 ID_KEY = 'id'
 IX_KEY = 'ix'
+
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "cloudharness",
+        "USER": "mnp",
+        # 'PASSWORD': '1234',
+        "HOST": "127.0.0.1",
+        "PORT": "5432",
+    }
+}
