@@ -1,4 +1,3 @@
-from functools import cache, cached_property
 from django.contrib import admin
 from django.contrib.admin.widgets import ManyToManyRawIdWidget, FilteredSelectMultiple
 from django.db.models import Q
@@ -8,10 +7,6 @@ from django.utils.html import escape, format_html, format_html_join, mark_safe
 from django.utils.text import format_lazy
 from django.urls import reverse
 from import_export.admin import ImportMixin
-
-from keycloak.exceptions import KeycloakGetError
-
-from cloudharness import log
 
 from api.forms.AntibodyImportForm import AntibodyImportForm
 from api.models import (
@@ -74,10 +69,10 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     import_form_class = AntibodyImportForm
     resource_classes = [AntibodyResource]
     list_filter = ("status",)
-    list_display = (id_with_ab, "ab_name", "submitter_name", "status")
+    list_display = (id_with_ab, "ab_name", "submitter", "status")
     search_fields = ("ab_id", "ab_name", "catalog_num")
     readonly_fields = (
-        "submitter_name",
+        # "uid",
         "submitter_email",
         "ab_id",
         "insert_time",
@@ -87,50 +82,26 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     autocomplete_fields = ("vendor", "antigen", "species", "source_organism")
 
     def __init__(self, *args, **kwargs):
-        disabled_fields = {"uid", "ix"}
-        added_fields = ["submitter_name", "submitter_email"]
+        disabled_fields = {"uid", "ix", "submitter"}
         all_fields = [
             field.name
             for field in Antibody._meta.concrete_fields
             if field.name not in disabled_fields
         ]
+        added_fields = ["uid", "submitter_email"]
         all_fields[1:2] = added_fields
         self.fields = all_fields
         super().__init__(*args, **kwargs)
 
-
-    @cached_property
-    def keycloak_admin(self):
-        from cloudharness.auth import AuthClient
-        return AuthClient().get_admin_client()
-
-    
-    @cache
-    def get_user(self, user_id):
-        return self.keycloak_admin.get_user(user_id=user_id)
-
-    @admin.display(description="Submitter name")
-    def submitter_name(self, obj: Antibody):
-        if not obj.uid:
-            return "Unknown"
-        try:
-            submitter = self.get_user(user_id=obj.uid)
-            submitter = self.keycloak_admin.get_user(user_id=obj.uid)
-            return f"{submitter['firstName']} {submitter['lastName']} ({submitter['username']})"
-        except KeycloakGetError:
-            log.error(f"User {obj.uid} lookup error", exc_info=True)
-            return "Error"
+    @admin.display(description="Submitter")
+    def submitter(self, obj: Antibody):
+        return f"{obj.uid}"
 
     @admin.display(description="Submitter email")
     def submitter_email(self, obj: Antibody):
         if not obj.uid:
-            return "Unknown"
-        try:
-            submitter = self.get_user(user_id=obj.uid)
-            return f"{submitter['email']}"
-        except KeycloakGetError:
-            log.error(f"User {obj.uid} lookup error", exc_info=True)
-            return "Error"
+            return "-"
+        return f"{obj.uid.email}"
 
     def get_resource_kwargs(self, request, *args, **kwargs):
         rk = super().get_resource_kwargs(request, *args, **kwargs)
