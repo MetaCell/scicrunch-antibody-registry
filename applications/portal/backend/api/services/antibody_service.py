@@ -5,9 +5,9 @@ from typing import List
 import dateutil
 from django.core.paginator import Paginator
 
-from api.mappers.antibody_mapper import AntibodyMapper
+from api.mappers.antibody_mapper import AntibodyMapper, get_django_user
 from api.models import STATUS, Antibody, CommercialType
-from api.utilities.exceptions import DuplicatedAntibody
+from api.utilities.exceptions import DuplicatedAntibody, NonexistingSubmitter
 from api.utilities.functions import generate_id_aux
 from cloudharness import log
 from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO
@@ -40,7 +40,7 @@ def get_antibodies(page: int = 1, size: int = 50) -> PaginatedAntibodies:
 
 def get_user_antibodies(userid: str, page: int = 1, size: int = 50) -> PaginatedAntibodies:
     p = Paginator(Antibody.objects.all().filter(
-        uid=userid).order_by("lastedit_time"), size)
+        uid__member__kc_id=userid).order_by("lastedit_time"), size)
     items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
 
@@ -49,7 +49,11 @@ def create_antibody(body: AddUpdateAntibodyDTO, userid: str) -> AntibodyDTO:
     antibody = antibody_mapper.from_dto(body)
     antibody.ab_id = generate_ab_id(antibody)
     antibody.accession = antibody.ab_id
-    antibody.uid = userid
+    try:
+        antibody.uid = get_django_user(userid)
+    except Exception as e:
+        log.error("Antibody submitter with user id %s", userid, exc_info=e)
+        raise NonexistingSubmitter(antibody_mapper.to_dto(antibody), userid)
     antibody.status = STATUS.QUEUE
     if antibody.commercial_type != CommercialType.PERSONAL:
         try:

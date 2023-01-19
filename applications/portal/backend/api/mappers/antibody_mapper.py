@@ -1,9 +1,11 @@
-import enum
 import datetime
 import enum
 from urllib.parse import urlsplit
+
+from cloudharness_django.models import Member
 from api.utilities.exceptions import AntibodyDataException
 
+from django.contrib.auth.models import User
 from django.db import models
 from pydantic import ValidationError
 
@@ -18,11 +20,12 @@ from ..services.specie_service import get_or_create_specie
 dto_fields = {to_snake(f) for f in AntibodyDTO.__fields__}
 
 
-
-
-
 def extract_base_url(url):
     return urlsplit(url).hostname
+
+
+def get_django_user(userid: str) -> User:
+    return User.objects.get(id=Member.objects.get(kc_id=userid))
 
 
 class AntibodyMapper(IDAOMapper):

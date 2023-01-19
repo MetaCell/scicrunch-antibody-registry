@@ -16,3 +16,10 @@ class AntibodyDataException(Exception):
         super().__init__(message)
         self.field_name = field_name
         self.field_value = field_value
+
+
+class NonexistingSubmitter(Exception):
+    def __init__(self, submitter_id: str, antibody: AntibodyDTO):
+        super().__init__(f"Submitter {} does not exists for antibody {antibody}")
+        self.submitter_id = submitter_id
+        self.antibody = antibody
