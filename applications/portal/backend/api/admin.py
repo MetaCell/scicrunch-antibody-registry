@@ -9,6 +9,10 @@ from django.utils.text import format_lazy
 from django.urls import reverse
 from import_export.admin import ImportMixin
 
+from keycloak.exceptions import KeycloakGetError
+
+from cloudharness import log
+
 from api.forms.AntibodyImportForm import AntibodyImportForm
 from api.models import (
     STATUS,
@@ -107,21 +111,27 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
 
     @admin.display(description="Submitter name")
     def submitter_name(self, obj: Antibody):
+        if not obj.uid:
+            return "Unknown"
         try:
             submitter = self.get_user(user_id=obj.uid)
             return (
                 f"{submitter.first_name} {submitter.last_name} ({submitter.username})"
             )
-        except Exception:
-            return "Unknown"
+        except KeycloakGetError:
+            log.error(f"User {obj.uid} lookup error", exc_info=True)
+            return "Error"
 
     @admin.display(description="Submitter email")
     def submitter_email(self, obj: Antibody):
+        if not obj.uid:
+            return "Unknown"
         try:
             submitter = self.get_user(user_id=obj.uid)
             return f"{submitter.email}"
-        except Exception:
-            return "Unknown"
+        except KeycloakGetError:
+            log.error(f"User {obj.uid} lookup error", exc_info=True)
+            return "Error"
 
     def get_resource_kwargs(self, request, *args, **kwargs):
         rk = super().get_resource_kwargs(request, *args, **kwargs)
