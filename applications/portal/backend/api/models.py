@@ -171,8 +171,8 @@ class Antibody(models.Model):
         null=True
     )
     # This user id maps the users in keycloak
-    uid_tmp = models.CharField(
-        max_length=ANTIBODY_UID_MAX_LEN, null=True, db_index=True, blank=True)
+    # uid_tmp = models.CharField(
+    #     max_length=ANTIBODY_UID_MAX_LEN, null=True, db_index=True, blank=True)
     uid = models.ForeignKey(
         User, on_delete=models.RESTRICT, null=True, db_index=True, blank=True)
     # Maps to old users -- used only for migration purpose
