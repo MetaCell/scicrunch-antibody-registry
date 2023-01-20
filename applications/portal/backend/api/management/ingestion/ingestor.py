@@ -51,12 +51,13 @@ def get_insert_values_into_table_stm(table_name, columns, entries):
 
 
 def get_clean_species_str(specie: str):
-    
     return specie.translate(str.maketrans('', '', string.punctuation)).strip().lower()
+
 
 def is_valid_specie(specie: str):
     # valid if has less than 3 spaces
     return len(specie.split(' ')) < 3
+
 
 class Ingestor:
     ANTIBODY_TABLE = Antibody.objects.model._meta.db_table
@@ -111,7 +112,7 @@ class Ingestor:
         df_vendor = df_vendor.where(pd.notnull(df_vendor), None)
         vendor_insert_stm = get_insert_values_into_table_stm(self.VENDOR_TABLE,
                                                              ['id', 'nif_id', 'vendor',
-                                                                 'commercial_type'],
+                                                              'commercial_type'],
                                                              len(df_vendor))
         # insert vendors
         vendor_synonyms_params = []
