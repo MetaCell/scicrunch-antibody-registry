@@ -13,7 +13,9 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = []
+    dependencies = [
+        ("cloudharness_django", "0001_initial"),
+    ]
 
     operations = [
         migrations.CreateModel(
