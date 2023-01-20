@@ -99,7 +99,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         super().__init__(*args, **kwargs)
 
 
-    @cached_property
+    @property
     def keycloak_admin(self):
         from cloudharness.auth import AuthClient
         return AuthClient().get_admin_client()
@@ -116,13 +116,13 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         try:
             submitter = self.get_user(user_id=obj.uid)
             submitter = self.keycloak_admin.get_user(user_id=obj.uid)
-            return f"{submitter['firstName']} {submitter['lastName']} ({submitter['username']})"
+            return f"{submitter.get('firstName', '')} {submitter.get('lastName', '')} ({submitter['username']})"
         except KeycloakGetError:
             log.error(f"User {obj.uid} lookup error", exc_info=True)
             return f"{obj.uid} (not found)"
         except Exception:
             log.error(f"User {obj.uid} definition error", exc_info=True)
-            return f"{obj.uid} (Error)"
+            return f"{obj.uid} (error)"
 
     @admin.display(description="Submitter email")
     def submitter_email(self, obj: Antibody):
