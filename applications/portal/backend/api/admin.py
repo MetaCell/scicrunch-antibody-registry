@@ -69,17 +69,17 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     import_form_class = AntibodyImportForm
     resource_classes = [AntibodyResource]
     list_filter = ("status",)
-    list_display = (id_with_ab, "ab_name", "submitter", "status")
+    list_display = (id_with_ab, "ab_name", "uid", "status")
     search_fields = ("ab_id", "ab_name", "catalog_num")
     readonly_fields = (
-        # "uid",
+        "uid",
         "submitter_email",
         "ab_id",
         "insert_time",
         "lastedit_time",
         "curate_time",
     )
-    autocomplete_fields = ("vendor", "antigen", "species", "source_organism")
+    autocomplete_fields = ("vendor", "antigen", "species", "source_organism", "uid")
 
     def __init__(self, *args, **kwargs):
         disabled_fields = {"uid", "ix", "submitter"}
