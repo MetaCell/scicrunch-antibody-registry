@@ -7,7 +7,7 @@ from django.db.models.functions import Length, Coalesce
 from django.utils import timezone
 
 from api.utilities.functions import generate_id_aux
-from portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
+from portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_UID_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
     ANTIBODY_CLONE_ID_MAX_LEN, ANTIGEN_ENTREZ_ID_MAX_LEN, ANTIGEN_UNIPROT_ID_MAX_LEN, STATUS_MAX_LEN, \
     ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN, ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, ANTIBODY_PRODUCT_FORM_MAX_LEN, \
@@ -171,8 +171,8 @@ class Antibody(models.Model):
         null=True
     )
     # This user id maps the users in keycloak
-    # uid = models.CharField(
-    #     max_length=ANTIBODY_UID_MAX_LEN, null=True, db_index=True, blank=True)
+    uid_tmp = models.CharField(
+        max_length=ANTIBODY_UID_MAX_LEN, null=True, db_index=True, blank=True)
     uid = models.ForeignKey(
         User, on_delete=models.RESTRICT, null=True, db_index=True, blank=True)
     # Maps to old users -- used only for migration purpose
