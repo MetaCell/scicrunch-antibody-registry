@@ -119,7 +119,10 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
             return f"{submitter['firstName']} {submitter['lastName']} ({submitter['username']})"
         except KeycloakGetError:
             log.error(f"User {obj.uid} lookup error", exc_info=True)
-            return "Error"
+            return f"{obj.uid} (not found)"
+        except Exception:
+            log.error(f"User {obj.uid} definition error", exc_info=True)
+            return f"{obj.uid} (Error)"
 
     @admin.display(description="Submitter email")
     def submitter_email(self, obj: Antibody):
