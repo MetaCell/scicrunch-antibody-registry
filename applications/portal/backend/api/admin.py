@@ -1,5 +1,5 @@
 from functools import cache, cached_property
-from django.contrib import admin
+from django.contrib import admin, AdminSite
 from django.contrib.admin.widgets import ManyToManyRawIdWidget, FilteredSelectMultiple
 from django.db.models import Q
 from django.db.models.functions import Length
@@ -27,6 +27,8 @@ from api.models import (
 from api.resources.AntibodyResource import AntibodyResource
 from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 
+admin.site.site_header = 'Antibody Registry admin'
+admin.site.site_title = 'Antibody Registry admin'
 
 @admin.display(description="ab_id")
 def id_with_ab(obj: Antibody):
