@@ -1,5 +1,5 @@
 from functools import cache, cached_property
-from django.contrib import admin, AdminSite
+from django.contrib import admin
 from django.contrib.admin.widgets import ManyToManyRawIdWidget, FilteredSelectMultiple
 from django.db.models import Q
 from django.db.models.functions import Length
