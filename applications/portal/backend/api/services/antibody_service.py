@@ -6,19 +6,12 @@ import dateutil
 from django.core.paginator import Paginator
 
 from api.mappers.antibody_mapper import AntibodyMapper
-from api.models import STATUS, Antibody, CommercialType
+from api.models import STATUS, Antibody
 from api.utilities.exceptions import DuplicatedAntibody
-from api.utilities.functions import generate_id_aux
-from cloudharness import log
 from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO, PaginatedAntibodies
 
-
 antibody_mapper = AntibodyMapper()
-
-
-def generate_ab_id(antibody: Antibody):
-    return generate_id_aux(antibody.ix)
 
 
 def search_antibodies_by_catalog(search: str, page: int = 1, size: int = 50,
@@ -47,30 +40,12 @@ def get_user_antibodies(userid: str, page: int = 1, size: int = 50) -> Paginated
 
 def create_antibody(body: AddUpdateAntibodyDTO, userid: str) -> AntibodyDTO:
     antibody = antibody_mapper.from_dto(body)
-    antibody.ab_id = generate_ab_id(antibody)
-    antibody.accession = antibody.ab_id
     antibody.uid = userid
-    antibody.status = STATUS.QUEUE
-    if antibody.commercial_type != CommercialType.PERSONAL:
-        try:
-            existing: Antibody = Antibody.objects.get(vendor__id=antibody.vendor.id, catalog_num=body.catalogNum,
-                                                      status=STATUS.CURATED)
-            antibody.ab_id = existing.ab_id
-            antibody.status = STATUS.REJECTED
-            antibody.save()
-            raise DuplicatedAntibody(antibody_mapper.to_dto(antibody))
-        except Antibody.DoesNotExist:
-            pass
-        except Antibody.MultipleObjectsReturned:
-            log.error("Unexpectedly found multiple antibodies with catalog number %s and vendor %s",
-                      body.vendorName, body.catalogNum)
-            existing = Antibody.objects.filter(vendor__name=body.vendorName, catalog_num=body.catalogNum,
-                                               status=STATUS.CURATED).first()
-            antibody.ab_id = existing.ab_id
-            antibody.status = STATUS.REJECTED
-            antibody.save()
-            raise DuplicatedAntibody(antibody_mapper.to_dto(antibody))
     antibody.save()
+
+    if antibody.get_duplicate():
+        raise DuplicatedAntibody(antibody_mapper.to_dto(antibody))
+
     return antibody_mapper.to_dto(antibody)
 
 

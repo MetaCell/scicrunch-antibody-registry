@@ -258,3 +258,8 @@ app.include_router(prefix_router)
 app.mount("/static", StaticFiles(directory=settings.STATIC_ROOT), name="static")
 app.mount("/media", StaticFiles(directory=settings.MEDIA_ROOT), name="media")
 app.mount("/", get_asgi_application())
+
+
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
