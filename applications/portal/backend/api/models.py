@@ -154,7 +154,6 @@ class Antigen(models.Model):
     def __str__(self):
         return f"{self.symbol or '?' + self.id}"
 
-    
 
 class Antibody(models.Model):
     ix = models.AutoField(primary_key=True, unique=True, null=False)
@@ -184,7 +183,7 @@ class Antibody(models.Model):
         Antigen, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
     target_species_raw = models.CharField(
         max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True)
-    
+
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
                                      through='AntibodySpecies', blank=True)
     subregion = models.CharField(max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion', null=True,
@@ -213,7 +212,7 @@ class Antibody(models.Model):
         max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True, blank=True)
     product_form = models.CharField(
         max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True, db_index=True, blank=True)
-    comments = models.TextField(null=True,  blank=True)
+    comments = models.TextField(null=True, blank=True)
     applications = models.ManyToManyField(
         Application, through='AntibodyApplications', blank=True)
     kit_contents = models.TextField(null=True, db_index=True, blank=True)
@@ -266,8 +265,8 @@ class Antibody(models.Model):
 
             Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma',
                                                                                       Value(''))) - (
-                100 + Length(Coalesce('disc_date', Value(''))))).desc(),
-                name='antibody_nb_citations_idx2'),
+                           100 + Length(Coalesce('disc_date', Value(''))))).desc(),
+                  name='antibody_nb_citations_idx2'),
 
             Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
 
