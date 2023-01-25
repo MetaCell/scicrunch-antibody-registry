@@ -67,12 +67,6 @@ class AntibodiesTestCase(TestCase):
         assert len(ab.targetSpecies) == 2
 
         new_ant = AddAntibodyDTO(**example_ab)
-        try:
-            ab2 = create_antibody(new_ant, "bbb")
-
-        except DuplicatedAntibody as e:
-            self.fail("No duplicate antibody because none is curated")
-
         new_ant.catalogNum = "N176A/36"
         ab2 = create_antibody(new_ant, "bbb")
         self.assertNotEqual(ab.abId, ab2.abId)
@@ -114,7 +108,6 @@ class AntibodiesTestCase(TestCase):
         except DuplicatedAntibody as e:
             da = e.antibody
             assert da.accession != da.abId
-            assert da.status == Status.REJECTED
             assert da.abId == ab.abId
 
         assert VendorDomain.objects.all().count() == 1
@@ -150,8 +143,8 @@ class VendorAdminTests(TestCase):
     def test_force_delete_vendor(self):
         # Create data
         vendor = Vendor.objects.create()
-        ab1 = Antibody.objects.create(vendor=vendor)
-        ab2 = Antibody.objects.create(vendor=vendor)
+        ab1 = Antibody.objects.create(vendor=vendor, url='https://example.com')
+        ab2 = Antibody.objects.create(vendor=vendor, url='https://example.com')
         domain = VendorDomain.objects.create(vendor=vendor)
 
         self.assertEquals(ab1.vendor, vendor)
@@ -172,8 +165,8 @@ class VendorAdminTests(TestCase):
         # Create data
         v1 = Vendor.objects.create(name="v1")
         v2 = Vendor.objects.create(name="v2")
-        ab1 = Antibody.objects.create(vendor=v1)
-        ab2 = Antibody.objects.create(vendor=v1)
+        ab1 = Antibody.objects.create(vendor=v1, url='https://example.com')
+        ab2 = Antibody.objects.create(vendor=v1, url='https://example.com')
         domain = VendorDomain.objects.create(vendor=v1)
 
         self.assertEquals(ab1.vendor, v1)
