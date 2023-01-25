@@ -110,6 +110,8 @@ PROJECT_NAME = "portal".upper()
 # Persistent storage
 PERSISTENT_ROOT = os.path.join(BASE_DIR, "persistent")
 
+DATABASES = {}
+
 # ***********************************************************************
 # * portal settings
 # ***********************************************************************
@@ -120,6 +122,11 @@ from cloudharness.utils.config import ALLVALUES_PATH, CloudharnessConfig
 # * import base CloudHarness Django settings
 # ***********************************************************************
 from cloudharness_django.settings import *
+
+DATABASES["default"]["TEST"] = {
+                                   "ENGINE": "django.db.backends.postgres",
+                                   "NAME": "testdb",
+                               }
 
 # add the local apps
 INSTALLED_APPS += [
@@ -209,7 +216,7 @@ GUID_KEY = 'guid'
 
 # Used for data import/export processing
 ANTIBODY_HEADER = {'ab_name': "text", 'ab_target': "text", 'target_species': "text", 'vendor': "text",
-                   'vendor_id': "int", 'catalog_num': "text", 'clonality': "text", 
+                   'vendor_id': "int", 'catalog_num': "text", 'clonality': "text",
                    'source_organism': "text", 'clone_id': "text", 'url': "text", 'link': "text",
                    'ab_target_entrez_gid': "text", 'product_isotype': "text",
                    'product_conjugate': "text", 'product_form': "text", 'target_subregion': "text",

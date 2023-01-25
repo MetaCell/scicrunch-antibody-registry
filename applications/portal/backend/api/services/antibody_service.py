@@ -6,9 +6,12 @@ import dateutil
 from django.core.paginator import Paginator
 
 from api.mappers.antibody_mapper import AntibodyMapper
-from api.models import STATUS, Antibody
-from api.utilities.exceptions import DuplicatedAntibody
-from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO
+from api.models import STATUS, Antibody, CommercialType
+from api.utilities.exceptions import DuplicatedAntibody, AntibodyDataException
+from api.utilities.functions import generate_id_aux, strip_ab_from_id
+from cloudharness import log
+from openapi.models import AddAntibody as AddAntibodyDTO
+from openapi.models import UpdateAntibody as UpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO, PaginatedAntibodies
 
 antibody_mapper = AntibodyMapper()
@@ -38,7 +41,7 @@ def get_user_antibodies(userid: str, page: int = 1, size: int = 50) -> Paginated
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
 
 
-def create_antibody(body: AddUpdateAntibodyDTO, userid: str) -> AntibodyDTO:
+def create_antibody(body: AddAntibodyDTO, userid: str) -> AntibodyDTO:
     antibody = antibody_mapper.from_dto(body)
     antibody.uid = userid
     antibody.save()
@@ -56,19 +59,19 @@ def get_antibody(antibody_id: int, status=STATUS.CURATED) -> List[AntibodyDTO]:
         return None
 
 
-def update_antibody(antibody_id: str, body: AddUpdateAntibodyDTO) -> AntibodyDTO:
-    antibody_mapper = AntibodyMapper()
-    try:
-        current_antibody = Antibody.objects.get(
-            id=int(antibody_id.split("AB_")[1]))
-        new_ab = antibody_mapper.from_dto(body)
+def update_antibody(user_id: str, antibody_accession_number: str, body: UpdateAntibodyDTO) -> AntibodyDTO:
+    accession_number = strip_ab_from_id(antibody_accession_number)
+    if getattr(body, 'vendorName', None) is not None:
+        raise AntibodyDataException("Vendor name cannot be updated", 'vendorName', None)
+    if getattr(body, 'catalogNum', None) is not None:
+        raise AntibodyDataException("Catalog number cannot be updated", 'catalogNum', None)
+    current_antibody = Antibody.objects.get(accession=accession_number, uid=user_id)
+    updated_antibody = antibody_mapper.from_dto(AntibodyDTO(**body.__dict__, abId=current_antibody.ab_id,
+                                                            catalogNum=current_antibody.catalog_num,
+                                                            vendorName=current_antibody.vendor.name,
+                                                            insertTime=current_antibody.insert_time))
 
-        # TODO: update current_antibody with new_antibody data @afonsobspinto
-        return current_antibody
-    except Antibody.DoesNotExist:
-        return None
-
-    # return antibody_repository.update_or_create(current_antibody)
+    return antibody_mapper.to_dto(updated_antibody)
 
 
 def delete_antibody(antibody_id: str) -> None:

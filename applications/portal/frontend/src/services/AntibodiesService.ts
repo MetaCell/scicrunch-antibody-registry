@@ -3,7 +3,7 @@ import {
   Antibody,
   PaginatedAntibodies,
   AntibodyApi,
-  AddUpdateAntibody,
+  AddAntibody,
   AntibodyCommercialTypeEnum,
   SearchApi
 } from "../rest/api";
@@ -33,7 +33,7 @@ export async function addAntibody(antibodyObj): Promise<any> {
   ).data;
 }
 
-function mapAntibody(antibody): AddUpdateAntibody {
+function mapAntibody(antibody): AddAntibody {
   let commercialAb = {
     clonality: antibody.clonality,
     epitope: antibody.epitope,

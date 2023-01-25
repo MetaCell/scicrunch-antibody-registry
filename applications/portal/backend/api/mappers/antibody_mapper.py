@@ -1,5 +1,6 @@
 import datetime
 import enum
+from urllib.parse import urlsplit
 
 from django.db import models
 from pydantic import ValidationError
@@ -9,22 +10,26 @@ from api.models import STATUS, Antibody, Antigen, Vendor, VendorDomain
 from api.utilities.exceptions import AntibodyDataException
 from cloudharness import log
 from openapi.models import Antibody as AntibodyDTO
+from openapi.models import AbstractAntibody as AbstractAntibodyDTO
 from .mapping_utils import dict_to_snake, dict_to_camel, to_snake
 from ..services.gene_service import get_or_create_gene
 from ..services.specie_service import get_or_create_specie
-from ..utilities.functions import extract_base_url
 
 dto_fields = {to_snake(f) for f in AntibodyDTO.__fields__}
 
 
+def extract_base_url(url):
+    return urlsplit(url).hostname
+
+
 class AntibodyMapper(IDAOMapper):
 
-    def from_dto(self, dto: AntibodyDTO) -> Antibody:
-
+    def from_dto(self, dto: AbstractAntibodyDTO) -> Antibody:
         if hasattr(dto, "abId") and dto.abId:
-            ab: Antibody = Antibody.objects.get(dto.abId)
+            ab: Antibody = Antibody.objects.get(ab_id=dto.abId)
         else:
             ab = Antibody()
+            ab.ab_id = 0
 
         if dto.abTarget:
             antigen_symbol = dto.abTarget
@@ -55,9 +60,9 @@ class AntibodyMapper(IDAOMapper):
                 continue
             if isinstance(v, enum.Enum):
                 setattr(ab, k, v.value)
-            elif not isinstance(v, (list, tuple)) and not getattr(ab, k, None):
+            elif not isinstance(v, (list, tuple)) and (getattr(ab, k, None) is None or isinstance(getattr(ab, k, None),
+                                                                                                  (int, str))):
                 setattr(ab, k, v)
-        ab.ab_id = 0
         ab.save()  # Need to save first to set the manytomany
 
         if dto.targetSpecies:

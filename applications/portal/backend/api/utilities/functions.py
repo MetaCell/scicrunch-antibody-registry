@@ -5,6 +5,7 @@ from django.db.models import AutoField
 from django.forms import URLField
 
 magic = 64544
+prefix = "AB_"
 
 
 def generate_id_aux(base: Union[int, AutoField]) -> int:
@@ -18,6 +19,9 @@ def remove_empty_string(str_list) -> List[str]:
         return [str_list]
     return list(filter(None, set(str_list)))
 
+
+def strip_ab_from_id(ab_id: str) -> str:
+    return ab_id if not ab_id.startswith(prefix) else ab_id.strip(prefix)[1]
 
 def extract_base_url(url: Union[str, URLField]) -> str:
     return urlsplit(url).hostname
