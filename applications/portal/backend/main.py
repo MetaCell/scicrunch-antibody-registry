@@ -78,7 +78,7 @@ if os.environ.get('KUBERNETES_SERVICE_HOST', None):
 
 # enable the Bearer Authentication
 security = APIKeyCookie(name="kc-access") # This works but having issues with dev server
-# security = HTTPBearer()
+security = HTTPBearer()
 
 
 async def has_access(credentials: HTTPBasicCredentials = Depends(security)):
