@@ -1,10 +1,14 @@
-from typing import List
+from typing import List, Union
+from urllib.parse import urlsplit
+
+from django.db.models import AutoField
+from django.forms import URLField
 
 magic = 64544
 prefix = "AB_"
 
 
-def generate_id_aux(base: int) -> int:
+def generate_id_aux(base: Union[int, AutoField]) -> int:
     return int(base) + magic
 
 
@@ -18,3 +22,6 @@ def remove_empty_string(str_list) -> List[str]:
 
 def strip_ab_from_id(ab_id: str) -> str:
     return ab_id if not ab_id.startswith(prefix) else ab_id.strip(prefix)[1]
+
+def extract_base_url(url: Union[str, URLField]) -> str:
+    return urlsplit(url).hostname

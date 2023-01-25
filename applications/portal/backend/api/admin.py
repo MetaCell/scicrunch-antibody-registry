@@ -27,6 +27,8 @@ from api.models import (
 from api.resources.AntibodyResource import AntibodyResource
 from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 
+admin.site.site_header = 'Antibody Registry admin'
+admin.site.site_title = 'Antibody Registry admin'
 
 @admin.display(description="ab_id")
 def id_with_ab(obj: Antibody):
@@ -99,7 +101,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         super().__init__(*args, **kwargs)
 
 
-    @cached_property
+    @property
     def keycloak_admin(self):
         from cloudharness.auth import AuthClient
         return AuthClient().get_admin_client()
@@ -115,12 +117,14 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
             return "Unknown"
         try:
             submitter = self.get_user(user_id=obj.uid)
-            return (
-                f"{submitter.first_name} {submitter.last_name} ({submitter.username})"
-            )
+            submitter = self.keycloak_admin.get_user(user_id=obj.uid)
+            return f"{submitter.get('firstName', '')} {submitter.get('lastName', '')} ({submitter['username']})"
         except KeycloakGetError:
             log.error(f"User {obj.uid} lookup error", exc_info=True)
-            return "Error"
+            return f"{obj.uid} (not found)"
+        except Exception:
+            log.error(f"User {obj.uid} definition error", exc_info=True)
+            return f"{obj.uid} (error)"
 
     @admin.display(description="Submitter email")
     def submitter_email(self, obj: Antibody):
@@ -128,7 +132,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
             return "Unknown"
         try:
             submitter = self.get_user(user_id=obj.uid)
-            return f"{submitter.email}"
+            return f"{submitter['email']}"
         except KeycloakGetError:
             log.error(f"User {obj.uid} lookup error", exc_info=True)
             return "Error"

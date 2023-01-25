@@ -93,8 +93,6 @@ class AntibodyMapper(IDAOMapper):
             v = Vendor(name=vendor_name,
                        commercial_type=dto.commercialType.value)
             v.save()
-            vd = VendorDomain(vendor=v, base_url=base_url, status=STATUS.QUEUE)
-            vd.save()
             return v
 
     def to_dto(self, dao: Antibody) -> AntibodyDTO:

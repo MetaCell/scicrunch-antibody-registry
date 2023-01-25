@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector
 from django.db import models
@@ -5,7 +7,8 @@ from django.db.models import Transform, CharField, Index, Q, Value
 from django.db.models.functions import Length, Coalesce
 from django.utils import timezone
 
-from api.utilities.functions import generate_id_aux
+from api.utilities.functions import generate_id_aux, extract_base_url
+from cloudharness import log
 from portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
     ANTIBODY_CLONE_ID_MAX_LEN, ANTIGEN_ENTREZ_ID_MAX_LEN, ANTIGEN_UNIPROT_ID_MAX_LEN, STATUS_MAX_LEN, \
@@ -233,18 +236,75 @@ class Antibody(models.Model):
     curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
 
     def save(self, *args, **kwargs):
+        self._handle_status_changes(*args, **kwargs)
+        self._generate_automatic_attributes(*args, **kwargs)
+        self._handle_duplicates(*args, **kwargs)
+        self._generate_related_fields(*args, **kwargs)
+        super(Antibody, self).save(*args, **kwargs)
+
+    def _generate_automatic_attributes(self, *args, **kwargs):
+        """
+        Generates ab_id, accession and status for newly created instances
+        """
+        if not self.ix:  # Newly instantiated instances have ix = None
+            super(Antibody, self).save(*args, **kwargs)
+            self.ab_id = self._generate_ab_id()
+            self.accession = self.ab_id
+            self.status = STATUS.QUEUE
+
+    def _handle_status_changes(self, *args, **kwargs):
+        """
+        Updates curate_time on status changes to CURATED
+        """
         if self.status == STATUS.CURATED:
             old_version = Antibody.objects.get(ix=self.ix)
             if old_version.status != STATUS.CURATED:
                 self.curate_time = timezone.now()
 
-        super(Antibody, self).save(*args, **kwargs)
-        if self.ab_id is None:
-            self.ab_id = generate_id_aux(self.ix)
-            super(Antibody, self).save(*args, **kwargs)
+    def _handle_duplicates(self, *args, **kwargs):
+        """
+        Verifies if instance meets the duplicate criteria and acts accordingly
+        """
+        duplicate = self.get_duplicate()
+        if duplicate:
+            self.ab_id = duplicate.ab_id
+
+    def _generate_ab_id(self) -> int:
+        return generate_id_aux(self.ix)
+
+    def get_duplicate(self) -> Optional['Antibody']:
+        """
+        Returns a non-personal antibody with the same vendor_id and same catalog_number if exists
+        """
+        duplicate_antibodies = Antibody.objects.filter(vendor__id=self.vendor.id, catalog_num=self.catalog_num) \
+            .exclude(commercial_type=CommercialType.PERSONAL)
+        duplicates_length = len(duplicate_antibodies)
+        if duplicates_length <= 1:  # Because the save happened before there will always be one antibody in the database
+            return None
+        if duplicates_length > 3 or duplicate_antibodies == 2 and \
+                all([ab.ab_id is not None for ab in duplicate_antibodies]):  # Work around to handle the temporary
+            # creation of entities on the confirmation step of django-import-export
+            log.error("Unexpectedly found multiple antibodies with catalog number %s and vendor %s", self.vendor.name,
+                      self.catalog_num)
+        return duplicate_antibodies[0]
+
+    def _generate_related_fields(self, *args, **kwargs):
+        """
+        Creates VendorDomain entity from current vendor content if non-existent
+        """
+        assert self.url is not None
+        base_url = extract_base_url(self.url)
+        try:
+            VendorDomain.objects.get(base_url=base_url)
+        except VendorDomain.DoesNotExist:
+            vendor_name = self.vendor.name or base_url
+            log.info("Creating new Vendor `%s` on domain  to `%s`", vendor_name, base_url)
+            assert self.vendor is not None
+            vd = VendorDomain(vendor=self.vendor, base_url=base_url, status=STATUS.QUEUE)
+            vd.save()
 
     def __str__(self):
-        return "AB_" + str(self.ab_id)
+        return 'AB_' + str(self.ab_id)
 
     class Meta:
         verbose_name_plural = "antibodies"
@@ -328,8 +388,7 @@ class Antibody(models.Model):
 
 
 class AntibodySpecies(models.Model):
-    antibody = models.ForeignKey(
-        Antibody, on_delete=models.CASCADE, db_index=True)
+    antibody = models.ForeignKey(Antibody, on_delete=models.CASCADE, db_index=True)
     specie = models.ForeignKey(Specie, on_delete=models.CASCADE, db_index=True)
 
     def __str__(self):
@@ -337,10 +396,8 @@ class AntibodySpecies(models.Model):
 
 
 class AntibodyApplications(models.Model):
-    antibody = models.ForeignKey(
-        Antibody, on_delete=models.CASCADE, db_index=True)
-    application = models.ForeignKey(
-        Application, on_delete=models.CASCADE, db_index=True)
+    antibody = models.ForeignKey(Antibody, on_delete=models.CASCADE, db_index=True)
+    application = models.ForeignKey(Application, on_delete=models.CASCADE, db_index=True)
 
     def __str__(self):
         return "AB_%s->%s" % (self.antibody.ab_id, self.application.name)
