@@ -164,7 +164,8 @@ class Antibody(models.Model):
         max_length=ANTIBODY_NAME_MAX_LEN, null=True, db_index=True)
     ab_id = models.CharField(
         max_length=ANTIBODY_ID_MAX_LEN, null=True, db_index=True)
-    accession = models.CharField(max_length=ANTIBODY_ID_MAX_LEN, null=True, blank=True)
+    accession = models.CharField(
+        max_length=ANTIBODY_ID_MAX_LEN, null=True, blank=True)
     commercial_type = models.CharField(
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
         choices=CommercialType.choices,
@@ -181,7 +182,8 @@ class Antibody(models.Model):
     cat_alt = models.CharField(
         max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True, db_index=True, blank=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
-    url = models.URLField(max_length=URL_MAX_LEN, null=True, db_index=True, blank=True)
+    url = models.URLField(max_length=URL_MAX_LEN,
+                          null=True, db_index=True, blank=True)
     antigen = models.ForeignKey(
         Antigen, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
     target_species_raw = models.CharField(
@@ -235,22 +237,28 @@ class Antibody(models.Model):
         auto_now=True, db_index=True, null=True)
     curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args,  **kwargs):
+
         self._handle_status_changes(*args, **kwargs)
-        self._generate_automatic_attributes(*args, **kwargs)
+
         self._handle_duplicates(*args, **kwargs)
         self._generate_related_fields(*args, **kwargs)
-        super(Antibody, self).save(*args, **kwargs)
+        first_save = self.ix is None
+
+        if first_save:  # Newly instantiated instances have ix = None
+            super(Antibody, self).save(*args, **kwargs)
+            self._generate_automatic_attributes(*args, **kwargs)
+            super(Antibody, self).save()
+        else:
+            super(Antibody, self).save(*args, **kwargs)
 
     def _generate_automatic_attributes(self, *args, **kwargs):
         """
         Generates ab_id, accession and status for newly created instances
         """
-        if not self.ix:  # Newly instantiated instances have ix = None
-            super(Antibody, self).save(*args, **kwargs)
-            self.ab_id = self._generate_ab_id()
-            self.accession = self.ab_id
-            self.status = STATUS.QUEUE
+        self.ab_id = self._generate_ab_id()
+        self.accession = self.ab_id
+        self.status = STATUS.QUEUE
 
     def _handle_status_changes(self, *args, **kwargs):
         """
@@ -298,9 +306,11 @@ class Antibody(models.Model):
             VendorDomain.objects.get(base_url=base_url)
         except VendorDomain.DoesNotExist:
             vendor_name = self.vendor.name or base_url
-            log.info("Creating new Vendor `%s` on domain  to `%s`", vendor_name, base_url)
+            log.info("Creating new Vendor `%s` on domain  to `%s`",
+                     vendor_name, base_url)
             assert self.vendor is not None
-            vd = VendorDomain(vendor=self.vendor, base_url=base_url, status=STATUS.QUEUE)
+            vd = VendorDomain(vendor=self.vendor,
+                              base_url=base_url, status=STATUS.QUEUE)
             vd.save()
 
     def __str__(self):
@@ -325,8 +335,8 @@ class Antibody(models.Model):
 
             Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma',
                                                                                       Value(''))) - (
-                           100 + Length(Coalesce('disc_date', Value(''))))).desc(),
-                  name='antibody_nb_citations_idx2'),
+                100 + Length(Coalesce('disc_date', Value(''))))).desc(),
+                name='antibody_nb_citations_idx2'),
 
             Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
 
@@ -388,7 +398,8 @@ class Antibody(models.Model):
 
 
 class AntibodySpecies(models.Model):
-    antibody = models.ForeignKey(Antibody, on_delete=models.CASCADE, db_index=True)
+    antibody = models.ForeignKey(
+        Antibody, on_delete=models.CASCADE, db_index=True)
     specie = models.ForeignKey(Specie, on_delete=models.CASCADE, db_index=True)
 
     def __str__(self):
@@ -396,8 +407,10 @@ class AntibodySpecies(models.Model):
 
 
 class AntibodyApplications(models.Model):
-    antibody = models.ForeignKey(Antibody, on_delete=models.CASCADE, db_index=True)
-    application = models.ForeignKey(Application, on_delete=models.CASCADE, db_index=True)
+    antibody = models.ForeignKey(
+        Antibody, on_delete=models.CASCADE, db_index=True)
+    application = models.ForeignKey(
+        Application, on_delete=models.CASCADE, db_index=True)
 
     def __str__(self):
         return "AB_%s->%s" % (self.antibody.ab_id, self.application.name)
