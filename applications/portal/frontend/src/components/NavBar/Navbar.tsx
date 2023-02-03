@@ -15,6 +15,7 @@ import NavLinks from "./NavLinks";
 import HelpMenu from "./HelpMenu";
 import { UserContext, User } from "../../services/UserService";
 import UserAccountMenu from "./UserAccountMenu";
+import logo from "../../assets/logo.svg";
 
 const Navbar = () => {
   const user: User = React.useContext(UserContext)[0];
@@ -44,7 +45,7 @@ const Navbar = () => {
                 >
                   <Stack direction="row" spacing={2}>
                     <Link href="/">
-                      <img src="./assets/logo.svg" title="Antibody Registry" />
+                      <img src={logo} title="Antibody Registry" />
                     </Link>
 
                     <Divider

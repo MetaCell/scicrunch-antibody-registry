@@ -51,7 +51,7 @@ function mapAntibody(antibody): AddAntibody {
     targetSpecies: antibody.targetSpecies.split(/\W/),
     uniprotId: antibody.uniprotID,
     vendorName: antibody.vendor,
-    applications: antibody.applications.split(/\W/),
+    applications: antibody.applications?.split(/\W/),
   };
   if (antibody.type === AntibodyCommercialTypeEnum.Commercial) {
     return commercialAb;
@@ -81,5 +81,20 @@ export async function getSearchAntibodies(
 ):Promise<PaginatedAntibodies>{
   return (
     await searchApi.ftsAntibodies(page, size, query)
+  ).data;
+}
+
+
+export async function getAntibodyByAccessionNumber(accesionNumber:number){
+  return (await api.getByAccession(accesionNumber)).data;
+}
+
+export async function updateSubmittedAntibody(updatedAntibody, accesionNumber){
+  let ab = mapAntibody(updatedAntibody);
+  console.log(ab)
+  return (
+    await new AntibodyApi(
+      new Configuration({ apiKey: getToken(), accessToken: getToken() })
+    ).updateUserAntibody(accesionNumber, ab)
   ).data;
 }

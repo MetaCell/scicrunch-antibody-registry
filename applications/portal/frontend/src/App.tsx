@@ -84,7 +84,7 @@ const App = () => {
                 <Navbar />
                 <Home activeTab={MYSUBMISSIONS} />
               </Route>
-              <Route path="/update/:antibody_id">
+              <Route path="/update/:ab_accession_number">
                 <Navbar />
                 <UpdateForm />
               </Route>
