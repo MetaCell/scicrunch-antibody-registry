@@ -58,6 +58,14 @@ def get_antibody(antibody_id: int, status=STATUS.CURATED) -> List[AntibodyDTO]:
     except Antibody.DoesNotExist:
         return None
 
+def get_antibody_by_accession(accession: int) -> List[AntibodyDTO]:
+    try:
+        return antibody_mapper.to_dto(Antibody.objects.get(accession=accession))
+    except Antibody.DoesNotExist:
+        raise
+    except Antibody.MultipleObjectsReturned:
+        log.warning(f"Multiple antibodies with accession {accession}")
+        raise
 
 def update_antibody(user_id: str, antibody_accession_number: str, body: UpdateAntibodyDTO) -> AntibodyDTO:
     accession_number = strip_ab_from_id(antibody_accession_number)

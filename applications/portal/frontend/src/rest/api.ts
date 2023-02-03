@@ -82,7 +82,7 @@ export interface AbstractAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
      * @type {string}
      * @memberof AbstractAntibody
      */
@@ -219,7 +219,7 @@ export interface AddAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
      * @type {string}
      * @memberof AddAntibody
      */
@@ -459,7 +459,7 @@ export interface Antibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
      * @type {string}
      * @memberof Antibody
      */
@@ -846,7 +846,7 @@ export interface UpdateAntibody {
      */
     'definingCitation'?: string;
     /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well. 
+     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
      * @type {string}
      * @memberof UpdateAntibody
      */
@@ -1080,6 +1080,40 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
+         * 
+         * @summary Get antibody by the accession number
+         * @param {number} accessionNumber An unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getByAccession: async (accessionNumber: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'accessionNumber' is not null or undefined
+            assertParamExists('getByAccession', 'accessionNumber', accessionNumber)
+            const localVarPath = `/antibodies/user/{accession_number}`
+                .replace(`{${"accession_number"}}`, encodeURIComponent(String(accessionNumber)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Gets a list of `Antibody` entities.
          * @summary List Antibodies
          * @param {number} [page] Represents the page requested, considering the size parameter
@@ -1223,6 +1257,17 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * 
+         * @summary Get antibody by the accession number
+         * @param {number} accessionNumber An unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getByAccession(accessionNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Antibody>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getByAccession(accessionNumber, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Gets a list of `Antibody` entities.
          * @summary List Antibodies
          * @param {number} [page] Represents the page requested, considering the size parameter
@@ -1296,6 +1341,16 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
          */
         getAntibody(antibodyId: number, options?: any): AxiosPromise<Array<Antibody>> {
             return localVarFp.getAntibody(antibodyId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get antibody by the accession number
+         * @param {number} accessionNumber An unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getByAccession(accessionNumber: number, options?: any): AxiosPromise<Antibody> {
+            return localVarFp.getByAccession(accessionNumber, options).then((request) => request(axios, basePath));
         },
         /**
          * Gets a list of `Antibody` entities.
@@ -1376,6 +1431,18 @@ export class AntibodyApi extends BaseAPI {
      */
     public getAntibody(antibodyId: number, options?: AxiosRequestConfig) {
         return AntibodyApiFp(this.configuration).getAntibody(antibodyId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get antibody by the accession number
+     * @param {number} accessionNumber An unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AntibodyApi
+     */
+    public getByAccession(accessionNumber: number, options?: AxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).getByAccession(accessionNumber, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -1,4 +1,5 @@
 from typing import List, Union
+from api.models import Antibody
 
 import jwt
 from fastapi import HTTPException
@@ -53,3 +54,9 @@ def update_user_antibody(antibody_accession_number: str, body: UpdateAntibodyDTO
 
 def delete_antibody(antibody_id: str) -> None:
     return antibody_service.delete_antibody(antibody_id)
+
+def get_by_accession(accession_number: int) -> AntibodyDTO:
+    try:
+        return antibody_service.get_antibody_by_accession(accession_number)
+    except Antibody.DoesNotExist as e:
+        raise HTTPException(status_code=404, detail=e.message)

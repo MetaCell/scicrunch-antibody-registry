@@ -1,0 +1,9 @@
+harness:
+  dependencies:
+    hard:
+      - common
+      - accounts
+    soft:
+      - pgadmin
+      - accounts-api
+

@@ -299,6 +299,30 @@ paths:
         description: >-
             The REST endpoint/path used to update a single instances of an `Antibody` submitted.  This path
             contains `PUT` operation used to perform the update task.
+        get:
+            tags:
+                - antibody
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Antibody'
+                    description: antibody found
+                '400':
+                    content:
+                        application/json: {}
+                    description: Accession number is in the wrong format
+                '401':
+                    content:
+                        application/json: {}
+                    description: The antibody cannot be accessed by this user
+                '404':
+                    content:
+                        application/json: {}
+                    description: Not found
+            operationId: getByAccession
+            summary: Get antibody by the accession number
         put:
             requestBody:
                 description: Updated `Antibody` information.
@@ -554,7 +578,7 @@ components:
                     description: >
                         The molecule that the antibody is conjugated to. This is generally used for secondary
                         antibodies but the field is not restricted as there can be various tags on primary
-                        antibodies as well.
+                        antibodies as well. 
                     type: string
                 productForm:
                     description: >-

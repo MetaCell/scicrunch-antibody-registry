@@ -119,6 +119,11 @@ class AntibodiesTestCase(TestCase):
         assert len(fts_antibodies(search="N176A 35").items) == 1
         assert len(fts_antibodies(search="N176A|35").items) == 1
 
+        ab_by_accession = get_antibody_by_accession(ab.accession)
+        assert ab_by_accession.abId == ab.abId
+        assert ab_by_accession.accession == ab.accession
+        assert ab_by_accession.vendorName == ab.vendorName
+
     def test_update(self):
         user_id = "aaaa"
         new_name = "My updated abName"
