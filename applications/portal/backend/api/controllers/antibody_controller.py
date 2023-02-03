@@ -44,9 +44,9 @@ def get_antibody(antibody_id: int) -> List[AntibodyDTO]:
     return antibody_service.get_antibody(antibody_id)
 
 
-def update_user_antibody(antibody_accession_number: str, body: UpdateAntibodyDTO) -> AntibodyDTO:
+def update_user_antibody(accession_number: str, body: UpdateAntibodyDTO) -> AntibodyDTO:
     try:
-        return antibody_service.update_antibody(get_user_id(), antibody_accession_number, body)
+        return antibody_service.update_antibody(get_user_id(), accession_number, body)
     except AntibodyDataException as e:
         raise HTTPException(status_code=400, detail=dict(
             name=e.field_name, value=e.field_value))
