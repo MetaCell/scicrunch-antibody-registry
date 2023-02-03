@@ -91,7 +91,6 @@ export async function getAntibodyByAccessionNumber(accesionNumber:number){
 
 export async function updateSubmittedAntibody(updatedAntibody, accesionNumber){
   let ab = mapAntibody(updatedAntibody);
-  console.log(ab)
   return (
     await new AntibodyApi(
       new Configuration({ apiKey: getToken(), accessToken: getToken() })
