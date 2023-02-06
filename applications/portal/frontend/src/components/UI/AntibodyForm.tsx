@@ -68,23 +68,6 @@ const AntibodyForm = (props) => {
     },
   };
 
-  //   const [antibody, setAntibody] = useState<Antibody>();
-
-  //   const fetchAntibody = (accessionNum) => {
-  //     getAntibody(accessionNum)
-  //       .then((res) => {
-  //         return setAntibody(res[0]);
-  //       })
-  //       .catch((err) => alert(err));
-  //   };
-
-  //   const updateAntibody = (updatedAntibody) => {
-  //     let ab = { ...updatedAntibody, type: antibody.commercialType };
-  //     updateSubmittedAntibody(ab, ab_accession_number);
-  //   };
-
-  //   useEffect(() => fetchAntibody(ab_accession_number), []);
-
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialValues,
