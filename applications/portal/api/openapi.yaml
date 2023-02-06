@@ -339,6 +339,8 @@ paths:
             security:
                 -
                     cookieAuth: []
+                -
+                    bearerAuth: []
             operationId: updateUserAntibody
             summary: Update a submitted Antibody
             description: Updates a submitted `Antibody`.
