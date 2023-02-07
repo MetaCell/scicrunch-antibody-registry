@@ -63,7 +63,7 @@ const UpdateForm = () => {
     url: antibody.url,
     name: antibody.abName,
     host: antibody.sourceOrganism,
-    targetSpecies: antibody.targetSpecies,
+    targetSpecies: antibody.targetSpecies?.join(","),
     antibodyTarget: antibody.abTarget,
     clonality: antibody.clonality,
     cloneID: antibody.cloneId,
@@ -72,7 +72,7 @@ const UpdateForm = () => {
     format: antibody.productForm,
     uniprotID: antibody.uniprotId,
     epitope: antibody.epitope,
-    applications: antibody.applications,
+    applications: antibody.applications?.join(","),
     citation: antibody.definingCitation,
     comments: antibody.comments,
   });

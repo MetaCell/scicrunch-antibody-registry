@@ -45,7 +45,7 @@ import SearchContext from "../../context/search/SearchContext";
 import NotFoundMessage from "./NotFoundMessage";
 import Error500 from "../UI/Error500";
 
-const currentPath = window.location.pathname;
+
 
 const StyledBadge = (props) => {
   if (props.field === "vendorName") {
@@ -106,6 +106,7 @@ const CustomToolbar = ({ activeTab }) => {
 };
 
 const RenderNameAndId = (props: GridRenderCellParams<String>) => {
+  const currentPath = window.location.pathname;
   const href =
     currentPath === "/submissions"
       ? `/update/${props.row.accession}`
@@ -345,10 +346,10 @@ const AntibodiesTable = (props) => {
   const fetchAntibodies = () => {
     !activeSearch
       ? getAntibodies()
-          .then((res) => {
-            return setAntibodiesList(res.items);
-          })
-          .catch((err) => alert(err))
+        .then((res) => {
+          return setAntibodiesList(res.items);
+        })
+        .catch((err) => alert(err))
       : setAntibodiesList(searchedAntibodies);
   };
 
@@ -549,15 +550,15 @@ const AntibodiesTable = (props) => {
     typeof activeSearch === "string" &&
     activeSearch !== "" &&
     searchedAntibodies.length === 0 ? (
-      <NotFoundMessage activeSearch={activeSearch} />
-    ) : typeof activeSearch !== "string" ? (
-      <Error500 />
-    ) : (
-      <GridNoRowsOverlay />
-    );
+        <NotFoundMessage activeSearch={activeSearch} />
+      ) : typeof activeSearch !== "string" ? (
+        <Error500 />
+      ) : (
+        <GridNoRowsOverlay />
+      );
 
   const SortIcon = ({ sortingOrder, ...other }) => <SortingIcon {...other} />;
-
+  const currentPath = window.location.pathname;
   return (
     <Box>
       <Box sx={{ flexGrow: 1, height: "90vh" }}>
