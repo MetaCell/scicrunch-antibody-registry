@@ -16,17 +16,20 @@ import AccountDetails from "./components/AccountDetails";
 import { ALLRESULTS, MYSUBMISSIONS } from "./constants/constants";
 import SearchState from "./context/search/SearchState";
 import * as UserService from "./services/UserService";
+import UpdateForm from "./components/Update/UpdateForm";
 
 const App = () => {
-
   const [user, setUser] = useState(undefined);
 
   function refreshUser() {
     const u = UserService.getCurrentUserFromCookie();
-    if(u && u.sub) {
-      UserService.fetchUser(u.sub).then((res: any) => setUser({ ...u, ...res.data }), () => setUser(null));
+    if (u && u.sub) {
+      UserService.fetchUser(u.sub).then(
+        (res: any) => setUser({ ...u, ...res.data }),
+        () => setUser(null)
+      );
     }
-    
+
     setUser(u);
     return u;
   }
@@ -34,22 +37,19 @@ const App = () => {
   if (user === undefined) {
     return [refreshUser(), refreshUser];
   }
- 
+
   return (
-    
     <BrowserRouter>
-    
       <ThemeProvider theme={theme}>
         <UserService.UserContext.Provider value={[user, refreshUser]}>
           <CssBaseline />
           <SearchState>
-          
             <Switch>
               <Route exact path="/">
                 <Navbar />
                 <Home activeTab={ALLRESULTS} />
               </Route>
-              <Route exact path="/about" >
+              <Route exact path="/about">
                 <Navbar />
                 <About />
               </Route>
@@ -64,7 +64,7 @@ const App = () => {
                 <Navbar />
                 <AntibodyDetail />
               </Route>
-              <Route path="/user" >
+              <Route path="/user">
                 <Navbar />
                 <AccountDetails />
               </Route>
@@ -76,7 +76,7 @@ const App = () => {
                 <Navbar />
                 <ContactUs />
               </Route>
-              <Route path="/terms-and-conditions" >
+              <Route path="/terms-and-conditions">
                 <Navbar />
                 <TermsAndConditions />
               </Route>
@@ -84,12 +84,15 @@ const App = () => {
                 <Navbar />
                 <Home activeTab={MYSUBMISSIONS} />
               </Route>
+              <Route path="/update/:ab_accession_number">
+                <Navbar />
+                <UpdateForm />
+              </Route>
             </Switch>
           </SearchState>
         </UserService.UserContext.Provider>
       </ThemeProvider>
     </BrowserRouter>
-    
   );
 };
 

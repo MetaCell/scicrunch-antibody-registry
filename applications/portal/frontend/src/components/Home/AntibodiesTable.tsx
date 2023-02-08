@@ -45,6 +45,8 @@ import SearchContext from "../../context/search/SearchContext";
 import NotFoundMessage from "./NotFoundMessage";
 import Error500 from "../UI/Error500";
 
+
+
 const StyledBadge = (props) => {
   if (props.field === "vendorName") {
     return (
@@ -74,7 +76,7 @@ const StyledCheckBox = (props) => {
   );
 };
 
-const getRowId = (ab: Antibody) => `${ab.abId}${Math.random()}`
+const getRowId = (ab: Antibody) => `${ab.abId}${Math.random()}`;
 
 const CustomToolbar = ({ activeTab }) => {
   const [activeSelection, setActiveSelection] = useState(true);
@@ -104,9 +106,13 @@ const CustomToolbar = ({ activeTab }) => {
 };
 
 const RenderNameAndId = (props: GridRenderCellParams<String>) => {
+  const currentPath = window.location.pathname;
+  const href =
+    currentPath === "/submissions"
+      ? `/update/${props.row.accession}`
+      : `/AB_${props.row.abId}`;
   return (
-    <Link href ={`/AB_${props.row.abId}`}>
-    
+    <Link href={href}>
       <Typography
         variant="body2"
         align="left"
@@ -144,22 +150,19 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
   );
 };
 
-
-const RenderHtml= (props: GridRenderCellParams<String>) => {
+const RenderHtml = (props: GridRenderCellParams<String>) => {
   return (
     <StyledBadge {...props}>
       <Typography
         variant="caption"
         align="left"
         color="grey.500"
-        component="div" 
+        component="div"
         dangerouslySetInnerHTML={{ __html: props.value }}
       />
     </StyledBadge>
   );
 };
-
-
 
 const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   const theme = useTheme();
@@ -266,16 +269,15 @@ interface ValueProps {
 
 const getValueOrEmpty = (props: ValueProps) => {
   return props.row[props.field] ?? "";
-}
+};
 
 const getList = (props: ValueProps) => {
   return props.row[props.field]?.join(", ") ?? "";
 };
 
 const getNameAndId = (props: ValueProps) => {
-  return `${props.row.abName} AB_${props.row.abId}`
+  return `${props.row.abName} AB_${props.row.abId}`;
 };
-
 
 const getValueForCitation = (props: ValueProps) => {
   return getProperCitation(props.row);
@@ -296,8 +298,8 @@ const dataGridStyles = {
     borderColor: "grey.200",
     borderTopLeftRadius: "8px",
     borderTopRightRadius: "8px",
-    "& div":{
-      pointerEvents:'auto'
+    "& div": {
+      pointerEvents: "auto",
     },
   },
   "& .MuiDataGrid-row:hover": {
@@ -336,20 +338,19 @@ const dataGridStyles = {
 
 const AntibodiesTable = (props) => {
   const user = useContext(UserContext)[0];
-  const currentPath = window.location.pathname;
+
   const [antibodiesList, setAntibodiesList] = useState<Antibody[]>();
-  const { activeSearch, searchedAntibodies, loader } = useContext(SearchContext)
+  const { activeSearch, searchedAntibodies, loader } =
+    useContext(SearchContext);
 
   const fetchAntibodies = () => {
     !activeSearch
-      ? (
-        getAntibodies()
-          .then((res) => {
-            return setAntibodiesList(res.items);
-          })
-          .catch((err) => alert(err))
-      )
-      : setAntibodiesList(searchedAntibodies)
+      ? getAntibodies()
+        .then((res) => {
+          return setAntibodiesList(res.items);
+        })
+        .catch((err) => alert(err))
+      : setAntibodiesList(searchedAntibodies);
   };
 
   const fetchUserAntibodies = () => {
@@ -365,7 +366,6 @@ const AntibodiesTable = (props) => {
       ? fetchAntibodies()
       : user && fetchUserAntibodies();
   }, [activeSearch, searchedAntibodies]);
-
 
   const columns: GridColDef[] = [
     {
@@ -490,8 +490,8 @@ const AntibodiesTable = (props) => {
     toolbar: {
       activeTab: props.activeTab,
     },
-    noRowsOverlay:{
-      activeSearch: activeSearch
+    noRowsOverlay: {
+      activeSearch: activeSearch,
     },
     panel: {
       sx: {
@@ -546,16 +546,25 @@ const AntibodiesTable = (props) => {
     },
   };
 
-  const NoRowsOverlay = () => typeof activeSearch==='string' && activeSearch !== '' && searchedAntibodies.length === 0? <NotFoundMessage activeSearch={activeSearch}/>:typeof activeSearch !== 'string'? <Error500 />: <GridNoRowsOverlay/>
+  const NoRowsOverlay = () =>
+    typeof activeSearch === "string" &&
+    activeSearch !== "" &&
+    searchedAntibodies.length === 0 ? (
+        <NotFoundMessage activeSearch={activeSearch} />
+      ) : typeof activeSearch !== "string" ? (
+        <Error500 />
+      ) : (
+        <GridNoRowsOverlay />
+      );
 
-  const SortIcon = ({ sortingOrder, ...other }) => <SortingIcon {...other} />
-
+  const SortIcon = ({ sortingOrder, ...other }) => <SortingIcon {...other} />;
+  const currentPath = window.location.pathname;
   return (
     <Box>
       <Box sx={{ flexGrow: 1, height: "90vh" }}>
         {currentPath === "/submissions" && !user ? (
           <ConnectAccount />
-        ) :(
+        ) : (
           <DataGrid
             sx={dataGridStyles}
             rows={antibodiesList ?? []}
@@ -566,8 +575,7 @@ const AntibodiesTable = (props) => {
             checkboxSelection
             disableSelectionOnClick
             getRowHeight={() => "auto"}
-            loading={!antibodiesList|| loader}
-  
+            loading={!antibodiesList || loader}
             components={{
               BaseCheckbox: StyledCheckBox,
               ColumnFilteredIcon: FilteredColumnIcon,
@@ -577,13 +585,13 @@ const AntibodiesTable = (props) => {
               Toolbar: CustomToolbar,
               ColumnMenuIcon: FilterIcon,
               ColumnSelectorIcon: SettingsIcon,
-              NoRowsOverlay: NoRowsOverlay
+              NoRowsOverlay: NoRowsOverlay,
             }}
             componentsProps={compProps}
             localeText={{
               toolbarColumns: "Table settings",
             }}
-          /> 
+          />
         )}
       </Box>
     </Box>

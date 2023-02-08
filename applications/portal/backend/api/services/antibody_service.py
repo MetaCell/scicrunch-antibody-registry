@@ -68,17 +68,16 @@ def get_antibody_by_accession(accession: int) -> List[AntibodyDTO]:
         raise
 
 def update_antibody(user_id: str, antibody_accession_number: str, body: UpdateAntibodyDTO) -> AntibodyDTO:
-    accession_number = strip_ab_from_id(antibody_accession_number)
     if getattr(body, 'vendorName', None) is not None:
         raise AntibodyDataException("Vendor name cannot be updated", 'vendorName', None)
     if getattr(body, 'catalogNum', None) is not None:
         raise AntibodyDataException("Catalog number cannot be updated", 'catalogNum', None)
-    current_antibody = Antibody.objects.get(accession=accession_number, uid=user_id)
+    current_antibody = Antibody.objects.get(accession=antibody_accession_number, uid=user_id)
     updated_antibody = antibody_mapper.from_dto(AntibodyDTO(**body.__dict__, abId=current_antibody.ab_id,
                                                             catalogNum=current_antibody.catalog_num,
                                                             vendorName=current_antibody.vendor.name,
                                                             insertTime=current_antibody.insert_time))
-
+    updated_antibody.save()
     return antibody_mapper.to_dto(updated_antibody)
 
 
