@@ -97,7 +97,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     def __init__(self, *args, **kwargs):
         disabled_fields = {"uid", "ix"}
 
-        self.fields += ['applications',  'target_species_raw', 'species']
+        self.fields += ['applications',  'target_species_raw']
 
         # doing this so we are sure we don't forget anything
         more_fields =  [

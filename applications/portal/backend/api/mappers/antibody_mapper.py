@@ -63,16 +63,13 @@ class AntibodyMapper(IDAOMapper):
             elif not isinstance(v, (list, tuple)) and (getattr(ab, k, None) is None or isinstance(getattr(ab, k, None),
                                                                                                   (int, str))):
                 setattr(ab, k, v)
-        ab.save()  # Need to save first to set the manytomany
+        
 
         if dto.targetSpecies:
-            species = []
-            for specie_name in dto.targetSpecies:
-                specie, new = get_or_create_specie(name=specie_name)
-                species.append(specie)
-                if new:
-                    log.info("Adding specie: %s", specie_name)
-            ab.species.set(species)
+            # the logic to create species and fill the field is in the model save automations
+            ab.target_species_raw=','.join(dto.targetSpecies)
+
+        ab.save()  # Need to save to set the manytomany
 
         return ab
 

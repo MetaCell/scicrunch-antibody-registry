@@ -1,4 +1,5 @@
-from typing import Optional
+from typing import Optional, Tuple
+from api.utilities.exceptions import RequiredParameterMissing
 
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector
@@ -187,10 +188,10 @@ class Antibody(models.Model):
     antigen = models.ForeignKey(
         Antigen, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
     target_species_raw = models.CharField(
-        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True)
+        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True, verbose_name="Target species (raw)", help_text="Comma separated value for target species. Values filled here will be parsed and assigned to the 'Target species' field.")
 
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
-                                     through='AntibodySpecies', blank=True)
+                                     through='AntibodySpecies', blank=True, verbose_name="Target species")
     subregion = models.CharField(max_length=ANTIBODY_TARGET_SUBREGION_MAX_LEN, db_column='target_subregion', null=True,
                                  db_index=True, blank=True)
     modifications = models.CharField(max_length=ANTIBODY_TARGET_MODIFICATION_MAX_LEN, db_column='target_modification',
@@ -238,19 +239,18 @@ class Antibody(models.Model):
     curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
 
     def save(self, *args,  **kwargs):
-
+        super(Antibody, self).save(*args, **kwargs)
         self._handle_status_changes(*args, **kwargs)
 
         self._handle_duplicates(*args, **kwargs)
         self._generate_related_fields(*args, **kwargs)
+        self._fill_target_species_from_raw()
         first_save = self.ix is None
 
         if first_save:  # Newly instantiated instances have ix = None
-            super(Antibody, self).save(*args, **kwargs)
             self._generate_automatic_attributes(*args, **kwargs)
-            super(Antibody, self).save()
-        else:
-            super(Antibody, self).save(*args, **kwargs)
+   
+        super(Antibody, self).save()
 
     def _generate_automatic_attributes(self, *args, **kwargs):
         """
@@ -280,6 +280,16 @@ class Antibody(models.Model):
     def _generate_ab_id(self) -> int:
         return generate_id_aux(self.ix)
 
+    def _fill_target_species_from_raw(self):
+        species = []
+        if self.target_species_raw:
+            for specie_name in self.target_species_raw.split(','):
+                specie_name = specie_name.strip().lower()
+                specie, _ = Specie.objects.get_or_create(name=specie_name)
+                species.append(specie)
+
+            self.species.set(species)
+
     def get_duplicate(self) -> Optional['Antibody']:
         """
         Returns a non-personal antibody with the same vendor_id and same catalog_number if exists
@@ -300,7 +310,8 @@ class Antibody(models.Model):
         """
         Creates VendorDomain entity from current vendor content if non-existent
         """
-        assert self.url is not None
+        if self.url is None:
+            return
         base_url = extract_base_url(self.url)
         try:
             VendorDomain.objects.get(base_url=base_url)
@@ -405,6 +416,19 @@ class AntibodySpecies(models.Model):
     def __str__(self):
         return "AB_%s->%s" % (self.antibody.ab_id, self.specie.name)
 
+def get_or_create_specie(**kwargs) -> Tuple[Specie, bool]:
+    name = kwargs.get('name', None)
+    if name is None:
+        raise RequiredParameterMissing('name')
+
+    new = False
+    try:
+        specie = Specie.objects.get(name=name)
+    except Specie.DoesNotExist:
+        specie = Specie(**kwargs)
+        specie.save()
+        new = True
+    return specie, new
 
 class AntibodyApplications(models.Model):
     antibody = models.ForeignKey(
