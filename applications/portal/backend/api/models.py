@@ -79,7 +79,7 @@ class STATUS(models.TextChoices):
 
 class Vendor(models.Model):
     name = models.CharField(max_length=VENDOR_MAX_LEN,
-                            db_column='vendor', db_index=True)
+                            db_column='vendor', db_index=True, unique=True)
     nif_id = models.CharField(
         max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id', null=True, blank=True)
     eu_id = models.CharField(
@@ -129,7 +129,7 @@ class VendorDomain(models.Model):
     base_url = models.URLField(unique=True, max_length=URL_MAX_LEN,
                                null=True, db_column='domain_name', db_index=True)
     vendor = models.ForeignKey(
-        Vendor, on_delete=models.RESTRICT, null=True, db_column='vendor_id', db_index=True)
+        Vendor, on_delete=models.CASCADE, null=True, db_column='vendor_id', db_index=True)
     is_domain_visible = models.BooleanField(default=True, db_column='link')
     status = models.CharField(
         max_length=STATUS_MAX_LEN,
@@ -182,11 +182,11 @@ class Antibody(models.Model):
         max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True)
     cat_alt = models.CharField(
         max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True, db_index=True, blank=True)
-    vendor = models.ForeignKey(Vendor, on_delete=models.RESTRICT, null=True)
+    vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True)
     url = models.URLField(max_length=URL_MAX_LEN,
                           null=True, db_index=True, blank=True)
     antigen = models.ForeignKey(
-        Antigen, on_delete=models.RESTRICT, db_column='antigen_id', null=True)
+        Antigen, on_delete=models.SET_NULL, db_column='antigen_id', null=True)
     target_species_raw = models.CharField(
         max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True, verbose_name="Target species (raw)", help_text="Comma separated value for target species. Values filled here will be parsed and assigned to the 'Target species' field.")
 
@@ -239,17 +239,17 @@ class Antibody(models.Model):
     curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
 
     def save(self, *args,  **kwargs):
+        first_save = self.ix is None
         super(Antibody, self).save(*args, **kwargs)
         self._handle_status_changes(*args, **kwargs)
 
         self._handle_duplicates(*args, **kwargs)
         self._generate_related_fields(*args, **kwargs)
         self._fill_target_species_from_raw()
-        first_save = self.ix is None
 
         if first_save:  # Newly instantiated instances have ix = None
             self._generate_automatic_attributes(*args, **kwargs)
-   
+
         super(Antibody, self).save()
 
     def _generate_automatic_attributes(self, *args, **kwargs):
@@ -306,23 +306,65 @@ class Antibody(models.Model):
                       self.catalog_num)
         return duplicate_antibodies[0]
 
+    def set_vendor_from_name_url(self, url, name=None):
+        """
+        Sets vendor from name and url.
+
+        if the name exists:
+            if the url exists:
+                return existing vendor
+            else:
+                create new vendor domain and associate to existing vendor
+        else:
+            if the url exists:
+                try to guess a vendor just by the url and add a vendor synonym
+            else if the url doesn't exist:
+                create a new vendor with the name from url
+            else:
+                do nothing
+        """
+
+        base_url = url and extract_base_url(url)
+        try:
+            vendor = Vendor.objects.get(name=name or base_url)
+            self.vendor = vendor
+            if base_url:
+                self.add_vendor_domain(base_url, vendor)
+        except Vendor.DoesNotExist:
+            
+            try:
+                vd = VendorDomain.objects.get(base_url=base_url)
+                self.vendor = vd.vendor
+                if name:
+                    VendorSynonym.objects.create(vendor=self.vendor, name=name)
+            except VendorDomain.DoesNotExist:
+                vendor_name = name or base_url
+                log.info("Creating new Vendor `%s` on domain  to `%s`",
+                        vendor_name, base_url)
+                vendor = Vendor(name=vendor_name)
+                vendor.save()
+                self.vendor = vendor
+                if base_url:
+                    self.add_vendor_domain(base_url, vendor)
+
+    def add_vendor_domain(self, base_url, vendor):
+        try:
+            VendorDomain.objects.get(base_url=base_url)
+        except VendorDomain.DoesNotExist:
+            vd = VendorDomain(vendor=vendor,
+                                        base_url=base_url, status=STATUS.QUEUE)
+            vd.save()
+
     def _generate_related_fields(self, *args, **kwargs):
         """
         Creates VendorDomain entity from current vendor content if non-existent
         """
-        if self.url is None:
-            return
-        base_url = extract_base_url(self.url)
-        try:
-            VendorDomain.objects.get(base_url=base_url)
-        except VendorDomain.DoesNotExist:
-            vendor_name = self.vendor.name or base_url
-            log.info("Creating new Vendor `%s` on domain  to `%s`",
-                     vendor_name, base_url)
-            assert self.vendor is not None
-            vd = VendorDomain(vendor=self.vendor,
-                              base_url=base_url, status=STATUS.QUEUE)
-            vd.save()
+        if self.url:
+            if not self.vendor:
+                self.set_vendor_from_name_url(url=self.url)
+            else:
+                self.add_vendor_domain(extract_base_url(self.url), self.vendor)
+            
 
     def __str__(self):
         return 'AB_' + str(self.ab_id)
@@ -416,6 +458,7 @@ class AntibodySpecies(models.Model):
     def __str__(self):
         return "AB_%s->%s" % (self.antibody.ab_id, self.specie.name)
 
+
 def get_or_create_specie(**kwargs) -> Tuple[Specie, bool]:
     name = kwargs.get('name', None)
     if name is None:
@@ -429,6 +472,7 @@ def get_or_create_specie(**kwargs) -> Tuple[Specie, bool]:
         specie.save()
         new = True
     return specie, new
+
 
 class AntibodyApplications(models.Model):
     antibody = models.ForeignKey(

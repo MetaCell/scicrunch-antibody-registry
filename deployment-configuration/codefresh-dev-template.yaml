@@ -1,0 +1,9 @@
+steps:
+  tests_unit:
+    stage: unittest
+    type: parallel
+    steps:
+      portal_unit:
+        type: composition
+        title: Portal django tests
+        image: ${{portal}}

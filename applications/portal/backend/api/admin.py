@@ -78,6 +78,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     import_form_class = AntibodyImportForm
     resource_classes = [AntibodyResource]
     list_filter = ("status",)
+    # inlines=["applications"]
 
     # all the fields we want to display in a specific position here. Other fields are added in the __init__ method
     fields = ['ab_name', "submitter_name", "submitter_email", 'accession', 'commercial_type', 'catalog_num',
@@ -97,7 +98,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     def __init__(self, *args, **kwargs):
         disabled_fields = {"uid", "ix"}
 
-        self.fields += ['applications',  'target_species_raw']
+        self.fields += [ 'target_species_raw']
 
         # doing this so we are sure we don't forget anything
         more_fields =  [
@@ -140,7 +141,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         try:
             submitter = self.get_user(user_id=obj.uid)
             return f"{submitter['email']}"
-        except KeycloakGetError:
+        except:
             log.error(f"User {obj.uid} lookup error", exc_info=True)
             return "Error"
 

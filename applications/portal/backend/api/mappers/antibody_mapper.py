@@ -48,10 +48,10 @@ class AntibodyMapper(IDAOMapper):
             if new:
                 log.info("Adding specie: %s", specie_name)
 
-        if dto.url:
-            ab.vendor = self.vendor_from_antibody(dto)
+        if dto.url or dto.vendorName:
+            ab.set_vendor_from_name_url(url=dto.url, name=dto.vendorName)
         else:
-            raise AntibodyDataException("Vendor url is mandatory", 'url', None)
+            raise AntibodyDataException("Either vendor url or name is mandatory", 'url/name', None)
 
         ab_dict = dict_to_snake(dto.dict())
 
