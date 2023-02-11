@@ -12,7 +12,7 @@ from openapi.models import (
 )
 
 from .admin import VendorAdmin
-from .models import Vendor, Antibody, VendorDomain
+from .models import Vendor, Antibody, VendorDomain, VendorSynonym
 
 example_ab = {
     "clonality": "cocktail",
@@ -66,11 +66,21 @@ class AntibodiesTestCase(TestCase):
         assert ab.sourceOrganism == "mouse"
         assert len(ab.targetSpecies) == 2
 
+        domains = VendorDomain.objects.filter(vendor__id=ab.vendorId)
+        self.assertEquals(len(domains), 1)
+        self.assertEquals(domains[0].base_url, "www.bdbiosciences.com")
+        self.assertEquals(domains[0].status, STATUS.QUEUE)
+
         new_ant = AddAntibodyDTO(**example_ab)
         new_ant.catalogNum = "N176A/36"
+        new_ant.url = "https://www.ab.com/My-antibody" # should add this domain to the vendor
         ab2 = create_antibody(new_ant, "bbb")
         self.assertNotEqual(ab.abId, ab2.abId)
         self.assertEquals(ab.vendorName, ab2.vendorName)
+        
+        domains = VendorDomain.objects.filter(vendor__id=ab2.vendorId)
+        self.assertEquals(len(domains), 2)
+
 
         abs = get_antibodies()
         assert abs.page == 1
@@ -103,14 +113,22 @@ class AntibodiesTestCase(TestCase):
         a.save()
 
         try:
-            create_antibody(AddAntibodyDTO(**example_ab), "bbb")
+            duplicated = AddAntibodyDTO(**example_ab)
+            duplicated.vendorName = "My vendor synonym" # should keep the same vendor and add a synonym
+            create_antibody(duplicated, "bbb")
             self.fail("Should detect duplicate antibody")
         except DuplicatedAntibody as e:
             da = e.antibody
             assert da.accession != da.abId
             assert da.abId == ab.abId
+            assert da.status == Status.QUEUE
+            assert da.vendorId == ab.vendorId
+            assert da.vendorName == "My vendor"
+            
+            synonyms = VendorSynonym.objects.filter(vendor__id=da.vendorId)
+            assert len(synonyms) == 1
 
-        assert VendorDomain.objects.all().count() == 1
+        assert VendorDomain.objects.all().count() == 2
         assert Vendor.objects.all().count() == 1
 
         # Test search

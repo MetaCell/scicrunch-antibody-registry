@@ -30,6 +30,7 @@ from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 admin.site.site_header = 'Antibody Registry admin'
 admin.site.site_title = 'Antibody Registry admin'
 
+
 @admin.display(description="ab_id")
 def id_with_ab(obj: Antibody):
     return f"AB_{obj.ab_id}"
@@ -51,7 +52,8 @@ class VerboseManyToManyRawIdWidget(ManyToManyRawIdWidget):
         class_name = fk_model._meta.object_name.lower()
         for the_value in values:
             try:
-                obj = fk_model._default_manager.using(self.db).get(**{key: the_value})
+                obj = fk_model._default_manager.using(
+                    self.db).get(**{key: the_value})
                 url = reverse(
                     "admin:{0}_{1}_change".format(app_label, class_name), args=[obj.id]
                 )
@@ -76,6 +78,11 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     import_form_class = AntibodyImportForm
     resource_classes = [AntibodyResource]
     list_filter = ("status",)
+    # inlines=["applications"]
+
+    # all the fields we want to display in a specific position here. Other fields are added in the __init__ method
+    fields = ['ab_name', "submitter_name", "submitter_email", 'accession', 'commercial_type', 'catalog_num',
+              'cat_alt', 'vendor', 'url']
     list_display = (id_with_ab, "ab_name", "submitter_name", "status")
     search_fields = ("ab_id", "ab_name", "catalog_num")
     readonly_fields = (
@@ -86,27 +93,28 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         "lastedit_time",
         "curate_time",
     )
-    autocomplete_fields = ("vendor", "antigen", "species", "source_organism")
+    autocomplete_fields = ("vendor", "antigen", "source_organism")
 
     def __init__(self, *args, **kwargs):
         disabled_fields = {"uid", "ix"}
-        added_fields = ["submitter_name", "submitter_email"]
-        all_fields = [
+
+        self.fields += [ 'target_species_raw']
+
+        # doing this so we are sure we don't forget anything
+        more_fields =  [
             field.name
             for field in Antibody._meta.concrete_fields
-            if field.name not in disabled_fields
+            if field.name not in disabled_fields and field.name not in self.fields
         ]
-        all_fields[1:2] = added_fields
-        self.fields = all_fields
-        super().__init__(*args, **kwargs)
 
+        self.fields = self.fields + more_fields
+        super().__init__(*args, **kwargs)
 
     @property
     def keycloak_admin(self):
         from cloudharness.auth import AuthClient
         return AuthClient().get_admin_client()
 
-    
     @cache
     def get_user(self, user_id):
         return self.keycloak_admin.get_user(user_id=user_id)
@@ -133,7 +141,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         try:
             submitter = self.get_user(user_id=obj.uid)
             return f"{submitter['email']}"
-        except KeycloakGetError:
+        except:
             log.error(f"User {obj.uid} lookup error", exc_info=True)
             return "Error"
 
@@ -164,7 +172,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
             return super().formfield_for_manytomany(db_field, request, **kwargs)
         if db_field.name == "applications":
             kwargs["widget"] = FilteredSelectMultiple(
-                db_field.verbose_name, is_stacked=False
+                db_field.verbose_name, is_stacked=False, 
             )
             if "queryset" not in kwargs:
                 queryset = db_field.related_model.objects.all()
@@ -292,8 +300,10 @@ class VendorAdmin(admin.ModelAdmin):
 
     def delete_view(self, request, object_id, extra_context=None):
         extra_context = extra_context or {}
-        extra_context["vendors"] = list(self.model.objects.filter(~Q(id=object_id)))
-        extra_context["nb_antibodies"] = list(Antibody.objects.filter(vendor=object_id))
+        extra_context["vendors"] = list(
+            self.model.objects.filter(~Q(id=object_id)))
+        extra_context["nb_antibodies"] = list(
+            Antibody.objects.filter(vendor=object_id))
         return super().delete_view(
             request,
             object_id,
