@@ -240,8 +240,9 @@ class Antibody(models.Model):
 
     def save(self, *args,  **kwargs):
         first_save = self.ix is None
+        self._handle_status_changes()
         super(Antibody, self).save(*args, **kwargs)
-        self._handle_status_changes(*args, **kwargs)
+        
 
         self._handle_duplicates(*args, **kwargs)
         self._generate_related_fields(*args, **kwargs)
@@ -260,7 +261,7 @@ class Antibody(models.Model):
         self.accession = self.ab_id
         self.status = STATUS.QUEUE
 
-    def _handle_status_changes(self, *args, **kwargs):
+    def _handle_status_changes(self):
         """
         Updates curate_time on status changes to CURATED
         """
