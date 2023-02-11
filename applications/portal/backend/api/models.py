@@ -188,7 +188,7 @@ class Antibody(models.Model):
     antigen = models.ForeignKey(
         Antigen, on_delete=models.SET_NULL, db_column='antigen_id', null=True)
     target_species_raw = models.CharField(
-        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True, verbose_name="Target species (raw)", help_text="Comma separated value for target species. Values filled here will be parsed and assigned to the 'Target species' field.")
+        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True, verbose_name="Target species (csv)", help_text="Comma separated value for target species. Values filled here will be parsed and assigned to the 'Target species' field.")
 
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
                                      through='AntibodySpecies', blank=True, verbose_name="Target species")
@@ -289,7 +289,7 @@ class Antibody(models.Model):
                 specie, _ = Specie.objects.get_or_create(name=specie_name)
                 species.append(specie)
 
-            self.species.set(species)
+                self.species.add(specie)
 
     def get_duplicate(self) -> Optional['Antibody']:
         """

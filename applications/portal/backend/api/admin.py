@@ -1,5 +1,6 @@
 from functools import cache, cached_property
 from django.contrib import admin
+from django.forms import ModelForm
 from django.contrib.admin.widgets import ManyToManyRawIdWidget, FilteredSelectMultiple
 from django.db.models import Q
 from django.db.models.functions import Length
@@ -71,6 +72,17 @@ class VerboseManyToManyRawIdWidget(ManyToManyRawIdWidget):
     def format_value(self, value):
         return ",".join(str(v) for v in value) if value else ""
 
+class ApplicationsInlineAdmin(admin.TabularInline):
+    model = Antibody.applications.through
+    extra = 1
+
+class TargetSpeciesInlineAdmin(admin.TabularInline):
+    model = Antibody.species.through
+    extra = 1
+    autocomplete_fields = ("specie",)
+    classes=("collapse",)
+    verbose_name="Target Specie"
+    
 
 @admin.register(Antibody)
 class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
@@ -78,11 +90,9 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     import_form_class = AntibodyImportForm
     resource_classes = [AntibodyResource]
     list_filter = ("status",)
-    # inlines=["applications"]
+    inlines = [TargetSpeciesInlineAdmin]
+    
 
-    # all the fields we want to display in a specific position here. Other fields are added in the __init__ method
-    fields = ['ab_name', "submitter_name", "submitter_email", 'accession', 'commercial_type', 'catalog_num',
-              'cat_alt', 'vendor', 'url']
     list_display = (id_with_ab, "ab_name", "submitter_name", "status")
     search_fields = ("ab_id", "ab_name", "catalog_num")
     readonly_fields = (
@@ -95,20 +105,6 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     )
     autocomplete_fields = ("vendor", "antigen", "source_organism")
 
-    def __init__(self, *args, **kwargs):
-        disabled_fields = {"uid", "ix"}
-
-        self.fields += [ 'target_species_raw']
-
-        # doing this so we are sure we don't forget anything
-        more_fields =  [
-            field.name
-            for field in Antibody._meta.concrete_fields
-            if field.name not in disabled_fields and field.name not in self.fields
-        ]
-
-        self.fields = self.fields + more_fields
-        super().__init__(*args, **kwargs)
 
     @property
     def keycloak_admin(self):
@@ -189,7 +185,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
             kwargs["widget"] = VerboseManyToManyRawIdWidget(
                 db_field.remote_field, self.admin_site
             )
-            return db_field.formfield(**kwargs)
+            return ""
 
 
 @admin.register(Antigen)
@@ -253,15 +249,15 @@ class VendorDomainInline(admin.TabularInline):
     extra = 0
 
 
-# @admin.register(VendorDomain)
-# class VendorDomainAdmin(admin.ModelAdmin):
-#     list_display = (
-#         "base_url",
-#         "vendor",
-#         "status",
-#         "is_domain_visible",
-#     )
-#     list_editable = ("is_domain_visible",)
+@admin.register(VendorDomain)
+class VendorDomainAdmin(admin.ModelAdmin):
+    list_display = (
+        "base_url",
+        "vendor",
+        "status",
+        "is_domain_visible",
+    )
+    list_editable = ("is_domain_visible",)
 
 
 @admin.register(Vendor)
