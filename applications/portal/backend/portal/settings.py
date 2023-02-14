@@ -262,4 +262,6 @@ FILL_KEY = 'fill'
 SKIP_KEY = 'skip'
 ID_KEY = 'id'
 IX_KEY = 'ix'
+KC_USER_ID_KEY = 'keycloak_user'
+USER_KEY = 'user'
 

@@ -7,12 +7,13 @@ from import_export.resources import ModelResource
 from api.models import Antibody, Vendor, Antigen, Specie
 from api.services.gene_service import get_or_create_gene
 from api.services.import_antbody_service import filter_dataset_c1, filter_dataset_c2, get_antibody_q1, get_antibody_q2
+from api.services.keycloak_service import KeycloakService
 from api.services.specie_service import get_or_create_specie
 from api.services.vendor_service import get_or_create_vendor
 from api.widgets.foreign_key_widget import ForeignKeyWidgetWithCreation
 from api.widgets.many_to_many_widget import ManyToManyWidgetWithCreation
 from portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY, FILL_KEY, UPDATE_KEY, \
-    DUPLICATE_KEY
+    DUPLICATE_KEY, KC_USER_ID_KEY, USER_KEY
 
 
 class AntibodyIdentifier:
@@ -86,7 +87,7 @@ class AntibodyResource(ModelResource):
             AntibodyIdentifier(
                 [self.fields['ab_id'], self.fields['ix'], self.fields['accession']],
                 lambda row: self.fields['ab_id'].column_name in row and (
-                    self.fields['ix'].column_name in row or self.fields['accession'].column_name in row),
+                        self.fields['ix'].column_name in row or self.fields['accession'].column_name in row),
                 lambda dataset: get_antibody_q1(dataset, self.fields['ab_id'],
                                                 [self.fields['ix'], self.fields['accession']]),
                 lambda dataset, negate, antibodies: filter_dataset_c1(dataset, negate, antibodies, self.fields['ab_id'],
@@ -102,6 +103,7 @@ class AntibodyResource(ModelResource):
                                                                       self.fields['vendor'])
             )
         ]
+        self.keycloak_service = KeycloakService()
         self.request = request
 
     class Meta:
@@ -136,7 +138,10 @@ class AntibodyResource(ModelResource):
                     del row[self.fields['ab_id'].column_name]
                 if self.fields['ix'].column_name in row:
                     del row[self.fields['ix'].column_name]
-        return (self.init_instance(row), True)
+        instance = self.init_instance(row)
+        if 'uid' in row:
+            instance.uid = row['uid']
+        return instance, True
 
     def get_instance(self, instance_loader, row):
         antibody_identifier = self.get_antibody_identifier(row)
@@ -148,11 +153,14 @@ class AntibodyResource(ModelResource):
         # the Confirm Import Form using django sessions based on:
         # https://stackoverflow.com/questions/52335510/extend-django-import-exports-import-form-to-specify-fixed-value-for-each-import
 
-        # if we are in the confirmation import request we read the values from session and reset the session after
+        # if we are in the confirmation import request we read the values from session
+        # and get the keycloak user id from the keycloak_service
         if kwargs[FOR_NEW_KEY] is None:
             kwargs[FOR_NEW_KEY] = self.request.session[FOR_NEW_KEY]
             kwargs[FOR_EXTANT_KEY] = self.request.session[FOR_EXTANT_KEY]
             kwargs[METHOD_KEY] = self.request.session[METHOD_KEY]
+
+            kwargs[KC_USER_ID_KEY] = self.keycloak_service.get_user_id_from_django_user(kwargs[USER_KEY])
 
         else:  # if we are in the import form request we set the values in session using the request values
             self.request.session[FOR_NEW_KEY] = kwargs[FOR_NEW_KEY]
@@ -192,6 +200,8 @@ class AntibodyResource(ModelResource):
             if field.column_name in row:
                 if row[field.column_name] == '':
                     row[field.column_name] = None
+        if KC_USER_ID_KEY in kwargs:
+            row['uid'] = kwargs[KC_USER_ID_KEY]
 
     def import_field(self, field, obj, data, is_m2m=False, **kwargs):
         is_fill = kwargs.get(METHOD_KEY, FILL_KEY) == FILL_KEY
