@@ -241,7 +241,7 @@ class Antibody(models.Model):
 
     def save(self, *args, **kwargs):
         first_save = self.ix is None
-        self._handle_status_changes()
+        self._handle_status_changes(first_save)
         super(Antibody, self).save(*args, **kwargs)
 
         self._handle_duplicates(*args, **kwargs)
@@ -259,16 +259,21 @@ class Antibody(models.Model):
         """
         self.ab_id = self._generate_ab_id()
         self.accession = self.ab_id
-        self.status = STATUS.QUEUE
+        if self.status is None:
+            self.status = STATUS.QUEUE
 
-    def _handle_status_changes(self):
+    def _handle_status_changes(self, first_save=False):
         """
         Updates curate_time on status changes to CURATED
         """
+
         if self.status == STATUS.CURATED:
-            old_version = Antibody.objects.get(ix=self.ix)
-            if old_version.status != STATUS.CURATED:
+            if first_save:
                 self.curate_time = timezone.now()
+            else:
+                old_version = Antibody.objects.get(ix=self.ix)
+                if old_version.status != STATUS.CURATED:
+                    self.curate_time = timezone.now()
 
     def _handle_duplicates(self, *args, **kwargs):
         """

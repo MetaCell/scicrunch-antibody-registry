@@ -4,7 +4,7 @@ from import_export.fields import Field
 from import_export.instance_loaders import ModelInstanceLoader
 from import_export.resources import ModelResource
 
-from api.models import Antibody, Vendor, Antigen, Specie
+from api.models import Antibody, Vendor, Antigen, Specie, STATUS
 from api.services.gene_service import get_or_create_gene
 from api.services.import_antbody_service import filter_dataset_c1, filter_dataset_c2, get_antibody_q1, get_antibody_q2
 from api.services.keycloak_service import KeycloakService
@@ -139,6 +139,7 @@ class AntibodyResource(ModelResource):
                 if self.fields['ix'].column_name in row:
                     del row[self.fields['ix'].column_name]
         instance = self.init_instance(row)
+        instance.status = STATUS.CURATED
         if 'uid' in row:
             instance.uid = row['uid']
         return instance, True
