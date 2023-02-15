@@ -112,7 +112,7 @@ class AntibodyResource(ModelResource):
         fields = (
             'name', 'vendor', 'catalog_num', 'url', 'target', 'species', 'clonality', 'host', 'clone_id',
             'product_isotype', 'product_conjugate', 'product_form', 'comments', 'defining_citation', 'subregion',
-            'modifications', 'gene_id', 'disc_date', 'commercial_type', 'epitope', 'cat_alt', 'ab_id',
+            'modifications', 'gene_id', 'disc_date', 'commercial_type', 'uniprot', 'epitope', 'cat_alt', 'ab_id',
             'accession', 'ix')
         instance_loader_class = AntibodyInstanceLoaderClass
 
