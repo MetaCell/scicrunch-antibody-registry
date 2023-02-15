@@ -477,6 +477,7 @@ class AntibodyFiles(models.Model):
         return self.display_name
 
     def save(self, *args, **kwargs):
+        # todo: handle file hash
         if self.id is None:
             tmp_file = self.file
             self.file = None
