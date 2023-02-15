@@ -38,7 +38,7 @@ class AntibodyResource(ModelResource):
         widget=ForeignKeyWidgetWithCreation(model=Vendor, field='name',
                                             get_or_create=lambda **kwargs: get_or_create_vendor(**kwargs)[0])
     )
-    catalog_num = Field(attribute='catalog_num', column_name='base cat')
+    catalog_num = Field(attribute='catalog_num', column_name='CAT NUM')
     url = Field(attribute='url', column_name='URL')
     target = Field(
         column_name='TARGET',
@@ -70,10 +70,11 @@ class AntibodyResource(ModelResource):
     defining_citation = Field(
         attribute='defining_citation', column_name='CITATION')
     subregion = Field(attribute='subregion', column_name='SUBREGION')
-    modifications = Field(attribute='modifications',
-                          column_name='MODIFICATION')
+    modifications = Field(attribute='modifications', column_name='MODIFICATION')
+    gene_id = Field(attribute='antigen__entrez_id', column_name='GeneID')
     disc_date = Field(attribute='disc_date', column_name='DISC')
     commercial_type = Field(attribute='commercial_type', column_name='TYPE')
+    uniprot = Field(attribute='antigen__uniprot_id', column_name='UNIPROT')
     epitope = Field(attribute='epitope', column_name='EPITOPE')
     cat_alt = Field(attribute='cat_alt', column_name='CAT ALT')
     ab_id = Field(attribute='ab_id', column_name='id')
@@ -111,7 +112,7 @@ class AntibodyResource(ModelResource):
         fields = (
             'name', 'vendor', 'catalog_num', 'url', 'target', 'species', 'clonality', 'host', 'clone_id',
             'product_isotype', 'product_conjugate', 'product_form', 'comments', 'defining_citation', 'subregion',
-            'modifications', 'gid', 'disc_date', 'commercial_type', 'uniprot', 'epitope', 'cat_alt', 'ab_id',
+            'modifications', 'gene_id', 'disc_date', 'commercial_type', 'epitope', 'cat_alt', 'ab_id',
             'accession', 'ix')
         instance_loader_class = AntibodyInstanceLoaderClass
 
