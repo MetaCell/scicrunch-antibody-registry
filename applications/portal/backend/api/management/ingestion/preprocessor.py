@@ -2,6 +2,7 @@ import glob
 import json
 import logging
 import os
+from datetime import datetime
 from typing import List
 
 import pandas as pd
@@ -10,9 +11,10 @@ from api.management.ingestion.gd_downloader import GDDownloader
 from api.models import AntibodyClonality, CommercialType
 from api.services.filesystem_service import replace_file
 from api.utilities.decorators import timed_class_method
+from api.utilities.functions import get_antibody_persistence_directory
 from portal.settings import RAW_ANTIBODY_DATA_BASENAME, RAW_VENDOR_DATA_BASENAME, RAW_VENDOR_DOMAIN_DATA_BASENAME, \
     CHUNK_SIZE, \
-    ANTIBODY_HEADER, RAW_USERS_DATA_BASENAME, DEFAULT_UID
+    ANTIBODY_HEADER, RAW_USERS_DATA_BASENAME, DEFAULT_UID, RAW_ANTIBODY_FILES_BASENAME, ANTIBODY_PERSISTENCE
 
 UNKNOWN_VENDORS = {'1669', '1667', '1625', '1633', '1628', '11599', '12068', '12021', '1632', '5455', '1626', '1670',
                    '11278', '(null)', '1684', '11598', '0', '1682', '11434'}
@@ -25,11 +27,12 @@ UNKNOWN_USERS = {'3483', '1473', '3208', '3519', '21828', '30083', '7650', '7574
 
 class AntibodyMetadata:
     def __init__(self, antibody_data_paths: List[str], vendor_data_path: str, vendor_domain_data_path: str,
-                 users_data_path: str):
+                 users_data_path: str, antibody_files_path: str):
         self.antibody_data_paths = antibody_data_paths
         self.vendor_data_path = vendor_data_path
         self.vendor_domain_data_path = vendor_domain_data_path
         self.users_data_path = users_data_path
+        self.antibody_files_path = antibody_files_path
 
 
 def clean_df(df):
@@ -124,6 +127,16 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
             replace_file(antibody_data_path, tmp_antibody_data_path)
 
 
+def update_antibody_files(csv_path: str):
+    logging.info("Updating antibody files")
+    df_antibody_files = pd.read_csv(csv_path)
+    df_antibody_files['filename'] = df_antibody_files.apply(
+        lambda row: get_antibody_persistence_directory(row['id'], row['filename']), axis=1)
+    df_antibody_files['timestamp'] = df_antibody_files.apply(
+        lambda row: datetime.utcfromtimestamp(row['timestamp']), axis=1)
+    df_antibody_files.to_csv(csv_path, index=False, mode='w+')
+
+
 class Preprocessor:
     def __init__(self, file_id: str, dest: str = './antibody_data'):
         self.file_id = file_id
@@ -136,15 +149,16 @@ class Preprocessor:
         GDDownloader(self.file_id, self.dest).download()
 
         metadata = AntibodyMetadata(glob.glob(os.path.join(self.dest, '*', f"{RAW_ANTIBODY_DATA_BASENAME}*.csv")),
-                                    glob.glob(os.path.join(
-                                        self.dest, '*', f"{RAW_VENDOR_DATA_BASENAME}.csv"))[0],
+                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DATA_BASENAME}.csv"))[0],
                                     glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DOMAIN_DATA_BASENAME}.csv"))[
                                         0],
-                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_USERS_DATA_BASENAME}.csv"))[0])
+                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_USERS_DATA_BASENAME}.csv"))[0],
+                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_ANTIBODY_FILES_BASENAME}.csv"))[0])
 
         update_vendor_domains(metadata.vendor_domain_data_path)
         update_vendors(metadata.vendor_data_path)
         update_antibodies(metadata.antibody_data_paths)
         update_users(metadata.users_data_path)
+        update_antibody_files(metadata.antibody_files_path)
 
         return metadata

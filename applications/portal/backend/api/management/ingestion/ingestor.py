@@ -1,21 +1,20 @@
 import itertools
 import logging
-import string
 import re
+import string
 
 import pandas as pd
 from django.core.management.color import no_style
 from django.db import connection
 
-from cloudharness import log
-
 from api.management.ingestion.preprocessor import AntibodyMetadata
 from api.management.ingestion.users_ingestor import UsersIngestor
 from api.models import Antibody, Antigen, Vendor, VendorDomain, Specie, \
-    VendorSynonym, AntibodySpecies
+    VendorSynonym, AntibodySpecies, AntibodyFiles
 from api.utilities.decorators import timed_class_method
+from cloudharness import log
 from portal.settings import ANTIBODY_ANTIBODY_START_SEQ, ANTIBODY_VENDOR_START_SEQ, \
-    ANTIBODY_VENDOR_DOMAIN_START_SEQ, ANTIBODY_HEADER, D_TYPES, UID_INDEX
+    ANTIBODY_VENDOR_DOMAIN_START_SEQ, ANTIBODY_HEADER, D_TYPES, ANTIBODY_FILE_START_SEQ
 from portal.settings import CHUNK_SIZE
 
 TRUNCATE_STM = "TRUNCATE TABLE {table_name} CASCADE;"
@@ -61,6 +60,7 @@ def is_valid_specie(specie: str):
 
 class Ingestor:
     ANTIBODY_TABLE = Antibody.objects.model._meta.db_table
+    ANTIBODY_FILES_TABLE = AntibodyFiles.objects.model._meta.db_table
     ANTIGEN_TABLE = Antigen.objects.model._meta.db_table
     SPECIE_TABLE = Specie.objects.model._meta.db_table
     VENDOR_DOMAIN_TABLE = VendorDomain.objects.model._meta.db_table
@@ -78,23 +78,25 @@ class Ingestor:
 
     def ingest(self):
         species_map = {}
+        users_map = {}
 
         self._truncate_tables()
         self._insert_vendors()
         self._insert_vendor_domains()
-        self._fill_tmp_table()
+        users_map = self._fill_tmp_table(users_map)
         self._insert_genes()
-        self._insert_species(species_map)
+        species_map = self._insert_species(species_map)
         self._insert_antibodies()
         self._insert_antibody_species(species_map)
         self._update_vendor_domains()
+        self._insert_antibody_files(users_map)
         self._reset_auto_increment()
         self._drop_tmp_table()
 
     @timed_class_method('Tables truncated')
     def _truncate_tables(self):
         # delete tables content (opposite order of insertion)
-        tables_to_delete = [self.SPECIE_TABLE, self.ANTIBODY_TABLE,
+        tables_to_delete = [self.ANTIBODY_FILES_TABLE, self.SPECIE_TABLE, self.ANTIBODY_TABLE,
                             self.ANTIGEN_TABLE, self.VENDOR_SYNONYM_TABLE,
                             self.VENDOR_DOMAIN_TABLE, self.VENDOR_TABLE]
 
@@ -154,7 +156,7 @@ class Ingestor:
         self.cursor.execute(vendor_domain_insert_stm, vendor_domain_params)
 
     @timed_class_method('Temporary table filled')
-    def _fill_tmp_table(self):
+    def _fill_tmp_table(self, users_map):
         try:
             users_map = self.users_ingestor.get_users_map() if self.users_ingestor else {}
         except:
@@ -179,6 +181,7 @@ class Ingestor:
                                     chunk.to_numpy().flatten().tolist())
                 logging.info(
                     f"File progress: {int(min((i + 1) * CHUNK_SIZE, len_csv) / len_csv * 100)}% ")
+        return users_map
 
     @timed_class_method('Genes added')
     def _insert_genes(self):
@@ -219,6 +222,7 @@ class Ingestor:
         if len(species_map) > 0:
             self.cursor.execute(species_insert_stm, list(
                 itertools.chain.from_iterable(species_map.items())))
+        return species_map
 
     def get_species_from_targets(self, specie_str):
         # split by comma or semicolon
@@ -282,12 +286,34 @@ class Ingestor:
                                    f"AND {self.TMP_TABLE}.link = 'yes'; "
         self.cursor.execute(vendor_domain_update_stm)
 
+    @timed_class_method('Antibody files added ')
+    def _insert_antibody_files(self, users_map):
+        # Prepare antibody files insert
+        df_antibody_files = pd.read_csv(self.metadata.antibody_files_path)
+        antibody_files_insert_stm = get_insert_values_into_table_stm(self.ANTIBODY_FILES_TABLE,
+                                                                     ['id', 'ab_ix', 'type', 'file', 'display_name',
+                                                                      'timestamp', 'uploader_uid', 'filehash'],
+                                                                     len(df_antibody_files))
+        # insert antibody files
+        antibody_files_params = []
+        for index, row in df_antibody_files.iterrows():
+            uploader_id = users_map.get(row['uploader_id'], None)
+            if not uploader_id:
+                logging.warning(f"No user found for uploader_id: {row['uploader_id']}")
+                continue
+            antibody_files_params.extend(
+                [row['id'], row['ab_ix'], row['type'], row['filename'], row['displayname'], row['timestamp'],
+                 uploader_id, row['filehash']]
+            )
+        self.cursor.execute(antibody_files_insert_stm, antibody_files_params)
+
     @timed_class_method('Sequence tables updated')
     def _reset_auto_increment(self):
         tables_to_restart_seq = {
             'api_antibody_ix_seq': ANTIBODY_ANTIBODY_START_SEQ,
             'api_vendor_id_seq': ANTIBODY_VENDOR_START_SEQ,
             'api_vendordomain_id_seq': ANTIBODY_VENDOR_DOMAIN_START_SEQ,
+            'api_antibodyfiles_id_seq': ANTIBODY_FILE_START_SEQ,
         }
 
         for ttr in tables_to_restart_seq:

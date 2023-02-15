@@ -8,7 +8,7 @@ from django.db.models import Transform, CharField, Index, Q, Value
 from django.db.models.functions import Length, Coalesce
 from django.utils import timezone
 
-from api.utilities.functions import generate_id_aux, extract_base_url
+from api.utilities.functions import generate_id_aux, extract_base_url, get_antibody_persistence_directory
 from cloudharness import log
 from portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
@@ -17,7 +17,8 @@ from portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPL
     ANTIBODY_TARGET_MODIFICATION_MAX_LEN, ANTIBODY_TARGET_SUBREGION_MAX_LEN, ANTIBODY_DEFINING_CITATION_MAX_LEN, \
     ANTIBODY_ID_MAX_LEN, ANTIBODY_CAT_ALT_MAX_LEN, VENDOR_COMMERCIAL_TYPE_MAX_LEN, ANTIBODY_TARGET_EPITOPE_MAX_LEN, \
     VENDOR_NIF_MAX_LEN, ANTIBODY_TARGET_SPECIES_MAX_LEN, ANTIBODY_DISC_DATE_MAX_LEN, \
-    URL_MAX_LEN, VENDOR_EU_ID_MAX_LEN, ANTIBODY_UID_MAX_LEN
+    URL_MAX_LEN, VENDOR_EU_ID_MAX_LEN, ANTIBODY_UID_MAX_LEN, ANTIBODY_FILE_DISPLAY_NAME_MAX_LEN, \
+    ANTIBODY_FILES_HASH_MAX_LEN, ANTIBODY_PERSISTENCE, ANTIBODY_FILE_TYPE_MAX_LEN
 
 
 @CharField.register_lookup
@@ -79,7 +80,7 @@ class STATUS(models.TextChoices):
 
 class Vendor(models.Model):
     name = models.CharField(max_length=VENDOR_MAX_LEN,
-                            db_column='vendor', db_index=True, unique=True)
+                            db_column='vendor', db_index=True, unique=False)
     nif_id = models.CharField(
         max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id', null=True, blank=True)
     eu_id = models.CharField(
@@ -456,6 +457,35 @@ class Antibody(models.Model):
                     weight='C',
                 ), name='antibody_all_fts_idx2'),
         ]
+
+
+def antibody_persistence_directory(instance, filename):
+    return get_antibody_persistence_directory(instance.id, filename)
+
+
+class AntibodyFiles(models.Model):
+    id = models.AutoField(primary_key=True, unique=True, null=False)
+    antibody = models.ForeignKey(Antibody, on_delete=models.CASCADE, db_column='ab_ix')
+    type = models.CharField(max_length=ANTIBODY_FILE_TYPE_MAX_LEN)
+    file = models.FileField(upload_to=antibody_persistence_directory)
+    display_name = models.CharField(max_length=ANTIBODY_FILE_DISPLAY_NAME_MAX_LEN)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    uploader_uid = models.CharField(max_length=ANTIBODY_UID_MAX_LEN)
+    filehash = models.CharField(max_length=ANTIBODY_FILES_HASH_MAX_LEN)
+
+    def __str__(self):
+        return self.display_name
+
+    def save(self, *args, **kwargs):
+        if self.id is None:
+            tmp_file = self.file
+            self.file = None
+            super(AntibodyFiles, self).save(*args, **kwargs)
+            self.file = tmp_file
+        super(AntibodyFiles, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name_plural = "Antibody files"
 
 
 class AntibodySpecies(models.Model):
