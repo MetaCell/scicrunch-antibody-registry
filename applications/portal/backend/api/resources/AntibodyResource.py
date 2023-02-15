@@ -134,8 +134,8 @@ class AntibodyResource(ModelResource):
                 if not create_duplicate:
                     return (instance, False)
                 row[self.fields['accession'].column_name] = instance.ab_id
-                if self.fields['ab_id'].column_name in row:
-                    del row[self.fields['ab_id'].column_name]
+                # if self.fields['ab_id'].column_name in row:
+                #     del row[self.fields['ab_id'].column_name]
                 if self.fields['ix'].column_name in row:
                     del row[self.fields['ix'].column_name]
         instance = self.init_instance(row)
@@ -197,7 +197,11 @@ class AntibodyResource(ModelResource):
     def before_import_row(self, row, row_number=None, **kwargs):
         antibody_identifier = self.get_antibody_identifier(row)
         # modify empty strings to none on identifier columns
+        create_duplicate = self.request.session.get(FOR_EXTANT_KEY, UPDATE_KEY) == DUPLICATE_KEY
         for field in antibody_identifier.fields:
+            # Exceptionally on the create_duplicate option we retain the ab_id
+            if field.attribute == 'ab_id' and create_duplicate:
+                continue
             if field.column_name in row:
                 if row[field.column_name] == '':
                     row[field.column_name] = None
@@ -206,7 +210,7 @@ class AntibodyResource(ModelResource):
 
     def import_field(self, field, obj, data, is_m2m=False, **kwargs):
         is_fill = kwargs.get(METHOD_KEY, FILL_KEY) == FILL_KEY
-        if field.attribute and field.column_name in data:
+        if field.attribute and (field.column_name in data):
             # If we are only updating the filled columns and the column is empty we do nothing
             if is_fill and data[field.column_name] == '':
                 return

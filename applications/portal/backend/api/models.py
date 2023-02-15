@@ -257,8 +257,10 @@ class Antibody(models.Model):
         """
         Generates ab_id, accession and status for newly created instances
         """
-        self.ab_id = self._generate_ab_id()
-        self.accession = self.ab_id
+        if self.ab_id is None:
+            self.ab_id = self._generate_ab_id()
+        if self.accession is None:
+            self.accession = self.ab_id
         if self.status is None:
             self.status = STATUS.QUEUE
 
@@ -282,6 +284,7 @@ class Antibody(models.Model):
         duplicate = self.get_duplicate()
         if duplicate:
             self.ab_id = duplicate.ab_id
+            self.accession = self._generate_ab_id()
 
     def _generate_ab_id(self) -> int:
         return generate_id_aux(self.ix)
