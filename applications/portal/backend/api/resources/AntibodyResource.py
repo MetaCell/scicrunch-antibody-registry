@@ -13,7 +13,7 @@ from api.services.vendor_service import get_or_create_vendor
 from api.widgets.foreign_key_widget import ForeignKeyWidgetWithCreation
 from api.widgets.many_to_many_widget import ManyToManyWidgetWithCreation
 from portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY, FILL_KEY, UPDATE_KEY, \
-    DUPLICATE_KEY, KC_USER_ID_KEY, USER_KEY
+    DUPLICATE_KEY, KC_USER_ID_KEY, USER_KEY, REMOVE_KEYWORD
 
 
 class AntibodyIdentifier:
@@ -211,8 +211,11 @@ class AntibodyResource(ModelResource):
     def import_field(self, field, obj, data, is_m2m=False, **kwargs):
         is_fill = kwargs.get(METHOD_KEY, FILL_KEY) == FILL_KEY
         if field.attribute and (field.column_name in data):
-            # If we are only updating the filled columns and the column is empty we do nothing
-            if is_fill and data[field.column_name] == '':
-                return
+            if is_fill:
+                # If we are only updating the filled columns and the column is empty we do nothing
+                if data[field.column_name] == '':
+                    return
+                if data[field.column_name] == REMOVE_KEYWORD:
+                    data[field.column_name] = None
             # Otherwise we save the field
             field.save(obj, data, is_m2m, **kwargs)

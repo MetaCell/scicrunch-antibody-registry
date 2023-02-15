@@ -264,4 +264,4 @@ ID_KEY = 'id'
 IX_KEY = 'ix'
 KC_USER_ID_KEY = 'keycloak_user'
 USER_KEY = 'user'
-
+REMOVE_KEYWORD = 'remove'
