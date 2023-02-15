@@ -61,7 +61,7 @@ class AntibodyResource(ModelResource):
         widget=ForeignKeyWidgetWithCreation(model=Specie, field='name',
                                             get_or_create=lambda **kwargs: get_or_create_specie(**kwargs)[0])
     )
-    clone_id = Field(attribute='clone_id', column_name='clone')
+    clone_id = Field(attribute='clone_id', column_name='CLONE')
     product_isotype = Field(attribute='product_isotype', column_name='ISOTYPE')
     product_conjugate = Field(
         attribute='product_conjugate', column_name='CONJUGATE')
