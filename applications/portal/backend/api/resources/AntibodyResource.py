@@ -4,15 +4,16 @@ from import_export.fields import Field
 from import_export.instance_loaders import ModelInstanceLoader
 from import_export.resources import ModelResource
 
-from api.models import Antibody, Vendor, Antigen, Specie
+from api.models import Antibody, Vendor, Antigen, Specie, STATUS
 from api.services.gene_service import get_or_create_gene
 from api.services.import_antbody_service import filter_dataset_c1, filter_dataset_c2, get_antibody_q1, get_antibody_q2
+from api.services.keycloak_service import KeycloakService
 from api.services.specie_service import get_or_create_specie
 from api.services.vendor_service import get_or_create_vendor
 from api.widgets.foreign_key_widget import ForeignKeyWidgetWithCreation
 from api.widgets.many_to_many_widget import ManyToManyWidgetWithCreation
 from portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY, FILL_KEY, UPDATE_KEY, \
-    DUPLICATE_KEY
+    DUPLICATE_KEY, KC_USER_ID_KEY, USER_KEY, REMOVE_KEYWORD
 
 
 class AntibodyIdentifier:
@@ -37,7 +38,7 @@ class AntibodyResource(ModelResource):
         widget=ForeignKeyWidgetWithCreation(model=Vendor, field='name',
                                             get_or_create=lambda **kwargs: get_or_create_vendor(**kwargs)[0])
     )
-    catalog_num = Field(attribute='catalog_num', column_name='base cat')
+    catalog_num = Field(attribute='catalog_num', column_name='CAT NUM')
     url = Field(attribute='url', column_name='URL')
     target = Field(
         column_name='TARGET',
@@ -60,7 +61,7 @@ class AntibodyResource(ModelResource):
         widget=ForeignKeyWidgetWithCreation(model=Specie, field='name',
                                             get_or_create=lambda **kwargs: get_or_create_specie(**kwargs)[0])
     )
-    clone_id = Field(attribute='clone_id', column_name='clone')
+    clone_id = Field(attribute='clone_id', column_name='CLONE')
     product_isotype = Field(attribute='product_isotype', column_name='ISOTYPE')
     product_conjugate = Field(
         attribute='product_conjugate', column_name='CONJUGATE')
@@ -69,10 +70,11 @@ class AntibodyResource(ModelResource):
     defining_citation = Field(
         attribute='defining_citation', column_name='CITATION')
     subregion = Field(attribute='subregion', column_name='SUBREGION')
-    modifications = Field(attribute='modifications',
-                          column_name='MODIFICATION')
+    modifications = Field(attribute='modifications', column_name='MODIFICATION')
+    gene_id = Field(attribute='antigen__entrez_id', column_name='GeneID')
     disc_date = Field(attribute='disc_date', column_name='DISC')
     commercial_type = Field(attribute='commercial_type', column_name='TYPE')
+    uniprot = Field(attribute='antigen__uniprot_id', column_name='UNIPROT')
     epitope = Field(attribute='epitope', column_name='EPITOPE')
     cat_alt = Field(attribute='cat_alt', column_name='CAT ALT')
     ab_id = Field(attribute='ab_id', column_name='id')
@@ -86,7 +88,7 @@ class AntibodyResource(ModelResource):
             AntibodyIdentifier(
                 [self.fields['ab_id'], self.fields['ix'], self.fields['accession']],
                 lambda row: self.fields['ab_id'].column_name in row and (
-                    self.fields['ix'].column_name in row or self.fields['accession'].column_name in row),
+                        self.fields['ix'].column_name in row or self.fields['accession'].column_name in row),
                 lambda dataset: get_antibody_q1(dataset, self.fields['ab_id'],
                                                 [self.fields['ix'], self.fields['accession']]),
                 lambda dataset, negate, antibodies: filter_dataset_c1(dataset, negate, antibodies, self.fields['ab_id'],
@@ -102,6 +104,7 @@ class AntibodyResource(ModelResource):
                                                                       self.fields['vendor'])
             )
         ]
+        self.keycloak_service = KeycloakService()
         self.request = request
 
     class Meta:
@@ -109,7 +112,7 @@ class AntibodyResource(ModelResource):
         fields = (
             'name', 'vendor', 'catalog_num', 'url', 'target', 'species', 'clonality', 'host', 'clone_id',
             'product_isotype', 'product_conjugate', 'product_form', 'comments', 'defining_citation', 'subregion',
-            'modifications', 'gid', 'disc_date', 'commercial_type', 'uniprot', 'epitope', 'cat_alt', 'ab_id',
+            'modifications', 'gene_id', 'disc_date', 'commercial_type', 'epitope', 'cat_alt', 'ab_id',
             'accession', 'ix')
         instance_loader_class = AntibodyInstanceLoaderClass
 
@@ -132,11 +135,15 @@ class AntibodyResource(ModelResource):
                 if not create_duplicate:
                     return (instance, False)
                 row[self.fields['accession'].column_name] = instance.ab_id
-                if self.fields['ab_id'].column_name in row:
-                    del row[self.fields['ab_id'].column_name]
+                # if self.fields['ab_id'].column_name in row:
+                #     del row[self.fields['ab_id'].column_name]
                 if self.fields['ix'].column_name in row:
                     del row[self.fields['ix'].column_name]
-        return (self.init_instance(row), True)
+        instance = self.init_instance(row)
+        instance.status = STATUS.CURATED
+        if 'uid' in row:
+            instance.uid = row['uid']
+        return instance, True
 
     def get_instance(self, instance_loader, row):
         antibody_identifier = self.get_antibody_identifier(row)
@@ -148,11 +155,14 @@ class AntibodyResource(ModelResource):
         # the Confirm Import Form using django sessions based on:
         # https://stackoverflow.com/questions/52335510/extend-django-import-exports-import-form-to-specify-fixed-value-for-each-import
 
-        # if we are in the confirmation import request we read the values from session and reset the session after
+        # if we are in the confirmation import request we read the values from session
+        # and get the keycloak user id from the keycloak_service
         if kwargs[FOR_NEW_KEY] is None:
             kwargs[FOR_NEW_KEY] = self.request.session[FOR_NEW_KEY]
             kwargs[FOR_EXTANT_KEY] = self.request.session[FOR_EXTANT_KEY]
             kwargs[METHOD_KEY] = self.request.session[METHOD_KEY]
+
+            kwargs[KC_USER_ID_KEY] = self.keycloak_service.get_user_id_from_django_user(kwargs[USER_KEY])
 
         else:  # if we are in the import form request we set the values in session using the request values
             self.request.session[FOR_NEW_KEY] = kwargs[FOR_NEW_KEY]
@@ -188,16 +198,25 @@ class AntibodyResource(ModelResource):
     def before_import_row(self, row, row_number=None, **kwargs):
         antibody_identifier = self.get_antibody_identifier(row)
         # modify empty strings to none on identifier columns
+        create_duplicate = self.request.session.get(FOR_EXTANT_KEY, UPDATE_KEY) == DUPLICATE_KEY
         for field in antibody_identifier.fields:
+            # Exceptionally on the create_duplicate option we retain the ab_id
+            if field.attribute == 'ab_id' and create_duplicate:
+                continue
             if field.column_name in row:
                 if row[field.column_name] == '':
                     row[field.column_name] = None
+        if KC_USER_ID_KEY in kwargs:
+            row['uid'] = kwargs[KC_USER_ID_KEY]
 
     def import_field(self, field, obj, data, is_m2m=False, **kwargs):
         is_fill = kwargs.get(METHOD_KEY, FILL_KEY) == FILL_KEY
-        if field.attribute and field.column_name in data:
-            # If we are only updating the filled columns and the column is empty we do nothing
-            if is_fill and data[field.column_name] == '':
-                return
+        if field.attribute and (field.column_name in data):
+            if is_fill:
+                # If we are only updating the filled columns and the column is empty we do nothing
+                if data[field.column_name] == '':
+                    return
+                if data[field.column_name] == REMOVE_KEYWORD:
+                    data[field.column_name] = None
             # Otherwise we save the field
             field.save(obj, data, is_m2m, **kwargs)
