@@ -10,3 +10,4 @@ skaffold.yaml
 /build
 /deployment/helm/*
 .overrides
+.hypothesis
