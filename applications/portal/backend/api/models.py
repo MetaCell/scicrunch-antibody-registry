@@ -164,7 +164,7 @@ class Antigen(models.Model):
 class Antibody(models.Model):
     ix = models.AutoField(primary_key=True, unique=True, null=False)
     ab_name = models.CharField(
-        max_length=ANTIBODY_NAME_MAX_LEN, null=True, db_index=True)
+        max_length=ANTIBODY_NAME_MAX_LEN, null=True, db_index=True, blank=True)
     ab_id = models.CharField(
         max_length=ANTIBODY_ID_MAX_LEN, null=True, db_index=True)
     accession = models.CharField(
@@ -173,7 +173,8 @@ class Antibody(models.Model):
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
         choices=CommercialType.choices,
         default=CommercialType.OTHER,
-        null=True
+        null=True,
+        blank=True
     )
     # This user id maps the users in keycloak
     uid = models.CharField(
@@ -181,7 +182,7 @@ class Antibody(models.Model):
     # Maps to old users -- used only for migration purpose
     uid_legacy = models.IntegerField(null=True, blank=True)
     catalog_num = models.CharField(
-        max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True)
+        max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True, blank=True)
     cat_alt = models.CharField(
         max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True, db_index=True, blank=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True)
@@ -189,7 +190,7 @@ class Antibody(models.Model):
     url = models.URLField(max_length=URL_MAX_LEN,
                           null=True, db_index=True, blank=True)
     antigen = models.ForeignKey(
-        Antigen, on_delete=models.SET_NULL, db_column='antigen_id', null=True)
+        Antigen, on_delete=models.SET_NULL, db_column='antigen_id', null=True, blank=True)
     target_species_raw = models.CharField(
         max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True, verbose_name="Target species (csv)",
         help_text="Comma separated value for target species. Values filled here will be parsed and assigned to the 'Target species' field.")
@@ -260,9 +261,9 @@ class Antibody(models.Model):
         """
         Generates ab_id, accession and status for newly created instances
         """
-        if self.ab_id is None:
+        if not self.ab_id:
             self.ab_id = self._generate_ab_id()
-        if self.accession is None:
+        if not self.accession:
             self.accession = self.ab_id
         if self.status is None:
             self.status = STATUS.QUEUE
