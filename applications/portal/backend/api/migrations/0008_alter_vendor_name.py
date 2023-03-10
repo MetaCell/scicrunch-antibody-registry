@@ -10,11 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name="vendor",
-            name="name",
-            field=models.CharField(
-                db_column="vendor", db_index=True, max_length=512, unique=True
-            ),
-        ),
+    
     ]
