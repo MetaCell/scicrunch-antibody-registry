@@ -226,13 +226,16 @@ class NonCuratedDomains(admin.SimpleListFilter):
         return (
             ("Non-curated", ("Vendors with non-curated domains")),
             ("Curated", ("Vendors with curated domains")),
+            ("No-domain", ("Vendors with no domains")),
         )
 
     def queryset(self, request, queryset):
         if self.value() == "Non-curated":
-            return queryset.filter(~Q(vendordomain__status=STATUS.CURATED))
+            return queryset.exclude(vendordomain__status=STATUS.CURATED).exclude(vendordomain__base_url__isnull=True)
         if self.value() == "Curated":
             return queryset.filter(vendordomain__status=STATUS.CURATED)
+        if self.value() == "No-domain":
+            return queryset.filter(vendordomain__base_url__isnull=True)
 
 
 class VendorSynonymInline(admin.TabularInline):
@@ -263,9 +266,9 @@ class VendorDomainAdmin(admin.ModelAdmin):
 @admin.register(Vendor)
 class VendorAdmin(admin.ModelAdmin):
     delete_confirmation_template = "admin/vendor/delete_confirmation.html"
-    # list_filter = ("vendordomain__status",)
-    list_filter = (NonCuratedDomains,)
     search_fields = ("name",)
+    list_display=("name", "commercial_type", "nif_id", "eu_id")
+    list_filter = (NonCuratedDomains, "commercial_type",)
     fields = (
         "nb_antibodies",
         "recent_antibodies",
