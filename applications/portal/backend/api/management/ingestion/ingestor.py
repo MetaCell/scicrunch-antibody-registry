@@ -297,9 +297,9 @@ class Ingestor:
         # insert antibody files
         antibody_files_params = []
         for index, row in df_antibody_files.iterrows():
-            uploader_id = users_map.get(row['uploader_id'], None)
+            uploader_id = users_map.get(row['uploader_uid'], None)
             if not uploader_id:
-                logging.warning(f"No user found for uploader_id: {row['uploader_id']}")
+                logging.warning(f"No user found for uploader_uid: {row['uploader_uid']}")
                 continue
             antibody_files_params.extend(
                 [row['id'], row['ab_ix'], row['type'], row['filename'], row['displayname'], row['timestamp'],
