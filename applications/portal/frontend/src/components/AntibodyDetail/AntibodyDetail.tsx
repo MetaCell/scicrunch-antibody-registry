@@ -184,7 +184,7 @@ export const AntibodyDetail = () => {
                 <Grid item xs={3}>
                   <Typography variant="h4">Target antigen</Typography>
                   <Typography variant="subtitle2">
-                    {antibody.abTarget} {antibody.targetSpecies}
+                    {antibody.abTarget} - {antibody.targetSpecies.join(", ")}
                   </Typography>
                 </Grid>
                 
