@@ -105,7 +105,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     list_filter = ("status",)
     inlines = [TargetSpeciesInlineAdmin, AntibodyFilesAdmin]
 
-    list_display = (id_with_ab, "ab_name", "submitter_name", "status")
+    list_display = (id_with_ab, "ab_name", "submitter_name", "status", "vendor", "catalog_num", "accession")
     search_fields = ("ab_id", "ab_name", "catalog_num")
     readonly_fields = (
         "submitter_name",
@@ -132,7 +132,6 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
             return "Unknown"
         try:
             submitter = self.get_user(user_id=obj.uid)
-            submitter = self.keycloak_admin.get_user(user_id=obj.uid)
             return f"{submitter.get('firstName', '')} {submitter.get('lastName', '')} ({submitter['username']})"
         except KeycloakGetError:
             log.error(f"User {obj.uid} lookup error", exc_info=True)
