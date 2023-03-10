@@ -85,13 +85,25 @@ class TargetSpeciesInlineAdmin(admin.TabularInline):
     verbose_name = "Target Specie"
 
 
+class AntibodyFilesAdmin(admin.TabularInline):
+    model = AntibodyFiles
+    exclude = ("uploader_uid", 'filehash', 'timestamp')
+
+    def save_model(self, request, obj, form, change):
+        keycloak_service = KeycloakService()
+        uid = keycloak_service.get_user_id_from_django_user(request.user)
+        if not uid:
+            raise Exception("User not found")
+        obj.uploader_uid = uid
+        super().save_model(request, obj, form, change)
+
 @admin.register(Antibody)
 class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     import_template_name = "admin/import_export/custom_import_form.html"
     import_form_class = AntibodyImportForm
     resource_classes = [AntibodyResource]
     list_filter = ("status",)
-    inlines = [TargetSpeciesInlineAdmin]
+    inlines = [TargetSpeciesInlineAdmin, AntibodyFilesAdmin]
 
     list_display = (id_with_ab, "ab_name", "submitter_name", "status")
     search_fields = ("ab_id", "ab_name", "catalog_num")
@@ -345,14 +357,4 @@ class VendorAdmin(admin.ModelAdmin):
         return super().get_deleted_objects(objs, request)
 
 
-@admin.register(AntibodyFiles)
-class AntibodyFilesAdmin(admin.ModelAdmin):
-    exclude = ("uploader_uid", 'filehash', 'timestamp')
 
-    def save_model(self, request, obj, form, change):
-        keycloak_service = KeycloakService()
-        uid = keycloak_service.get_user_id_from_django_user(request.user)
-        if not uid:
-            raise Exception("User not found")
-        obj.uploader_uid = uid
-        super().save_model(request, obj, form, change)

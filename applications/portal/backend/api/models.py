@@ -185,6 +185,7 @@ class Antibody(models.Model):
     cat_alt = models.CharField(
         max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True, db_index=True, blank=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True)
+    
     url = models.URLField(max_length=URL_MAX_LEN,
                           null=True, db_index=True, blank=True)
     antigen = models.ForeignKey(
