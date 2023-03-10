@@ -79,7 +79,7 @@ class STATUS(models.TextChoices):
 
 class Vendor(models.Model):
     name = models.CharField(max_length=VENDOR_MAX_LEN,
-                            db_column='vendor', db_index=True, unique=True)
+                            db_column='vendor', db_index=True)
     nif_id = models.CharField(
         max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id', null=True, blank=True)
     eu_id = models.CharField(
@@ -96,6 +96,7 @@ class Vendor(models.Model):
             GinIndex(SearchVector('name', config='english'),
                      name='vendor_name_fts_idx'),
         ]
+        ordering = ('name', )
 
     def __str__(self):
         return self.name
