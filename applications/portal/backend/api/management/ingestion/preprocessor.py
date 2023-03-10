@@ -133,7 +133,8 @@ def update_antibody_files(csv_path: str):
     df_antibody_files['filename'] = df_antibody_files.apply(
         lambda row: get_antibody_persistence_directory(row['id'], row['filename']), axis=1)
     df_antibody_files['timestamp'] = df_antibody_files.apply(
-        lambda row: datetime.utcfromtimestamp(row['timestamp']), axis=1)
+        lambda row: datetime.utcfromtimestamp(row['timestamp']) if type(row['timestamp']) is int else
+        row['timestamp'], axis=1)
     df_antibody_files.to_csv(csv_path, index=False, mode='w+')
 
 
