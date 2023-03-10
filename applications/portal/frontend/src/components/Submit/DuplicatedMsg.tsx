@@ -58,7 +58,7 @@ const DuplicatedMsg = (props) => {
             English
           </Typography>
         </Divider>
-        <Typography variant="subtitle1" align="center" sx={classes.message}>
+        <Typography variant="subtitle1" component="p" align="center" sx={classes.message}>
           The Antibody you Entered is a Duplicate, which will be Rejected. We
           have found that the antibody you entered already exists in our system.
           The ID associated with the antibody is 

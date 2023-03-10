@@ -97,6 +97,7 @@ export const AntibodyDetail = () => {
   const { antibody_id } = useParams();
   const abId = antibody_id.slice(3);
   const [antibodies, setAntibodies] = useState<Antibody[]>(null);
+  const [error, setError] = useState<string>(null);
   const accession = document.location.hash ? document.location.hash.split("#")[1]: abId;
 
   const antibody = antibodies && (antibodies.find(a => a.accession === accession) || antibodies[0]);
@@ -118,13 +119,23 @@ export const AntibodyDetail = () => {
   const fetchAntibody = (id) => {
     getAntibody(id)
       .then((res) => {
+        if(res.length === 0){
+          setError("There is currently no public record with this antibody RRID. This is likely due to this record not yet being curated. Please contact the antibody registry curation team if this antibody is needed for your manuscript. abr-help -at- scicrunch -dot- org")
+        }
         return setAntibodies(res);
+      },
+      () => {
+        setError("An unexpected error occurred. Please try again later.")
       })
-      .catch((err) => alert(err));
   };
 
   
   useEffect(() => fetchAntibody(abId), []);
+  if(error) {
+    return (
+      <Alert sx={{ m: 7 }} severity="error">{error}</Alert>
+    )
+  }
   if (!antibody) {
     return (
       <Backdrop open={true} sx={{ zIndex: 1000 }}
