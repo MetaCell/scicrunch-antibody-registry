@@ -189,7 +189,8 @@ class Antibody(models.Model):
     antigen = models.ForeignKey(
         Antigen, on_delete=models.SET_NULL, db_column='antigen_id', null=True)
     target_species_raw = models.CharField(
-        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True, verbose_name="Target species (csv)", help_text="Comma separated value for target species. Values filled here will be parsed and assigned to the 'Target species' field.")
+        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True, verbose_name="Target species (csv)",
+        help_text="Comma separated value for target species. Values filled here will be parsed and assigned to the 'Target species' field.")
 
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
                                      through='AntibodySpecies', blank=True, verbose_name="Target species")
@@ -239,11 +240,10 @@ class Antibody(models.Model):
         auto_now=True, db_index=True, null=True)
     curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
 
-    def save(self, *args,  **kwargs):
+    def save(self, *args, **kwargs):
         first_save = self.ix is None
-        self._handle_status_changes()
+        self._handle_status_changes(first_save)
         super(Antibody, self).save(*args, **kwargs)
-        
 
         self._handle_duplicates(*args, **kwargs)
         self._generate_related_fields(*args, **kwargs)
@@ -258,18 +258,25 @@ class Antibody(models.Model):
         """
         Generates ab_id, accession and status for newly created instances
         """
-        self.ab_id = self._generate_ab_id()
-        self.accession = self.ab_id
-        self.status = STATUS.QUEUE
+        if self.ab_id is None:
+            self.ab_id = self._generate_ab_id()
+        if self.accession is None:
+            self.accession = self.ab_id
+        if self.status is None:
+            self.status = STATUS.QUEUE
 
-    def _handle_status_changes(self):
+    def _handle_status_changes(self, first_save=False):
         """
         Updates curate_time on status changes to CURATED
         """
+
         if self.status == STATUS.CURATED:
-            old_version = Antibody.objects.get(ix=self.ix)
-            if old_version.status != STATUS.CURATED:
+            if first_save:
                 self.curate_time = timezone.now()
+            else:
+                old_version = Antibody.objects.get(ix=self.ix)
+                if old_version.status != STATUS.CURATED:
+                    self.curate_time = timezone.now()
 
     def _handle_duplicates(self, *args, **kwargs):
         """
@@ -278,6 +285,7 @@ class Antibody(models.Model):
         duplicate = self.get_duplicate()
         if duplicate:
             self.ab_id = duplicate.ab_id
+            self.accession = self._generate_ab_id()
 
     def _generate_ab_id(self) -> int:
         return generate_id_aux(self.ix)
@@ -333,7 +341,7 @@ class Antibody(models.Model):
             if base_url:
                 self.add_vendor_domain(base_url, vendor)
         except Vendor.DoesNotExist:
-            
+
             try:
                 vd = VendorDomain.objects.get(base_url=base_url)
                 self.vendor = vd.vendor
@@ -342,7 +350,7 @@ class Antibody(models.Model):
             except VendorDomain.DoesNotExist:
                 vendor_name = name or base_url
                 log.info("Creating new Vendor `%s` on domain  to `%s`",
-                        vendor_name, base_url)
+                         vendor_name, base_url)
                 vendor = Vendor(name=vendor_name)
                 vendor.save()
                 self.vendor = vendor
@@ -354,7 +362,7 @@ class Antibody(models.Model):
             VendorDomain.objects.get(base_url=base_url)
         except VendorDomain.DoesNotExist:
             vd = VendorDomain(vendor=vendor,
-                                        base_url=base_url, status=STATUS.QUEUE)
+                              base_url=base_url, status=STATUS.QUEUE)
             vd.save()
 
     def _generate_related_fields(self, *args, **kwargs):
@@ -366,7 +374,6 @@ class Antibody(models.Model):
                 self.set_vendor_from_name_url(url=self.url)
             else:
                 self.add_vendor_domain(extract_base_url(self.url), self.vendor)
-            
 
     def __str__(self):
         return 'AB_' + str(self.ab_id)
@@ -390,8 +397,8 @@ class Antibody(models.Model):
 
             Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma',
                                                                                       Value(''))) - (
-                100 + Length(Coalesce('disc_date', Value(''))))).desc(),
-                name='antibody_nb_citations_idx2'),
+                           100 + Length(Coalesce('disc_date', Value(''))))).desc(),
+                  name='antibody_nb_citations_idx2'),
 
             Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
 
