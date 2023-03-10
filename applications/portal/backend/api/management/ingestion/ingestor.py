@@ -290,21 +290,24 @@ class Ingestor:
     def _insert_antibody_files(self, users_map):
         # Prepare antibody files insert
         df_antibody_files = pd.read_csv(self.metadata.antibody_files_path)
-        antibody_files_insert_stm = get_insert_values_into_table_stm(self.ANTIBODY_FILES_TABLE,
-                                                                     ['id', 'ab_ix', 'type', 'file', 'display_name',
-                                                                      'timestamp', 'uploader_uid', 'filehash'],
-                                                                     len(df_antibody_files))
+
         # insert antibody files
         antibody_files_params = []
+        count = 0
         for index, row in df_antibody_files.iterrows():
-            uploader_id = users_map.get(row['uploader_id'], None)
+            uploader_id = users_map.get(row['uploader_uid'], None)
             if not uploader_id:
-                logging.warning(f"No user found for uploader_id: {row['uploader_id']}")
+                logging.warning(f"No user found for uploader_uid: {row['uploader_uid']}")
                 continue
+            count += 1
             antibody_files_params.extend(
                 [row['id'], row['ab_ix'], row['type'], row['filename'], row['displayname'], row['timestamp'],
                  uploader_id, row['filehash']]
             )
+        antibody_files_insert_stm = get_insert_values_into_table_stm(self.ANTIBODY_FILES_TABLE,
+                                                                     ['id', 'ab_ix', 'type', 'file', 'display_name',
+                                                                      'timestamp', 'uploader_uid', 'filehash'],
+                                                                     count)
         self.cursor.execute(antibody_files_insert_stm, antibody_files_params)
 
     @timed_class_method('Sequence tables updated')
