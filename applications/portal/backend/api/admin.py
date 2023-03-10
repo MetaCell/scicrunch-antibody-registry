@@ -1,18 +1,15 @@
-from functools import cache, cached_property
+from functools import cache
+
 from django.contrib import admin
-from django.forms import ModelForm
 from django.contrib.admin.widgets import ManyToManyRawIdWidget, FilteredSelectMultiple
 from django.db.models import Q
 from django.db.models.functions import Length
+from django.urls import reverse
 from django.utils.encoding import smart_str
 from django.utils.html import escape, format_html, format_html_join, mark_safe
 from django.utils.text import format_lazy
-from django.urls import reverse
 from import_export.admin import ImportMixin
-
 from keycloak.exceptions import KeycloakGetError
-
-from cloudharness import log
 
 from api.forms.AntibodyImportForm import AntibodyImportForm
 from api.models import (
@@ -23,9 +20,11 @@ from api.models import (
     Vendor,
     Specie,
     VendorDomain,
-    VendorSynonym,
+    VendorSynonym, AntibodyFiles,
 )
 from api.resources.AntibodyResource import AntibodyResource
+from api.services.keycloak_service import KeycloakService
+from cloudharness import log
 from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 
 admin.site.site_header = 'Antibody Registry admin'
@@ -72,17 +71,19 @@ class VerboseManyToManyRawIdWidget(ManyToManyRawIdWidget):
     def format_value(self, value):
         return ",".join(str(v) for v in value) if value else ""
 
+
 class ApplicationsInlineAdmin(admin.TabularInline):
     model = Antibody.applications.through
     extra = 1
+
 
 class TargetSpeciesInlineAdmin(admin.TabularInline):
     model = Antibody.species.through
     extra = 1
     autocomplete_fields = ("specie",)
-    classes=("collapse",)
-    verbose_name="Target Specie"
-    
+    classes = ("collapse",)
+    verbose_name = "Target Specie"
+
 
 @admin.register(Antibody)
 class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
@@ -91,7 +92,6 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     resource_classes = [AntibodyResource]
     list_filter = ("status",)
     inlines = [TargetSpeciesInlineAdmin]
-    
 
     list_display = (id_with_ab, "ab_name", "submitter_name", "status")
     search_fields = ("ab_id", "ab_name", "catalog_num")
@@ -104,7 +104,6 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         "curate_time",
     )
     autocomplete_fields = ("vendor", "antigen", "source_organism")
-
 
     @property
     def keycloak_admin(self):
@@ -168,7 +167,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
             return super().formfield_for_manytomany(db_field, request, **kwargs)
         if db_field.name == "applications":
             kwargs["widget"] = FilteredSelectMultiple(
-                db_field.verbose_name, is_stacked=False, 
+                db_field.verbose_name, is_stacked=False,
             )
             if "queryset" not in kwargs:
                 queryset = db_field.related_model.objects.all()
@@ -346,4 +345,14 @@ class VendorAdmin(admin.ModelAdmin):
         return super().get_deleted_objects(objs, request)
 
 
-# admin.site.register(VendorSynonym)
+@admin.register(AntibodyFiles)
+class AntibodyFilesAdmin(admin.ModelAdmin):
+    exclude = ("uploader_uid", 'filehash', 'timestamp')
+
+    def save_model(self, request, obj, form, change):
+        keycloak_service = KeycloakService()
+        uid = keycloak_service.get_user_id_from_django_user(request.user)
+        if not uid:
+            raise Exception("User not found")
+        obj.uploader_uid = uid
+        super().save_model(request, obj, form, change)
