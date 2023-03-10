@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from api.utilities.functions import generate_id_aux, extract_base_url, get_antibody_persistence_directory
 from cloudharness import log
+from api.services.user_service import UnrecognizedUser, get_current_user_id
 from portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
     ANTIBODY_CLONE_ID_MAX_LEN, ANTIGEN_ENTREZ_ID_MAX_LEN, ANTIGEN_UNIPROT_ID_MAX_LEN, STATUS_MAX_LEN, \
@@ -185,7 +186,7 @@ class Antibody(models.Model):
         max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True, blank=True)
     cat_alt = models.CharField(
         max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True, db_index=True, blank=True)
-    vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True)
+    vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True, blank=True)
     
     url = models.URLField(max_length=URL_MAX_LEN,
                           null=True, db_index=True, blank=True)
@@ -267,6 +268,11 @@ class Antibody(models.Model):
             self.accession = self.ab_id
         if self.status is None:
             self.status = STATUS.QUEUE
+        if not self.uid:
+            try:
+                self.uid = get_current_user_id()
+            except UnrecognizedUser:
+                log.exception("Could not set user")
 
     def _handle_status_changes(self, first_save=False):
         """

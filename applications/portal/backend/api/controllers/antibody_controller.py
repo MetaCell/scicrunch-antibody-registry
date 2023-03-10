@@ -1,14 +1,15 @@
 from typing import List, Union
 from api.models import Antibody
+from api.services.user_service import UnrecognizedUser, get_current_user_id
 
-import jwt
+
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from api.services import antibody_service
 from api.utilities.exceptions import AntibodyDataException
-from cloudharness.middleware import get_authentication_token
+
 from openapi.models import AddAntibody as AddAntibodyDTO, PaginatedAntibodies
 from openapi.models import UpdateAntibody as UpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO
@@ -19,15 +20,14 @@ def get_antibodies(page: int = 0, size: int = 50) -> PaginatedAntibodies:
 
 
 def get_user_id() -> str:
-    token = get_authentication_token()
     try:
-        return jwt.decode(token, options={"verify_signature": False}, algorithms='RS256')['sub']
-    except Exception as e:
+        return get_current_user_id()
+    except UnrecognizedUser:
         raise HTTPException(status_code=401, detail="Unrecognized user")
 
 
 def get_user_antibodies(page: int = 1, size: int = 50) -> PaginatedAntibodies:
-    return antibody_service.get_user_antibodies(get_user_id(), page, size)
+    return antibody_service.get_user_antibodies(get_current_user_id(), page, size)
 
 
 def create_antibody(body: AddAntibodyDTO) -> Union[AntibodyDTO, JSONResponse]:
