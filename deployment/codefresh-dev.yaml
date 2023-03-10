@@ -33,8 +33,10 @@ steps:
     working_directory: .
     commands:
     - bash cloud-harness/install.sh
-    - harness-deployment cloud-harness . -t ${{CF_BUILD_ID}} -d ${{DOMAIN}} -r ${{REGISTRY}}
-      -rs ${{REGISTRY_SECRET}} -n ${{NAMESPACE}} -e dev -i portal
+    - harness-deployment cloud-harness . -d ${{DOMAIN}} -r ${{REGISTRY}} -rs ${{REGISTRY_SECRET}}
+      -n ${{NAMESPACE}} --write-env -e dev -i portal
+    - cat deployment/.env >> ${{CF_VOLUME_PATH}}/env_vars_to_export
+    - cat ${{CF_VOLUME_PATH}}/env_vars_to_export
   prepare_deployment_view:
     commands:
     - helm template ./deployment/helm --debug -n ${{NAMESPACE}}
@@ -52,48 +54,66 @@ steps:
       cloudharness-base:
         type: build
         stage: build
-        tag: '${{CF_BUILD_ID}}'
         dockerfile: infrastructure/base-images/cloudharness-base/Dockerfile
         registry: '${{CODEFRESH_REGISTRY}}'
         buildkit: true
         build_arguments:
-        - TAG=${{CF_BUILD_ID}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
         image_name: areg/cloudharness-base
         title: Cloudharness base
         working_directory: ./cloud-harness
+        tag: '${{CLOUDHARNESS_BASE_TAG}}'
+        when:
+          condition:
+            any:
+              buildDoesNotExist: includes('${{CLOUDHARNESS_BASE_TAG_EXISTS}}', '{{CLOUDHARNESS_BASE_TAG_EXISTS}}')
+                == true
+              forceNoCache: includes('${{CLOUDHARNESS_BASE_TAG_FORCE_BUILD}}', '{{CLOUDHARNESS_BASE_TAG_FORCE_BUILD}}')
+                == false
       cloudharness-frontend-build:
         type: build
         stage: build
-        tag: '${{CF_BUILD_ID}}'
         dockerfile: infrastructure/base-images/cloudharness-frontend-build/Dockerfile
         registry: '${{CODEFRESH_REGISTRY}}'
         buildkit: true
         build_arguments:
-        - TAG=${{CF_BUILD_ID}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
         image_name: areg/cloudharness-frontend-build
         title: Cloudharness frontend build
         working_directory: ./cloud-harness
+        tag: '${{CLOUDHARNESS_FRONTEND_BUILD_TAG}}'
+        when:
+          condition:
+            any:
+              buildDoesNotExist: includes('${{CLOUDHARNESS_FRONTEND_BUILD_TAG_EXISTS}}',
+                '{{CLOUDHARNESS_FRONTEND_BUILD_TAG_EXISTS}}') == true
+              forceNoCache: includes('${{CLOUDHARNESS_FRONTEND_BUILD_TAG_FORCE_BUILD}}',
+                '{{CLOUDHARNESS_FRONTEND_BUILD_TAG_FORCE_BUILD}}') == false
       cloudharness-base-debian:
         type: build
         stage: build
-        tag: '${{CF_BUILD_ID}}'
         dockerfile: infrastructure/base-images/cloudharness-base-debian/Dockerfile
         registry: '${{CODEFRESH_REGISTRY}}'
         buildkit: true
         build_arguments:
-        - TAG=${{CF_BUILD_ID}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
         image_name: areg/cloudharness-base-debian
         title: Cloudharness base debian
         working_directory: ./cloud-harness
+        tag: '${{CLOUDHARNESS_BASE_DEBIAN_TAG}}'
+        when:
+          condition:
+            any:
+              buildDoesNotExist: includes('${{CLOUDHARNESS_BASE_DEBIAN_TAG_EXISTS}}',
+                '{{CLOUDHARNESS_BASE_DEBIAN_TAG_EXISTS}}') == true
+              forceNoCache: includes('${{CLOUDHARNESS_BASE_DEBIAN_TAG_FORCE_BUILD}}',
+                '{{CLOUDHARNESS_BASE_DEBIAN_TAG_FORCE_BUILD}}') == false
   build_static_images:
     title: Build static images
     type: parallel
@@ -102,35 +122,47 @@ steps:
       cloudharness-flask:
         type: build
         stage: build
-        tag: '${{CF_BUILD_ID}}'
         dockerfile: Dockerfile
         registry: '${{CODEFRESH_REGISTRY}}'
         buildkit: true
         build_arguments:
-        - TAG=${{CF_BUILD_ID}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
-        - CLOUDHARNESS_BASE=${{REGISTRY}}/areg/cloudharness-base:${{CF_BUILD_ID}}
+        - CLOUDHARNESS_BASE=${{REGISTRY}}/areg/cloudharness-base:${{CLOUDHARNESS_BASE_TAG}}
         image_name: areg/cloudharness-flask
         title: Cloudharness flask
         working_directory: ./cloud-harness/infrastructure/common-images/cloudharness-flask
+        tag: '${{CLOUDHARNESS_FLASK_TAG}}'
+        when:
+          condition:
+            any:
+              buildDoesNotExist: includes('${{CLOUDHARNESS_FLASK_TAG_EXISTS}}', '{{CLOUDHARNESS_FLASK_TAG_EXISTS}}')
+                == true
+              forceNoCache: includes('${{CLOUDHARNESS_FLASK_TAG_FORCE_BUILD}}', '{{CLOUDHARNESS_FLASK_TAG_FORCE_BUILD}}')
+                == false
       cloudharness-django:
         type: build
         stage: build
-        tag: '${{CF_BUILD_ID}}'
         dockerfile: Dockerfile
         registry: '${{CODEFRESH_REGISTRY}}'
         buildkit: true
         build_arguments:
-        - TAG=${{CF_BUILD_ID}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
-        - CLOUDHARNESS_BASE_DEBIAN=${{REGISTRY}}/areg/cloudharness-base-debian:${{CF_BUILD_ID}}
+        - CLOUDHARNESS_BASE_DEBIAN=${{REGISTRY}}/areg/cloudharness-base-debian:${{CLOUDHARNESS_BASE_DEBIAN_TAG}}
         image_name: areg/cloudharness-django
         title: Cloudharness django
         working_directory: ./cloud-harness/infrastructure/common-images/cloudharness-django
+        tag: '${{CLOUDHARNESS_DJANGO_TAG}}'
+        when:
+          condition:
+            any:
+              buildDoesNotExist: includes('${{CLOUDHARNESS_DJANGO_TAG_EXISTS}}', '{{CLOUDHARNESS_DJANGO_TAG_EXISTS}}')
+                == true
+              forceNoCache: includes('${{CLOUDHARNESS_DJANGO_TAG_FORCE_BUILD}}', '{{CLOUDHARNESS_DJANGO_TAG_FORCE_BUILD}}')
+                == false
   build_application_images:
     type: parallel
     stage: build
@@ -138,67 +170,91 @@ steps:
       accounts:
         type: build
         stage: build
-        tag: '${{CF_BUILD_ID}}'
         dockerfile: Dockerfile
         registry: '${{CODEFRESH_REGISTRY}}'
         buildkit: true
         build_arguments:
-        - TAG=${{CF_BUILD_ID}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
         image_name: areg/accounts
         title: Accounts
         working_directory: ./.overrides/applications/accounts
+        tag: '${{ACCOUNTS_TAG}}'
+        when:
+          condition:
+            any:
+              buildDoesNotExist: includes('${{ACCOUNTS_TAG_EXISTS}}', '{{ACCOUNTS_TAG_EXISTS}}')
+                == true
+              forceNoCache: includes('${{ACCOUNTS_TAG_FORCE_BUILD}}', '{{ACCOUNTS_TAG_FORCE_BUILD}}')
+                == false
       common:
         type: build
         stage: build
-        tag: '${{CF_BUILD_ID}}'
         dockerfile: Dockerfile
         registry: '${{CODEFRESH_REGISTRY}}'
         buildkit: true
         build_arguments:
-        - TAG=${{CF_BUILD_ID}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
-        - CLOUDHARNESS_FLASK=${{REGISTRY}}/areg/cloudharness-flask:${{CF_BUILD_ID}}
+        - CLOUDHARNESS_FLASK=${{REGISTRY}}/areg/cloudharness-flask:${{CLOUDHARNESS_FLASK_TAG}}
         image_name: areg/common
         title: Common
         working_directory: ./cloud-harness/applications/common/server
+        tag: '${{COMMON_TAG}}'
+        when:
+          condition:
+            any:
+              buildDoesNotExist: includes('${{COMMON_TAG_EXISTS}}', '{{COMMON_TAG_EXISTS}}')
+                == true
+              forceNoCache: includes('${{COMMON_TAG_FORCE_BUILD}}', '{{COMMON_TAG_FORCE_BUILD}}')
+                == false
       accounts-api:
         type: build
         stage: build
-        tag: '${{CF_BUILD_ID}}'
         dockerfile: Dockerfile
         registry: '${{CODEFRESH_REGISTRY}}'
         buildkit: true
         build_arguments:
-        - TAG=${{CF_BUILD_ID}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
-        - CLOUDHARNESS_FLASK=${{REGISTRY}}/areg/cloudharness-flask:${{CF_BUILD_ID}}
+        - CLOUDHARNESS_FLASK=${{REGISTRY}}/areg/cloudharness-flask:${{CLOUDHARNESS_FLASK_TAG}}
         image_name: areg/accounts-api
         title: Accounts api
         working_directory: ./applications/accounts-api
+        tag: '${{ACCOUNTS_API_TAG}}'
+        when:
+          condition:
+            any:
+              buildDoesNotExist: includes('${{ACCOUNTS_API_TAG_EXISTS}}', '{{ACCOUNTS_API_TAG_EXISTS}}')
+                == true
+              forceNoCache: includes('${{ACCOUNTS_API_TAG_FORCE_BUILD}}', '{{ACCOUNTS_API_TAG_FORCE_BUILD}}')
+                == false
       portal:
         type: build
         stage: build
-        tag: '${{CF_BUILD_ID}}'
         dockerfile: Dockerfile
         registry: '${{CODEFRESH_REGISTRY}}'
         buildkit: true
         build_arguments:
-        - TAG=${{CF_BUILD_ID}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
-        - CLOUDHARNESS_FRONTEND_BUILD=${{REGISTRY}}/areg/cloudharness-frontend-build:${{CF_BUILD_ID}}
-        - CLOUDHARNESS_DJANGO=${{REGISTRY}}/areg/cloudharness-django:${{CF_BUILD_ID}}
+        - CLOUDHARNESS_FRONTEND_BUILD=${{REGISTRY}}/areg/cloudharness-frontend-build:${{CLOUDHARNESS_FRONTEND_BUILD_TAG}}
+        - CLOUDHARNESS_DJANGO=${{REGISTRY}}/areg/cloudharness-django:${{CLOUDHARNESS_DJANGO_TAG}}
         image_name: areg/portal
         title: Portal
         working_directory: ./applications/portal
+        tag: '${{PORTAL_TAG}}'
+        when:
+          condition:
+            any:
+              buildDoesNotExist: includes('${{PORTAL_TAG_EXISTS}}', '{{PORTAL_TAG_EXISTS}}')
+                == true
+              forceNoCache: includes('${{PORTAL_TAG_FORCE_BUILD}}', '{{PORTAL_TAG_FORCE_BUILD}}')
+                == false
   deployment:
     stage: deploy
     type: helm
@@ -211,7 +267,7 @@ steps:
       kube_context: '${{CLUSTER_NAME}}'
       namespace: '${{NAMESPACE}}'
       chart_version: '${{CF_BUILD_ID}}'
-      cmd_ps: --wait --timeout 600s
+      cmd_ps: --wait --timeout 600s --create-namespace
       custom_value_files:
       - ./deployment/helm/values.yaml
       custom_values: []
@@ -223,19 +279,25 @@ steps:
       test-api:
         type: build
         stage: build
-        tag: '${{CF_BUILD_ID}}'
         dockerfile: test/test-api/Dockerfile
         registry: '${{CODEFRESH_REGISTRY}}'
         buildkit: true
         build_arguments:
-        - TAG=${{CF_BUILD_ID}}
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
-        - CLOUDHARNESS_BASE=${{REGISTRY}}/areg/cloudharness-base:${{CF_BUILD_ID}}
+        - CLOUDHARNESS_BASE=${{REGISTRY}}/areg/cloudharness-base:${{CLOUDHARNESS_BASE_TAG}}
         image_name: areg/test-api
         title: Test api
         working_directory: ./cloud-harness
+        tag: '${{TEST_API_TAG}}'
+        when:
+          condition:
+            any:
+              buildDoesNotExist: includes('${{TEST_API_TAG_EXISTS}}', '{{TEST_API_TAG_EXISTS}}')
+                == true
+              forceNoCache: includes('${{TEST_API_TAG_FORCE_BUILD}}', '{{TEST_API_TAG_FORCE_BUILD}}')
+                == false
     when:
       condition:
         all:
@@ -263,12 +325,13 @@ steps:
     stage: qa
     title: Api tests
     working_directory: /home/test
-    image: '${{test-api}}'
+    image: '${{REGISTRY}}/areg/test-api:${{TEST_API_TAG}}'
     fail_fast: false
     commands:
     - echo $APP_NAME
     scale:
       common_api_test:
+        title: common api test
         volumes:
         - '${{CF_REPO_NAME}}/cloud-harness/applications/common:/home/test'
         - '${{CF_REPO_NAME}}/deployment/helm/values.yaml:/opt/cloudharness/resources/allvalues.yaml'
@@ -297,7 +360,7 @@ steps:
         stage: publish
         type: push
         title: Cloudharness base
-        candidate: '${{REGISTRY}}/areg/cloudharness-base:${{CF_BUILD_ID}}'
+        candidate: '${{REGISTRY}}/areg/cloudharness-base:${{${{CLOUDHARNESS_BASE_TAG}}}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -305,7 +368,7 @@ steps:
         stage: publish
         type: push
         title: Cloudharness frontend build
-        candidate: '${{REGISTRY}}/areg/cloudharness-frontend-build:${{CF_BUILD_ID}}'
+        candidate: '${{REGISTRY}}/areg/cloudharness-frontend-build:${{${{CLOUDHARNESS_FRONTEND_BUILD_TAG}}}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -313,7 +376,7 @@ steps:
         stage: publish
         type: push
         title: Cloudharness base debian
-        candidate: '${{REGISTRY}}/areg/cloudharness-base-debian:${{CF_BUILD_ID}}'
+        candidate: '${{REGISTRY}}/areg/cloudharness-base-debian:${{${{CLOUDHARNESS_BASE_DEBIAN_TAG}}}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -321,7 +384,7 @@ steps:
         stage: publish
         type: push
         title: Cloudharness flask
-        candidate: '${{REGISTRY}}/areg/cloudharness-flask:${{CF_BUILD_ID}}'
+        candidate: '${{REGISTRY}}/areg/cloudharness-flask:${{${{CLOUDHARNESS_FLASK_TAG}}}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -329,7 +392,7 @@ steps:
         stage: publish
         type: push
         title: Cloudharness django
-        candidate: '${{REGISTRY}}/areg/cloudharness-django:${{CF_BUILD_ID}}'
+        candidate: '${{REGISTRY}}/areg/cloudharness-django:${{${{CLOUDHARNESS_DJANGO_TAG}}}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -337,7 +400,7 @@ steps:
         stage: publish
         type: push
         title: Accounts
-        candidate: '${{REGISTRY}}/areg/accounts:${{CF_BUILD_ID}}'
+        candidate: '${{REGISTRY}}/areg/accounts:${{${{ACCOUNTS_TAG}}}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -345,7 +408,7 @@ steps:
         stage: publish
         type: push
         title: Common
-        candidate: '${{REGISTRY}}/areg/common:${{CF_BUILD_ID}}'
+        candidate: '${{REGISTRY}}/areg/common:${{${{COMMON_TAG}}}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -353,7 +416,7 @@ steps:
         stage: publish
         type: push
         title: Accounts api
-        candidate: '${{REGISTRY}}/areg/accounts-api:${{CF_BUILD_ID}}'
+        candidate: '${{REGISTRY}}/areg/accounts-api:${{${{ACCOUNTS_API_TAG}}}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -361,7 +424,7 @@ steps:
         stage: publish
         type: push
         title: Portal
-        candidate: '${{REGISTRY}}/areg/portal:${{CF_BUILD_ID}}'
+        candidate: '${{REGISTRY}}/areg/portal:${{${{PORTAL_TAG}}}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
