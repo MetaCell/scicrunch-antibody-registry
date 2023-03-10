@@ -345,14 +345,14 @@ class Antibody(models.Model):
 
         base_url = url and extract_base_url(url)
         try:
-            vendor = Vendor.objects.get(name=name or base_url)
+            vendor = Vendor.objects.get(name__iexact=name or base_url)
             self.vendor = vendor
             if base_url:
                 self.add_vendor_domain(base_url, vendor)
         except Vendor.DoesNotExist:
 
             try:
-                vd = VendorDomain.objects.get(base_url=base_url)
+                vd = VendorDomain.objects.get(base_url__iexact=base_url)
                 self.vendor = vd.vendor
                 if name:
                     VendorSynonym.objects.create(vendor=self.vendor, name=name)
@@ -368,7 +368,7 @@ class Antibody(models.Model):
 
     def add_vendor_domain(self, base_url, vendor):
         try:
-            VendorDomain.objects.get(base_url=base_url)
+            VendorDomain.objects.get(base_url__iexact=base_url)
         except VendorDomain.DoesNotExist:
             vd = VendorDomain(vendor=vendor,
                               base_url=base_url, status=STATUS.QUEUE)

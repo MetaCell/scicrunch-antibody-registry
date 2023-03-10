@@ -50,7 +50,10 @@ const SuccessSubmission = (props) => {
             abr-help@scicrunch.org
           </Link>
           <br />
-          Your temporary ID is RRID: AB_{props.temporaryID}
+          Your temporary ID is
+        </Typography>
+        <Typography variant="h5" align="center">
+          RRID: AB_{props.temporaryID}
         </Typography>
         <Box>
           <Button
