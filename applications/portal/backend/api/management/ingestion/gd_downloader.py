@@ -20,8 +20,10 @@ class GDDownloader:
             logging.info("Download completed.")
             if extract:
                 self.extract()
-        else:
-            logging.info('%s download skipped: file already present', self.dest)
+            return True
+
+        logging.info('%s download skipped: file already present', self.dest)
+        return False
 
     def extract(self):
         with zipfile.ZipFile(self.get_filename(), 'r') as zip_ref:
