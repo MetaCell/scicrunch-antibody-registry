@@ -1,5 +1,6 @@
+import os
+from random import randint
 from typing import Optional, Tuple
-from api.utilities.exceptions import RequiredParameterMissing
 
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector
@@ -8,9 +9,10 @@ from django.db.models import Transform, CharField, Index, Q, Value
 from django.db.models.functions import Length, Coalesce
 from django.utils import timezone
 
+from api.services.user_service import UnrecognizedUser, get_current_user_id
+from api.utilities.exceptions import RequiredParameterMissing
 from api.utilities.functions import generate_id_aux, extract_base_url, get_antibody_persistence_directory
 from cloudharness import log
-from api.services.user_service import UnrecognizedUser, get_current_user_id
 from portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
     ANTIBODY_CLONE_ID_MAX_LEN, ANTIGEN_ENTREZ_ID_MAX_LEN, ANTIGEN_UNIPROT_ID_MAX_LEN, STATUS_MAX_LEN, \
@@ -19,7 +21,7 @@ from portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPL
     ANTIBODY_ID_MAX_LEN, ANTIBODY_CAT_ALT_MAX_LEN, VENDOR_COMMERCIAL_TYPE_MAX_LEN, ANTIBODY_TARGET_EPITOPE_MAX_LEN, \
     VENDOR_NIF_MAX_LEN, ANTIBODY_TARGET_SPECIES_MAX_LEN, ANTIBODY_DISC_DATE_MAX_LEN, \
     URL_MAX_LEN, VENDOR_EU_ID_MAX_LEN, ANTIBODY_UID_MAX_LEN, ANTIBODY_FILE_DISPLAY_NAME_MAX_LEN, \
-    ANTIBODY_FILES_HASH_MAX_LEN, ANTIBODY_PERSISTENCE, ANTIBODY_FILE_TYPE_MAX_LEN
+    ANTIBODY_FILES_HASH_MAX_LEN, ANTIBODY_FILE_TYPE_MAX_LEN
 
 
 @CharField.register_lookup
@@ -98,7 +100,7 @@ class Vendor(models.Model):
             GinIndex(SearchVector('name', config='english'),
                      name='vendor_name_fts_idx'),
         ]
-        ordering = ('name', )
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -187,7 +189,7 @@ class Antibody(models.Model):
     cat_alt = models.CharField(
         max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True, db_index=True, blank=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True, blank=True)
-    
+
     url = models.URLField(max_length=URL_MAX_LEN,
                           null=True, db_index=True, blank=True)
     antigen = models.ForeignKey(
@@ -491,7 +493,10 @@ class AntibodyFiles(models.Model):
             tmp_file = self.file
             self.file = None
             super(AntibodyFiles, self).save(*args, **kwargs)
+            rand_str = str(randint(0, 9999)).zfill(4)[:4]
             self.file = tmp_file
+            name, extension = os.path.splitext(self.file.name)
+            self.display_name = f"AB{self.id}_{str.upper(self.type)}{rand_str}{extension}"
         super(AntibodyFiles, self).save(*args, **kwargs)
 
     class Meta:
