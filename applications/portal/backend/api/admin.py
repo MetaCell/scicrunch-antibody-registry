@@ -87,15 +87,7 @@ class TargetSpeciesInlineAdmin(admin.TabularInline):
 
 class AntibodyFilesAdmin(admin.TabularInline):
     model = AntibodyFiles
-    exclude = ("uploader_uid", 'filehash', 'timestamp')
-
-    def save_model(self, request, obj, form, change):
-        keycloak_service = KeycloakService()
-        uid = keycloak_service.get_user_id_from_django_user(request.user)
-        if not uid:
-            raise Exception("User not found")
-        obj.uploader_uid = uid
-        super().save_model(request, obj, form, change)
+    exclude = ("uploader_uid", 'filehash', 'timestamp', 'display_name')
 
 @admin.register(Antibody)
 class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
@@ -197,6 +189,20 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
             )
             return ""
 
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        for instance in instances:
+            if formset.fk.model == AntibodyFiles:
+                keycloak_service = KeycloakService()
+                uid = keycloak_service.get_user_id_from_django_user(request.user)
+                if not uid:
+                    raise Exception("User not found")
+                instance.uploader_uid = uid
+            instance.save()
+        formset.save_m2m()
+
 
 @admin.register(Antigen)
 class GeneAdmin(admin.ModelAdmin):
@@ -277,7 +283,7 @@ class VendorDomainAdmin(admin.ModelAdmin):
 class VendorAdmin(admin.ModelAdmin):
     delete_confirmation_template = "admin/vendor/delete_confirmation.html"
     search_fields = ("name",)
-    list_display=("name", "commercial_type", "nif_id", "eu_id")
+    list_display = ("name", "commercial_type", "nif_id", "eu_id")
     list_filter = (NonCuratedDomains, "commercial_type",)
     fields = (
         "nb_antibodies",
@@ -354,6 +360,3 @@ class VendorAdmin(admin.ModelAdmin):
                 self._force_delete(src_vendor)
                 return super().get_deleted_objects(objs, request)
         return super().get_deleted_objects(objs, request)
-
-
-
