@@ -214,7 +214,7 @@ class AntibodyResource(ModelResource):
         if field.attribute and (field.column_name in data):
             if is_fill:
                 # If we are only updating the filled columns and the column is empty we do nothing
-                if data[field.column_name] == '':
+                if data[field.column_name] == '' or data[field.column_name] is None:
                     return
                 if data[field.column_name] == REMOVE_KEYWORD:
                     data[field.column_name] = None
