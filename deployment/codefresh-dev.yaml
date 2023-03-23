@@ -360,7 +360,7 @@ steps:
         stage: publish
         type: push
         title: Cloudharness base
-        candidate: '${{REGISTRY}}/areg/cloudharness-base:${{${{CLOUDHARNESS_BASE_TAG}}}}'
+        candidate: '${{REGISTRY}}/areg/cloudharness-base:${{CLOUDHARNESS_BASE_TAG}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -368,7 +368,7 @@ steps:
         stage: publish
         type: push
         title: Cloudharness frontend build
-        candidate: '${{REGISTRY}}/areg/cloudharness-frontend-build:${{${{CLOUDHARNESS_FRONTEND_BUILD_TAG}}}}'
+        candidate: '${{REGISTRY}}/areg/cloudharness-frontend-build:${{CLOUDHARNESS_FRONTEND_BUILD_TAG}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -376,7 +376,7 @@ steps:
         stage: publish
         type: push
         title: Cloudharness base debian
-        candidate: '${{REGISTRY}}/areg/cloudharness-base-debian:${{${{CLOUDHARNESS_BASE_DEBIAN_TAG}}}}'
+        candidate: '${{REGISTRY}}/areg/cloudharness-base-debian:${{CLOUDHARNESS_BASE_DEBIAN_TAG}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -384,7 +384,7 @@ steps:
         stage: publish
         type: push
         title: Cloudharness flask
-        candidate: '${{REGISTRY}}/areg/cloudharness-flask:${{${{CLOUDHARNESS_FLASK_TAG}}}}'
+        candidate: '${{REGISTRY}}/areg/cloudharness-flask:${{CLOUDHARNESS_FLASK_TAG}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -392,7 +392,7 @@ steps:
         stage: publish
         type: push
         title: Cloudharness django
-        candidate: '${{REGISTRY}}/areg/cloudharness-django:${{${{CLOUDHARNESS_DJANGO_TAG}}}}'
+        candidate: '${{REGISTRY}}/areg/cloudharness-django:${{CLOUDHARNESS_DJANGO_TAG}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -400,7 +400,7 @@ steps:
         stage: publish
         type: push
         title: Accounts
-        candidate: '${{REGISTRY}}/areg/accounts:${{${{ACCOUNTS_TAG}}}}'
+        candidate: '${{REGISTRY}}/areg/accounts:${{ACCOUNTS_TAG}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -408,7 +408,7 @@ steps:
         stage: publish
         type: push
         title: Common
-        candidate: '${{REGISTRY}}/areg/common:${{${{COMMON_TAG}}}}'
+        candidate: '${{REGISTRY}}/areg/common:${{COMMON_TAG}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -416,7 +416,7 @@ steps:
         stage: publish
         type: push
         title: Accounts api
-        candidate: '${{REGISTRY}}/areg/accounts-api:${{${{ACCOUNTS_API_TAG}}}}'
+        candidate: '${{REGISTRY}}/areg/accounts-api:${{ACCOUNTS_API_TAG}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
@@ -424,7 +424,7 @@ steps:
         stage: publish
         type: push
         title: Portal
-        candidate: '${{REGISTRY}}/areg/portal:${{${{PORTAL_TAG}}}}'
+        candidate: '${{REGISTRY}}/areg/portal:${{PORTAL_TAG}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'
