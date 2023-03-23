@@ -131,10 +131,9 @@ def update_antibody_files(csv_path: str):
     logging.info("Updating antibody files")
     df_antibody_files = pd.read_csv(csv_path)
     df_antibody_files['filename'] = df_antibody_files.apply(
-        lambda row: get_antibody_persistence_directory(row['id'], row['filename']), axis=1)
+        lambda row: get_antibody_persistence_directory(row['id'], os.path.basename(row['filename'])), axis=1)
     df_antibody_files['timestamp'] = df_antibody_files.apply(
-        lambda row: datetime.utcfromtimestamp(row['timestamp']) if type(row['timestamp']) is int else
-        row['timestamp'], axis=1)
+        lambda row: datetime.utcfromtimestamp(row['timestamp']), axis=1)
     df_antibody_files.to_csv(csv_path, index=False, mode='w+')
 
 
@@ -147,7 +146,7 @@ class Preprocessor:
     def preprocess(self) -> AntibodyMetadata:
         logging.info("Preprocessing started")
 
-        GDDownloader(self.file_id, self.dest).download()
+        was_downloaded = GDDownloader(self.file_id, self.dest).download()
 
         metadata = AntibodyMetadata(glob.glob(os.path.join(self.dest, '*', f"{RAW_ANTIBODY_DATA_BASENAME}*.csv")),
                                     glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DATA_BASENAME}.csv"))[0],
@@ -156,10 +155,11 @@ class Preprocessor:
                                     glob.glob(os.path.join(self.dest, '*', f"{RAW_USERS_DATA_BASENAME}.csv"))[0],
                                     glob.glob(os.path.join(self.dest, '*', f"{RAW_ANTIBODY_FILES_BASENAME}.csv"))[0])
 
-        update_vendor_domains(metadata.vendor_domain_data_path)
-        update_vendors(metadata.vendor_data_path)
-        update_antibodies(metadata.antibody_data_paths)
-        update_users(metadata.users_data_path)
-        update_antibody_files(metadata.antibody_files_path)
+        if was_downloaded:
+            update_vendor_domains(metadata.vendor_domain_data_path)
+            update_vendors(metadata.vendor_data_path)
+            update_antibodies(metadata.antibody_data_paths)
+            update_users(metadata.users_data_path)
+            update_antibody_files(metadata.antibody_files_path)
 
         return metadata
