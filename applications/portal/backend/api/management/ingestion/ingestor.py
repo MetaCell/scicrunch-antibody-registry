@@ -64,8 +64,6 @@ def get_species_from_targets(specie_str):
     return re.split(r',|;', specie_str)
 
 
-
-
 class Ingestor:
     ANTIBODY_TABLE = Antibody.objects.model._meta.db_table
     ANTIBODY_FILES_TABLE = AntibodyFiles.objects.model._meta.db_table
