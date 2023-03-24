@@ -11,6 +11,7 @@ from api.management.ingestion.preprocessor import AntibodyMetadata
 from api.management.ingestion.users_ingestor import UsersIngestor
 from api.models import Antibody, Antigen, Vendor, VendorDomain, Specie, \
     VendorSynonym, AntibodySpecies, AntibodyFiles
+from api.services.keycloak_service import KeycloakService
 from api.utilities.decorators import timed_class_method
 from cloudharness import log
 from portal.settings import ANTIBODY_ANTIBODY_START_SEQ, ANTIBODY_VENDOR_START_SEQ, \
@@ -58,6 +59,13 @@ def is_valid_specie(specie: str):
     return len(specie.split(' ')) < 3
 
 
+def get_species_from_targets(specie_str):
+    # split by comma or semicolon
+    return re.split(r',|;', specie_str)
+
+
+
+
 class Ingestor:
     ANTIBODY_TABLE = Antibody.objects.model._meta.db_table
     ANTIBODY_FILES_TABLE = AntibodyFiles.objects.model._meta.db_table
@@ -71,25 +79,31 @@ class Ingestor:
     def __init__(self, metadata: AntibodyMetadata, cursor):
         self.metadata = metadata
         self.cursor = cursor
+        self.keycloak_service = KeycloakService()
         try:
-            self.users_ingestor = UsersIngestor(metadata.users_data_path)
+            user_ingestor = UsersIngestor(metadata.users_data_path, keycloak_service=self.keycloak_service)
+            self.users_map = user_ingestor.get_users_map()
         except Exception as e:
             log.error(f"Cannot ingest users: {str(e)}", exc_info=True)
+            self.users_map = {}
+
+    def _execute(self, statement, params):
+        if len(params) > 0:
+            self.cursor.execute(statement, params)
 
     def ingest(self):
         species_map = {}
-        users_map = {}
 
         self._truncate_tables()
         self._insert_vendors()
         self._insert_vendor_domains()
-        users_map = self._fill_tmp_table(users_map)
+        self._fill_tmp_table()
         self._insert_genes()
         species_map = self._insert_species(species_map)
         self._insert_antibodies()
         self._insert_antibody_species(species_map)
         self._update_vendor_domains()
-        self._insert_antibody_files(users_map)
+        self._insert_antibody_files()
         self._reset_auto_increment()
         self._drop_tmp_table()
 
@@ -126,14 +140,14 @@ class Ingestor:
             if synonyms_str:
                 for s in synonyms_str.split(','):
                     vendor_synonyms_params.extend([row['id'], s])
-        self.cursor.execute(vendor_insert_stm, vendor_params)
+        self._execute(vendor_insert_stm, vendor_params)
 
         # insert vendors synonyms
         vendor_synonyms_insert_stm = get_insert_values_into_table_stm(
             self.VENDOR_SYNONYM_TABLE,
             ['vendor_id', 'name'],
             int(len(vendor_synonyms_params) / 2))
-        self.cursor.execute(vendor_synonyms_insert_stm, vendor_synonyms_params)
+        self._execute(vendor_synonyms_insert_stm, vendor_synonyms_params)
 
     @timed_class_method('Vendor domains added ')
     def _insert_vendor_domains(self):
@@ -153,15 +167,23 @@ class Ingestor:
             vendor_domain_params.extend(
                 [row['id'], row['domain_name'], row['vendor_id'],
                  row['status'].upper(), False])
-        self.cursor.execute(vendor_domain_insert_stm, vendor_domain_params)
+
+        self._execute(vendor_domain_insert_stm, vendor_domain_params)
+
+    def _get_keycloak_id(self, original_id):
+        if original_id is None:
+            return None
+        if original_id not in self.users_map:
+            keycloak_user = self.keycloak_service.get_user_by_attribute('id', original_id)
+            if keycloak_user:
+                self.users_map[original_id] = keycloak_user.get('id')
+            else:
+                logging.error(f"User {original_id} not found in Keycloak")
+        return self.users_map.get(original_id, None)
 
     @timed_class_method('Temporary table filled')
-    def _fill_tmp_table(self, users_map):
-        try:
-            users_map = self.users_ingestor.get_users_map() if self.users_ingestor else {}
-        except:
-            log.error("Cannot ingest users", exc_info=True)
-            users_map = {}
+    def _fill_tmp_table(self):
+
         self.cursor.execute(get_create_table_stm(
             self.TMP_TABLE, ANTIBODY_HEADER))
 
@@ -172,16 +194,14 @@ class Ingestor:
             for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype=D_TYPES)):
                 chunk = chunk.where(pd.notnull(chunk), None)
                 chunk['uid_legacy'] = chunk['uid']
-                chunk['uid'] = chunk['uid_legacy'].apply(
-                    lambda x: users_map.get(x, None))
+                chunk['uid'] = chunk['uid_legacy'].apply(lambda x: self._get_keycloak_id(x))
                 raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, ANTIBODY_HEADER.keys(),
                                                                        len(chunk))
 
-                self.cursor.execute(raw_data_insert_stm,
-                                    chunk.to_numpy().flatten().tolist())
+                self._execute(raw_data_insert_stm, chunk.to_numpy().flatten().tolist())
+
                 logging.info(
                     f"File progress: {int(min((i + 1) * CHUNK_SIZE, len_csv) / len_csv * 100)}% ")
-        return users_map
 
     @timed_class_method('Genes added')
     def _insert_genes(self):
@@ -209,7 +229,7 @@ class Ingestor:
         for row in self.cursor:
             specie_str = row[0]
             if specie_str:
-                for specie in self.get_species_from_targets(specie_str):
+                for specie in get_species_from_targets(specie_str):
                     if not is_valid_specie(specie): continue
 
                     clean_specie = get_clean_species_str(specie)
@@ -220,13 +240,8 @@ class Ingestor:
                                                               ['name', 'id'],
                                                               len(species_map.keys()))
         if len(species_map) > 0:
-            self.cursor.execute(species_insert_stm, list(
-                itertools.chain.from_iterable(species_map.items())))
+            self.cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(species_map.items())))
         return species_map
-
-    def get_species_from_targets(self, specie_str):
-        # split by comma or semicolon
-        return re.split(r',|;', specie_str)
 
     @timed_class_method('Antibodies added')
     def _insert_antibodies(self):
@@ -263,7 +278,7 @@ class Ingestor:
                 for index, row in chunk.iterrows():
                     target_species = row['target_species']
                     if target_species:
-                        for specie in self.get_species_from_targets(row['target_species']):
+                        for specie in get_species_from_targets(row['target_species']):
                             if not is_valid_specie(specie): continue
                             clean_specie = get_clean_species_str(specie)
                             species_params.extend(
@@ -274,8 +289,7 @@ class Ingestor:
                         'antibody_id', 'specie_id'],
                     int(len(species_params) / 2))
 
-                self.cursor.execute(
-                    antibody_species_insert_stm, species_params)
+                self._execute(antibody_species_insert_stm, species_params)
 
     @timed_class_method('Vendor domain links updated')
     def _update_vendor_domains(self):
@@ -287,7 +301,7 @@ class Ingestor:
         self.cursor.execute(vendor_domain_update_stm)
 
     @timed_class_method('Antibody files added ')
-    def _insert_antibody_files(self, users_map):
+    def _insert_antibody_files(self):
         # Prepare antibody files insert
         df_antibody_files = pd.read_csv(self.metadata.antibody_files_path)
 
@@ -295,7 +309,7 @@ class Ingestor:
         antibody_files_params = []
         count = 0
         for index, row in df_antibody_files.iterrows():
-            uploader_id = users_map.get(str(row['uploader_uid']), None)
+            uploader_id = self._get_keycloak_id(row['uploader_uid'])
             if not uploader_id:
                 logging.warning(f"No user found for uploader_uid: {row['uploader_uid']}")
                 continue
@@ -308,7 +322,7 @@ class Ingestor:
                                                                      ['id', 'ab_ix', 'type', 'file', 'display_name',
                                                                       'timestamp', 'uploader_uid', 'filehash'],
                                                                      count)
-        self.cursor.execute(antibody_files_insert_stm, antibody_files_params)
+        self._execute(antibody_files_insert_stm, antibody_files_params)
 
     @timed_class_method('Sequence tables updated')
     def _reset_auto_increment(self):
