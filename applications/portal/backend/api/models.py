@@ -161,7 +161,12 @@ class Antigen(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.symbol or '?' + self.id}"
+        s =  f"{self.symbol or '?' + self.id}"
+        if self.entrez_id:
+           s += f" - EZ:{self.entrez_id}"
+        if self.uniprot_id:
+           s += f" - UP:{self.uniprot_id}"
+        return s
 
 
 class Antibody(models.Model):
@@ -315,7 +320,7 @@ class Antibody(models.Model):
         """
         Returns a non-personal antibody with the same vendor_id and same catalog_number if exists
         """
-        duplicate_antibodies = Antibody.objects.filter(vendor__id=self.vendor.id, catalog_num=self.catalog_num) \
+        duplicate_antibodies = Antibody.objects.filter(vendor__id=self.vendor.id, catalog_num__iexact=self.catalog_num) \
             .exclude(commercial_type=CommercialType.PERSONAL)
         duplicates_length = len(duplicate_antibodies)
         if duplicates_length <= 1:  # Because the save happened before there will always be one antibody in the database
