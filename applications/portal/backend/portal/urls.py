@@ -27,6 +27,7 @@ urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += [re_path(r"^(?P<path>.*)$", index, name="index")]
 
-admin.site.site_header = "portal Admin"
-admin.site.site_title = "portal Admin"
+
+admin.site.site_header = 'Antibody Registry admin'
+admin.site.site_title = 'Admin: Antibody Registry'
 admin.site.index_title = "Index"
