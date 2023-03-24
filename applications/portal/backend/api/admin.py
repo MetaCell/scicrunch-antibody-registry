@@ -27,9 +27,6 @@ from api.services.keycloak_service import KeycloakService
 from cloudharness import log
 from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 
-admin.site.site_header = 'Antibody Registry admin'
-admin.site.site_title = 'Antibody Registry admin'
-
 
 @admin.display(description="ab_id")
 def id_with_ab(obj: Antibody):
@@ -207,6 +204,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
 @admin.register(Antigen)
 class GeneAdmin(admin.ModelAdmin):
     search_fields = ("symbol", "entrez_id", "uniprot_id")
+    list_display = ("symbol", "entrez_id", "uniprot_id")
 
 
 @admin.register(Specie)
