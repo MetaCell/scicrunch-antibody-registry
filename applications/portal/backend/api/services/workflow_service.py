@@ -14,7 +14,13 @@ def _create_task(image_name, **kwargs):
     )
 
 
+
 def execute_ingestion_workflow(file_id: str):
+    ttl_strategy={
+    'secondsAfterCompletion': 60 * 60 * 24,
+    'secondsAfterSuccess': 60 * 20,
+    'secondsAfterFailure': 60 * 60 * 24
+    }       
     operations.PipelineOperation(
         basename=INGEST_OP,
         tasks=(
@@ -23,4 +29,5 @@ def execute_ingestion_workflow(file_id: str):
                 command=["python", "manage.py", "ingest", file_id]
             ),
         ),
+        ttl_strategy=ttl_strategy
     ).execute()
