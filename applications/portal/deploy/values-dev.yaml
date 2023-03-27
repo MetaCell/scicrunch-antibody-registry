@@ -1,65 +1,12 @@
 harness:
-  subdomain: www
-  secured: open
-  service:
-    port: 8080
-    auto: true
   deployment:
-    auto: true
-    replicas: 3
-    port: 8080
-  livenessProbe:
-    path: /api/live
-  readinessProbe:
-    path: /api/ready
-  dependencies:
-    build:
-      - cloudharness-frontend-build
-      - cloudharness-django
-    hard:
-      - common
-      - events
-      - accounts
-      - argo
-    soft:
-      - pgadmin
-      - accounts-api
-  use_services:
-    - name: common
-    - name: accounts_api
-  uri_role_mapping:
-    - uri: /admin/*
-      roles:
-        - administrator
-    - uri: /admin
-      roles:
-        - administrator
-      require-any-role: true
-    - uri: /add
-      roles: []
-      require-any-role: true
-    - uri: /submissions
-      roles: []
-      require-any-role: false
-    - uri: /login
-      roles: []
-      require-any-role: true
-    - uri: /
-      white-listed: true
-
+    replicas: 1
   database:
-    auto: true
-    type: postgres
     size: 20Gi
     resources:
       requests:
         memory: 0.5Gi
         cpu: 50m
       limits:
-        memory: 2Gi
-        cpu: 2
-  accounts:
-    roles:
-      - administrator
-      - manager
-      - user
+        memory: 1.5Gi
+        cpu: 1
