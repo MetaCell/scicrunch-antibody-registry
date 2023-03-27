@@ -475,8 +475,14 @@ class Antibody(models.Model):
         ]
 
 
+def get_antibody_filename(instance, original_filename):
+    name, extension = os.path.splitext(original_filename)
+    rand_str = str(randint(0, 9999)).zfill(4)[:4]
+    return f"AB{instance.antibody.ab_id}_{str.upper(instance.type)}{rand_str}{extension}"
+
+
 def antibody_persistence_directory(instance, filename):
-    return get_antibody_persistence_directory(instance.id, filename)
+    return get_antibody_persistence_directory(instance.antibody.ab_id, get_antibody_filename(instance, filename))
 
 
 class AntibodyFiles(models.Model):
@@ -493,15 +499,8 @@ class AntibodyFiles(models.Model):
         return self.display_name
 
     def save(self, *args, **kwargs):
-        # todo: handle file hash
         if self.id is None:
-            tmp_file = self.file
-            self.file = None
-            super(AntibodyFiles, self).save(*args, **kwargs)
-            rand_str = str(randint(0, 9999)).zfill(4)[:4]
-            self.file = tmp_file
-            name, extension = os.path.splitext(self.file.name)
-            self.display_name = f"AB{self.id}_{str.upper(self.type)}{rand_str}{extension}"
+            self.display_name = get_antibody_filename(self, self.file.name)
         super(AntibodyFiles, self).save(*args, **kwargs)
 
     class Meta:

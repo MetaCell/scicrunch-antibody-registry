@@ -4,7 +4,6 @@ from typing import Dict
 
 import pandas as pd
 
-from api.services.keycloak_service import KeycloakService
 from api.utilities.decorators import timed_class_method
 from portal.settings import ORCID_URL, USERS_RELEVANT_HEADER, GUID_INDEX, PROVIDER_ID
 
@@ -15,10 +14,10 @@ class KeycloakRequiredActions(Enum):
 
 
 class UsersIngestor:
-    def __init__(self, users_data_path):
+    def __init__(self, users_data_path, keycloak_service):
         self.users_df = pd.read_csv(users_data_path, dtype='unicode')
         self.users_df = self.users_df.where(pd.notnull(self.users_df), '')
-        self.keycloak_service = KeycloakService()
+        self.keycloak_service = keycloak_service
 
     @timed_class_method('Keycloak users added')
     def get_users_map(self) -> Dict:
