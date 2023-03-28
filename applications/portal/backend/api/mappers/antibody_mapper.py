@@ -107,8 +107,6 @@ class AntibodyMapper(IDAOMapper):
         except ValidationError as e:
             log.error("Validation error on antibody %s",
                       dao.ab_id, exc_info=True)
-            from pprint import pprint
-            pprint(dict_to_camel(dao_dict))
             ab = AntibodyDTO()
         if dao.antigen:
             antigen: Antigen = dao.antigen
