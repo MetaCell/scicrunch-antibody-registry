@@ -63,7 +63,7 @@ async def add_process_time_header(request: Request, call_next):
     )
     if authorization:
         if "Bearer" in authorization:
-            authorization = authorization.split("Bearer ")[1]
+            authorization = authorization.split("Bearer ")[-1]
         set_authentication_token(authorization)
     return await call_next(request)
 
