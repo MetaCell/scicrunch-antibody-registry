@@ -63,15 +63,32 @@ async def add_process_time_header(request: Request, call_next):
             authorization = authorization.split("Bearer ")[1]
         set_authentication_token(authorization)
     return await call_next(request)
-
+    
 if os.environ.get('KUBERNETES_SERVICE_HOST', None):
     # init the auth service when running in/for k8s
+    import threading 
     from cloudharness_django.services import get_auth_service, init_services
+    from cloudharness import log
+    import time
+    def start_auth_service():
+        try:
+            init_services()
+        except:
+            log.exception("Error initializing services. Retrying in 5 seconds...")
+            time.sleep(5)
+            start_auth_service()
 
-
-    init_services()
-            # start the kafka event listener when running in/for k8s
-    import cloudharness_django.services.events
+    threading.Thread(target=start_auth_service).start()
+    # start the kafka event listener when running in/for k8s
+    def start_event_listener():
+        try:
+            import cloudharness_django.services.events
+            log.info("User sync events listener started")
+        except:
+            log.exception("Error initializing event queue. Retrying in 5 seconds...")
+            time.sleep(5)
+            start_event_listener()
+    threading.Thread(target=start_event_listener).start()
 
 
 # enable the Bearer Authentication

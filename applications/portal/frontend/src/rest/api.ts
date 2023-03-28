@@ -74,7 +74,7 @@ export interface AbstractAntibody {
      * @type {string}
      * @memberof AbstractAntibody
      */
-    'commercialType': AbstractAntibodyCommercialTypeEnum;
+    'commercialType'?: AbstractAntibodyCommercialTypeEnum;
     /**
      * The manuscript that describes the creation of the antibody. 
      * @type {string}
@@ -211,7 +211,7 @@ export interface AddAntibody {
      * @type {string}
      * @memberof AddAntibody
      */
-    'commercialType': AddAntibodyCommercialTypeEnum;
+    'commercialType'?: AddAntibodyCommercialTypeEnum;
     /**
      * The manuscript that describes the creation of the antibody. 
      * @type {string}
@@ -271,7 +271,7 @@ export interface AddAntibody {
      * @type {string}
      * @memberof AddAntibody
      */
-    'catalogNum': string;
+    'catalogNum'?: string;
     /**
      * The name of the company or laboratory for commercial antibodies. The principal investigator name for personal/other antibodies.
      * @type {string}
@@ -349,7 +349,7 @@ export interface Antibody {
      * @type {string}
      * @memberof Antibody
      */
-    'abId': string;
+    'abId'?: string;
     /**
      * The alternative catalog numbers for this product, delimited by comma, e.g., 9101S, 9101P, 9191L
      * @type {string}
@@ -379,7 +379,7 @@ export interface Antibody {
      * @type {string}
      * @memberof Antibody
      */
-    'insertTime': string;
+    'insertTime'?: string;
     /**
      * Any modification to the target protein
      * @type {string}
@@ -451,7 +451,7 @@ export interface Antibody {
      * @type {string}
      * @memberof Antibody
      */
-    'commercialType': AntibodyCommercialTypeEnum;
+    'commercialType'?: AntibodyCommercialTypeEnum;
     /**
      * The manuscript that describes the creation of the antibody. 
      * @type {string}
@@ -511,7 +511,7 @@ export interface Antibody {
      * @type {string}
      * @memberof Antibody
      */
-    'catalogNum': string;
+    'catalogNum'?: string;
     /**
      * The name of the company or laboratory for commercial antibodies. The principal investigator name for personal/other antibodies.
      * @type {string}
@@ -583,7 +583,7 @@ export interface AntibodyAllOf {
      * @type {string}
      * @memberof AntibodyAllOf
      */
-    'abId': string;
+    'abId'?: string;
     /**
      * The alternative catalog numbers for this product, delimited by comma, e.g., 9101S, 9101P, 9191L
      * @type {string}
@@ -613,7 +613,7 @@ export interface AntibodyAllOf {
      * @type {string}
      * @memberof AntibodyAllOf
      */
-    'insertTime': string;
+    'insertTime'?: string;
     /**
      * Any modification to the target protein
      * @type {string}
@@ -659,7 +659,7 @@ export interface AntibodyCoreId {
      * @type {string}
      * @memberof AntibodyCoreId
      */
-    'catalogNum': string;
+    'catalogNum'?: string;
     /**
      * The name of the company or laboratory for commercial antibodies. The principal investigator name for personal/other antibodies.
      * @type {string}
@@ -838,7 +838,7 @@ export interface UpdateAntibody {
      * @type {string}
      * @memberof UpdateAntibody
      */
-    'commercialType': UpdateAntibodyCommercialTypeEnum;
+    'commercialType'?: UpdateAntibodyCommercialTypeEnum;
     /**
      * The manuscript that describes the creation of the antibody. 
      * @type {string}
