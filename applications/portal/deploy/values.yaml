@@ -55,3 +55,6 @@ harness:
       - administrator
       - manager
       - user
+  test:
+    e2e:
+      enabled: true
