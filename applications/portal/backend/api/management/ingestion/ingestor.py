@@ -95,15 +95,15 @@ class Ingestor:
         species_map = {}
 
         self._truncate_tables()
-        "vendors" in self.data_paths and self._insert_vendors(self.data_paths["vendors"])
-        "vendor_domains" in self.data_paths and self._insert_vendor_domains(self.data_paths["vendor_domains"])
+        self.data_paths.vendors and self._insert_vendors(self.data_paths.vendors)
+        self.data_paths.vendor_domains and self._insert_vendor_domains(self.data_paths.vendor_domains)
         self._fill_tmp_table()
         self._insert_genes()
         species_map = self._insert_species(species_map)
         self._insert_antibodies()
         self._insert_antibody_species(species_map)
-        "vendor_domains" in self.data_paths and self._update_vendor_domains()
-        'antibody_files' in self.data_paths and self._insert_antibody_files()
+        self.data_paths.vendor_domains and self._update_vendor_domains()
+        self.data_paths.antibody_files and self._insert_antibody_files(self.data_paths.antibody_files)
         self._reset_auto_increment()
         self._drop_tmp_table()
 
@@ -192,7 +192,7 @@ class Ingestor:
             self.TMP_TABLE, ANTIBODY_HEADER))
 
         # Insert raw data into tmp table
-        for antibody_data_path in self.data_paths['antibodies']:
+        for antibody_data_path in self.data_paths.antibodies:
             logging.info(antibody_data_path)
             len_csv = sum(1 for _ in open(antibody_data_path, 'r'))
             for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype=D_TYPES)):
@@ -274,7 +274,7 @@ class Ingestor:
 
     @timed_class_method('AntibodySpecies added')
     def _insert_antibody_species(self, species_map):
-        for antibody_data_path in self.data_paths['antibodies']:
+        for antibody_data_path in self.data_paths.antibodies:
             logging.info("Inserting species from %s", antibody_data_path)
             for chunk in pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype=D_TYPES):
                 chunk = chunk.where(pd.notnull(chunk), None)

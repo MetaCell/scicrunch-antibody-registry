@@ -4,6 +4,7 @@ import logging
 import os
 from datetime import datetime
 from typing import List, TypedDict
+from dataclasses import dataclass
 
 import pandas as pd
 
@@ -24,8 +25,8 @@ UNKNOWN_USERS = {'3483', '1473', '3208', '3519', '21828', '30083', '7650', '7574
                  '2209', '3082', '31464', '32106', '1282', '3671', '9132', '2892', '22915', '5047', '1175', '1883',
                  '31166', '8612', '8016', '7706'}
 
-
-class AntibodyDataPaths(TypedDict):
+@dataclass
+class AntibodyDataPaths:
     antibodies: str
     vendors: str
     vendor_domains: str
@@ -161,10 +162,10 @@ class Preprocessor:
         )
 
         if was_downloaded:
-            update_vendor_domains(metadata["vendor_domains"])
-            update_vendors(metadata['vendors'])
-            update_antibodies(metadata['antibodies'])
-            update_users(metadata['users'])
-            update_antibody_files(metadata["antibody_files"])
+            update_vendor_domains(metadata.vendor_domains)
+            update_vendors(metadata.vendors)
+            update_antibodies(metadata.antibodies)
+            update_users(metadata.users)
+            update_antibody_files(metadata.antibody_files)
 
         return metadata
