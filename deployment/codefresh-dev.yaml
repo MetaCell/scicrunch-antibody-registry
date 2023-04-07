@@ -276,6 +276,27 @@ steps:
     type: parallel
     stage: qa
     steps:
+      test-e2e:
+        type: build
+        stage: build
+        dockerfile: Dockerfile
+        registry: '${{CODEFRESH_REGISTRY}}'
+        buildkit: true
+        build_arguments:
+        - DOMAIN=${{DOMAIN}}
+        - NOCACHE=${{CF_BUILD_ID}}
+        - REGISTRY=${{REGISTRY}}/areg/
+        image_name: areg/test-e2e
+        title: Test e2e
+        working_directory: ./cloud-harness/test/test-e2e
+        tag: '${{TEST_E2E_TAG}}'
+        when:
+          condition:
+            any:
+              buildDoesNotExist: includes('${{TEST_E2E_TAG_EXISTS}}', '{{TEST_E2E_TAG_EXISTS}}')
+                == true
+              forceNoCache: includes('${{TEST_E2E_TAG_FORCE_BUILD}}', '{{TEST_E2E_TAG_FORCE_BUILD}}')
+                == false
       test-api:
         type: build
         stage: build
@@ -340,6 +361,25 @@ steps:
         commands:
         - st --pre-run cloudharness_test.apitest_init run api/openapi.yaml --base-url
           https://common.${{DOMAIN}}/api -c all
+    when:
+      condition:
+        all:
+          whenVarExists: includes("${{SKIP_TESTS}}", "{{SKIP_TESTS}}") == true
+  tests_e2e:
+    stage: qa
+    title: End to end tests
+    working_directory: /home/test
+    image: '${{REGISTRY}}/areg/test-e2e:${{TEST_E2E_TAG}}'
+    fail_fast: false
+    commands:
+    - yarn test
+    scale:
+      portal_e2e_test:
+        title: portal e2e test
+        volumes:
+        - '${{CF_REPO_NAME}}/applications/portal/test/e2e:/home/test/__tests__/portal'
+        environment:
+        - APP_URL=https://www.${{DOMAIN}}
     when:
       condition:
         all:
