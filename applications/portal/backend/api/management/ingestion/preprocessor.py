@@ -3,7 +3,7 @@ import json
 import logging
 import os
 from datetime import datetime
-from typing import List
+from typing import List, TypedDict
 
 import pandas as pd
 
@@ -25,14 +25,12 @@ UNKNOWN_USERS = {'3483', '1473', '3208', '3519', '21828', '30083', '7650', '7574
                  '31166', '8612', '8016', '7706'}
 
 
-class AntibodyMetadata:
-    def __init__(self, antibody_data_paths: List[str], vendor_data_path: str, vendor_domain_data_path: str,
-                 users_data_path: str, antibody_files_path: str):
-        self.antibody_data_paths = antibody_data_paths
-        self.vendor_data_path = vendor_data_path
-        self.vendor_domain_data_path = vendor_domain_data_path
-        self.users_data_path = users_data_path
-        self.antibody_files_path = antibody_files_path
+class AntibodyDataPaths(TypedDict):
+    antibodies: str
+    vendors: str
+    vendor_domains: str
+    users: str
+    antibody_files: str
 
 
 def clean_df(df):
@@ -143,23 +141,30 @@ class Preprocessor:
         self.dest = dest
 
     @timed_class_method('Preprocessing finished')
-    def preprocess(self) -> AntibodyMetadata:
+    def preprocess(self) -> AntibodyDataPaths:
         logging.info("Preprocessing started")
 
         was_downloaded = GDDownloader(self.file_id, self.dest).download()
 
-        metadata = AntibodyMetadata(glob.glob(os.path.join(self.dest, '*', f"{RAW_ANTIBODY_DATA_BASENAME}*.csv")),
-                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DATA_BASENAME}.csv"))[0],
-                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DOMAIN_DATA_BASENAME}.csv"))[
-                                        0],
-                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_USERS_DATA_BASENAME}.csv"))[0],
-                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_ANTIBODY_FILES_BASENAME}.csv"))[0])
+        def get_metadata_file(file_name: str) -> str:
+            fnames = glob.glob(os.path.join(
+                self.dest, '**', f"{file_name}*.csv"), recursive=True)
+            return fnames and fnames[0]
+
+        metadata = AntibodyDataPaths(
+            antibodies=glob.glob(os.path.join(self.dest, '**',
+                      f"{RAW_ANTIBODY_DATA_BASENAME}*.csv"), recursive=True),
+            vendors=get_metadata_file(RAW_VENDOR_DATA_BASENAME),
+            vendor_domains=get_metadata_file(RAW_VENDOR_DOMAIN_DATA_BASENAME),
+            users=get_metadata_file(RAW_USERS_DATA_BASENAME),
+            antobody_files=get_metadata_file(RAW_ANTIBODY_FILES_BASENAME)
+        )
 
         if was_downloaded:
-            update_vendor_domains(metadata.vendor_domain_data_path)
-            update_vendors(metadata.vendor_data_path)
-            update_antibodies(metadata.antibody_data_paths)
-            update_users(metadata.users_data_path)
-            update_antibody_files(metadata.antibody_files_path)
+            update_vendor_domains(metadata["vendor_domains"])
+            update_vendors(metadata['vendors'])
+            update_antibodies(metadata['antibodies'])
+            update_users(metadata['users'])
+            update_antibody_files(metadata["antibody_files"])
 
         return metadata

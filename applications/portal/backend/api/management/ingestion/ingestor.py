@@ -1,3 +1,4 @@
+from functools import cache
 import itertools
 import logging
 import re
@@ -7,7 +8,7 @@ import pandas as pd
 from django.core.management.color import no_style
 from django.db import connection
 
-from api.management.ingestion.preprocessor import AntibodyMetadata
+from api.management.ingestion.preprocessor import AntibodyDataPaths
 from api.management.ingestion.users_ingestor import UsersIngestor
 from api.models import Antibody, Antigen, Vendor, VendorDomain, Specie, \
     VendorSynonym, AntibodySpecies, AntibodyFiles
@@ -74,16 +75,17 @@ class Ingestor:
     VENDOR_TABLE = Vendor.objects.model._meta.db_table
     TMP_TABLE = 'tmp_table'
 
-    def __init__(self, metadata: AntibodyMetadata, cursor):
-        self.metadata = metadata
+    def __init__(self, data_paths: AntibodyDataPaths, cursor):
+        self.data_paths = data_paths
         self.cursor = cursor
         self.keycloak_service = KeycloakService()
-        try:
-            user_ingestor = UsersIngestor(metadata.users_data_path, keycloak_service=self.keycloak_service)
-            self.users_map = user_ingestor.get_users_map()
-        except Exception as e:
-            log.error(f"Cannot ingest users: {str(e)}", exc_info=True)
-            self.users_map = {}
+        self.users_map = {}
+        if data_paths['users']:
+            try:
+                user_ingestor = UsersIngestor(data_paths['users'], keycloak_service=self.keycloak_service)
+                self.users_map = user_ingestor.get_users_map()
+            except Exception as e:
+                log.error(f"Cannot ingest users: {str(e)}", exc_info=True)
 
     def _execute(self, statement, params):
         if len(params) > 0:
@@ -93,15 +95,15 @@ class Ingestor:
         species_map = {}
 
         self._truncate_tables()
-        self._insert_vendors()
-        self._insert_vendor_domains()
+        "vendors" in self.data_paths and self._insert_vendors(self.data_paths["vendors"])
+        "vendor_domains" in self.data_paths and self._insert_vendor_domains(self.data_paths["vendor_domains"])
         self._fill_tmp_table()
         self._insert_genes()
         species_map = self._insert_species(species_map)
         self._insert_antibodies()
         self._insert_antibody_species(species_map)
-        self._update_vendor_domains()
-        self._insert_antibody_files()
+        "vendor_domains" in self.data_paths and self._update_vendor_domains()
+        'antibody_files' in self.data_paths and self._insert_antibody_files()
         self._reset_auto_increment()
         self._drop_tmp_table()
 
@@ -120,9 +122,9 @@ class Ingestor:
                           TRUNCATE_STM.format(table_name=ttd), exc_info=True)
 
     @timed_class_method('Vendors added ')
-    def _insert_vendors(self):
+    def _insert_vendors(self, csv_file):
         # Prepare vendor inserts
-        df_vendor = pd.read_csv(self.metadata.vendor_data_path)
+        df_vendor = pd.read_csv(csv_file)
         df_vendor = df_vendor.where(pd.notnull(df_vendor), None)
         vendor_insert_stm = get_insert_values_into_table_stm(self.VENDOR_TABLE,
                                                              ['id', 'nif_id', 'vendor',
@@ -148,9 +150,10 @@ class Ingestor:
         self._execute(vendor_synonyms_insert_stm, vendor_synonyms_params)
 
     @timed_class_method('Vendor domains added ')
-    def _insert_vendor_domains(self):
+    def _insert_vendor_domains(self, csv_filename):
         # Prepare vendor domains inserts
-        df_vendor_domain = pd.read_csv(self.metadata.vendor_domain_data_path)
+        df_vendor_domain = pd.read_csv(csv_filename)
+        # df_vendor_domain = df_vendor_domain.drop_duplicates(subset=['domain_name'])
         df_vendor_domain = df_vendor_domain.where(
             pd.notnull(df_vendor_domain), None)
 
@@ -165,9 +168,12 @@ class Ingestor:
             vendor_domain_params.extend(
                 [row['id'], row['domain_name'], row['vendor_id'],
                  row['status'].upper(), False])
+        try:
+            self._execute(vendor_domain_insert_stm, vendor_domain_params)
+        except:
+            logging.exception("Error inserting vendor domains")
 
-        self._execute(vendor_domain_insert_stm, vendor_domain_params)
-
+    @cache
     def _get_keycloak_id(self, original_id):
         if original_id is None:
             return None
@@ -186,7 +192,7 @@ class Ingestor:
             self.TMP_TABLE, ANTIBODY_HEADER))
 
         # Insert raw data into tmp table
-        for antibody_data_path in self.metadata.antibody_data_paths:
+        for antibody_data_path in self.data_paths['antibodies']:
             logging.info(antibody_data_path)
             len_csv = sum(1 for _ in open(antibody_data_path, 'r'))
             for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype=D_TYPES)):
@@ -268,7 +274,8 @@ class Ingestor:
 
     @timed_class_method('AntibodySpecies added')
     def _insert_antibody_species(self, species_map):
-        for antibody_data_path in self.metadata.antibody_data_paths:
+        for antibody_data_path in self.data_paths['antibodies']:
+            logging.info("Inserting species from %s", antibody_data_path)
             for chunk in pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype=D_TYPES):
                 chunk = chunk.where(pd.notnull(chunk), None)
 
@@ -299,9 +306,10 @@ class Ingestor:
         self.cursor.execute(vendor_domain_update_stm)
 
     @timed_class_method('Antibody files added ')
-    def _insert_antibody_files(self):
+    def _insert_antibody_files(self, csv_file):
         # Prepare antibody files insert
-        df_antibody_files = pd.read_csv(self.metadata.antibody_files_path)
+        logging.info("Inserting antibody files from %s")
+        df_antibody_files = pd.read_csv(csv_file)
 
         # insert antibody files
         antibody_files_params = []

@@ -131,7 +131,7 @@ class Application(models.Model):
 
 
 class VendorDomain(models.Model):
-    base_url = models.URLField(unique=True, max_length=URL_MAX_LEN,
+    base_url = models.URLField(max_length=URL_MAX_LEN,
                                null=True, db_column='domain_name', db_index=True)
     vendor = models.ForeignKey(
         Vendor, on_delete=models.CASCADE, null=True, db_column='vendor_id', db_index=True)

@@ -1,4 +1,5 @@
 import logging
+import os
 
 from django.contrib.auth.models import User
 
@@ -7,8 +8,10 @@ from cloudharness.auth import AuthClient
 
 
 class KeycloakService:
-    def __init__(self):
-        self.keycloak_admin = AuthClient().get_admin_client()
+    def __init__(self, username=None, password=None):
+        username = os.getenv("ACCOUNTS_ADMIN_USERNAME", username)
+        password = os.getenv("ACCOUNTS_ADMIN_PASSWORD", password)
+        self.keycloak_admin = AuthClient(username, password).get_admin_client()
 
     @refresh_keycloak_client
     def create_user(self, payload, **kwargs):
