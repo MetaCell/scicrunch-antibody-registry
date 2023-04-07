@@ -189,6 +189,7 @@ const About = () => {
     { name: 'licor', url: 'https://www.licor.com/' },
     { name: 'hytest', url: 'https://www.hytest.fi/home' },
     { name: 'cytoskeleton', url: 'https://www.cytoskeleton.com/' },
+    { name: 'Ansh Labs', url: 'https://www.anshlabs.com/', img: './assets/partners/anshlabs.png' },
   ]
   const history = useHistory();
   const navigate = () => history.push('/');
@@ -215,10 +216,13 @@ const About = () => {
 
           <Slider {...settings}>
             {
-              partners.map((elementInArray, index) => (
+              partners.map((partner, index) => (
                 <Box px={3} key={index}>
-                  <a href={elementInArray.url} target="_blank" rel="noreferrer">
-                    <img src={`./assets/partners/${index+1}.svg`} alt={elementInArray.name}/>
+                  <a href={partner.url} target="_blank" rel="noreferrer">
+                    <Box component="img" src={partner.img || `./assets/partners/${index+1}.svg`} 
+                      alt={partner.name} 
+                      title={partner.name} 
+                      sx={{ maxHeight: "85px", filter: "grayscale(1)" }} />
                   </a>
                 </Box>
               )
