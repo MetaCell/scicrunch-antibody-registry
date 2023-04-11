@@ -80,9 +80,9 @@ class Ingestor:
         self.cursor = cursor
         self.keycloak_service = KeycloakService()
         self.users_map = {}
-        if data_paths['users']:
+        if data_paths.users:
             try:
-                user_ingestor = UsersIngestor(data_paths['users'], keycloak_service=self.keycloak_service)
+                user_ingestor = UsersIngestor(data_paths.users, keycloak_service=self.keycloak_service)
                 self.users_map = user_ingestor.get_users_map()
             except Exception as e:
                 log.error(f"Cannot ingest users: {str(e)}", exc_info=True)

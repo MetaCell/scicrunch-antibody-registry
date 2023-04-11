@@ -94,6 +94,7 @@ class Vendor(models.Model):
         default=CommercialType.OTHER,
         null=True
     )
+    show_link = models.BooleanField(default=True, null=True, blank=True)
 
     class Meta:
         indexes = [
@@ -250,6 +251,7 @@ class Antibody(models.Model):
     lastedit_time = models.DateTimeField(
         auto_now=True, db_index=True, null=True)
     curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
+    show_link = models.BooleanField(default=True, null=True, blank=True) # whether the full link to the antibody is shown. If None, the vendor's default is used
 
     def save(self, *args, **kwargs):
         first_save = self.ix is None

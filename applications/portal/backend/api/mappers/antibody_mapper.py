@@ -118,5 +118,14 @@ class AntibodyMapper(IDAOMapper):
         if dao.species and not ab.targetSpecies:
             ab.targetSpecies = [s.name for s in dao.species.all()]
 
+        if not dao.show_link:
+            if dao.show_link is not None or not dao.vendor.show_link:
+                try:
+                    ab.url = VendorDomain.objects.filter(vendor=dao.vendor).first().base_url
+                except VendorDomain.DoesNotExist:
+                    ab.url = None
+                  
+
+
         # ab.commercialType = dao.
         return ab

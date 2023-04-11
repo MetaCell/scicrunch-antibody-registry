@@ -158,7 +158,7 @@ class Preprocessor:
             vendors=get_metadata_file(RAW_VENDOR_DATA_BASENAME),
             vendor_domains=get_metadata_file(RAW_VENDOR_DOMAIN_DATA_BASENAME),
             users=get_metadata_file(RAW_USERS_DATA_BASENAME),
-            antobody_files=get_metadata_file(RAW_ANTIBODY_FILES_BASENAME)
+            antibody_files=get_metadata_file(RAW_ANTIBODY_FILES_BASENAME)
         )
 
         if was_downloaded:
