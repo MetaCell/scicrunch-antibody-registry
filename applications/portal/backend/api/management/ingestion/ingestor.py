@@ -251,7 +251,7 @@ class Ingestor:
     def _insert_antibodies(self):
 
         antibody_stm = f"INSERT INTO {self.ANTIBODY_TABLE} (ix, ab_name, ab_id, accession, commercial_type, uid, catalog_num, cat_alt,  \
-                       vendor_id, url, antigen_id, target_subregion, target_modification, \
+                       vendor_id, url, link as show_link, antigen_id, target_subregion, target_modification, \
                        epitope, clonality, clone_id, product_isotype, target_species_raw, \
                        product_conjugate, defining_citation, product_form, comments, feedback, \
                        curator_comment, disc_date, status, insert_time, curate_time, source_organism_id)\
