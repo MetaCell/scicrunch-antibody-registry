@@ -10,8 +10,8 @@ from api.services.import_antbody_service import filter_dataset_c1, filter_datase
 from api.services.keycloak_service import KeycloakService
 from api.services.specie_service import get_or_create_specie
 from api.services.vendor_service import get_or_create_vendor
-from api.widgets.foreign_key_widget import ForeignKeyWidgetWithCreation
-from api.widgets.many_to_many_widget import ManyToManyWidgetWithCreation
+from .widgets.foreign_key_widget import ForeignKeyWidgetWithCreation
+from .widgets.many_to_many_widget import ManyToManyWidgetWithCreation
 from portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY, FILL_KEY, UPDATE_KEY, \
     DUPLICATE_KEY, KC_USER_ID_KEY, USER_KEY, REMOVE_KEYWORD
 
@@ -38,46 +38,47 @@ class AntibodyResource(ModelResource):
         widget=ForeignKeyWidgetWithCreation(model=Vendor, field='name',
                                             get_or_create=lambda **kwargs: get_or_create_vendor(**kwargs)[0])
     )
-    catalog_num = Field(attribute='catalog_num', column_name='CAT NUM')
-    url = Field(attribute='url', column_name='URL')
+    catalog_num = Field(attribute='catalog_num', column_name='catalog_num')
+    url = Field(attribute='url', column_name='url')
+    link = Field(attribute='show_link', column_name='link')
     target = Field(
-        column_name='TARGET',
+        column_name='ab_target',
         attribute='antigen',
         widget=ForeignKeyWidgetWithCreation(model=Antigen, field='symbol',
                                             get_or_create=lambda **kwargs: get_or_create_gene(**kwargs)[
-                                                0],
-                                            other_cols_map={'GID': 'entrez_id', 'UNIPROT': 'uniprot_id'})
+                                                0])
     )
+
     species = Field(
-        column_name='SPECIES',
+        column_name='target_species',
         attribute='species',
         widget=ManyToManyWidgetWithCreation(model=Specie, separator=';', field='name',
                                             get_or_create=lambda **kwargs: get_or_create_specie(**kwargs)[0])
     )
-    clonality = Field(attribute='clonality', column_name='CLONALITY')
+    clonality = Field(attribute='clonality', column_name='clonality')
     host = Field(
-        column_name='HOST',
+        column_name='source_organism',
         attribute='source_organism',
         widget=ForeignKeyWidgetWithCreation(model=Specie, field='name',
                                             get_or_create=lambda **kwargs: get_or_create_specie(**kwargs)[0])
     )
-    clone_id = Field(attribute='clone_id', column_name='CLONE')
-    product_isotype = Field(attribute='product_isotype', column_name='ISOTYPE')
+    clone_id = Field(attribute='clone_id', column_name='clone_id')
+    product_isotype = Field(attribute='product_isotype', column_name='product_isotype')
     product_conjugate = Field(
-        attribute='product_conjugate', column_name='CONJUGATE')
-    product_form = Field(attribute='product_form', column_name='FORM')
-    comments = Field(attribute='comments', column_name='COMMENTS')
+        attribute='product_conjugate', column_name='product_conjugate')
+    product_form = Field(attribute='product_form', column_name='product_form')
+    comments = Field(attribute='comments', column_name='comments')
     defining_citation = Field(
-        attribute='defining_citation', column_name='CITATION')
-    subregion = Field(attribute='subregion', column_name='SUBREGION')
-    modifications = Field(attribute='modifications', column_name='MODIFICATION')
-    gene_id = Field(attribute='antigen__entrez_id', column_name='GeneID')
-    disc_date = Field(attribute='disc_date', column_name='DISC')
-    commercial_type = Field(attribute='commercial_type', column_name='TYPE')
-    uniprot = Field(attribute='antigen__uniprot_id', column_name='UNIPROT')
-    epitope = Field(attribute='epitope', column_name='EPITOPE')
-    cat_alt = Field(attribute='cat_alt', column_name='CAT ALT')
-    ab_id = Field(attribute='ab_id', column_name='id')
+        attribute='defining_citation', column_name='defining_citation')
+    subregion = Field(attribute='subregion', column_name='target_subregion')
+    modifications = Field(attribute='modifications', column_name='target_modification')
+    gene_id = Field(attribute='entrez_id', column_name='ab_target_entrez_gid')
+    disc_date = Field(attribute='disc_date', column_name='disc_date')
+    commercial_type = Field(attribute='commercial_type', column_name='commercial_type')
+    uniprot = Field(attribute='uniprot_id', column_name='uniprot_id')
+    epitope = Field(attribute='epitope', column_name='epitope')
+    cat_alt = Field(attribute='cat_alt', column_name='cat_alt')
+    ab_id = Field(attribute='ab_id', column_name='ab_id')
     accession = Field(attribute='accession', column_name='ab_id_old')
     ix = Field(attribute='ix', column_name='ix')
 
@@ -110,7 +111,7 @@ class AntibodyResource(ModelResource):
     class Meta:
         model = Antibody
         fields = (
-            'name', 'vendor', 'catalog_num', 'url', 'target', 'species', 'clonality', 'host', 'clone_id',
+            'name', 'vendor', 'catalog_num', 'url', 'link', 'target', 'species', 'clonality', 'host', 'clone_id',
             'product_isotype', 'product_conjugate', 'product_form', 'comments', 'defining_citation', 'subregion',
             'modifications', 'gene_id', 'disc_date', 'commercial_type', 'epitope', 'cat_alt', 'ab_id',
             'accession', 'ix')
@@ -199,13 +200,18 @@ class AntibodyResource(ModelResource):
         antibody_identifier = self.get_antibody_identifier(row)
         # modify empty strings to none on identifier columns
         create_duplicate = self.request.session.get(FOR_EXTANT_KEY, UPDATE_KEY) == DUPLICATE_KEY
-        for field in antibody_identifier.fields:
-            # Exceptionally on the create_duplicate option we retain the ab_id
-            if field.attribute == 'ab_id' and create_duplicate:
-                continue
-            if field.column_name in row:
-                if row[field.column_name] == '':
-                    row[field.column_name] = None
+        if antibody_identifier:
+            for field in antibody_identifier.fields:
+                # Exceptionally on the create_duplicate option we retain the ab_id
+                if field.attribute == 'ab_id' and create_duplicate:
+                    continue
+                if field.attribute == 'link' and field.column_name in row and row[field.column_name]:
+                    row[field.column_name] = 'y' in row[field.column_name].lower()
+                else:
+                    row['link'] = True
+                if field.column_name in row:
+                    if row[field.column_name] == '':
+                        row[field.column_name] = None
         if KC_USER_ID_KEY in kwargs:
             row['uid'] = kwargs[KC_USER_ID_KEY]
 

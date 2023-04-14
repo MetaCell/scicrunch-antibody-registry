@@ -11,9 +11,11 @@ class ForeignKeyWidgetWithCreation(ForeignKeyWidget):
         self.get_or_create = get_or_create
 
     def clean(self, value, row=None, **kwargs):
+        if not value:
+            return None
         try:
             return super().clean(value, row, **kwargs)
-        except self.model.DoesNotExist:
+        except:
             params = {self.field: value}
             if row is not None:
                 params = {**params, **{self.other_cols[p]: row[p] for p in self.other_cols if row[p] != ''}}

@@ -488,7 +488,7 @@ def antibody_persistence_directory(instance, filename):
 class AntibodyFiles(models.Model):
     id = models.AutoField(primary_key=True, unique=True, null=False)
     antibody = models.ForeignKey(Antibody, on_delete=models.CASCADE, db_column='ab_ix')
-    type = models.CharField(max_length=ANTIBODY_FILE_TYPE_MAX_LEN)
+    type = models.CharField(max_length=ANTIBODY_FILE_TYPE_MAX_LEN, null=True)
     file = models.FileField(upload_to=antibody_persistence_directory)
     display_name = models.CharField(max_length=ANTIBODY_FILE_DISPLAY_NAME_MAX_LEN)
     timestamp = models.DateTimeField(auto_now_add=True)

@@ -22,7 +22,7 @@ from api.models import (
     VendorDomain,
     VendorSynonym, AntibodyFiles,
 )
-from api.resources.AntibodyResource import AntibodyResource
+from api.import_export import AntibodyResource
 from api.services.keycloak_service import KeycloakService
 from cloudharness import log
 from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
