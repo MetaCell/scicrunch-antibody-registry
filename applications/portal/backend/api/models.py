@@ -150,10 +150,7 @@ class VendorDomain(models.Model):
 class Antigen(models.Model):
     symbol = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN,
                               db_column='ab_target', null=True, db_index=True)
-    entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
-                                 null=True, db_index=True, blank=True)
-    uniprot_id = models.CharField(
-        unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True, blank=True)
+
 
     class Meta:
         indexes = [
@@ -162,12 +159,7 @@ class Antigen(models.Model):
         ]
 
     def __str__(self):
-        s =  f"{self.symbol or '?' + self.id}"
-        if self.entrez_id:
-           s += f" - EZ:{self.entrez_id}"
-        if self.uniprot_id:
-           s += f" - UP:{self.uniprot_id}"
-        return s
+        return self.symbol
 
 
 class Antibody(models.Model):
@@ -200,6 +192,10 @@ class Antibody(models.Model):
                           null=True, db_index=True, blank=True)
     antigen = models.ForeignKey(
         Antigen, on_delete=models.SET_NULL, db_column='antigen_id', null=True, blank=True)
+    entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
+                                 null=True, db_index=True, blank=True)
+    uniprot_id = models.CharField(
+        unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True, blank=True)
     target_species_raw = models.CharField(
         max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True, verbose_name="Target species (csv)",
         help_text="Comma separated value for target species. Values filled here will be parsed and assigned to the 'Target species' field.")

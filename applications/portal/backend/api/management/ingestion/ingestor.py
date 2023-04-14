@@ -73,7 +73,7 @@ class Ingestor:
     VENDOR_DOMAIN_TABLE = VendorDomain.objects.model._meta.db_table
     VENDOR_SYNONYM_TABLE = VendorSynonym.objects.model._meta.db_table
     VENDOR_TABLE = Vendor.objects.model._meta.db_table
-    TMP_TABLE = 'tmp_table'
+    ANTIBODIES_TMP_TABLE = 'tmp_table'
 
     def __init__(self, data_paths: AntibodyDataPaths, cursor):
         self.data_paths = data_paths
@@ -97,12 +97,11 @@ class Ingestor:
         self._truncate_tables()
         self.data_paths.vendors and self._insert_vendors(self.data_paths.vendors)
         self.data_paths.vendor_domains and self._insert_vendor_domains(self.data_paths.vendor_domains)
-        self._fill_tmp_table()
+        self._insert_antibodies(self.ANTIBODIES_TMP_TABLE)
         self._insert_genes()
         species_map = self._insert_species(species_map)
-        self._insert_antibodies()
+        self._swap_antibodies(self.ANTIBODIES_TMP_TABLE, self.ANTIBODY_TABLE)
         self._insert_antibody_species(species_map)
-        self.data_paths.vendor_domains and self._update_vendor_domains()
         self.data_paths.antibody_files and self._insert_antibody_files(self.data_paths.antibody_files)
         self._reset_auto_increment()
         self._drop_tmp_table()
@@ -186,12 +185,12 @@ class Ingestor:
         return self.users_map.get(original_id, None)
 
     @timed_class_method('Temporary table filled')
-    def _fill_tmp_table(self):
+    def _insert_antibodies(self, table):
 
         self.cursor.execute(get_create_table_stm(
-            self.TMP_TABLE, ANTIBODY_HEADER))
+            table, ANTIBODY_HEADER))
 
-        # Insert raw data into tmp table
+        # Insert raw data into table
         for antibody_data_path in self.data_paths.antibodies:
             logging.info(antibody_data_path)
             len_csv = sum(1 for _ in open(antibody_data_path, 'r'))
@@ -199,7 +198,7 @@ class Ingestor:
                 chunk = chunk.where(pd.notnull(chunk), None)
                 chunk['uid_legacy'] = chunk['uid']
                 chunk['uid'] = chunk['uid_legacy'].apply(lambda x: self._get_keycloak_id(x))
-                raw_data_insert_stm = get_insert_values_into_table_stm(self.TMP_TABLE, ANTIBODY_HEADER.keys(),
+                raw_data_insert_stm = get_insert_values_into_table_stm(table, ANTIBODY_HEADER.keys(),
                                                                        len(chunk))
 
                 self._execute(raw_data_insert_stm, chunk.to_numpy().flatten().tolist())
@@ -213,21 +212,14 @@ class Ingestor:
                                                              'ab_target',
                                                              True,
                                                              'ab_target',
-                                                             self.TMP_TABLE))
+                                                             self.ANTIBODIES_TMP_TABLE))
 
-        # Update antigen with ids
-        antigen_update_stm = f"UPDATE {self.ANTIGEN_TABLE} " \
-                             f"SET ab_target_entrez_gid=TMP.ab_target_entrez_gid, " \
-                             f"uniprot_id=TMP.uniprot_id " \
-                             f"FROM {self.TMP_TABLE} as TMP " \
-                             f"WHERE {self.ANTIGEN_TABLE}.ab_target=TMP.ab_target; "
-        self.cursor.execute(antigen_update_stm)
 
     @timed_class_method('Species added')
     def _insert_species(self, species_map):
-        get_species_stm = f"SELECT DISTINCT target_species FROM {self.TMP_TABLE} " \
+        get_species_stm = f"SELECT DISTINCT target_species FROM {self.ANTIBODIES_TMP_TABLE} " \
                           f"UNION " \
-                          f"SELECT DISTINCT source_organism FROM {self.TMP_TABLE}"
+                          f"SELECT DISTINCT source_organism FROM {self.ANTIBODIES_TMP_TABLE}"
         self.cursor.execute(get_species_stm)
         species_id = 1
         for row in self.cursor:
@@ -248,21 +240,23 @@ class Ingestor:
         return species_map
 
     @timed_class_method('Antibodies added')
-    def _insert_antibodies(self):
+    def _swap_antibodies(self, from_table, to_table):
 
-        antibody_stm = f"INSERT INTO {self.ANTIBODY_TABLE} (ix, ab_name, ab_id, accession, commercial_type, uid, catalog_num, cat_alt,  \
-                       vendor_id, url, link as show_link, antigen_id, target_subregion, target_modification, \
+        antibody_stm = f"INSERT INTO {to_table} (ix, ab_name, ab_id, accession, commercial_type, uid, catalog_num, cat_alt,  \
+                       vendor_id, url, show_link, antigen_id, ab_target_entrez_gid, uniprot_id, target_subregion, target_modification, \
                        epitope, clonality, clone_id, product_isotype, target_species_raw, \
                        product_conjugate, defining_citation, product_form, comments, feedback, \
                        curator_comment, disc_date, status, insert_time, curate_time, source_organism_id)\
                        SELECT DISTINCT ix, ab_name, ab_id, ab_id_old, TMP.commercial_type, \
-                       uid, catalog_num, cat_alt, vendor_id, url, antigen.id, \
+                       uid, catalog_num, cat_alt, vendor_id, url, \
+                       (CASE WHEN link='yes' THEN true ELSE false END) show_link, \
+                       antigen.id, ab_target_entrez_gid, uniprot_id, \
                        target_subregion, target_modification, epitope, clonality, \
                        clone_id, product_isotype, target_species AS target_species_raw, product_conjugate, defining_citation, product_form, \
                        comments, feedback, curator_comment, disc_date, status, \
                        to_timestamp(cast(insert_time as BIGINT)), \
                        to_timestamp(cast(curate_time as BIGINT)), SP.id \
-                       FROM {self.TMP_TABLE} as TMP \
+                       FROM {from_table} as TMP \
                        LEFT JOIN {self.VENDOR_TABLE} as vendor \
                        ON TMP.vendor_id = vendor.id \
                        LEFT JOIN {self.ANTIGEN_TABLE} as antigen \
@@ -295,15 +289,7 @@ class Ingestor:
                     int(len(species_params) / 2))
 
                 self._execute(antibody_species_insert_stm, species_params)
-
-    @timed_class_method('Vendor domain links updated')
-    def _update_vendor_domains(self):
-        vendor_domain_update_stm = f"UPDATE {self.VENDOR_DOMAIN_TABLE} " \
-                                   f"SET link = True " \
-                                   f"FROM {self.TMP_TABLE} " \
-                                   f"WHERE {self.VENDOR_DOMAIN_TABLE}.vendor_id={self.TMP_TABLE}.vendor_id " \
-                                   f"AND {self.TMP_TABLE}.link = 'yes'; "
-        self.cursor.execute(vendor_domain_update_stm)
+                
 
     @timed_class_method('Antibody files added ')
     def _insert_antibody_files(self, csv_file):
@@ -350,4 +336,4 @@ class Ingestor:
 
     @timed_class_method('Temporary table dropped')
     def _drop_tmp_table(self):
-        self.cursor.execute(DROP_TABLE_STM.format(table_name=self.TMP_TABLE))
+        self.cursor.execute(DROP_TABLE_STM.format(table_name=self.ANTIBODIES_TMP_TABLE))

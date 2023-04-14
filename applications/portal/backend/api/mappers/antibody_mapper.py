@@ -122,9 +122,11 @@ class AntibodyMapper(IDAOMapper):
             if dao.show_link is not None or not dao.vendor.show_link:
                 try:
                     ab.url = VendorDomain.objects.filter(vendor=dao.vendor).first().base_url
-                except VendorDomain.DoesNotExist:
+                except (VendorDomain.DoesNotExist, AttributeError):
                     ab.url = None
-                  
+
+        if ab.url and "//" not in ab.url:
+            ab.url = "//" + ab.url  
 
 
         # ab.commercialType = dao.

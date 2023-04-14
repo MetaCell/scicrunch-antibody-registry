@@ -203,8 +203,8 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
 
 @admin.register(Antigen)
 class GeneAdmin(admin.ModelAdmin):
-    search_fields = ("symbol", "entrez_id", "uniprot_id")
-    list_display = ("symbol", "entrez_id", "uniprot_id")
+    search_fields = ("symbol",)
+    list_display = ("symbol",)
 
 
 @admin.register(Specie)
