@@ -1,4 +1,5 @@
 import logging
+import os
 from timeit import default_timer as timer
 
 from keycloak.exceptions import KeycloakAuthenticationError
@@ -26,7 +27,9 @@ def refresh_keycloak_client(method):
         try:
             res = method(*args, **kwargs)
         except KeycloakAuthenticationError:
-            self.keycloak_admin = AuthClient().get_admin_client()
+            username = os.getenv("ACCOUNTS_ADMIN_USERNAME", None)
+            password = os.getenv("ACCOUNTS_ADMIN_PASSWORD", None)
+            self.keycloak_admin = AuthClient(username=username, password=password).get_admin_client()
             res = method(*args, **kwargs)
         return res
 
