@@ -84,7 +84,9 @@ class TargetSpeciesInlineAdmin(admin.TabularInline):
 
 class AntibodyFilesAdmin(admin.TabularInline):
     model = AntibodyFiles
+    fields = ("file", "type", "antibody")
     exclude = ("uploader_uid", 'filehash', 'timestamp', 'display_name')
+    extra = 1
 
 @admin.register(Antibody)
 class AntibodyAdmin(ImportMixin, admin.ModelAdmin):

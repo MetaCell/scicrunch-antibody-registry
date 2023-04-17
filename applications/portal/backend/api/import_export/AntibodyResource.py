@@ -40,7 +40,7 @@ class AntibodyResource(ModelResource):
     )
     catalog_num = Field(attribute='catalog_num', column_name='catalog_num')
     url = Field(attribute='url', column_name='url')
-    link = Field(attribute='show_link', column_name='link')
+    link = Field(column_name='link')
     target = Field(
         column_name='ab_target',
         attribute='antigen',
