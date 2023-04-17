@@ -39,7 +39,7 @@ def clean_df(df):
 
 
 def update_vendors(csv_path: str):
-    logging.info("Updating vendors")
+    logging.info("Updating vendors", csv_path)
     df_vendors = pd.read_csv(csv_path)
     clean_df(df_vendors)
     valid_commercial_types = ('commercial', 'personal', 'other', 'non-profit')
@@ -127,7 +127,7 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
 
 
 def update_antibody_files(csv_path: str):
-    logging.info("Updating antibody files")
+    logging.info("Updating antibody files", csv_path)
     df_antibody_files = pd.read_csv(csv_path)
     df_antibody_files['filename'] = df_antibody_files.apply(
         lambda row: get_antibody_persistence_directory(row['id'], os.path.basename(row['filename'])), axis=1)
@@ -149,7 +149,7 @@ class Preprocessor:
 
         def get_metadata_file(file_name: str) -> str:
             fnames = glob.glob(os.path.join(
-                self.dest, '**', f"{file_name}*.csv"), recursive=True)
+                self.dest, '**', f"{file_name}.csv"), recursive=True)
             return fnames and fnames[0]
 
         metadata = AntibodyDataPaths(
@@ -166,6 +166,9 @@ class Preprocessor:
             update_vendors(metadata.vendors)
             update_antibodies(metadata.antibodies)
             update_users(metadata.users)
-            update_antibody_files(metadata.antibody_files)
+            try:
+                update_antibody_files(metadata.antibody_files)
+            except Exception as e:
+                logging.exception("Failed to update antibody files")
 
         return metadata
