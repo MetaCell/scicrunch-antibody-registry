@@ -38,8 +38,8 @@ def clean_df(df):
     df.replace(to_replace=['(null)', '(NaN)'], value=None, inplace=True)
 
 
-def update_vendors(csv_path: str):
-    logging.info("Updating vendors", csv_path)
+def preprocess_vendors(csv_path: str):
+    logging.info("Preprocess vendors %s", csv_path)
     df_vendors = pd.read_csv(csv_path)
     clean_df(df_vendors)
     valid_commercial_types = ('commercial', 'personal', 'other', 'non-profit')
@@ -49,8 +49,8 @@ def update_vendors(csv_path: str):
     df_vendors.to_csv(csv_path, index=False, mode='w+')
 
 
-def update_users(csv_path: str):
-    logging.info("Updating users")
+def preprocess_users(csv_path: str):
+    logging.info("Preprocess users")
     df_users = pd.read_csv(csv_path)
     # df_users = df_users.drop(['password', 'salt'], axis=1)
     df_users = df_users.drop_duplicates(
@@ -62,8 +62,8 @@ def update_users(csv_path: str):
     df_users.to_csv(csv_path, index=False, mode='w+')
 
 
-def update_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_mapping.json'):
-    logging.info("Updating vendor domains")
+def preprocess_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_mapping.json'):
+    logging.info("Preprocessing vendor domains %s", vendors_map_path)
     with open(vendors_map_path, 'r') as f:
         vendors_map = json.load(f)
         df_vendor_domain = pd.read_csv(csv_path)
@@ -74,8 +74,8 @@ def update_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_mapp
         df_vendor_domain.to_csv(csv_path, index=False, mode='w+')
 
 
-def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibodies_mapping.json'):
-    logging.info("Updating antibodies")
+def preprocess_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibodies_mapping.json'):
+    logging.info("Preprocessing antibodies")
     with open(antibodies_map_path, 'r') as f:
         antibodies_map = json.load(f)
         for antibody_data_path in csv_paths:
@@ -126,7 +126,7 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
             replace_file(antibody_data_path, tmp_antibody_data_path)
 
 
-def update_antibody_files(csv_path: str):
+def preprocess_antibody_files(csv_path: str):
     logging.info("Updating antibody files", csv_path)
     df_antibody_files = pd.read_csv(csv_path)
     df_antibody_files['filename'] = df_antibody_files.apply(
@@ -161,13 +161,13 @@ class Preprocessor:
             antibody_files=get_metadata_file(RAW_ANTIBODY_FILES_BASENAME)
         )
 
-        if was_downloaded:
-            update_vendor_domains(metadata.vendor_domains)
-            update_vendors(metadata.vendors)
-            update_antibodies(metadata.antibodies)
-            update_users(metadata.users)
+        if was_downloaded or os.getenv('FORCE_PREPROCESSING', False):
+            metadata.vendor_domains and preprocess_vendor_domains(metadata.vendor_domains)
+            metadata.vendors and preprocess_vendors(metadata.vendors)
+            metadata.antibodies and preprocess_antibodies(metadata.antibodies)
+            metadata.users and preprocess_users(metadata.users)
             try:
-                update_antibody_files(metadata.antibody_files)
+                metadata.antibody_files and preprocess_antibody_files(metadata.antibody_files)
             except Exception as e:
                 logging.exception("Failed to update antibody files")
 
