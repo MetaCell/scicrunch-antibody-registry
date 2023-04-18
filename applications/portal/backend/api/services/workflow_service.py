@@ -10,7 +10,8 @@ def _create_task(image_name, **kwargs):
     from cloudharness.workflows import tasks
 
     return tasks.CustomTask(
-        name=f"{image_name}-{str(uuid.uuid4())[:8]}", image_name=image_name, **kwargs
+        name=f"{image_name}-{str(uuid.uuid4())[:8]}", image_name=image_name, **kwargs,
+        resources={"requests": {"cpu": "100m", "memory": "3Gi"}}
     )
 
 
