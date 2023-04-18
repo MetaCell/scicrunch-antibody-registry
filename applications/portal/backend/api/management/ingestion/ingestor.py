@@ -294,7 +294,7 @@ class Ingestor:
     @timed_class_method('Antibody files added ')
     def _insert_antibody_files(self, csv_file):
         # Prepare antibody files insert
-        logging.info("Inserting antibody files from %s")
+        logging.info("Inserting antibody files from %s", csv_file)
         df_antibody_files = pd.read_csv(csv_file)
 
         # insert antibody files
