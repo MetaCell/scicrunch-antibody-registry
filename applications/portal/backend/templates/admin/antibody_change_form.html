@@ -1,0 +1,15 @@
+{% extends "admin/change_form.html" %}
+
+
+
+{% block submit_buttons_top %}{% load i18n admin_urls %}
+<div class="submit-row">
+{% block submit-row %}
+<input type="submit" class="default" value="{% translate 'Save and continue editing' %}" name="_continue">
+
+{% endblock %}
+<input type="submit" value="{% translate 'Save' %}"  name="_save">
+<input type="submit" value="{% translate 'Save and add another' %}" name="_addanother">
+
+
+</div>{% endblock %}
