@@ -50,14 +50,14 @@ harness:
   database:
     auto: true
     type: postgres
-    size: 20Gi
+    size: 40Gi
     resources:
       requests:
-        memory: 2Gi
-        cpu: 500m
+        memory: 640Mi
+        cpu: 200m
       limits:
-        memory: 10Gi
-        cpu: 4
+        memory: 640Mi
+        cpu: 2
   accounts:
     roles:
       - administrator
