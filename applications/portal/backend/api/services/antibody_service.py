@@ -29,7 +29,7 @@ def search_antibodies_by_catalog(search: str, page: int = 1, size: int = 50,
 def get_antibodies(page: int = 1, size: int = 50) -> PaginatedAntibodies:
     try:
         p = Paginator(Antibody.objects.select_related("antigen", "vendor", "source_organism").
-                    prefetch_related("species").all()
+                    prefetch_related("species")
                     .filter(status=STATUS.CURATED).order_by("-ix"), size)
         items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
     except Antibody.DoesNotExist:
@@ -38,7 +38,7 @@ def get_antibodies(page: int = 1, size: int = 50) -> PaginatedAntibodies:
 
 
 def get_user_antibodies(userid: str, page: int = 1, size: int = 50) -> PaginatedAntibodies:
-    p = Paginator(Antibody.objects.all().filter(
+    p = Paginator(Antibody.objects.filter(
         uid=userid).order_by("lastedit_time"), size)
     items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)

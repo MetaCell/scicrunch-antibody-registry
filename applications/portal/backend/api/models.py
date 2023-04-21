@@ -288,9 +288,13 @@ class Antibody(models.Model):
             if first_save:
                 self.curate_time = timezone.now()
             else:
-                old_version = Antibody.objects.get(ix=self.ix)
-                if old_version.status != STATUS.CURATED:
+                try:
+                    old_version = Antibody.objects.get(ix=self.ix)
+                    if old_version.status != STATUS.CURATED:
+                        self.curate_time = timezone.now()
+                except Antibody.DoesNotExist:
                     self.curate_time = timezone.now()
+                    
 
     def _handle_duplicates(self, *args, **kwargs):
         """

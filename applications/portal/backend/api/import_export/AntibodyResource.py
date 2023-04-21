@@ -6,7 +6,7 @@ from import_export.resources import ModelResource
 
 from api.models import Antibody, Vendor, Antigen, Specie, STATUS
 from api.services.gene_service import get_or_create_gene
-from api.services.import_antbody_service import filter_dataset_c1, filter_dataset_c2, get_antibody_q1, get_antibody_q2
+from api.import_export.import_antibody_helpers import  filter_dataset_by_accession, filter_dataset_by_catnum_vendor, filter_dataset_by_ix, get_antibody_q1, get_antibody_q2
 from api.services.keycloak_service import KeycloakService
 from api.services.specie_service import get_or_create_specie
 from api.services.vendor_service import get_or_create_vendor
@@ -18,6 +18,12 @@ from portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY,
 
 class AntibodyIdentifier:
     def __init__(self, fields, condition: Callable, q: Callable, filter_dataset: Callable):
+        """
+        :param fields: list of fields that are used to identify the antibody
+        :param condition: function that returns true if the identifier is activated
+        :param q: how to filter objects in the existing database: returns a Q object
+        :param filter_dataset: function that filters the dataset to be ingested (the data from the csv file). The mask to the pandas dataframe is returned
+        """
         self.fields = fields
         self.condition = condition
         self.q = q
@@ -31,9 +37,9 @@ class AntibodyInstanceLoaderClass(ModelInstanceLoader):
 
 
 class AntibodyResource(ModelResource):
-    name = Field(attribute='ab_name', column_name='NAME')
+    name = Field(attribute='ab_name', column_name='ab_name')
     vendor = Field(
-        column_name='VENDOR',
+        column_name='vendor',
         attribute='vendor',
         widget=ForeignKeyWidgetWithCreation(model=Vendor, field='name',
                                             get_or_create=lambda **kwargs: get_or_create_vendor(**kwargs)[0])
@@ -87,20 +93,23 @@ class AntibodyResource(ModelResource):
         super().__init__()
         self.antibody_identifiers = [
             AntibodyIdentifier(
-                [self.fields['ab_id'], self.fields['ix'], self.fields['accession']],
-                lambda row: self.fields['ab_id'].column_name in row and (
-                        self.fields['ix'].column_name in row or self.fields['accession'].column_name in row),
-                lambda dataset: get_antibody_q1(dataset, self.fields['ab_id'],
-                                                [self.fields['ix'], self.fields['accession']]),
-                lambda dataset, negate, antibodies: filter_dataset_c1(dataset, negate, antibodies, self.fields['ab_id'],
-                                                                      self.fields['ix'], self.fields['accession'])
+                [self.fields['ix']],
+                lambda row: self.fields['ix'].column_name in row,
+                lambda dataset: get_antibody_q1(dataset, self.fields['ix']),
+                lambda dataset, negate, antibodies: filter_dataset_by_ix(dataset, negate, antibodies)
+            ),
+            AntibodyIdentifier(
+                [self.fields['accession']],
+                lambda row: self.fields['accession'].column_name in row,
+                lambda dataset: get_antibody_q1(dataset, self.fields['accession']),
+                lambda dataset, negate, antibodies: filter_dataset_by_accession(dataset, negate, antibodies)
             ),
             AntibodyIdentifier(
                 [self.fields['vendor'], self.fields['catalog_num']],
                 lambda row: self.fields['vendor'].column_name in row and self.fields['catalog_num'].column_name in row,
                 lambda dataset: get_antibody_q2(
                     dataset, self.fields['catalog_num'], self.fields['vendor']),
-                lambda dataset, negate, antibodies: filter_dataset_c2(dataset, negate, antibodies,
+                lambda dataset, negate, antibodies: filter_dataset_by_catnum_vendor(dataset, negate, antibodies,
                                                                       self.fields['catalog_num'],
                                                                       self.fields['vendor'])
             )
@@ -189,12 +198,14 @@ class AntibodyResource(ModelResource):
         dataset.df = dataset.df.dropna(axis=0, how='all')
 
     def _filter_dataset(self, dataset, negate_filter_condition=False):
-        ic = self.get_antibody_identifier(dataset.headers)
-        if ic is None:
+        antibody_identifier = self.get_antibody_identifier(dataset.headers)
+        if antibody_identifier is None:
             return
-        existent_antibodies = Antibody.objects.filter(ic.q(dataset))
-        dataset.df = dataset.df.where(ic.filter_dataset(
-            dataset, negate_filter_condition, existent_antibodies))
+        existent_antibodies = Antibody.objects.filter(antibody_identifier.q(dataset))
+        dataset.df = dataset.df.where(
+            antibody_identifier.filter_dataset(
+            dataset, negate_filter_condition, existent_antibodies)
+        )
 
     def before_import_row(self, row, row_number=None, **kwargs):
         antibody_identifier = self.get_antibody_identifier(row)
@@ -205,6 +216,8 @@ class AntibodyResource(ModelResource):
                 # Exceptionally on the create_duplicate option we retain the ab_id
                 if field.attribute == 'ab_id' and create_duplicate:
                     continue
+                if field.attribute == 'ab_id' or field.attribute == "ab_id_old":
+                    row[field.column_name] = row[field.column_name].replace("AB_", "")
                 if field.attribute == 'link' and field.column_name in row and row[field.column_name]:
                     row[field.column_name] = 'y' in row[field.column_name].lower()
                 else:
