@@ -207,8 +207,8 @@ class Ingestor:
                 try:
                     self._execute(raw_data_insert_stm, chunk.to_numpy().flatten().tolist())
                 except:
-                    logging.exception("Error inserting file", antibody_data_path)
-                    logging.error(raw_data_insert_stm)
+                    logging.exception("Error inserting antibodies from, chunk #", antibody_data_path, i)
+                    logging.error(raw_data_insert_stm % chunk.to_numpy().flatten().tolist())
                     error = True
 
                 logging.info(

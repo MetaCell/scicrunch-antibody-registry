@@ -215,7 +215,7 @@ RAW_VENDOR_DOMAIN_DATA_BASENAME = 'antibody_vendors_domain'
 RAW_USERS_DATA_BASENAME = 'users_antibody'
 RAW_ANTIBODY_FILES_BASENAME = 'antibody_files'
 
-CHUNK_SIZE = 10 ** 5
+CHUNK_SIZE = 10 ** 4
 
 UID_KEY = 'uid'
 GUID_KEY = 'guid'
