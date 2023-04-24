@@ -11,7 +11,8 @@ class KeycloakService:
     def __init__(self, username=None, password=None):
         username = os.getenv("ACCOUNTS_ADMIN_USERNAME", username)
         password = os.getenv("ACCOUNTS_ADMIN_PASSWORD", password)
-        self.keycloak_admin = AuthClient(username, password).get_admin_client()
+        self.auth_client = AuthClient(username, password)
+        self.keycloak_admin = self.auth_client.get_admin_client()
 
     @refresh_keycloak_client
     def create_user(self, payload, **kwargs):
@@ -20,6 +21,11 @@ class KeycloakService:
     @refresh_keycloak_client
     def add_user_social_login(self, user_id, provider_id, provider_user_id, provider_user_name):
         return self.keycloak_admin.add_user_social_login(user_id, provider_id, provider_user_id, provider_user_name)
+    
+    @refresh_keycloak_client
+    def get_user_by_username(self, username):
+        users = self.auth_client.get_users({"username": username})
+        return users[0] if len(users) else None
 
     @refresh_keycloak_client
     def get_user_by_attribute(self, attribute: str, value: str):
