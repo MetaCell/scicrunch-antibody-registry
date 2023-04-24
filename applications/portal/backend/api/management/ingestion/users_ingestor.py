@@ -1,11 +1,12 @@
 import logging
 from enum import Enum
 from typing import Dict
+from api.services.keycloak_service import KeycloakService
 
 import pandas as pd
 
 from api.utilities.decorators import timed_class_method
-from portal.settings import ORCID_URL, USERS_RELEVANT_HEADER, GUID_INDEX, PROVIDER_ID
+from portal.settings import ORCID_URL, USERS_RELEVANT_HEADER, GUID_INDEX, PROVIDER_ID, EMAIL_INDEX
 
 
 class KeycloakRequiredActions(Enum):
@@ -14,15 +15,15 @@ class KeycloakRequiredActions(Enum):
 
 
 class UsersIngestor:
-    def __init__(self, users_data_path, keycloak_service):
+    def __init__(self, users_data_path, keycloak_service: KeycloakService):
         self.users_df = pd.read_csv(users_data_path, dtype='unicode')
         self.users_df = self.users_df.where(pd.notnull(self.users_df), '')
         self.keycloak_service = keycloak_service
 
     @timed_class_method('Keycloak users added')
-    def get_users_map(self) -> Dict:
+    def ingest_users(self) -> Dict:
         return {str(int(float(row[GUID_INDEX]))): self._get_or_create_keycloak_user_from_row(*row) for row in
-                self.users_df[USERS_RELEVANT_HEADER].to_numpy() if row[GUID_INDEX] != ''}
+                self.users_df[USERS_RELEVANT_HEADER].to_numpy() if row[GUID_INDEX] != '' and row[EMAIL_INDEX]}
 
     def _get_or_create_keycloak_user_from_row(self, *args):
 

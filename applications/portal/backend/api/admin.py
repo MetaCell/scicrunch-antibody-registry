@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.contrib.admin.widgets import ManyToManyRawIdWidget, FilteredSelectMultiple
 from django.forms import CheckboxSelectMultiple
 from django.db.models import Q
-from django.forms import TextInput, Textarea
+from django.forms import TextInput, Textarea, URLInput
 from django.db import models
 from django.db.models.functions import Length
 from django.urls import reverse
@@ -93,16 +93,23 @@ class AntibodyFilesAdmin(admin.TabularInline):
 
 @admin.register(Antibody)
 class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
+    
+    change_form_template = "admin/antibody_change_form.html"
+
+    # Import/Export module settings
     import_template_name = "admin/import_export/custom_import_form.html"
     import_form_class = AntibodyImportForm
     resource_classes = [AntibodyResource]
-    list_filter = ("status",)
-    exclude= ("uid", "uid_legacy")
-    inlines = [TargetSpeciesInlineAdmin, AntibodyFilesAdmin]
-    change_form_template = "admin/antibody_change_form.html"
 
+    # list display settings
+    list_filter = ("status",)
     list_display = (id_with_ab, "ab_name", "submitter_name", "status", "vendor", "catalog_num", "accession", "insert_time")
     search_fields = ("ab_id", "ab_name", "catalog_num")
+
+    # Edit form settings
+    # exclude= ("uid", "uid_legacy")
+    inlines = [TargetSpeciesInlineAdmin, AntibodyFilesAdmin]
+    
     readonly_fields = (
         "submitter_name",
         "submitter_email",
@@ -110,6 +117,8 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         "insert_time",
         "lastedit_time",
         "curate_time",
+        "uid",
+        "uid_legacy"
     )
     autocomplete_fields = ("vendor", "antigen", "source_organism")
     save_on_top = True
@@ -117,7 +126,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
 
     formfield_overrides = {
         models.CharField: {'widget': TextInput(attrs={'size':'120'})},
-        models.TextField: {'widget': Textarea(attrs={'rows':2, 'cols':120})},
+        models.TextField: {'widget': Textarea(attrs={'rows':2, 'cols':120})}
     }
 
     @property
