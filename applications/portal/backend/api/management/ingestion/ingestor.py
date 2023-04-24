@@ -191,6 +191,8 @@ class Ingestor:
         with connection.cursor() as cursor:
             cursor.execute(get_create_table_stm(
             table, ANTIBODY_HEADER))
+        
+        error = False
 
         # Insert raw data into table
         for antibody_data_path in self.data_paths.antibodies:
@@ -202,11 +204,17 @@ class Ingestor:
                 chunk['uid'] = chunk['uid_legacy'].apply(lambda x: self._get_keycloak_id(x))
                 raw_data_insert_stm = get_insert_values_into_table_stm(table, ANTIBODY_HEADER.keys(),
                                                                        len(chunk))
-
-                self._execute(raw_data_insert_stm, chunk.to_numpy().flatten().tolist())
+                try:
+                    self._execute(raw_data_insert_stm, chunk.to_numpy().flatten().tolist())
+                except:
+                    logging.exception("Error inserting file", antibody_data_path)
+                    logging.error(raw_data_insert_stm)
+                    error = True
 
                 logging.info(
                     f"File progress: {int(min((i + 1) * CHUNK_SIZE, len_csv) / len_csv * 100)}% ")
+        if error:
+            raise Exception("Error inserting antibodies")
 
     @timed_class_method('Genes added')
     def _insert_genes(self):
