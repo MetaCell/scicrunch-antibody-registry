@@ -75,9 +75,9 @@ class Ingestor:
     VENDOR_TABLE = Vendor.objects.model._meta.db_table
     ANTIBODIES_TMP_TABLE = 'tmp_table'
 
-    def __init__(self, data_paths: AntibodyDataPaths, cursor):
+    def __init__(self, data_paths: AntibodyDataPaths, connection):
         self.data_paths = data_paths
-        self.cursor = cursor
+        self.connection = connection
         self.keycloak_service = KeycloakService()
         self.users_map = {}
         if data_paths.users:
@@ -89,7 +89,8 @@ class Ingestor:
 
     def _execute(self, statement, params):
         if len(params) > 0:
-            self.cursor.execute(statement, params)
+            with connection.cursor() as cursor:
+                cursor.execute(statement, params)
 
     def ingest(self):
         species_map = {}
@@ -115,7 +116,8 @@ class Ingestor:
 
         for ttd in tables_to_delete:
             try:
-                self.cursor.execute(TRUNCATE_STM.format(table_name=ttd))
+                with connection.cursor() as cursor:
+                    cursor.execute(TRUNCATE_STM.format(table_name=ttd))
             except:
                 log.error("Cannot execute statement %s",
                           TRUNCATE_STM.format(table_name=ttd), exc_info=True)
@@ -186,8 +188,8 @@ class Ingestor:
 
     @timed_class_method('Temporary table filled')
     def _insert_antibodies(self, table):
-
-        self.cursor.execute(get_create_table_stm(
+        with connection.cursor() as cursor:
+            cursor.execute(get_create_table_stm(
             table, ANTIBODY_HEADER))
 
         # Insert raw data into table
@@ -208,7 +210,8 @@ class Ingestor:
 
     @timed_class_method('Genes added')
     def _insert_genes(self):
-        self.cursor.execute(get_insert_into_table_select_stm(self.ANTIGEN_TABLE,
+        with connection.cursor() as cursor:
+            cursor.execute(get_insert_into_table_select_stm(self.ANTIGEN_TABLE,
                                                              'ab_target',
                                                              True,
                                                              'ab_target',
@@ -220,23 +223,24 @@ class Ingestor:
         get_species_stm = f"SELECT DISTINCT target_species FROM {self.ANTIBODIES_TMP_TABLE} " \
                           f"UNION " \
                           f"SELECT DISTINCT source_organism FROM {self.ANTIBODIES_TMP_TABLE}"
-        self.cursor.execute(get_species_stm)
-        species_id = 1
-        for row in self.cursor:
-            specie_str = row[0]
-            if specie_str:
-                for specie in get_species_from_targets(specie_str):
-                    if not is_valid_specie(specie): continue
+        with connection.cursor() as cursor:
+            cursor.execute(get_species_stm)
+            species_id = 1
+            for row in cursor:
+                specie_str = row[0]
+                if specie_str:
+                    for specie in get_species_from_targets(specie_str):
+                        if not is_valid_specie(specie): continue
 
-                    clean_specie = get_clean_species_str(specie)
-                    if clean_specie not in species_map:
-                        species_map[clean_specie] = species_id
-                        species_id += 1
-        species_insert_stm = get_insert_values_into_table_stm(self.SPECIE_TABLE,
-                                                              ['name', 'id'],
-                                                              len(species_map.keys()))
-        if len(species_map) > 0:
-            self.cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(species_map.items())))
+                        clean_specie = get_clean_species_str(specie)
+                        if clean_specie not in species_map:
+                            species_map[clean_specie] = species_id
+                            species_id += 1
+            species_insert_stm = get_insert_values_into_table_stm(self.SPECIE_TABLE,
+                                                                ['name', 'id'],
+                                                                len(species_map.keys()))
+            if len(species_map) > 0:
+                cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(species_map.items())))
         return species_map
 
     @timed_class_method('Antibodies added')
@@ -263,8 +267,8 @@ class Ingestor:
                        ON TMP.ab_target = antigen.ab_target \
                        LEFT JOIN {self.SPECIE_TABLE} as SP \
                        ON TMP.source_organism = SP.name "
-
-        self.cursor.execute(antibody_stm)
+        with self.connection.cursor() as cursor:
+            cursor.execute(antibody_stm)
 
     @timed_class_method('AntibodySpecies added')
     def _insert_antibody_species(self, species_map):
@@ -325,15 +329,17 @@ class Ingestor:
             'api_antibodyfiles_id_seq': ANTIBODY_FILE_START_SEQ,
         }
 
-        for ttr in tables_to_restart_seq:
-            self.cursor.execute(get_restart_seq_stm(
-                ttr, tables_to_restart_seq[ttr]))
+        with self.connection.cursor() as cursor:
+            for ttr in tables_to_restart_seq:
+                cursor.execute(get_restart_seq_stm(
+                    ttr, tables_to_restart_seq[ttr]))
 
-        reset_sequence_sql = connection.ops.sequence_reset_sql(no_style(),
-                                                               [Specie, Antigen, AntibodySpecies, VendorSynonym])
-        for rss in reset_sequence_sql:
-            self.cursor.execute(rss)
+            reset_sequence_sql = connection.ops.sequence_reset_sql(no_style(),
+                                                                [Specie, Antigen, AntibodySpecies, VendorSynonym])
+            for rss in reset_sequence_sql:
+                cursor.execute(rss)
 
     @timed_class_method('Temporary table dropped')
     def _drop_tmp_table(self):
-        self.cursor.execute(DROP_TABLE_STM.format(table_name=self.ANTIBODIES_TMP_TABLE))
+        with connection.cursor() as cursor:
+            cursor.execute(DROP_TABLE_STM.format(table_name=self.ANTIBODIES_TMP_TABLE))
