@@ -128,6 +128,9 @@ class AntibodyMapper(IDAOMapper):
         if ab.url and "//" not in ab.url:
             ab.url = "//" + ab.url  
 
+        if dao.cat_alt:
+            ab.catalogNum = ab.catalogNum + " (also " + dao.cat_alt + ")"
+
 
         # ab.commercialType = dao.
         return ab

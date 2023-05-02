@@ -1,8 +1,22 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { getSearchAntibodies } from '../../services/AntibodiesService'
 import SearchContext from './SearchContext'
+import { getDataInfo } from "../../services/InfoService";
 
 const SearchState = (props) => {
+  const [baseData, setBaseData] = useState({
+    total: 0,
+    lastupdate: new Date()
+  });
+
+
+  useEffect(() => {
+    getDataInfo().then((res) => 
+      setBaseData({ total: res.total, lastupdate: new Date(res.lastupdate) })
+    ).catch((err) => {
+      console.log("Error: ", err)
+    })},[]);
+
 
   const [searchState, setSearch] = useState({
     loader:false,
@@ -49,7 +63,8 @@ const SearchState = (props) => {
       loader: searchState.loader,
       activeSearch: searchState.activeSearch,
       searchedAntibodies: searchState.searchedAntibodies,
-      totalElements: searchState.totalElements,
+      totalElements: searchState.activeSearch ? searchState.totalElements: baseData.total,
+      lastUpdate: baseData.lastupdate,
       getFilteredAntibodies,
       clearSearch,
     }}>

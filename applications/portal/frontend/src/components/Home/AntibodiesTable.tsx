@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 //MUI
 import {
   DataGrid,
@@ -47,6 +47,7 @@ import Error500 from "../UI/Error500";
 
 
 
+
 const StyledBadge = (props) => {
   if (props.field === "vendorName") {
     return (
@@ -80,7 +81,7 @@ const getRowId = (ab: Antibody) => `${ab.abId}${Math.random()}`;
 
 const CustomToolbar = ({ activeTab }) => {
   const [activeSelection, setActiveSelection] = useState(true);
-
+  
   const apiRef = useGridApiContext();
   const selectedRows = apiRef.current.getSelectedRows();
 
@@ -88,6 +89,11 @@ const CustomToolbar = ({ activeTab }) => {
     apiRef.current.exportDataAsCsv(options);
 
   const showFilterMenu = () => apiRef.current.showFilterPanel();
+
+
+
+  
+  
 
   useEffect(() => {
     selectedRows.size === 0
@@ -463,7 +469,7 @@ const AntibodiesTable = (props) => {
       field: "vendorName",
       headerName: "Link to Vendor",
       flex: 1.5,
-      type: "actions",
+
     },
     {
       ...columnsDefaultProps,
@@ -566,6 +572,7 @@ const AntibodiesTable = (props) => {
           <ConnectAccount />
         ) : (
           <DataGrid
+            key={"table-" + activeSearch}
             sx={dataGridStyles}
             rows={antibodiesList ?? []}
             getRowId={getRowId}
