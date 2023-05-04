@@ -60,7 +60,7 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
     if cat_search:
         return cat_search
 
-    search_query = SearchQuery(search)
+    search_query = SearchQuery(search.replace(" ", " & "), , search_type='raw')
     # According to https://github.com/MetaCell/scicrunch-antibody-registry/issues/52
     # If the catalog number is not matched, then return records if the query matches any visible or invisible field.
     first_cols = SearchVector(
@@ -100,14 +100,14 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
         search=first_cols + search_cols,
         nb_citations=nb_citation_rank,
         ranking=ranking,
-    ).filter(search=search_query, status=STATUS.CURATED)
+    ).filter(search=search_query, status=STATUS.CURATED)[0:settings.LIMIT_NUM_RESULTS]
 
 
-    min_rank = 0.03
-    while subfields_search.count() >= settings.LIMIT_NUM_RESULTS:
-        # too many results --> return the first settings.LIMIT_NUM_RESULTS without sorting/ranking
-        subfields_search = subfields_search.filter(ranking_gte=min_rank)
-        min_rank *= 2
+    # min_rank = 0.03
+    # while subfields_search.count() >= settings.LIMIT_NUM_RESULTS:
+    #     # too many results --> return the first settings.LIMIT_NUM_RESULTS without sorting/ranking
+    #     subfields_search = subfields_search.filter(ranking_gte=min_rank)
+    #     min_rank *= 2
 
     # lets apply the ranking
     subfields_search = subfields_search.order_by('-ranking').select_related('vendor')
