@@ -459,12 +459,9 @@ class Antibody(models.Model):
             GinIndex(
                 SearchVector(
                     'accession',
-                    'commercial_type',
-                    'url',
                     'subregion',
                     'modifications',
                     'epitope',
-                    'clonality',
                     'product_isotype',
                     'product_conjugate',
                     'defining_citation',

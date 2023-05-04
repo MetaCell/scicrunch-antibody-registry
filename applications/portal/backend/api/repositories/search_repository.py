@@ -22,7 +22,7 @@ def fts_by_catalog_number(search: str):
 
     search_query = SearchQuery(search)
 
-    vector = SearchVector('catalog_num', 'catalog_num_search', config='english')
+    vector = SearchVector('catalog_num_search', config='english')
     catalog_num_match = (
         Antibody.objects.annotate(
             search=vector,
@@ -80,10 +80,7 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
         'feedback',
         'curator_comment',
         'disc_date',
-        'status',
-        'vendor__name',
-        'antigen__symbol',
-        'source_organism__name',
+        'status'
     ]
     search_cols = SearchVector(*search_col_names, config='english', weight='C')
 
