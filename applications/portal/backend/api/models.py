@@ -11,7 +11,7 @@ from django.utils import timezone
 
 from api.services.user_service import UnrecognizedUser, get_current_user_id
 from api.utilities.exceptions import RequiredParameterMissing
-from api.utilities.functions import generate_id_aux, extract_base_url, get_antibody_persistence_directory
+from api.utilities.functions import catalog_number_chunked, generate_id_aux, extract_base_url, get_antibody_persistence_directory
 from cloudharness import log
 from portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
@@ -151,7 +151,6 @@ class Antigen(models.Model):
     symbol = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN,
                               db_column='ab_target', null=True, db_index=True)
 
-
     class Meta:
         indexes = [
             GinIndex(SearchVector('symbol', config='english'),
@@ -184,9 +183,14 @@ class Antibody(models.Model):
     uid_legacy = models.IntegerField(null=True, blank=True)
     catalog_num = models.CharField(
         max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True, blank=True)
+    catalog_num_search = models.CharField(
+        max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True, blank=True)
+  
+    
     cat_alt = models.CharField(
         max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True, db_index=True, blank=True)
-    vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True, blank=True)
+    vendor = models.ForeignKey(
+        Vendor, on_delete=models.SET_NULL, null=True, blank=True)
 
     url = models.URLField(max_length=URL_MAX_LEN,
                           null=True, db_index=True, blank=True)
@@ -247,13 +251,16 @@ class Antibody(models.Model):
     lastedit_time = models.DateTimeField(
         auto_now=True, db_index=True, null=True)
     curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
-    show_link = models.BooleanField(null=True, blank=True) # whether the full link to the antibody is shown. If None, the vendor's default is used
+    # whether the full link to the antibody is shown. If None, the vendor's default is used
+    show_link = models.BooleanField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         first_save = self.ix is None
         self._handle_status_changes(first_save)
         super(Antibody, self).save(*args, **kwargs)
 
+        if self.catalog_num:
+            self.catalog_num_search = catalog_number_chunked(self.catalog_num)
         self._handle_duplicates(*args, **kwargs)
         self._generate_related_fields(*args, **kwargs)
         self._fill_target_species_from_raw()
@@ -294,7 +301,6 @@ class Antibody(models.Model):
                         self.curate_time = timezone.now()
                 except Antibody.DoesNotExist:
                     self.curate_time = timezone.now()
-                    
 
     def _handle_duplicates(self, *args, **kwargs):
         """
@@ -332,7 +338,7 @@ class Antibody(models.Model):
                     all([ab.ab_id is not None for ab in duplicate_antibodies]):  # Work around to handle the temporary
                 # creation of entities on the confirmation step of django-import-export
                 log.error("Unexpectedly found multiple antibodies with catalog number %s and vendor %s", self.vendor.name,
-                        self.catalog_num)
+                          self.catalog_num)
             return duplicate_antibodies[0]
         return None
 
@@ -409,16 +415,16 @@ class Antibody(models.Model):
                                    name='curated_constraints'),
         ]
         indexes = [
-            GinIndex(SearchVector('catalog_num__normalize',
-                                  'cat_alt__normalize_relaxed', config='english'), name='antibody_catalog_num_fts_idx'),
+            GinIndex(SearchVector('catalog_num_search', config='english'), # TODO the english configurations has stop words we don't want here
+                      name='antibody_catalog_num_fts_idx'),
 
             Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce(
                 'defining_citation__remove_coma', Value('')))).desc(), name='antibody_nb_citations_idx'),
 
             Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma',
                                                                                       Value(''))) - (
-                           100 + Length(Coalesce('disc_date', Value(''))))).desc(),
-                  name='antibody_nb_citations_idx2'),
+                100 + Length(Coalesce('disc_date', Value(''))))).desc(),
+                name='antibody_nb_citations_idx2'),
 
             Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
 
@@ -430,14 +436,9 @@ class Antibody(models.Model):
                              'clone_id__normalize_relaxed', config='english', weight='A') +
                 SearchVector(
                     'accession',
-                    'commercial_type',
-                    'uid',
-                    'uid_legacy',
-                    'url',
                     'subregion',
                     'modifications',
                     'epitope',
-                    'clonality',
                     'product_isotype',
                     'product_conjugate',
                     'defining_citation',
@@ -448,6 +449,9 @@ class Antibody(models.Model):
                     'curator_comment',
                     'disc_date',
                     'status',
+                    'vendor',
+                    'antigen',
+                    'source_organism',
                     config='english',
                     weight='C',
                 ), name='antibody_all_fts_idx'),
@@ -456,8 +460,6 @@ class Antibody(models.Model):
                 SearchVector(
                     'accession',
                     'commercial_type',
-                    'uid',
-                    'uid_legacy',
                     'url',
                     'subregion',
                     'modifications',
@@ -491,10 +493,13 @@ def antibody_persistence_directory(instance, filename):
 
 class AntibodyFiles(models.Model):
     id = models.AutoField(primary_key=True, unique=True, null=False)
-    antibody = models.ForeignKey(Antibody, on_delete=models.CASCADE, db_column='ab_ix')
-    type = models.CharField(max_length=ANTIBODY_FILE_TYPE_MAX_LEN, null=True, default="mds")
+    antibody = models.ForeignKey(
+        Antibody, on_delete=models.CASCADE, db_column='ab_ix')
+    type = models.CharField(
+        max_length=ANTIBODY_FILE_TYPE_MAX_LEN, null=True, default="mds")
     file = models.FileField(upload_to=antibody_persistence_directory)
-    display_name = models.CharField(max_length=ANTIBODY_FILE_DISPLAY_NAME_MAX_LEN)
+    display_name = models.CharField(
+        max_length=ANTIBODY_FILE_DISPLAY_NAME_MAX_LEN)
     timestamp = models.DateTimeField(auto_now_add=True)
     uploader_uid = models.CharField(max_length=ANTIBODY_UID_MAX_LEN)
     filehash = models.CharField(max_length=ANTIBODY_FILES_HASH_MAX_LEN)

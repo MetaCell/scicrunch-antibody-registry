@@ -3,6 +3,7 @@ import itertools
 import logging
 import re
 import string
+from api.utilities.functions import catalog_number_chunked
 
 import pandas as pd
 from django.core.management.color import no_style
@@ -202,6 +203,7 @@ class Ingestor:
                 chunk = chunk.where(pd.notnull(chunk), None)
                 chunk['uid_legacy'] = chunk['uid']
                 chunk['uid'] = chunk['uid_legacy'].apply(lambda x: self._get_keycloak_id(x))
+                chunk['catalog_num_search'] = chunk['catalog_num'].apply(catalog_number_chunked)
                 raw_data_insert_stm = get_insert_values_into_table_stm(table, ANTIBODY_HEADER.keys(),
                                                                        len(chunk))
                 try:
@@ -254,13 +256,13 @@ class Ingestor:
     @timed_class_method('Antibodies added')
     def _swap_antibodies(self, from_table, to_table):
 
-        antibody_stm = f"INSERT INTO {to_table} (ix, ab_name, ab_id, accession, commercial_type, uid, catalog_num, cat_alt,  \
+        antibody_stm = f"INSERT INTO {to_table} (ix, ab_name, ab_id, accession, commercial_type, uid, catalog_num, catalog_num_search, cat_alt,  \
                        vendor_id, url, show_link, antigen_id, ab_target_entrez_gid, uniprot_id, target_subregion, target_modification, \
                        epitope, clonality, clone_id, product_isotype, target_species_raw, \
                        product_conjugate, defining_citation, product_form, comments, feedback, \
                        curator_comment, disc_date, status, insert_time, curate_time, source_organism_id)\
                        SELECT DISTINCT ix, ab_name, ab_id, ab_id_old, TMP.commercial_type, \
-                       uid, catalog_num, cat_alt, vendor_id, url, \
+                       uid, catalog_num, catalog_num_search, cat_alt, vendor_id, url, \
                        (CASE WHEN link='yes' THEN true ELSE false END) show_link, \
                        antigen.id, ab_target_entrez_gid, uniprot_id, \
                        target_subregion, target_modification, epitope, clonality, \

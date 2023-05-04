@@ -231,7 +231,7 @@ ANTIBODY_HEADER = {'ab_name': "text", 'ab_target': "text", 'target_species': "te
                    'id': "text", 'ab_id': "text", 'ab_id_old': "text",
                    'of_record': "text", 'ix': "int", UID_KEY: "text", 'status': "text",
                    'insert_time': "text", 'curate_time': "text", 'cat_alt': "text", 'commercial_type': "text",
-                   'uniprot_id': "text", 'epitope': "text", 'uid_legacy': "text"}
+                   'uniprot_id': "text", 'epitope': "text", 'uid_legacy': "text", 'catalog_num_search': "text"}
 
 D_TYPES = ANTIBODY_HEADER.copy()
 for dt in D_TYPES:
