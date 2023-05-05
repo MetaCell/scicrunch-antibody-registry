@@ -185,12 +185,12 @@ class AntibodiesTestCase(TestCase):
         assert len(fts_antibodies(search="citation").items) == 1, "Search in defining citation specificity"
         
         assert len(fts_antibodies(search="External validation DATA SET is released testing").items) == 1, "Search in comments"
-        # assert len(fts_antibodies(search="vendorname").items) == 2
-        # assert len(fts_antibodies(search="Andrew Dingwall").items) == 1
+        assert len(fts_antibodies(search="vendorname").items) == 2
+        assert len(fts_antibodies(search="Andrew Dingwall").items) == 1
 
-        # assert len(fts_antibodies(search="rabbit").items) == 1, "Search in source organism"
-        # assert len(fts_antibodies(search="Rabbit").items) == 1
-        # assert len(fts_antibodies(search="Andrew Dingwall").items) == 1
+        assert len(fts_antibodies(search="rabbit").items) == 1, "Search in source organism"
+        assert len(fts_antibodies(search="Rabbit").items) == 1
+        assert len(fts_antibodies(search="Andrew Dingwall").items) == 1
 
         ab_by_accession = get_antibody_by_accession(ab.accession)
         assert ab_by_accession.abId == ab.abId

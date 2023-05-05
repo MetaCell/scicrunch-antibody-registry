@@ -10,7 +10,7 @@ from django.contrib.postgres.search import SearchVectorField, SearchRank, Search
 
 from ..models import STATUS, Antibody
 
-MIN_CATALOG_RANKING = 0.03  # TODO validate the proper ranking value
+MIN_CATALOG_RANKING = 0.0  # TODO validate the proper ranking value
 
 
 def flat(l):
@@ -18,9 +18,9 @@ def flat(l):
 
 
 def fts_by_catalog_number(search: str):
-    search = catalog_number_chunked(search)
+    search = catalog_number_chunked(search, fill=" & ")
 
-    search_query = SearchQuery(search)
+    search_query = SearchQuery(search, search_type='raw')
 
     vector = SearchVector('catalog_num_search', config='english')
     catalog_num_match = (
@@ -37,7 +37,7 @@ def fts_by_catalog_number(search: str):
     return None
 
 
-def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Antibody]:
+def fts_antibodies(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, search: str = '') -> List[Antibody]:
     # According to https://github.com/MetaCell/scicrunch-antibody-registry/issues/52
     # Match the calalog number (make sure to treat the cat_alt field the same way)
     # If the catalog number is not matched, then return records if the query matches any visible or invisible field.
@@ -60,7 +60,7 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
     if cat_search:
         return cat_search
 
-    search_query = SearchQuery(search.replace(" ", " & "), , search_type='raw')
+    search_query = SearchQuery(search.replace(" ", " & "), search_type='raw')
     # According to https://github.com/MetaCell/scicrunch-antibody-registry/issues/52
     # If the catalog number is not matched, then return records if the query matches any visible or invisible field.
     first_cols = SearchVector(
@@ -80,7 +80,10 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
         'feedback',
         'curator_comment',
         'disc_date',
-        'status'
+        'status',
+        'vendor__name',
+        'antigen__symbol',
+        'source_organism__name',
     ]
     search_cols = SearchVector(*search_col_names, config='english', weight='C')
 
@@ -98,19 +101,26 @@ def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[Anti
 
     subfields_search = Antibody.objects.annotate(
         search=first_cols + search_cols,
-        nb_citations=nb_citation_rank,
-        ranking=ranking,
-    ).filter(search=search_query, status=STATUS.CURATED)[0:settings.LIMIT_NUM_RESULTS]
+    ).filter(search=search_query, status=STATUS.CURATED)[size*page:size + size*page]
 
-
+    count = subfields_search.count()
+    if count == size:
+        return subfields_search.select_related('vendor')
     # min_rank = 0.03
     # while subfields_search.count() >= settings.LIMIT_NUM_RESULTS:
     #     # too many results --> return the first settings.LIMIT_NUM_RESULTS without sorting/ranking
     #     subfields_search = subfields_search.filter(ranking_gte=min_rank)
     #     min_rank *= 2
 
+    if count == 0:
+        return []
+
     # lets apply the ranking
-    subfields_search = subfields_search.order_by('-ranking').select_related('vendor')
+    subfields_search = Antibody.objects.annotate(
+        search=first_cols + search_cols,
+        nb_citations=nb_citation_rank,
+        ranking=ranking,
+    ).filter(search=search_query, status=STATUS.CURATED).order_by('-ranking')[size*page:size + size*page].select_related('vendor')
                         
 
     return subfields_search
