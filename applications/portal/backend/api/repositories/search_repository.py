@@ -22,7 +22,7 @@ def fts_by_catalog_number(search: str):
 
     search_query = SearchQuery(search, search_type='raw')
 
-    vector = SearchVector('catalog_num_search', config='english')
+    vector = SearchVector('catalog_num_search', config='simple')
     catalog_num_match = (
         Antibody.objects.annotate(
             search=vector,
@@ -102,7 +102,7 @@ def fts_antibodies(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, search
     offset = (page - 1 ) * size
     subfields_search = Antibody.objects.annotate(
         search=first_cols + search_cols,
-    ).filter(search=search_query, status=STATUS.CURATED)[size*offset + offset]
+    ).filter(search=search_query, status=STATUS.CURATED)[offset: size + offset]
 
     count = subfields_search.count()
     if count == size:
@@ -121,7 +121,7 @@ def fts_antibodies(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, search
         search=first_cols + search_cols,
         nb_citations=nb_citation_rank,
         ranking=ranking,
-    ).filter(search=search_query, status=STATUS.CURATED).order_by('-ranking')[size*page:size + size*page].select_related('vendor')
+    ).filter(search=search_query, status=STATUS.CURATED).order_by('-ranking')[offset: size + offset].select_related('vendor')
                         
 
     return subfields_search

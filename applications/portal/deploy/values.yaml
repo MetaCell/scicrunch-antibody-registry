@@ -50,6 +50,7 @@ harness:
   database:
     auto: true
     type: postgres
+    image: postgres:15
     size: 40Gi
     resources:
       requests:

@@ -415,7 +415,7 @@ class Antibody(models.Model):
                                    name='curated_constraints'),
         ]
         indexes = [
-            GinIndex(SearchVector('catalog_num_search', config='english'), # TODO the english configurations has stop words we don't want here
+            GinIndex(SearchVector('catalog_num_search', config='simple'), # TODO the english configurations has stop words we don't want here
                       name='antibody_catalog_num_fts_idx'),
 
             Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce(
