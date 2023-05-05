@@ -60,7 +60,7 @@ def fts_antibodies(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, search
     if cat_search:
         return cat_search
 
-    search_query = SearchQuery(search.replace(" ", " & "), search_type='raw')
+    search_query = SearchQuery(" & ".join(search.split()), search_type='raw')
     # According to https://github.com/MetaCell/scicrunch-antibody-registry/issues/52
     # If the catalog number is not matched, then return records if the query matches any visible or invisible field.
     first_cols = SearchVector(
