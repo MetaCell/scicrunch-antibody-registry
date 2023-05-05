@@ -54,7 +54,7 @@ def fts_antibodies(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, search
     # preparing two search terms, one for catalog_num, the other for normal search.
 
     # search only allows alphanumeric characters and spaces
-
+    search = re.sub(r'[^\w\s]', '', search)
     cat_search = fts_by_catalog_number(search)
 
     if cat_search:
@@ -99,9 +99,10 @@ def fts_antibodies(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, search
 
     highlight_cols = flat((F(f), Value(' ')) for f in search_col_names)[:-1]
 
+    offset = (page - 1 ) * size
     subfields_search = Antibody.objects.annotate(
         search=first_cols + search_cols,
-    ).filter(search=search_query, status=STATUS.CURATED)[size*page:size + size*page]
+    ).filter(search=search_query, status=STATUS.CURATED)[size*offset + offset]
 
     count = subfields_search.count()
     if count == size:
