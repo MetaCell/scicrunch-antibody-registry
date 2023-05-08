@@ -17,7 +17,7 @@ const TIMEOUT = 60000;
 const USERNAME = "metacell-qa";
 const PASSWORD = "test";
 
-function range(size: number, startAt: number = 0): number[] {
+function range(size, startAt = 0) {
   return Array.from({ length: size }, (_, i) => i + startAt);
 }
 
@@ -189,10 +189,10 @@ describe("E2E Flow for AntiBody Registry", () => {
         document.querySelectorAll("button.MuiButton-sizeMedium")
       );
       const idElement = elements.find(
-        (element) => (element as HTMLElement).innerText === "Log in / Register"
+        (element) => (element).innerText === "Log in / Register"
       );
       if (idElement) {
-        (idElement as HTMLElement).click();
+        (idElement).click();
       }
     });
 
@@ -672,10 +672,10 @@ describe("E2E Flow for AntiBody Registry", () => {
         document.querySelectorAll(".MuiTypography-body1")
       );
       const idElement = elements.find(
-        (element) => (element as HTMLElement).innerText === "ID"
+        (element) => (element).innerText === "ID"
       );
       if (idElement) {
-        (idElement as HTMLElement).click();
+        (idElement).click();
       }
     });
 
@@ -733,10 +733,10 @@ describe("E2E Flow for AntiBody Registry", () => {
         document.querySelectorAll(".MuiTypography-body1")
       );
       const idElement = elements.find(
-        (element) => (element as HTMLElement).innerText === "ID"
+        (element) => (element).innerText === "ID"
       );
       if (idElement) {
-        (idElement as HTMLElement).click();
+        (idElement).click();
       }
     });
 
@@ -773,10 +773,10 @@ describe("E2E Flow for AntiBody Registry", () => {
         document.querySelectorAll("li.MuiMenuItem-gutters")
       );
       const idElement = elements.find(
-        (element) => (element as HTMLElement).innerText === "Log out"
+        (element) => (element).innerText === "Log out"
       );
       if (idElement) {
-        (idElement as HTMLElement).click();
+        (idElement).click();
       }
     });
 
