@@ -257,14 +257,14 @@ class Ingestor:
     def _swap_antibodies(self, from_table, to_table):
 
         antibody_stm = f"INSERT INTO {to_table} (ix, ab_name, ab_id, accession, commercial_type, uid, catalog_num, catalog_num_search, cat_alt,  \
-                       vendor_id, url, show_link, antigen_id, ab_target_entrez_gid, uniprot_id, target_subregion, target_modification, \
+                       vendor_id, url, show_link, ab_target, ab_target_entrez_gid, uniprot_id, target_subregion, target_modification, \
                        epitope, clonality, clone_id, product_isotype, target_species_raw, \
                        product_conjugate, defining_citation, product_form, comments, feedback, \
                        curator_comment, disc_date, status, insert_time, curate_time, source_organism_id)\
                        SELECT DISTINCT ix, ab_name, ab_id, ab_id_old, TMP.commercial_type, \
                        uid, catalog_num, catalog_num_search, cat_alt, vendor_id, url, \
                        (CASE WHEN link='yes' THEN true ELSE false END) show_link, \
-                       antigen.id, ab_target_entrez_gid, uniprot_id, \
+                       ab_target, ab_target_entrez_gid, uniprot_id, \
                        target_subregion, target_modification, epitope, clonality, \
                        clone_id, product_isotype, target_species AS target_species_raw, product_conjugate, defining_citation, product_form, \
                        comments, feedback, curator_comment, disc_date, status, \
@@ -273,8 +273,6 @@ class Ingestor:
                        FROM {from_table} as TMP \
                        LEFT JOIN {self.VENDOR_TABLE} as vendor \
                        ON TMP.vendor_id = vendor.id \
-                       LEFT JOIN {self.ANTIGEN_TABLE} as antigen \
-                       ON TMP.ab_target = antigen.ab_target \
                        LEFT JOIN {self.SPECIE_TABLE} as SP \
                        ON TMP.source_organism = SP.name "
         with self.connection.cursor() as cursor:

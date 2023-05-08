@@ -73,8 +73,7 @@ const DuplicatedMsg = (props) => {
           </Typography>
         </Divider>
         <Typography variant="subtitle1" component="p" align="center" sx={classes.message}>
-          您所提交的抗体已经存在于我们的系统中，此次申请将会被拒绝
-          我们发现您所提交的抗体已经存在于我们的系统中，它的ID 是
+          此次申请将会被拒绝，因为我们发现您所提交的抗体已经存在于我们的系统中，它的ID是
         </Typography>
         <Typography variant="subtitle1" align="center" sx={{ ...classes.message, fontWeight: 700, fontSize: "1em" }}>
           RRID:AB_{props.antibodyId}.

@@ -32,13 +32,10 @@ class AntibodyMapper(IDAOMapper):
             ab.ab_id = 0
 
         if dto.abTarget:
-            antigen_symbol = dto.abTarget
+            # antigen_symbol = dto.abTarget
             # del dto.abTarget
-            gene, new = get_or_create_gene(symbol=antigen_symbol)
-            ab.antigen = gene
-            if new:
-                # TODO what to do for non existing antigens? Create one? Should fill the table of antigens from a real data source?
-                log.warn("No antigen: %s", antigen_symbol)
+            # gene, new = get_or_create_gene(symbol=antigen_symbol)
+            ab.ab_target = dto.abTarget
 
         if dto.sourceOrganism:
             specie_name = dto.sourceOrganism
@@ -108,9 +105,8 @@ class AntibodyMapper(IDAOMapper):
             log.error("Validation error on antibody %s",
                       dao.ab_id, exc_info=True)
             ab = AntibodyDTO()
-        if dao.antigen:
-            antigen: Antigen = dao.antigen
-            ab.abTarget = antigen.symbol
+        if dao.ab_target:
+            ab.abTarget = dao.ab_target
         if dao.vendor:
             ab.vendorName = dao.vendor.name
         if dao.source_organism:

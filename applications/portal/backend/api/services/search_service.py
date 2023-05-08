@@ -14,8 +14,9 @@ antibody_mapper = AntibodyMapper()
 def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[AntibodyDTO]:
     page = page or 0  # required at the moment, issue with default values in main.py-L134
     size = size or 50  # required at the moment, issue with default values in main.py-L134
-    antibodies = [antibody_mapper.to_dto(a) for a in search_repository.fts_antibodies(search=search, page=page, size=size)]
-    return PaginatedAntibodies(page=int(page), totalElements=len(antibodies), items=antibodies)
+    antibodies_res, count = search_repository.fts_antibodies(page=page, size=size, search=search)
+    antibodies = [antibody_mapper.to_dto(a) for a in antibodies_res]
+    return PaginatedAntibodies(page=int(page), totalElements=count, items=antibodies)
 
 
 def filter_antibodies(body: FilterRequest) -> List[AntibodyDTO]:

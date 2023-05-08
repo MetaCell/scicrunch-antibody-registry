@@ -3,7 +3,7 @@ from random import randint
 from typing import Optional, Tuple
 
 from django.contrib.postgres.indexes import GinIndex
-from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.search import SearchVector, SearchVectorField
 from django.db import models
 from django.db.models import Transform, CharField, Index, Q, Value
 from django.db.models.functions import Length, Coalesce
@@ -119,6 +119,12 @@ class Specie(models.Model):
     name = models.CharField(
         max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, unique=True)
 
+    class Meta:
+        indexes = [
+            GinIndex(SearchVector('name', config='english'),
+                     name='specie_name_fts_idx'),
+        ]
+
     def __str__(self):
         return self.name
 
@@ -126,6 +132,12 @@ class Specie(models.Model):
 class Application(models.Model):
     name = models.CharField(
         max_length=APPLICATION_MAX_LEN, unique=True)
+
+    class Meta:
+        indexes = [
+            GinIndex(SearchVector('name', config='english'),
+                     name='application_name_fts_idx'),
+        ]
 
     def __str__(self):
         return self.name
@@ -185,8 +197,7 @@ class Antibody(models.Model):
         max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True, blank=True)
     catalog_num_search = models.CharField(
         max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True, blank=True)
-  
-    
+
     cat_alt = models.CharField(
         max_length=ANTIBODY_CAT_ALT_MAX_LEN, null=True, db_index=True, blank=True)
     vendor = models.ForeignKey(
@@ -196,6 +207,8 @@ class Antibody(models.Model):
                           null=True, db_index=True, blank=True)
     antigen = models.ForeignKey(
         Antigen, on_delete=models.SET_NULL, db_column='antigen_id', null=True, blank=True)
+    ab_target = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN,
+                               db_column='ab_target', null=True, db_index=True)
     entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
                                  null=True, db_index=True, blank=True)
     uniprot_id = models.CharField(
@@ -415,66 +428,12 @@ class Antibody(models.Model):
                                    name='curated_constraints'),
         ]
         indexes = [
-            GinIndex(SearchVector('catalog_num_search', config='simple'), # TODO the english configurations has stop words we don't want here
-                      name='antibody_catalog_num_fts_idx'),
+            GinIndex(SearchVector('catalog_num_search', config='simple'),  # TODO the english configurations has stop words we don't want here
+                     name='antibody_catalog_num_fts_idx'),
 
-            Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce(
-                'defining_citation__remove_coma', Value('')))).desc(), name='antibody_nb_citations_idx'),
-
-            Index((Length(Coalesce('defining_citation', Value(''))) - Length(Coalesce('defining_citation__remove_coma',
-                                                                                      Value(''))) - (
-                100 + Length(Coalesce('disc_date', Value(''))))).desc(),
-                name='antibody_nb_citations_idx2'),
 
             Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
 
-            GinIndex(SearchVector('ab_name',
-                                  'clone_id__normalize_relaxed', config='english', weight='A'),
-                     name='antibody_name_fts_idx'),
-            GinIndex(
-                SearchVector('ab_name',
-                             'clone_id__normalize_relaxed', config='english', weight='A') +
-                SearchVector(
-                    'accession',
-                    'subregion',
-                    'modifications',
-                    'epitope',
-                    'product_isotype',
-                    'product_conjugate',
-                    'defining_citation',
-                    'product_form',
-                    'comments',
-                    'kit_contents',
-                    'feedback',
-                    'curator_comment',
-                    'disc_date',
-                    'status',
-                    'vendor',
-                    'antigen',
-                    'source_organism',
-                    config='english',
-                    weight='C',
-                ), name='antibody_all_fts_idx'),
-
-            GinIndex(
-                SearchVector(
-                    'accession',
-                    'subregion',
-                    'modifications',
-                    'epitope',
-                    'product_isotype',
-                    'product_conjugate',
-                    'defining_citation',
-                    'product_form',
-                    'comments',
-                    'kit_contents',
-                    'feedback',
-                    'curator_comment',
-                    'disc_date',
-                    'status',
-                    config='english',
-                    weight='C',
-                ), name='antibody_all_fts_idx2'),
         ]
 
 
@@ -486,6 +445,9 @@ def get_antibody_filename(instance, original_filename):
 
 def antibody_persistence_directory(instance, filename):
     return get_antibody_persistence_directory(instance.antibody.ab_id, get_antibody_filename(instance, filename))
+
+
+
 
 
 class AntibodyFiles(models.Model):
@@ -516,7 +478,8 @@ class AntibodyFiles(models.Model):
 class AntibodySpecies(models.Model):
     antibody = models.ForeignKey(
         Antibody, on_delete=models.CASCADE, db_index=True)
-    specie = models.ForeignKey(Specie, on_delete=models.CASCADE, db_index=True)
+    specie = models.ForeignKey(
+        Specie, on_delete=models.CASCADE, db_index=True)
 
     def __str__(self):
         return "AB_%s->%s" % (self.antibody.ab_id, self.specie.name)
@@ -545,3 +508,24 @@ class AntibodyApplications(models.Model):
 
     def __str__(self):
         return "AB_%s->%s" % (self.antibody.ab_id, self.application.name)
+
+
+class AntibodySearch(models.Model):
+    ix = models.BigIntegerField(primary_key=True)
+    search_vector = SearchVectorField(null=True)
+    defining_citation = models.CharField(null=True, max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN)
+    disc_date = models.CharField(null=True, max_length=ANTIBODY_DISC_DATE_MAX_LEN)
+    status = models.CharField(
+        max_length=STATUS_MAX_LEN,
+        db_index=True,
+        null=True,
+    )
+    class Meta:
+        # managed = False
+        db_table = 'antibody_search'
+        indexes = [
+            GinIndex(
+                fields=["search_vector"],
+                name='antibody_search_fts_idx'),
+
+        ]

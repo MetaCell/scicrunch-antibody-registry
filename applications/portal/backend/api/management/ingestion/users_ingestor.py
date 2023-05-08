@@ -26,44 +26,49 @@ class UsersIngestor:
         users = {}
         for row in self.users_df[USERS_RELEVANT_HEADER].to_numpy():
             try:
-                users[str(int(float(row[GUID_INDEX])))] = self._get_or_create_keycloak_user_from_row(*row)
+                users[str(int(float(row[GUID_INDEX])))
+                      ] = self._get_or_create_keycloak_user_from_row(*row)
             except Exception as e:
-                logging.error(f"Cannot add user {row[EMAIL_INDEX]} -- GUID {row[GUID_INDEX]}: {e}")
+                logging.error(
+                    f"Cannot add user {row[EMAIL_INDEX]} -- GUID {row[GUID_INDEX]}: {e}")
         return users
 
     def _get_or_create_keycloak_user_from_row(self, *args):
 
         row = dict(zip(USERS_RELEVANT_HEADER, args))
-        if not row['guid']: 
+        if not row['guid']:
             raise Exception("GUID is empty")
-            
+
         if not row['email']:
             raise Exception("Email is empty")
         validate_email(row['email'])
 
-        existent_user = self.keycloak_service.get_user_by_username(row['email'])
+        existent_user = self.keycloak_service.get_user_by_username(
+            row['email'])
         if existent_user:
             return existent_user['id']
         logging.info(f"Creating user {row['email']}")
-        user_id = self.keycloak_service.create_user({"email": row['email'],
-                                                     "username": row['email'],
-                                                     "enabled": True,
-                                                     "firstName": row['firstName'],
-                                                     "lastName": row['lastName'],
-                                                     "attributes": {
-                                                         "orcid": _get_orcid_id(row),
-                                                         "id": row['id'],
-                                                         "guid": row['guid'],
-                                                         "level": row['level'],
-                                                         "middleInitial": row['middleInitial'],
-                                                         "organization": row['organization'],
-                                                         "created": row['created'],
-                                                     },
-                                                     "requiredActions": [KeycloakRequiredActions.UPDATE_PASSWORD.value]
-                                                     }, exist_ok=True)
+        user_id = self.keycloak_service.create_user(
+            {"email": row['email'],
+             "username": row['email'],
+             "enabled": True,
+             "firstName": row['firstName'],
+             "lastName": row['lastName'],
+             "attributes": {
+                "orcid": _get_orcid_id(row),
+                "id": row['id'],
+                "guid": row['guid'],
+                "level": row['level'],
+                "middleInitial": row['middleInitial'],
+                "organization": row['organization'],
+                "created": row['created'],
+            },
+                "requiredActions": [KeycloakRequiredActions.UPDATE_PASSWORD.value]
+            }, exist_ok=True)
         if row['orcid_id'] != '':
             try:
-                self.keycloak_service.add_user_social_login(user_id, PROVIDER_ID, row['orcid_id'], row['orcid_id'])
+                self.keycloak_service.add_user_social_login(
+                    user_id, PROVIDER_ID, row['orcid_id'], row['orcid_id'])
             except:
                 logging.error(f"Cannot add social login for user {user_id}")
         return user_id
