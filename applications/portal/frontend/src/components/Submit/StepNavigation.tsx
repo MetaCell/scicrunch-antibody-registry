@@ -2,7 +2,8 @@ import React from "react";
 
 import { useTheme } from "@mui/system";
 
-import { Button, Toolbar, Container, Box, Stack } from "@mui/material";
+import { Button, Toolbar, Container, Box, Stack,  Backdrop,
+  CircularProgress, } from "@mui/material";
 
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -37,6 +38,7 @@ export const StepNavigation = (props: NavigationProps) => {
     },
   };
   return (
+    <>{props.formik?.isSubmitting && <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={true} ><CircularProgress color="primary" /></Backdrop>}
     <Toolbar sx={classes.toolbar}>
       <Container maxWidth="xl">
         <Box sx={classes.content}>
@@ -61,7 +63,7 @@ export const StepNavigation = (props: NavigationProps) => {
                 startIcon={<DoneIcon fontSize="small" />}
                 type="submit"
                 disabled={
-                  props.formik && !(props.formik.isValid && props.formik.dirty)
+                  props.formik && !(props.formik.isValid && props.formik.dirty) || props.formik.isSubmitting
                 }
               >
                 Submit
@@ -80,6 +82,7 @@ export const StepNavigation = (props: NavigationProps) => {
         </Box>
       </Container>
     </Toolbar>
+    </>
   );
 };
 

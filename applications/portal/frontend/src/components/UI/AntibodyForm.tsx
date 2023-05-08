@@ -11,6 +11,8 @@ import {
   useTheme,
   Toolbar,
   Button,
+  Backdrop,
+  CircularProgress,
 } from "@mui/material";
 import DoneIcon from "@mui/icons-material/Done";
 
@@ -85,6 +87,7 @@ const AntibodyForm = (props) => {
       autoComplete="off"
       style={{ background: backgroundColorForm }}
     >
+      {formik.isSubmitting && <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={true} ><CircularProgress color="primary" /></Backdrop>}
       <Container maxWidth="xl" className={classes.container}>
         <Paper className={classes.paper}>
           <Grid
@@ -302,9 +305,10 @@ const AntibodyForm = (props) => {
               variant="contained"
               color="primary"
               startIcon={<DoneIcon fontSize="small" />}
+
               type="submit"
               disabled={
-                props.formik && !(props.formik.isValid && props.formik.dirty)
+                formik && (!(formik.isValid && formik.dirty) || formik.isSubmitting )
               }
             >
               Submit

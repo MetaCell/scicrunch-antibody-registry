@@ -4,7 +4,7 @@ from typing import Optional, Tuple
 
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector, SearchVectorField
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Transform, CharField, Index, Q, Value
 from django.db.models.functions import Length, Coalesce
 from django.utils import timezone
@@ -267,6 +267,7 @@ class Antibody(models.Model):
     # whether the full link to the antibody is shown. If None, the vendor's default is used
     show_link = models.BooleanField(null=True, blank=True)
 
+    @transaction.atomic
     def save(self, *args, **kwargs):
         first_save = self.ix is None
         self._handle_status_changes(first_save)
@@ -296,7 +297,7 @@ class Antibody(models.Model):
         if not self.uid:
             try:
                 self.uid = get_current_user_id()
-            except UnrecognizedUser:
+            except:
                 log.exception("Could not set user")
 
     def _handle_status_changes(self, first_save=False):

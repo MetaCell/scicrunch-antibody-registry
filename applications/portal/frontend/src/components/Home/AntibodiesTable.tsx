@@ -355,7 +355,7 @@ const AntibodiesTable = (props) => {
         .then((res) => {
           return setAntibodiesList(res.items);
         })
-        .catch((err) => alert(err))
+        .catch((err) => console.error(err))
       : setAntibodiesList(searchedAntibodies);
   };
 
@@ -364,14 +364,14 @@ const AntibodiesTable = (props) => {
       .then((res) => {
         return setAntibodiesList(res.items);
       })
-      .catch((err) => alert(err));
+      .catch((err) => console.error(err));
   };
 
   useEffect(() => {
     props.activeTab === ALLRESULTS
       ? fetchAntibodies()
       : user && fetchUserAntibodies();
-  }, [activeSearch, searchedAntibodies]);
+  }, [activeSearch, searchedAntibodies, props.activeTab, user]);
 
   const columns: GridColDef[] = [
     {

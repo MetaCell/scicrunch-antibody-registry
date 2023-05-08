@@ -53,38 +53,16 @@ export default function Searchbar() {
 
   const autocompleteOps=[]
 
-  const handleChange=useCallback((e:React.SyntheticEvent, value:string| null) => {
-    if(!value){
+  const handleChange=useCallback((e: any) => {
+    if(!e.target.value){
       clearSearch()
     } else {
       history.push('/');
-      getFilteredAntibodies(value)
+      getFilteredAntibodies(e.target.value)
     }
   }, [getFilteredAntibodies, clearSearch, history]);
 
 
-  const debouncedChangeHandler = useMemo(
-    () => debounce((e: any) => {
-      if (e.target.matches('li')) {return null}
-      return handleChange(null, e.target.value)}, 1000)
-    , [handleChange]);
-
-
-  const handleKeyPress = useCallback((event) => {
-    if(event.key==='/'){
-      event.preventDefault()
-      ref.current.focus()
-   
-    }
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyPress);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [handleKeyPress]);
 
   
   return (<>
@@ -93,19 +71,22 @@ export default function Searchbar() {
           sx={classes.input} 
           freeSolo 
           options={autocompleteOps.map(option => option)} 
-          onChange={handleChange}
-          onInputChange={debouncedChangeHandler}
           fullWidth
           clearOnEscape
           disabled={loader}
+       
           renderInput={(params) => { 
-            const  { InputProps, ...rest } = params
+            const  { InputProps, ...rest } = params;
+  
             return(
               <InputBase 
+                
                 inputRef={ref}
                 {...InputProps}
+                
                 {...rest}  
                 placeholder="Search for catalog number" 
+                
                 startAdornment={<SearchIcon fontSize="inherit"sx={{ mx: "0.65rem" }}/>}
                 endAdornment={
                   InputProps.endAdornment? InputProps.endAdornment:
@@ -117,6 +98,12 @@ export default function Searchbar() {
                       </Box>
                     </InputAdornment>
                 }
+                inputProps =  {{
+                  ...rest.inputProps,
+                  onBlur: handleChange,
+                  onKeyDown: (e) =>  e.key === "Enter" && handleChange(e)
+                
+                } }
               />
             )
           }
