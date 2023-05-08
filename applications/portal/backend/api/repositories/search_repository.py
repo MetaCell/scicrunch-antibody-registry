@@ -17,7 +17,7 @@ def flat(l):
     return [item for sublist in l for item in sublist]
 
 
-def fts_by_catalog_number(search: str):
+def fts_by_catalog_number(search: str, page, size):
     search = catalog_number_chunked(search, fill=" & ")
 
     search_query = SearchQuery(search, search_type='raw')
@@ -33,8 +33,12 @@ def fts_by_catalog_number(search: str):
     # as the match is a perfect match or a prefix match depending on the search word,
     # sorting the normalized catalog_num by length and returning the smallest
     count = catalog_num_match.count()
-    if count >= 1:
-        return catalog_num_match.order_by('-ranking'), count
+    offset = (page - 1) * size
+    if count > settings.LIMIT_NUM_RESULTS:
+        
+        return catalog_num_match[offset: size + offset], count
+    elif count:
+        return catalog_num_match.order_by('-ranking')[offset: size + offset], count
     return None
 
 
@@ -91,7 +95,7 @@ def fts_others_search(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, sea
     def sort_fn(x: AntibodySearch):
         ranking = -x.ranking
         if x.defining_citation:
-            ranking -= x.defining_citation / 100
+            ranking -= float(x.defining_citation.replace(",", "")) / 100
         
         if x.disc_date:
             ranking += 1000
