@@ -664,10 +664,40 @@ class Migration(migrations.Migration):
             DROP MATERIALIZED VIEW antibody_search;
             '''
         ),
+        migrations.RunSQL(
+            sql="""CREATE UNIQUE INDEX IF NOT EXISTS antibody_search_idx
+                    ON antibody_search
+                    (ix);
+                    """,
+        ),
         migrations.AddIndex(
             model_name="antibodysearch",
             index=django.contrib.postgres.indexes.GinIndex(
                 fields=["search_vector"], name="antibody_search_fts_idx"
             ),
         ),
+        migrations.RunSQL("""
+        create or replace function refresh_mat_view()
+        returns trigger language plpgsql
+        as $$
+        begin
+            refresh  materialized view concurrently antibody_search ;
+            return null;
+        end $$;
+
+        create trigger refresh_mat_view
+        after insert or update or delete or truncate
+        on api_vendor for each statement 
+        execute procedure refresh_mat_view();
+
+        create trigger refresh_mat_view
+        after insert or update or delete or truncate
+        on api_antibody for each statement 
+        execute procedure refresh_mat_view();
+
+        create trigger refresh_mat_view
+        after insert or update or delete or truncate
+        on api_specie for each statement 
+        execute procedure refresh_mat_view();
+        """)
     ]
