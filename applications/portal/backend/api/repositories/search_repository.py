@@ -9,6 +9,7 @@ from django.db.models.functions import Length, Concat, Coalesce
 from django.contrib.postgres.search import SearchVectorField, SearchRank, SearchQuery, SearchVector, SearchHeadline, SearchRank
 
 from ..models import STATUS, Antibody, AntibodySearch
+from cloudharness import log
 
 MIN_CATALOG_RANKING = 0.0  # TODO validate the proper ranking value
 MAX_SEARCH_RESULTS = settings.LIMIT_NUM_RESULTS
@@ -89,13 +90,17 @@ def fts_others_search(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, sea
         return [], 0
 
     if count > settings.LIMIT_NUM_RESULTS:
-        ids = [a.ix for a  in subfields_search[offset: size + offset]]
+        ids = [a.ix for a  in subfields_search.filter(disc_date__isnull=True)[offset: size + offset]]
         return Antibody.objects.filter(ix__in=ids, disc_date__isnull=True).select_related('vendor'), count
     
     def sort_fn(x: AntibodySearch):
         ranking = -x.ranking
         if x.defining_citation:
-            ranking -= float(x.defining_citation.replace(",", "")) / 100
+            try:
+                ranking -= float(x.defining_citation.replace(",", "")) / 100
+            except ValueError:
+                log.warning("Invalid citation value: %s", x.defining_citation)
+                ranking -= 1
         
         if x.disc_date:
             ranking += 1000

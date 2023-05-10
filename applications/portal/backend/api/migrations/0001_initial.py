@@ -646,6 +646,7 @@ class Migration(migrations.Migration):
                     COALESCE(product_isotype, ''::character varying)::text) || ' '::text) || 
                 COALESCE(product_conjugate, ''::text) || 
                 COALESCE(product_form, ''::character varying)::text) || ' '::text) || 
+                COALESCE(target_species_raw, ''::character varying)::text) || ' '::text) || 
                 COALESCE(kit_contents, ''::character varying)::text) || ' '::text)), 'C'::"char") ||
             setweight(to_tsvector('english'::regconfig, (((
                 COALESCE(comments, ''::text) || ' '::text) || 
