@@ -5,7 +5,7 @@ from api.utilities.functions import catalog_number_chunked
 
 from django.conf import settings
 from django.db.models import F, Value
-from django.db.models.functions import Length, Concat, Coalesce
+from django.db import connection
 from django.contrib.postgres.search import SearchVectorField, SearchRank, SearchQuery, SearchVector, SearchHeadline, SearchRank
 
 from ..models import STATUS, Antibody, AntibodySearch
@@ -108,5 +108,6 @@ def fts_others_search(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, sea
     
     ids = [a.ix for a in sorted((a for a  in subfields_search),key=sort_fn)][offset: size + offset]
     return Antibody.objects.filter(ix__in=ids).select_related('vendor'), count
+
 
 

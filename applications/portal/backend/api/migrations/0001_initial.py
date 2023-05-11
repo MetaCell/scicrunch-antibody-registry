@@ -636,7 +636,7 @@ class Migration(migrations.Migration):
                         COALESCE(clone_id, ''::text) || ' '::text)) 
             ), 'A'::"char") ||
                 
-                setweight(to_tsvector('english'::regconfig, (((((((((((((((
+                setweight(to_tsvector('english'::regconfig, (((((((((((((((((
                     COALESCE(api_vendor.vendor, ''::text) || ' '::text) || 
                     COALESCE(api_specie.name, ''::text) || ' '::text) || 
                     COALESCE(target_subregion, ''::text) || ' '::text) || 
@@ -676,29 +676,5 @@ class Migration(migrations.Migration):
             index=django.contrib.postgres.indexes.GinIndex(
                 fields=["search_vector"], name="antibody_search_fts_idx"
             ),
-        ),
-        migrations.RunSQL("""
-        create or replace function refresh_mat_view()
-        returns trigger language plpgsql
-        as $$
-        begin
-            refresh  materialized view concurrently antibody_search ;
-            return null;
-        end $$;
-
-        create trigger refresh_mat_view
-        after insert or update or delete or truncate
-        on api_vendor for each statement 
-        execute procedure refresh_mat_view();
-
-        create trigger refresh_mat_view
-        after insert or update or delete or truncate
-        on api_antibody for each statement 
-        execute procedure refresh_mat_view();
-
-        create trigger refresh_mat_view
-        after insert or update or delete or truncate
-        on api_specie for each statement 
-        execute procedure refresh_mat_view();
-        """)
+        )
     ]

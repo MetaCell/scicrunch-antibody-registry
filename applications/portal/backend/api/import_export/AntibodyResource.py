@@ -1,4 +1,5 @@
 from typing import Callable
+from api.repositories.maintainance import refresh_search_view
 
 from import_export.fields import Field
 from import_export.instance_loaders import ModelInstanceLoader
@@ -131,6 +132,36 @@ class AntibodyResource(ModelResource):
             if antibody_identifier.condition(row):
                 return antibody_identifier
         return None
+    
+    def save_instance(self, instance, is_create, using_transactions=True, dry_run=False):
+        """
+        Takes care of saving the object to the database.
+
+        Objects can be created in bulk if ``use_bulk`` is enabled.
+
+        :param instance: The instance of the object to be persisted.
+        :param is_create: A boolean flag to indicate whether this is a new object
+        to be created, or an existing object to be updated.
+        :param using_transactions: A flag to indicate whether db transactions are used.
+        :param dry_run: A flag to indicate dry-run mode.
+        """
+        self.before_save_instance(instance, using_transactions, dry_run)
+        if self._meta.use_bulk:
+            if is_create:
+                self.create_instances.append(instance)
+            else:
+                self.update_instances.append(instance)
+        else:
+            if not using_transactions and dry_run:
+                # we don't have transactions and we want to do a dry_run
+                pass
+            else:
+                instance.save(update_search=False)
+        self.after_save_instance(instance, using_transactions, dry_run)
+
+    def after_import(self, dataset, result, using_transactions, dry_run, **kwargs):
+        super().after_import(dataset, result, using_transactions, dry_run, **kwargs)
+        refresh_search_view()
 
     def get_or_init_instance(self, instance_loader, row):
         """

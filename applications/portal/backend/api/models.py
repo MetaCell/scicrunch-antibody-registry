@@ -1,6 +1,7 @@
 import os
 from random import randint
 from typing import Optional, Tuple
+from api.repositories.maintainance import refresh_search_view
 
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector, SearchVectorField
@@ -208,7 +209,7 @@ class Antibody(models.Model):
     antigen = models.ForeignKey(
         Antigen, on_delete=models.SET_NULL, db_column='antigen_id', null=True, blank=True)
     ab_target = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN,
-                               db_column='ab_target', null=True, db_index=True)
+                                 db_column='ab_target', null=True, db_index=True, blank=True)
     entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
                                  null=True, db_index=True, blank=True)
     uniprot_id = models.CharField(
@@ -268,7 +269,7 @@ class Antibody(models.Model):
     show_link = models.BooleanField(null=True, blank=True)
 
     @transaction.atomic
-    def save(self, *args, **kwargs):
+    def save(self, *args, update_search=True, **kwargs):
         first_save = self.ix is None
         self._handle_status_changes(first_save)
         super(Antibody, self).save(*args, **kwargs)
@@ -283,6 +284,13 @@ class Antibody(models.Model):
             self._generate_automatic_attributes(*args, **kwargs)
 
         super(Antibody, self).save()
+        if update_search and self.status == STATUS.CURATED:
+            refresh_search_view()
+
+    def delete(self, *args, **kwargs):
+        super(Antibody, self).delete(*args, **kwargs)
+        if self.status == STATUS.CURATED:
+            refresh_search_view()
 
     def _generate_automatic_attributes(self, *args, **kwargs):
         """
@@ -448,9 +456,6 @@ def antibody_persistence_directory(instance, filename):
     return get_antibody_persistence_directory(instance.antibody.ab_id, get_antibody_filename(instance, filename))
 
 
-
-
-
 class AntibodyFiles(models.Model):
     id = models.AutoField(primary_key=True, unique=True, null=False)
     antibody = models.ForeignKey(
@@ -514,13 +519,16 @@ class AntibodyApplications(models.Model):
 class AntibodySearch(models.Model):
     ix = models.BigIntegerField(primary_key=True)
     search_vector = SearchVectorField(null=True)
-    defining_citation = models.CharField(null=True, max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN)
-    disc_date = models.CharField(null=True, max_length=ANTIBODY_DISC_DATE_MAX_LEN)
+    defining_citation = models.CharField(
+        null=True, max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN)
+    disc_date = models.CharField(
+        null=True, max_length=ANTIBODY_DISC_DATE_MAX_LEN)
     status = models.CharField(
         max_length=STATUS_MAX_LEN,
         db_index=True,
         null=True,
     )
+
     class Meta:
         # managed = False
         db_table = 'antibody_search'
