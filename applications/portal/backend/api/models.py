@@ -284,7 +284,7 @@ class Antibody(models.Model):
             self._generate_automatic_attributes(*args, **kwargs)
 
         super(Antibody, self).save()
-        if self.ab_id == 0:
+        if self.ab_id == "0":
             raise Exception(f"Error during antibody id assignment\n {str(self)}")
         if update_search and self.status == STATUS.CURATED:
             refresh_search_view()
@@ -361,8 +361,8 @@ class Antibody(models.Model):
             if duplicates_length > 3 or duplicate_antibodies == 2 and \
                     all([ab.ab_id is not None for ab in duplicate_antibodies]):  # Work around to handle the temporary
                 # creation of entities on the confirmation step of django-import-export
-                log.error("Unexpectedly found multiple antibodies with catalog number %s and vendor %s", self.vendor.name,
-                          self.catalog_num)
+                log.error("Unexpectedly found multiple antibodies with catalog number %s and vendor %s",
+                          self.catalog_num, self.vendor.name)
             return duplicate_antibodies[0]
         return None
 
