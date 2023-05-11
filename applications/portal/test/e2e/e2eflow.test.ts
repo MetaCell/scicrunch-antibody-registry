@@ -112,6 +112,8 @@ describe("E2E Flow for AntiBody Registry", () => {
     await page.click(selectors.SEARCH_BAR_SELECTOR);
     await page.waitForTimeout(3000);
     await page.type(selectors.SEARCH_INPUT_SELECTOR, cat_nums[1]);
+    await page.waitForTimeout(2000);
+    await page.keyboard.press('Enter')
 
     await page.waitForFunction(
       () => {
@@ -158,11 +160,17 @@ describe("E2E Flow for AntiBody Registry", () => {
       'input[placeholder="Search for catalog number"]',
       (el) => el.value
     );
+    await page.click(selectors.SEARCH_INPUT_SELECTOR)
+    await page.waitForTimeout(3000);
     for (let i = 0; i < inputValue.length; i++) {
       await page.keyboard.press("Backspace");
     }
+    await page.waitForTimeout(2000);
+    await page.keyboard.press('Enter')
     await page.waitForTimeout(3000);
     await page.type(selectors.SEARCH_INPUT_SELECTOR, targ_antigens[1]);
+    await page.waitForTimeout(2000);
+    await page.keyboard.press('Enter')
 
     await page.waitForFunction(
       () => {
@@ -201,12 +209,12 @@ describe("E2E Flow for AntiBody Registry", () => {
 
     await page.type(
       selectors.USERNAME_SELECTOR,
-      process.env.USERNAME || USERNAME
+      process.env.username || USERNAME
     );
     await page.waitForTimeout(3000);
     await page.type(
       selectors.PASSWORD_SELECTOR,
-      process.env.PASSWORD || PASSWORD
+      process.env.password || PASSWORD
     );
     await page.waitForTimeout(3000);
 
@@ -348,7 +356,7 @@ describe("E2E Flow for AntiBody Registry", () => {
     await page.waitForTimeout(3000);
 
     await page.waitForSelector(selectors.SUCCESSFUL_SUBMISSION_SELECTOR);
-
+    await page.waitForTimeout(1000);
     await page.waitForSelector(selectors.CLOSE_SUBMISSION_SELECTOR);
     await page.click(selectors.CLOSE_SUBMISSION_SELECTOR);
 
@@ -493,7 +501,7 @@ describe("E2E Flow for AntiBody Registry", () => {
     await page.waitForTimeout(3000);
 
     await page.waitForSelector(selectors.SUCCESSFUL_SUBMISSION_SELECTOR);
-
+    await page.waitForTimeout(1000);
     await page.waitForSelector(selectors.CLOSE_SUBMISSION_SELECTOR);
     await page.click(selectors.CLOSE_SUBMISSION_SELECTOR);
 
@@ -639,7 +647,7 @@ describe("E2E Flow for AntiBody Registry", () => {
 
     await page.waitForSelector(selectors.CLOSE_SUBMISSION_SELECTOR);
     await page.click(selectors.CLOSE_SUBMISSION_SELECTOR);
-
+    await page.waitForTimeout(1000);
     await page.waitForSelector(selectors.TABLE_SELECTOR);
     await page.waitForSelector(selectors.NAME_ID_FIELD_SELECTOR);
 
@@ -666,7 +674,7 @@ describe("E2E Flow for AntiBody Registry", () => {
 
     await page.click(selectors.FILTER_SELECTOR);
     await page.waitForSelector(selectors.FILTER_TABLE_SELECTOR);
-
+    await page.waitForTimeout(1000);
     await page.evaluate(() => {
       const elements = Array.from(
         document.querySelectorAll(".MuiTypography-body1")
@@ -683,7 +691,7 @@ describe("E2E Flow for AntiBody Registry", () => {
 
     await page.click(selectors.SORT_SELECTOR);
     await page.click(selectors.SORT_SELECTOR);
-
+    await page.waitForTimeout(3000);
     const ab_Target_names = await page.$$eval(
       'div[data-field="abTarget"]',
       (ab_Target_names) => {
@@ -713,8 +721,9 @@ describe("E2E Flow for AntiBody Registry", () => {
     await page.click(`a[href= "/update/${ID_numbers[1]}"]`);
 
     await page.waitForSelector(selectors.INPUT_NAME_SELECTOR, {
-      timeout: 10000,
+      timeout: 15000,
     });
+    await page.waitForSelector(selectors.SUBMIT_SELECTOR);
 
     expect(page.url()).toContain(`update/${ID_numbers[1]}`);
 
@@ -727,7 +736,7 @@ describe("E2E Flow for AntiBody Registry", () => {
 
     await page.click(selectors.FILTER_SELECTOR);
     await page.waitForSelector(selectors.FILTER_TABLE_SELECTOR);
-
+    await page.waitForTimeout(1000);
     await page.evaluate(() => {
       const elements = Array.from(
         document.querySelectorAll(".MuiTypography-body1")
@@ -785,3 +794,4 @@ describe("E2E Flow for AntiBody Registry", () => {
     console.log("User logged out");
   });
 });
+
