@@ -284,6 +284,8 @@ class Antibody(models.Model):
             self._generate_automatic_attributes(*args, **kwargs)
 
         super(Antibody, self).save()
+        if self.ab_id == 0:
+            raise Exception(f"Error during antibody id assignment\n {str(self)}")
         if update_search and self.status == STATUS.CURATED:
             refresh_search_view()
 
