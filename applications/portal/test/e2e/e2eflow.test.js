@@ -3,7 +3,7 @@ require("expect-puppeteer");
 const puppeteer = require("puppeteer");
 const path = require("path");
 var scriptName = path.basename(__filename, ".js");
-import * as selectors from "./selectors";
+const selectors = require("./selectors");
 
 const antibody_type = require("./submissions.json");
 
