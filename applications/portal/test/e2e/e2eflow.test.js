@@ -687,9 +687,11 @@ describe("E2E Flow for AntiBody Registry", () => {
     });
 
     await page.waitForSelector(selectors.ANTIBODY_ID_FIELD_SELECTOR);
-
+    await page.waitForTimeout(1000);
     await page.click(selectors.SORT_SELECTOR);
+    await page.waitForTimeout(1000);
     await page.click(selectors.SORT_SELECTOR);
+    await page.waitForSelector('div[data-field="abTarget"]', {timeout: 6000})
     await page.waitForTimeout(3000);
     const ab_Target_names = await page.$$eval(
       'div[data-field="abTarget"]',
@@ -751,7 +753,9 @@ describe("E2E Flow for AntiBody Registry", () => {
     await page.waitForSelector(selectors.ANTIBODY_ID_FIELD_SELECTOR);
 
     await page.click(selectors.SORT_SELECTOR);
+    await page.waitForTimeout(1000);
     await page.click(selectors.SORT_SELECTOR);
+    await page.waitForSelector('div[data-field="nameAndId"]', {timeout:6000})
     await page.waitForTimeout(3000);
 
     const nameAndIds = await page.$$eval(
