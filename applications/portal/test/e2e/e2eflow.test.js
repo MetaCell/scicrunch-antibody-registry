@@ -1,6 +1,6 @@
 //IMPORTS:
-import "expect-puppeteer";
-import * as puppeteer from "puppeteer";
+require("expect-puppeteer");
+const puppeteer = require("puppeteer");
 const path = require("path");
 var scriptName = path.basename(__filename, ".js");
 import * as selectors from "./selectors";
