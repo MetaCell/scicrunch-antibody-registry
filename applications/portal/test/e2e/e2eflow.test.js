@@ -1,5 +1,4 @@
 //IMPORTS:
-require("expect-puppeteer");
 const puppeteer = require("puppeteer");
 const path = require("path");
 var scriptName = path.basename(__filename, ".js");
