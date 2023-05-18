@@ -107,7 +107,9 @@ def fts_others_search(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, sea
         return ranking
     
     ids = [a.ix for a in sorted((a for a  in subfields_search),key=sort_fn)][offset: size + offset]
-    return Antibody.objects.filter(ix__in=ids).select_related('vendor'), count
+    id_map = {ids[i]:i for i in range(len(ids))}
+    # the second sorting is needed because the query doesn't keep the ids order. 
+    return sorted(Antibody.objects.filter(ix__in=ids).select_related('vendor'),key=lambda x:id_map[x.ix]), count
 
 
 
