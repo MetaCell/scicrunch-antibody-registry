@@ -48,7 +48,8 @@ class AntibodyMapper(IDAOMapper):
         if dto.url or dto.vendorName:
             ab.set_vendor_from_name_url(url=dto.url, name=dto.vendorName)
         else:
-            raise AntibodyDataException("Either vendor url or name is mandatory", 'url/name', None)
+            raise AntibodyDataException(
+                "Either vendor url or name is mandatory", 'url/name', None)
 
         ab_dict = dict_to_snake(dto.dict())
 
@@ -60,11 +61,10 @@ class AntibodyMapper(IDAOMapper):
             elif not isinstance(v, (list, tuple)) and (getattr(ab, k, None) is None or isinstance(getattr(ab, k, None),
                                                                                                   (int, str))):
                 setattr(ab, k, v)
-        
 
         if dto.targetSpecies:
             # the logic to create species and fill the field is in the model save automations
-            ab.target_species_raw=','.join(dto.targetSpecies)
+            ab.target_species_raw = ','.join(dto.targetSpecies)
 
         ab.save()  # Need to save to set the manytomany
 
@@ -100,11 +100,24 @@ class AntibodyMapper(IDAOMapper):
             elif isinstance(v, datetime.date):
                 dao_dict[k] = v.isoformat()
         try:
-            ab = AntibodyDTO(**dict_to_camel(dao_dict), )
+            ab_dict = dict_to_camel(dao_dict)
+            ab = AntibodyDTO(**ab_dict, )
         except ValidationError as e:
-            log.error("Validation error on antibody %s",
+            log.error("Validation errors on antibody %s",
                       dao.ab_id, exc_info=True)
-            ab = AntibodyDTO()
+            for error in e.raw_errors:
+                for loc in error.loc_tuple():
+                    del ab_dict[loc]
+            try:
+                ab = AntibodyDTO(**ab_dict, )
+            except ValidationError as e:
+                log.error("Unrecoverable validation errors on antibody %s",
+                          dao.ab_id, exc_info=True)
+                ab = AntibodyDTO(abId=dao.ab_id, abName=dao.ab_name)
+        except Exception as e:
+            log.error("Unrecoverable errors on antibody %s",
+                      dao.ab_id, exc_info=True)
+            ab = AntibodyDTO(abId=dao.ab_id, abName=dao.ab_name)
         if dao.ab_target:
             ab.abTarget = dao.ab_target
         if dao.vendor:
@@ -117,16 +130,16 @@ class AntibodyMapper(IDAOMapper):
         if not dao.show_link:
             if dao.show_link is not None or (dao.vendor and not dao.vendor.show_link):
                 try:
-                    ab.url = VendorDomain.objects.filter(vendor=dao.vendor).first().base_url
+                    ab.url = VendorDomain.objects.filter(
+                        vendor=dao.vendor).first().base_url
                 except (VendorDomain.DoesNotExist, AttributeError):
                     ab.url = None
 
         if ab.url and "//" not in ab.url:
-            ab.url = "//" + ab.url  
+            ab.url = "//" + ab.url
 
         if dao.cat_alt:
             ab.catalogNum = ab.catalogNum + " (also " + dao.cat_alt + ")"
-
 
         # ab.commercialType = dao.
         return ab
