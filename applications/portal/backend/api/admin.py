@@ -21,7 +21,6 @@ from api.models import (
     STATUS,
     Antibody,
     Application,
-    Antigen,
     Vendor,
     Specie,
     VendorDomain,
@@ -129,7 +128,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         "uid",
         "uid_legacy"
     )
-    autocomplete_fields = ("vendor", "antigen", "source_organism")
+    autocomplete_fields = ("vendor", "source_organism")
     save_on_top = True
     show_save=False
 
@@ -242,13 +241,13 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         formset.save_m2m()
 
 
-@admin.register(Antigen)
-class GeneAdmin(admin.ModelAdmin):
-    search_fields = ("symbol",)
-    list_display = ("symbol",)
-    formfield_overrides = {
-        models.CharField: {'widget': TextInput(attrs={'size':'150'})},
-    }
+# @admin.register(Antigen)
+# class GeneAdmin(admin.ModelAdmin):
+#     search_fields = ("symbol",)
+#     list_display = ("symbol",)
+#     formfield_overrides = {
+#         models.CharField: {'widget': TextInput(attrs={'size':'150'})},
+#     }
 
 @admin.register(Specie)
 class SpecieAdmin(admin.ModelAdmin):

@@ -206,10 +206,10 @@ class Antibody(models.Model):
 
     url = models.URLField(max_length=URL_MAX_LEN,
                           null=True, db_index=True, blank=True)
-    antigen = models.ForeignKey(
-        Antigen, on_delete=models.SET_NULL, db_column='antigen_id', null=True, blank=True)
+    # antigen = models.ForeignKey(
+    #     Antigen, on_delete=models.SET_NULL, db_column='antigen_id', null=True, blank=True)
     ab_target = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN,
-                                 db_column='ab_target', null=True, db_index=True, blank=True)
+                                 db_column='ab_target', null=True, db_index=True, blank=True, verbose_name="Target antigen")
     entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
                                  null=True, db_index=True, blank=True)
     uniprot_id = models.CharField(

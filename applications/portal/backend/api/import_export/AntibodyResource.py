@@ -5,7 +5,7 @@ from import_export.fields import Field
 from import_export.instance_loaders import ModelInstanceLoader
 from import_export.resources import ModelResource
 
-from api.models import Antibody, AntibodyClonality, CommercialType, Vendor, Antigen, Specie, STATUS
+from api.models import Antibody, AntibodyClonality, CommercialType, Vendor, Specie, STATUS
 from api.services.gene_service import get_or_create_gene
 from api.import_export.import_antibody_helpers import filter_dataset_by_accession, filter_dataset_by_catnum_vendor, filter_dataset_by_ix, get_antibody_q1, get_antibody_q2
 from api.services.keycloak_service import KeycloakService
@@ -54,10 +54,7 @@ class AntibodyResource(ModelResource):
     link = Field(column_name='link')
     target = Field(
         column_name='ab_target',
-        attribute='antigen',
-        widget=ForeignKeyWidgetWithCreation(model=Antigen, field='symbol',
-                                            get_or_create=lambda **kwargs: get_or_create_gene(**kwargs)[
-                                                0])
+        attribute='ab_target'
     )
 
     species = Field(

@@ -11,7 +11,7 @@ from django.db import connection
 
 from api.management.ingestion.preprocessor import AntibodyDataPaths
 from api.management.ingestion.users_ingestor import UsersIngestor
-from api.models import Antibody, Antigen, Vendor, VendorDomain, Specie, \
+from api.models import Antibody, Vendor, VendorDomain, Specie, \
     VendorSynonym, AntibodySpecies, AntibodyFiles
 from api.services.keycloak_service import KeycloakService
 from api.utilities.decorators import timed_class_method
@@ -69,7 +69,7 @@ def get_species_from_targets(specie_str):
 class Ingestor:
     ANTIBODY_TABLE = Antibody.objects.model._meta.db_table
     ANTIBODY_FILES_TABLE = AntibodyFiles.objects.model._meta.db_table
-    ANTIGEN_TABLE = Antigen.objects.model._meta.db_table
+    # ANTIGEN_TABLE = Antigen.objects.model._meta.db_table
     SPECIE_TABLE = Specie.objects.model._meta.db_table
     VENDOR_DOMAIN_TABLE = VendorDomain.objects.model._meta.db_table
     VENDOR_SYNONYM_TABLE = VendorSynonym.objects.model._meta.db_table
@@ -100,7 +100,6 @@ class Ingestor:
         self.data_paths.vendors and self._insert_vendors(self.data_paths.vendors)
         self.data_paths.vendor_domains and self._insert_vendor_domains(self.data_paths.vendor_domains)
         self._insert_antibodies(self.ANTIBODIES_TMP_TABLE)
-        self._insert_genes()
         species_map = self._insert_species(species_map)
         self._swap_antibodies(self.ANTIBODIES_TMP_TABLE, self.ANTIBODY_TABLE)
         self._insert_antibody_species(species_map)
@@ -111,8 +110,7 @@ class Ingestor:
     @timed_class_method('Tables truncated')
     def _truncate_tables(self):
         # delete tables content (opposite order of insertion)
-        tables_to_delete = [self.ANTIBODY_FILES_TABLE, self.SPECIE_TABLE, self.ANTIBODY_TABLE,
-                            self.ANTIGEN_TABLE, self.VENDOR_SYNONYM_TABLE,
+        tables_to_delete = [self.ANTIBODY_FILES_TABLE, self.SPECIE_TABLE, self.ANTIBODY_TABLE, self.VENDOR_SYNONYM_TABLE,
                             self.VENDOR_DOMAIN_TABLE, self.VENDOR_TABLE]
 
         for ttd in tables_to_delete:
@@ -217,15 +215,6 @@ class Ingestor:
                     f"File progress: {int(min((i + 1) * CHUNK_SIZE, len_csv) / len_csv * 100)}% ")
         if error:
             raise Exception("Error inserting antibodies")
-
-    @timed_class_method('Genes added')
-    def _insert_genes(self):
-        with connection.cursor() as cursor:
-            cursor.execute(get_insert_into_table_select_stm(self.ANTIGEN_TABLE,
-                                                             'ab_target',
-                                                             True,
-                                                             'ab_target',
-                                                             self.ANTIBODIES_TMP_TABLE))
 
 
     @timed_class_method('Species added')
@@ -343,7 +332,7 @@ class Ingestor:
                     ttr, tables_to_restart_seq[ttr]))
 
             reset_sequence_sql = connection.ops.sequence_reset_sql(no_style(),
-                                                                [Specie, Antigen, AntibodySpecies, VendorSynonym])
+                                                                [Specie, AntibodySpecies, VendorSynonym])
             for rss in reset_sequence_sql:
                 cursor.execute(rss)
 
