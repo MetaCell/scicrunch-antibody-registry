@@ -279,7 +279,7 @@ export const AntibodyDetail = () => {
                     {antibody.vendorName}
                   </Typography>
 
-                  <Button
+                  {antibody.url && <Button
                     variant="text"
                     size="small"
                     sx={classes.buttonText}
@@ -289,7 +289,7 @@ export const AntibodyDetail = () => {
                     href={antibody.url}
                   >
                     Open in vendor website
-                  </Button>
+                  </Button>}
                 </Grid>
               </Grid>
               <Divider />

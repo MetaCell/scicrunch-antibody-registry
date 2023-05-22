@@ -49,25 +49,8 @@ import Error500 from "../UI/Error500";
 
 
 
-const StyledBadge = (props) => {
-  if (props.field === "vendorName") {
-    return (
-      <Box bgcolor="primary.light" px={0.5} py={0.25} borderRadius="0.25rem">
-        <Link underline="none" target="_blank" href={props.row.url}>
-          {props.children}
-        </Link>
-      </Box>
-    );
-  } else if (props.field === "clonality") {
-    return (
-      <Box bgcolor="grey.A200" px={1} py={0.25} borderRadius="1rem">
-        {props.children}
-      </Box>
-    );
-  } else {
-    return <Box>{props.children}</Box>;
-  }
-};
+
+
 const StyledCheckBox = (props) => {
   return (
     <Checkbox
@@ -90,11 +73,6 @@ const CustomToolbar = ({ activeTab }) => {
     apiRef.current.exportDataAsCsv(options);
 
   const showFilterMenu = () => apiRef.current.showFilterPanel();
-
-
-
-  
-  
 
   useEffect(() => {
     selectedRows.size === 0
@@ -142,32 +120,56 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
 
 const RenderCellContent = (props: GridRenderCellParams<String>) => {
   return (
-    <StyledBadge {...props}>
-      <Typography
-        variant="caption"
-        align="left"
-        color={props.field === "vendorName" ? "primary.main" : "grey.500"}
-        component="div"
-      >
-        {props.field === "targetAntigen"
-          ? `${props.row.abTarget} ${props.row.targetSpecies.join(", ")}`
-          : props.value}
-      </Typography>
-    </StyledBadge>
+    <Typography
+      variant="caption"
+      align="left"
+      color={"grey.500"}
+      component="div"
+    >
+      {props.field === "targetAntigen"
+        ? `${props.row.abTarget} ${props.row.targetSpecies.join(", ")}`
+        : props.value}
+    </Typography>
   );
 };
 
+const RenderVendor = (props) => ( 
+  
+  <Typography
+    variant="caption"
+    align="left"
+    color={"grey.500"}
+    component="div"
+  >
+    {props.row.url ? <Link bgcolor="primary.light" px={0.5} py={0.25} display="block" underline="none" target="_blank" href={props.row.url}>
+      {props.value}
+    </Link> : props.value}
+  </Typography>
+)
+
+const RenderClonality = (props) => (
+  <Typography
+    variant="caption"
+    align="left"
+    color={"grey.500"}
+    bgcolor="grey.A200"
+    component="div"
+    px={1} py={0.25} borderRadius="1rem"
+  >
+    {props.value}
+  </Typography>
+);
+
+
 const RenderHtml = (props: GridRenderCellParams<String>) => {
   return (
-    <StyledBadge {...props}>
-      <Typography
-        variant="caption"
-        align="left"
-        color="grey.500"
-        component="div"
-        dangerouslySetInnerHTML={{ __html: props.value }}
-      />
-    </StyledBadge>
+    <Typography
+      variant="caption"
+      align="left"
+      color="grey.500"
+      component="div"
+      dangerouslySetInnerHTML={{ __html: props.value }}
+    />
   );
 };
 
@@ -202,44 +204,42 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   const open = Boolean(anchorCitationPopover);
   const id = open ? "simple-popover" : undefined;
   return (
-    <StyledBadge {...props}>
-      <Box sx={classes.citationColumn}>
-        <Typography
-          variant="caption"
-          align="left"
-          color={props.field === "vendor" ? "primary.main" : "grey.500"}
-          component="div"
-        >
-          {props.value}
-        </Typography>
-        <CopyToClipboard text={props.value}>
-          <Button
-            onClick={handleClickCitation}
-            size="small"
-            sx={{ minWidth: 0 }}
-            startIcon={
-              <CopyIcon stroke={theme.palette.grey[500]} fontSize="inherit" />
-            }
-          />
-        </CopyToClipboard>
-        <Popover
-          id={id}
-          open={open}
-          anchorEl={anchorCitationPopover}
-          onClose={handleCloseCitation}
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "right",
-          }}
-          transformOrigin={{
-            vertical: "center",
-            horizontal: "center",
-          }}
-        >
-          <Typography sx={classes.popover}>Citation copied</Typography>
-        </Popover>
-      </Box>
-    </StyledBadge>
+    <Box sx={classes.citationColumn}>
+      <Typography
+        variant="caption"
+        align="left"
+        color={props.field === "vendor" ? "primary.main" : "grey.500"}
+        component="div"
+      >
+        {props.value}
+      </Typography>
+      <CopyToClipboard text={props.value}>
+        <Button
+          onClick={handleClickCitation}
+          size="small"
+          sx={{ minWidth: 0 }}
+          startIcon={
+            <CopyIcon stroke={theme.palette.grey[500]} fontSize="inherit" />
+          }
+        />
+      </CopyToClipboard>
+      <Popover
+        id={id}
+        open={open}
+        anchorEl={anchorCitationPopover}
+        onClose={handleCloseCitation}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "center",
+          horizontal: "center",
+        }}
+      >
+        <Typography sx={classes.popover}>Citation copied</Typography>
+      </Popover>
+    </Box>
   );
 };
 
@@ -437,6 +437,7 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "clonality",
       headerName: "Clonality",
+      renderCell: RenderClonality,
     },
     {
       ...columnsDefaultProps,
@@ -468,8 +469,9 @@ const AntibodiesTable = (props) => {
     {
       ...columnsDefaultProps,
       field: "vendorName",
-      headerName: "Link to Vendor",
+      headerName: "Vendor",
       flex: 1.5,
+      renderCell: RenderVendor,
 
     },
     {
