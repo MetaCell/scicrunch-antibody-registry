@@ -272,6 +272,7 @@ class Antibody(models.Model):
     def save(self, *args, update_search=True, **kwargs):
         first_save = self.ix is None
         self._handle_status_changes(first_save)
+
         super(Antibody, self).save(*args, **kwargs)
 
         if self.catalog_num:

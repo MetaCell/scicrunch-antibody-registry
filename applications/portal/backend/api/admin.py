@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.contrib.admin.widgets import ManyToManyRawIdWidget, FilteredSelectMultiple
 from django.forms import CheckboxSelectMultiple
 from django.db.models import Q
+from django.contrib.auth.models import User
 from django.forms import TextInput, Textarea, URLInput
 from django.db import models
 from django.db.models.functions import Length
@@ -13,6 +14,7 @@ from django.utils.html import escape, format_html, format_html_join, mark_safe
 from django.utils.text import format_lazy
 from import_export.admin import ImportMixin
 from keycloak.exceptions import KeycloakGetError
+from cloudharness_django.models import Member
 
 from api.forms.AntibodyImportForm import AntibodyImportForm
 from api.models import (
@@ -35,6 +37,13 @@ from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 def id_with_ab(obj: Antibody):
     return f"AB_{obj.ab_id}"
 
+@cache
+def get_user_by_kc_id(kc_id) -> User:
+    try:
+        return Member.objects.get(kc_id=kc_id).user
+    except Member.DoesNotExist:
+        return None
+    
 
 class VerboseManyToManyRawIdWidget(ManyToManyRawIdWidget):
     """
@@ -142,9 +151,13 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     def submitter_name(self, obj: Antibody):
         if not obj.uid:
             return "Unknown"
+        
+        dj_user: User = get_user_by_kc_id(obj.uid)
+        if dj_user:
+            return f"{dj_user.get_full_name()} ({dj_user.username})"
         try:
             submitter = self.get_user(user_id=obj.uid)
-            return f"{submitter.get('firstName', '')} {submitter.get('lastName', '')} ({submitter['username']})"
+            return f"{submitter.get('firstName', '')} {submitter.get('lastName', '')} ({submitter['email']})"
         except KeycloakGetError:
             log.error(f"User {obj.uid} lookup error", exc_info=True)
             return f"{obj.uid} (not found)"
@@ -156,6 +169,11 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     def submitter_email(self, obj: Antibody):
         if not obj.uid:
             return "Unknown"
+
+        dj_user: User = get_user_by_kc_id(obj.uid)
+        if dj_user:
+            return dj_user.email
+            
         try:
             submitter = self.get_user(user_id=obj.uid)
             return f"{submitter['email']}"
