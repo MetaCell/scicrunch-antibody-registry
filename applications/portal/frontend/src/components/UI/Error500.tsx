@@ -25,7 +25,8 @@ const Error500 = () => {
           Internal Server Error
         </Typography>
         <Typography variant="subtitle1" align="center" sx={classes.message}>
-          An unexpected error has occurred. We are sorry for the inconvenience.
+          An unexpected error has occurred. We are sorry for the inconvenience, please try again later.
+          If the problem persists, please contact us at <pre>abr-help -at- scicrunch -dot- org</pre>.
         </Typography>
         <Box>
           <Button variant="contained" href="/" sx={{ width: "fit-content" }}>
