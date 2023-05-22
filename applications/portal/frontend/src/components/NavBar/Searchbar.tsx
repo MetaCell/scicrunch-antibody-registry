@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useContext, useRef, useCallback, useEffect } from "react";
 import {  useTheme } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
 import { SearchIcon, SlashIcon } from "../icons";
-import { Box, Autocomplete, InputAdornment } from "@mui/material";
+import { Box, Autocomplete, InputAdornment, Stack, Tooltip, Typography } from "@mui/material";
 import SearchContext from "../../context/search/SearchContext";
 import { useHistory } from 'react-router-dom';
-import debounce from 'lodash.debounce';
 
 
 export default function Searchbar() {
@@ -62,54 +61,78 @@ export default function Searchbar() {
     }
   }, [getFilteredAntibodies, clearSearch, history]);
 
+  const handleKeyPress = useCallback((event) => {
+    if(event.key==='/'){
+      event.preventDefault()
+      ref.current.focus()
+   
+    }
+  }, []);
 
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [handleKeyPress]);
 
   
-  return (<>
-
-        <Autocomplete  
-          sx={classes.input} 
-          freeSolo 
-          options={autocompleteOps.map(option => option)} 
-          fullWidth
-          clearOnEscape
-          disabled={loader}
+  return (<Stack direction="row">
+    <Tooltip sx={{ opacity: 0.5 }}   title={<Typography sx={{ fontSize: "0.8rem", mb: 1 }}>
+      Search tips:
+      <Typography component="ul" sx={{ fontSize: "0.8rem", textAlign: "left" }}>
+        <li>Catalog number is searched first if you type numbers</li>
+        <li>Anything else is searched if no catalog number matches</li>
+        <li>Search is currently limited to a maximum of 100 elements; refine your search if you don't find what you're looking for with the filters</li>
+        
+      </Typography>
+    </Typography>}>
+      <Autocomplete  
+        sx={classes.input} 
+        freeSolo 
+        options={autocompleteOps.map(option => option)} 
+        fullWidth
+        clearOnEscape
+        disabled={loader}
        
-          renderInput={(params) => { 
-            const  { InputProps, ...rest } = params;
+        renderInput={(params) => { 
+          const  { InputProps, ...rest } = params;
   
-            return(
-              <InputBase 
+          return(
+            <InputBase 
                 
-                inputRef={ref}
-                {...InputProps}
+              inputRef={ref}
+              {...InputProps}
                 
-                {...rest}  
-                placeholder="Search for catalog number" 
+              {...rest}  
+              placeholder="Search for catalog number" 
                 
-                startAdornment={<SearchIcon fontSize="inherit"sx={{ mx: "0.65rem" }}/>}
-                endAdornment={
-                  InputProps.endAdornment? InputProps.endAdornment:
-                    <InputAdornment position='end'>
-                      <Box
-                        sx={classes.slashIcon}
-                      >
-                        <SlashIcon  sx={{ width:'1rem', height:'1rem' }}/>
-                      </Box>
-                    </InputAdornment>
-                }
-                inputProps =  {{
-                  ...rest.inputProps,
-                  onBlur: handleChange,
-                  onKeyDown: (e) =>  e.key === "Enter" && handleChange(e)
+              startAdornment={<SearchIcon fontSize="inherit"sx={{ mx: "0.65rem" }}/>}
+              endAdornment={
+                InputProps.endAdornment? InputProps.endAdornment:
+                  <InputAdornment position='end'>
+                    <Box
+                      sx={classes.slashIcon}
+                    >
+                      <SlashIcon  sx={{ width:'1rem', height:'1rem' }}/>
+                    </Box>
+                  </InputAdornment>
+              }
+              inputProps =  {{
+                ...rest.inputProps,
+                onBlur: handleChange,
+                onKeyDown: (e) =>  e.key === "Enter" && handleChange(e)
                 
-                } }
-              />
-            )
-          }
-          }
-        />
+              } }
+            />
+          )
+        }
+        }
+      />
 
-  </>
+    </Tooltip>
+
+  </Stack>
   );
 }

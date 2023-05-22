@@ -34,6 +34,7 @@ import {
   SettingsIcon,
   CopyIcon,
 } from "../icons";
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import HomeHeader from "./HomeHeader";
 import { Antibody } from "../../rest";
 import { getProperCitation } from "../../utils/antibody";
@@ -590,7 +591,7 @@ const AntibodiesTable = (props) => {
               ColumnSortedAscendingIcon: AscSortedIcon,
               ColumnSortedDescendingIcon: DescSortedIcon,
               Toolbar: CustomToolbar,
-              ColumnMenuIcon: FilterIcon,
+              ColumnMenuIcon: MoreVertIcon,
               ColumnSelectorIcon: SettingsIcon,
               NoRowsOverlay: NoRowsOverlay,
             }}
