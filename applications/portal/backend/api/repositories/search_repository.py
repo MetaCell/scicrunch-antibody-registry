@@ -66,8 +66,8 @@ def fts_antibodies(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, search
     if might_be_catalog_number(search):
         cat_search = fts_by_catalog_number(re.sub(r'[^\w\s]', '', search), page, size)
 
-    if cat_search:
-        return cat_search
+        if cat_search:
+            return cat_search
     
     return fts_others_search(page, size, search)
     

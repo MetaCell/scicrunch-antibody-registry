@@ -19,7 +19,7 @@ antibody_mapper = AntibodyMapper()
 
 def search_antibodies_by_catalog(search: str, page: int = 1, size: int = 50,
                                  status=STATUS.CURATED) -> PaginatedAntibodies:
-    p = Paginator(Antibody.objects.select_related("antigen", "vendor", "source_organism").prefetch_related(
+    p = Paginator(Antibody.objects.select_related("vendor", "source_organism").prefetch_related(
         "species").all().filter(
         status=status, catalog_num__iregex=".*" + re.sub('[^0-9a-zA-Z]+', '.*', search) + ".*").order_by("-ix"), size)
     items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
@@ -28,7 +28,7 @@ def search_antibodies_by_catalog(search: str, page: int = 1, size: int = 50,
 
 def get_antibodies(page: int = 1, size: int = 50) -> PaginatedAntibodies:
     try:
-        p = Paginator(Antibody.objects.select_related("antigen", "vendor", "source_organism").
+        p = Paginator(Antibody.objects.select_related("vendor", "source_organism").
                     prefetch_related("species")
                     .filter(status=STATUS.CURATED).order_by("-ix"), size)
         items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
