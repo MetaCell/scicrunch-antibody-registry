@@ -6,7 +6,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { useTheme } from "@mui/material/styles";
 import { InfoIconCircle, InfoIconCircleActive, FileQuestionIconActive, FileQuestionIcon, MessageChatSquareIcon, MessageChatSquareIconActive } from "../icons";
-
+import Handshake from '@mui/icons-material/Handshake';
 import SubHeader from "./SubHeader";
 
 const SupportTabs = (props) => {
@@ -36,6 +36,9 @@ const SupportTabs = (props) => {
     }
     if(window.location.pathname==='/terms-and-conditions'){
       setTabValue(2);
+    }
+    if(window.location.pathname==='/membership'){
+      setTabValue(3);
     }
   },[tabValue])
   const handleTabChange = (e, newTabValue) => {
@@ -72,9 +75,18 @@ const SupportTabs = (props) => {
           component={Link}
           to="/terms-and-conditions"
         />
+        <Tab
+          value={3}
+          sx={classes.tab}
+          icon={ <Handshake fontSize="small" color={tabValue === 3 ? "primary" : "inherit"} />}
+          iconPosition="start"
+          label="Become a member"
+          component={Link}
+          to="/membership"
+        />
       </Tabs>
     </Box>
-    <Box sx={{ marginTop: "95px" }}>
+    <Box sx={{ my: "3em", }}>
       {props.children}
     </Box>
   </>
