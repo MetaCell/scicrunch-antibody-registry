@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { getSearchAntibodies } from '../../services/AntibodiesService'
+import { getSearchAntibodies, getAntibodies } from '../../services/AntibodiesService'
 import SearchContext from './SearchContext'
 import { getDataInfo } from "../../services/InfoService";
 
@@ -15,15 +15,31 @@ const SearchState = (props) => {
       setBaseData({ total: res.total, lastupdate: new Date(res.lastupdate) })
     ).catch((err) => {
       console.log("Error: ", err)
-    })},[]);
+    })
+    getAntibodies()
+      .then((res) => {
+        setSearch({
+          loader:false,
+          activeSearch: "",
+          totalElements: res.totalElements,
+          searchedAntibodies: res.items
+        })
+      })
+      .catch((err) => console.error(err))
+  
+  },[]);
 
 
   const [searchState, setSearch] = useState({
-    loader:false,
+    loader:true,
     activeSearch:'',
     totalElements:0,
     searchedAntibodies:[]
   })
+
+
+
+
   const getFilteredAntibodies = async (query:string) => {
     setSearch((prev) => ({
       ...prev,
