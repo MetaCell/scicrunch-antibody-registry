@@ -206,12 +206,12 @@ const About = () => {
       </Box>
       <Box className={classes.mainContent}>
         <Box className={classes.content}>
-          <Typography align='center' marginBottom={1.5} component="h3">
+          <Typography variant="body1" align='center' marginBottom={1.5} component="h3">
             Antibody Registry Partners
           </Typography>
 
-          <Typography align='center' marginBottom={8}>
-            We would like to thank our partners, who submit data to us regularly making author's jobs easier. Would you like to become a partner? <Link href="#">Inquire here</Link>.
+          <Typography variant="body1" align='center' marginBottom={8}>
+            We would like to thank our partners, who submit data to us regularly making author&pos;s jobs easier. Would you like to become a partner? <Link href="/membership">Inquire here</Link>.
           </Typography>
 
           <Slider {...settings}>
@@ -277,7 +277,7 @@ const About = () => {
                 </Typography>
 
                 <Typography>
-                  We never delete records, so even when an antibody disappears from a vendor's catalog, or is sold to another vendor, we can trace the provenance of that antibody. (Bandrowski et al).
+                  We never delete records, so even when an antibody disappears from a vendor&pos;s catalog, or is sold to another vendor, we can trace the provenance of that antibody. (Bandrowski et al).
                 </Typography>
               </Grid>
               <Grid item md={7}>
@@ -312,9 +312,9 @@ const About = () => {
         </Container>
       </Box>
       <Box className={classes.footer}>
-        <Typography>
+        <Typography variant="body1">
           Powered by
-          <a href="https://www.metacell.us/" target="_blank">
+          <a href="https://www.metacell.us/" target="_blank" rel="noreferrer">
             <img src='./assets/matacell.svg' alt="metacell" />
           </a>
         </Typography>
