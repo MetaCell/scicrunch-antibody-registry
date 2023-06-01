@@ -2,13 +2,16 @@ import React from "react";
 import { makeStyles } from '@mui/styles';
 import { vars } from "../../theme/variables";
 import { AccordionPlusIcon, AccordionMinusIcon } from "../icons";
-import { Box, Grid, Typography, Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import { Box, Grid, Typography, Accordion, AccordionSummary, AccordionDetails, Container } from "@mui/material";
 import { faqsInfo } from "../../content/faqsInfo";
 const { primaryTextColor, primarySubheaderColor, primaryHeaderColor } = vars;
 import SupportTabs from "../UI/SupportTabs";
+
+
 const useStyles = makeStyles(() => ({
   faqBox: {
     textAlign: "left",
+    marginBottom: "2em"
   },
   faqBoxSubheader: {
     color: primarySubheaderColor,
@@ -26,11 +29,8 @@ const useStyles = makeStyles(() => ({
     fontWeight: 400
   },
   grid: {
-    gap: "4rem",
-    "& .MuiGrid-item": {
-      paddingTop: 0,
-      paddingLeft: 0
-    }
+
+   
   },
   gridAccordion: {
     overflowY: "auto",
@@ -64,46 +64,52 @@ const useStyles = makeStyles(() => ({
   }
 }))
 
+const FAQ = ({ question, answer, expanded, handleChange }) => {
+  const classes = useStyles();
+  return (
+    <Accordion defaultExpanded={true} onChange={handleChange}>
+      <AccordionSummary
+        expandIcon={ expanded ? <AccordionMinusIcon /> : <AccordionPlusIcon />}
+      >
+        <Typography component="div">
+          {question}
+        </Typography>
+      </AccordionSummary>
+      <AccordionDetails className={classes.accordionExpanded} >
+        <Typography component="div">
+          {answer}
+        </Typography>
+      </AccordionDetails>
+    </Accordion>
+  )
+}
+
 const FAQs = () => {
   const classes = useStyles();
-  const [expanded, setExpanded] = React.useState<string | false>(false);
+  const [expanded, setExpanded] = React.useState(faqsInfo.reduce((acc, _, index) => ({ ...acc, [index]: true }), {}));
 
-  const handleChange =
-    (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
-      setExpanded(isExpanded ? panel : false);
-    };
 
   return (
     <SupportTabs>
+      <Container maxWidth="lg">
+        <Box className={classes.faqBox}>
+          <Typography className={classes.faqBoxSubheader}>Support</Typography>
+          <Typography className={classes.faqBoxHeader}>FAQs</Typography>
+          <Typography className={classes.faqBoxText}>Everything you need to know about the Antibody Registry. Can’t find the answer you’re looking for? Please chat to our team.</Typography>
+        </Box>
+      </Container>
       <Grid container spacing={2} direction="row" alignItems="start" justifyContent="center" className={classes.grid}>
         <Grid item xs={12} sm={6} md={4}>
-          <Box className={classes.faqBox}>
-            <Typography className={classes.faqBoxSubheader}>Support</Typography>
-            <Typography className={classes.faqBoxHeader}>FAQs</Typography>
-            <Typography className={classes.faqBoxText}>Everything you need to know about the Antibody Registry. Can’t find the answer you’re looking for? Please chat to our team.</Typography>
+          <Box className={classes.accordion}>
+            {
+              faqsInfo.slice(0, faqsInfo.length / 2).map(({ question, answer }, index) => <FAQ key={question} question={question} answer={answer} expanded={expanded[index]} handleChange={() => setExpanded({ ...expanded,  [index]: !expanded[index] })} />)
+            }
           </Box>
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
           <Box className={classes.accordion}>
             {
-              faqsInfo.map(({ question, answer }, index) => {
-                return (
-                  <Accordion key={index} expanded={expanded === question} onChange={handleChange(question)}>
-                    <AccordionSummary
-                      expandIcon={expanded === question ? <AccordionMinusIcon /> : <AccordionPlusIcon />}
-                    >
-                      <Typography component="div">
-                        {question}
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails className={classes.accordionExpanded} >
-                      <Typography component="div">
-                        {answer}
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
-                )
-              })
+              faqsInfo.slice(faqsInfo.length / 2, faqsInfo.length).map(({ question, answer }, index) => <FAQ key={question} question={question} answer={answer} expanded={expanded[index + faqsInfo.length / 2]} handleChange={() => setExpanded({ ...expanded,  [index + faqsInfo.length / 2]: !expanded[index + faqsInfo.length / 2] })} />)
             }
           </Box>
         </Grid>
