@@ -44,7 +44,7 @@ export default function Searchbar() {
   }
 
 
-  const { getFilteredAntibodies, clearSearch, loader } = useContext(SearchContext)
+  const { getFilteredAntibodies, clearSearch, loader, activeSearch } = useContext(SearchContext)
 
   const history = useHistory();
 
@@ -53,6 +53,7 @@ export default function Searchbar() {
   const autocompleteOps=[]
 
   const handleChange=useCallback((e: any) => {
+    if(e.target.value === activeSearch) {return;}
     if(!e.target.value){
       clearSearch()
     } else {
@@ -84,7 +85,7 @@ export default function Searchbar() {
       <Typography component="ul" sx={{ fontSize: "0.8rem", textAlign: "left" }}>
         <li>Catalog number is searched first if you type numbers</li>
         <li>Anything else is searched if no catalog number matches</li>
-        <li>Search is currently limited to a maximum of 100 elements; refine your search if you don't find what you're looking for with the filters</li>
+        <li>Search is currently limited to a maximum of 100 elements; refine your search if you don&apos;t find what you&apos;re looking for with the filters</li>
         
       </Typography>
     </Typography>}>
@@ -106,7 +107,7 @@ export default function Searchbar() {
               {...InputProps}
                 
               {...rest}  
-              placeholder="Search for catalog number" 
+              placeholder="Search antibodies" 
                 
               startAdornment={<SearchIcon fontSize="inherit"sx={{ mx: "0.65rem" }}/>}
               endAdornment={

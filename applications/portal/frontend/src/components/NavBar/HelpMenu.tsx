@@ -11,6 +11,7 @@ import {
   Divider,
 } from "@mui/material";
 import { HelpIcon, FaqIcon, EmailIcon, InfoIcon } from "../icons";
+import Handshake from '@mui/icons-material/Handshake';
 
 const HelpMenu = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -67,6 +68,14 @@ const HelpMenu = () => {
             </ListItemIcon>
             <Typography variant="h5" color="grey.500">
               FAQ
+            </Typography>
+          </MenuItem>
+          <MenuItem component={Link} to="/membership" onClick={handleClose}>
+            <ListItemIcon>
+              <Handshake fontSize="inherit" />
+            </ListItemIcon>
+            <Typography variant="h5" color="grey.500">
+              Become a member
             </Typography>
           </MenuItem>
 

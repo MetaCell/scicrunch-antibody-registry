@@ -15,6 +15,7 @@ import {
   Checkbox,
   Popover,
   Button,
+  Alert,
 } from "@mui/material";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
@@ -63,7 +64,7 @@ const StyledCheckBox = (props) => {
 
 const getRowId = (ab: Antibody) => `${ab.abId}${Math.random()}`;
 
-const CustomToolbar = ({ activeTab }) => {
+const CustomToolbar = ({ activeTab, antibodiesList }) => {
   const [activeSelection, setActiveSelection] = useState(true);
   
   const apiRef = useGridApiContext();
@@ -81,12 +82,15 @@ const CustomToolbar = ({ activeTab }) => {
   }, [selectedRows]);
 
   return (
-    <HomeHeader
+    <><HomeHeader
       activeSelection={activeSelection}
       handleExport={handleExport}
       showFilterMenu={showFilterMenu}
       activeTab={activeTab}
+      shownResultsNum={antibodiesList?.length}
     />
+    
+    </>
   );
 };
 
@@ -350,15 +354,6 @@ const AntibodiesTable = (props) => {
   const { activeSearch, searchedAntibodies, loader } =
     useContext(SearchContext);
 
-  const fetchAntibodies = () => {
-    !activeSearch
-      ? getAntibodies()
-        .then((res) => {
-          return setAntibodiesList(res.items);
-        })
-        .catch((err) => console.error(err))
-      : setAntibodiesList(searchedAntibodies);
-  };
 
   const fetchUserAntibodies = () => {
     getUserAntibodies()
@@ -368,11 +363,11 @@ const AntibodiesTable = (props) => {
       .catch((err) => console.error(err));
   };
 
+  
+
   useEffect(() => {
-    props.activeTab === ALLRESULTS
-      ? fetchAntibodies()
-      : user && fetchUserAntibodies();
-  }, [activeSearch, searchedAntibodies, props.activeTab, user]);
+    props.activeTab === ALLRESULTS ? setAntibodiesList(searchedAntibodies) : user && fetchUserAntibodies();
+  }, [searchedAntibodies, props.activeTab, user]);
 
   const columns: GridColDef[] = [
     {
@@ -498,6 +493,7 @@ const AntibodiesTable = (props) => {
   const compProps = {
     toolbar: {
       activeTab: props.activeTab,
+      antibodiesList
     },
     noRowsOverlay: {
       activeSearch: activeSearch,
@@ -570,7 +566,9 @@ const AntibodiesTable = (props) => {
   const currentPath = window.location.pathname;
   return (
     <Box>
+      
       <Box sx={{ flexGrow: 1, height: "90vh" }}>
+        
         {currentPath === "/submissions" && !user ? (
           <ConnectAccount />
         ) : (
@@ -596,6 +594,7 @@ const AntibodiesTable = (props) => {
               ColumnMenuIcon: MoreVertIcon,
               ColumnSelectorIcon: SettingsIcon,
               NoRowsOverlay: NoRowsOverlay,
+    
             }}
             componentsProps={compProps}
             localeText={{
