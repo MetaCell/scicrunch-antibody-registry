@@ -307,7 +307,7 @@ const About = () => {
           <Typography>
             Ready to get started?
           </Typography>
-          <Button variant="contained" color='secondary' onClick={navigate}>Search for antibodies</Button>
+          <Button className="go-home-button" variant="contained" color='secondary' onClick={navigate}>Search for antibodies</Button>
           <img src="./assets/ipad.webp" alt="" />
         </Container>
       </Box>
