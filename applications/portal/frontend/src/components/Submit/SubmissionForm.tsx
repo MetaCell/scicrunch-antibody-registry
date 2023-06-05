@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 
 import { Box, Button, Container, Dialog, Toolbar } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -31,14 +32,14 @@ const SubmissionForm = (props) => {
   const [antibodyId, setAntibodyId] = useState("");
   const [apiResponse, setApiResponse] = useState({ status: 0, detail: "" });
 
+  const history = useHistory();
+
   const handleTypeSelector = (value: string) => {
     setSelectedType(value);
   };
 
   const handleClose = () => {
-    window.location.href = "/";
-    setSelectedType("commercial");
-    setAntibodyId("");
+    history.push("/");
   };
 
   return (

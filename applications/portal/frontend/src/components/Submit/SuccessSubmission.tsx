@@ -39,9 +39,9 @@ const SuccessSubmission = (props) => {
           <Link target="_blank" href="mailto:curation@scicrunch.com">
             curation@scicrunch.com
           </Link>{" "}
-          in 1 business day with your antibody's official RRID. If approved, the
+          in 1 business day with your antibody&apos;s official RRID. If approved, the
           data will be publicly available at{" "}
-          <Link target="_blank" href="https://www.antibodyregistry.org">
+          <Link href="/">
             antibodyregistry.org
           </Link>{" "}
           in approximately 8 business days.
