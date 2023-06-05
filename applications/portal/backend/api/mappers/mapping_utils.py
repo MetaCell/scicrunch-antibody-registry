@@ -9,7 +9,7 @@ def to_camel(snake_str):
     return ''.join([first.lower(), *map(str.title, others)])
 
 def dict_to_snake(d):
-    return {to_snake(k): v for k, v in d.items()}
+    return {to_snake(k): v.strip() for k, v in d.items()}
 
 def dict_to_camel(d):
     return {to_camel(k): v for k, v in d.items()}
