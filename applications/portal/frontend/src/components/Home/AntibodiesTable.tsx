@@ -7,6 +7,7 @@ import {
   GridRenderCellParams,
   GridCsvExportOptions,
   GridNoRowsOverlay,
+  GridFilterModel,
 } from "@mui/x-data-grid";
 import {
   Typography,
@@ -351,6 +352,7 @@ const AntibodiesTable = (props) => {
   const user = useContext(UserContext)[0];
 
   const [antibodiesList, setAntibodiesList] = useState<Antibody[]>();
+  const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
   const { activeSearch, searchedAntibodies, loader } =
     useContext(SearchContext);
 
@@ -363,6 +365,13 @@ const AntibodiesTable = (props) => {
       .catch((err) => console.error(err));
   };
 
+  const handleSetFilterModel = (model: GridFilterModel) => {
+    setFilterModel(model);
+  };
+
+  useEffect(() => {
+    setFilterModel({ items: [] })
+  }, [activeSearch]);
   
 
   useEffect(() => {
@@ -380,6 +389,12 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "abId",
       headerName: "ID",
+      hide: true,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "accession",
+      headerName: "Accession",
       hide: true,
     },
     {
@@ -573,7 +588,7 @@ const AntibodiesTable = (props) => {
           <ConnectAccount />
         ) : (
           <DataGrid
-            key={"table-" + activeSearch}
+            className="antibodies-table"
             sx={dataGridStyles}
             rows={antibodiesList ?? []}
             getRowId={getRowId}
@@ -584,6 +599,8 @@ const AntibodiesTable = (props) => {
             disableSelectionOnClick
             getRowHeight={() => "auto"}
             loading={!antibodiesList || loader}
+            filterModel={filterModel}
+            onFilterModelChange={handleSetFilterModel}
             components={{
               BaseCheckbox: StyledCheckBox,
               ColumnFilteredIcon: FilteredColumnIcon,
