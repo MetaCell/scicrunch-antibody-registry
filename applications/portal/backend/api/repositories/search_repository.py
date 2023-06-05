@@ -86,7 +86,7 @@ def fts_others_search(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, sea
     offset = (page - 1) * size
     subfields_search = AntibodySearch.objects.annotate(
         ranking=ranking,
-    ).filter(search_vector=search_query)
+    ).filter(search_vector=search_query, status=STATUS.CURATED)
 
     count = subfields_search.count()
 
