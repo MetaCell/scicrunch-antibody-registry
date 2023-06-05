@@ -79,7 +79,7 @@ export default function Searchbar() {
   }, [handleKeyPress]);
 
   
-  return (<Stack direction="row">
+  return (<Stack direction="row" className="search-bar">
     <Tooltip sx={{ opacity: 0.5 }}   title={<Typography sx={{ fontSize: "0.8rem", mb: 1 }}>
       Search tips:
       <Typography component="ul" sx={{ fontSize: "0.8rem", textAlign: "left" }}>
@@ -96,13 +96,14 @@ export default function Searchbar() {
         fullWidth
         clearOnEscape
         disabled={loader}
+        className="search-autocomplete"
        
         renderInput={(params) => { 
           const  { InputProps, ...rest } = params;
   
           return(
             <InputBase 
-                
+              id="search-main"
               inputRef={ref}
               {...InputProps}
                 

@@ -195,7 +195,7 @@ const PersonalForm = (props) => {
   const { handleSubmit } = formik;
 
   return (
-    <form onSubmit={handleSubmit} autoComplete="off">
+    <form onSubmit={handleSubmit} autoComplete="off" className="antibody-form type-personal">
       <Container maxWidth="xl" className={classes.container}>
         <Paper className={classes.paper}>
           <Grid

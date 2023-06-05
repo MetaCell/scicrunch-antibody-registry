@@ -46,6 +46,7 @@ const SubmissionForm = (props) => {
       fullScreen
       open={true}
       onClose={handleClose}
+      className="submission-form"
       PaperProps={{
         style: {
           backgroundColor: theme.palette.grey[50],
@@ -74,6 +75,7 @@ const SubmissionForm = (props) => {
               variant="contained"
               color="info"
               sx={{ visibility: "hidden" }}
+              className="close-button"
             >
               Close
             </Button>
@@ -90,6 +92,7 @@ const SubmissionForm = (props) => {
             next={props.next}
             previous={props.previous}
             hasPrevious={props.hasPrevious}
+            
           />
 
           {selectedType === "commercial" ? (

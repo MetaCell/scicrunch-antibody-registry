@@ -24,7 +24,7 @@ const Navbar = () => {
   };
   return (
     <Box>
-      <AppBar elevation={0}>
+      <AppBar className="top-bar" elevation={0}>
         <Container maxWidth="xl">
           <Toolbar
             sx={{
@@ -44,7 +44,7 @@ const Navbar = () => {
                   }}
                 >
                   <Stack direction="row" spacing={2}>
-                    <Link href="/">
+                    <Link className="logo" href="/">
                       <img src={logo} title="Antibody Registry" />
                     </Link>
 

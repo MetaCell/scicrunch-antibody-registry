@@ -41,7 +41,7 @@ export const StepNavigation = (props: NavigationProps) => {
     <>{props.formik?.isSubmitting && <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={true} ><CircularProgress color="primary" /></Backdrop>}
     <Toolbar sx={classes.toolbar}>
       <Container maxWidth="xl">
-        <Box sx={classes.content}>
+        <Box sx={classes.content} className="form-steps">
           <Steeper
             activeStep={props.activeStep}
             //totalSteps={props.totalSteps}
@@ -53,6 +53,7 @@ export const StepNavigation = (props: NavigationProps) => {
               color="info"
               onClick={props.previous}
               startIcon={<ChevronLeftIcon fontSize="small" />}
+              className="previous-button"
             >
               Previous
             </Button>
@@ -65,6 +66,7 @@ export const StepNavigation = (props: NavigationProps) => {
                 disabled={
                   props.formik && !(props.formik.isValid && props.formik.dirty) || props.formik.isSubmitting
                 }
+                className="submit-button"
               >
                 Submit
               </Button>
@@ -74,6 +76,7 @@ export const StepNavigation = (props: NavigationProps) => {
                 color="secondary"
                 endIcon={<ChevronRightIcon fontSize="small" />}
                 onClick={(e) => props.next(e)}
+                className="next-button"
               >
                 Next
               </Button>

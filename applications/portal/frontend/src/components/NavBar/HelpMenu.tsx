@@ -39,7 +39,7 @@ const HelpMenu = () => {
       </IconButton>
 
       <Menu
-        id="help=menu"
+        id="help-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}

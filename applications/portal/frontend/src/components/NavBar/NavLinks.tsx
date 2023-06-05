@@ -13,6 +13,7 @@ const LinkButton = (props: LinkButtonProps) => {
   return (
     <Link
       component="button"
+      className="link-button"
       underline="none"
       variant="body2"
       href="#"

@@ -231,6 +231,7 @@ const CommercialForm = (props) => {
       onSubmit={handleSubmit}
       className={classes.background}
       autoComplete="off"
+      className="antibody-form type-commercial"
     >
       <Container maxWidth="xl">
         <Grid container>

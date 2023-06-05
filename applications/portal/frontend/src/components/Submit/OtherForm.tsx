@@ -194,7 +194,7 @@ const OtherForm = (props) => {
   const { handleSubmit } = formik;
 
   return (
-    <form onSubmit={handleSubmit} autoComplete="off">
+    <form className="antibody-form type-other" onSubmit={handleSubmit} autoComplete="off">
       <Container maxWidth="xl" className={classes.container}>
         <Paper className={classes.paper}>
           <Grid

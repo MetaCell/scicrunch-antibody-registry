@@ -37,13 +37,14 @@ const UserAccountMenu = (props: UserProps) => {
   };
   return (
         <>
-            <Stack direction="row" spacing={1}>
+            <Stack direction="row" spacing={1} className="user-menu">
               <div>
                 <Typography variant="subtitle1" color="grey.400" align="left">Account</Typography>
                 <Typography variant="subtitle2" color="grey.700" align="left">{user.firstName ? `${user.firstName} ${user.lastName}` : user.email}</Typography>
               </div>
               <IconButton
                 disableRipple
+                className="user-menu-button"
                 sx={{
                   p: 1.25,
                 }}

@@ -79,7 +79,7 @@ const AbTypeStep = ({ label, ...props }: AbTypeStep) => {
 
   return (
     <>
-      <Box>
+      <Box className="antibody-type-choose">
         <Typography sx={classes.title} variant="h1">
           1. Type of antibody
         </Typography>
