@@ -286,7 +286,7 @@ class Antibody(models.Model):
 
         super(Antibody, self).save()
         if int(self.ab_id) == 0:
-            raise Exception(f"Error during antibody id assignment\n {str(self)}")
+            raise Exception(f"Error during antibody id assignment: {self.ix}")
         if update_search and self.status == STATUS.CURATED:
             refresh_search_view()
 
@@ -361,8 +361,7 @@ class Antibody(models.Model):
             duplicates_length = len(duplicate_antibodies)
             if duplicates_length == 0:  # Because the save happened before there will always be one antibody in the database
                 return None
-            if duplicates_length > 2 or duplicates_length == 2 and \
-                    all([ab.ab_id is not None for ab in duplicate_antibodies]):  # Work around to handle the temporary
+            if duplicates_length > 2 and len(set(ab.ab_id for ab in duplicate_antibodies if ab.ab_id is not None)) > 1:  # Work around to handle the temporary
                 # creation of entities on the confirmation step of django-import-export
                 log.error("Unexpectedly found multiple antibodies with catalog number %s and vendor %s",
                           self.catalog_num, self.vendor.name)
