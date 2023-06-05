@@ -115,7 +115,8 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     search_fields = ("ab_id", "ab_name", "catalog_num")
 
     # Edit form settings
-    # exclude= ("uid", "uid_legacy")
+    exclude= ("catalog_num_search",)
+
     inlines = [TargetSpeciesInlineAdmin, AntibodyFilesAdmin]
     
     readonly_fields = (
