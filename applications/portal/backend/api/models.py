@@ -334,7 +334,7 @@ class Antibody(models.Model):
         duplicate = self.get_duplicate()
         if duplicate:
             self.ab_id = duplicate.ab_id
-            self.accession = self._generate_ab_id()
+            self.accession = self.accession or self._generate_ab_id()
 
     def _generate_ab_id(self) -> int:
         return generate_id_aux(self.ix)
@@ -354,12 +354,14 @@ class Antibody(models.Model):
         Returns a non-personal antibody with the same vendor_id and same catalog_number if exists
         """
         if self.vendor and self.catalog_num:
-            duplicate_antibodies = Antibody.objects.filter(vendor__id=self.vendor.id, catalog_num__iexact=self.catalog_num) \
-                .exclude(commercial_type=CommercialType.PERSONAL)
+            duplicate_antibodies = Antibody.objects.filter(
+                vendor__id=self.vendor.id, 
+                catalog_num__iexact=self.catalog_num
+            ).exclude( commercial_type=CommercialType.PERSONAL).exclude(ix=self.ix)
             duplicates_length = len(duplicate_antibodies)
-            if duplicates_length <= 1:  # Because the save happened before there will always be one antibody in the database
+            if duplicates_length == 0:  # Because the save happened before there will always be one antibody in the database
                 return None
-            if duplicates_length > 3 or duplicate_antibodies == 2 and \
+            if duplicates_length > 2 or duplicates_length == 2 and \
                     all([ab.ab_id is not None for ab in duplicate_antibodies]):  # Work around to handle the temporary
                 # creation of entities on the confirmation step of django-import-export
                 log.error("Unexpectedly found multiple antibodies with catalog number %s and vendor %s",
