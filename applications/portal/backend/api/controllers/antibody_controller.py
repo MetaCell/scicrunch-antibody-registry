@@ -41,9 +41,10 @@ def create_antibody(body: AddAntibodyDTO) -> Union[AntibodyDTO, JSONResponse]:
     except antibody_service.DuplicatedAntibody as e:
         return JSONResponse(status_code=409, content=jsonable_encoder(e.antibody))
     except Exception as e:
-        log.error("Error creating antibody: %s", e)
+        log.error("Error creating antibody: %s", e, exc_info=True)
         from pprint import pprint
         pprint(body.dict())
+        raise e
 
 
 def get_antibody(antibody_id: int) -> List[AntibodyDTO]:

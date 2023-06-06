@@ -56,12 +56,13 @@ class AntibodyMapper(IDAOMapper):
         for k, v in ab_dict.items():
             if not v:
                 continue
+            if isinstance(v, str):
+                v = v.strip()
             if isinstance(v, enum.Enum):
                 setattr(ab, k, v.value)
-            elif isinstance(v, str):
-                setattr(ab, k, v.strip())
-            elif not isinstance(v, (list, tuple)) and (getattr(ab, k, None) is None or isinstance(getattr(ab, k, None),
-                                                                                                  (int, str))):
+            elif not isinstance(v, (list, tuple))\
+                and (getattr(ab, k, None) is None\
+                     or isinstance(getattr(ab, k, None), (int, str))):
                 setattr(ab, k, v)
 
         if dto.targetSpecies:
@@ -85,16 +86,16 @@ class AntibodyMapper(IDAOMapper):
             try:
                 if "www." in base_url:
                     return VendorDomain.objects.get(base_url=base_url.replace("www.", "")).vendor
-                return VendorDomain.objects.get(base_url="www." + base_url).vendor   
+                return VendorDomain.objects.get(base_url="www." + base_url).vendor
             except VendorDomain.DoesNotExist:
-                    vendor_name = dto.vendorName or base_url
-                    log.info("Creating new Vendor `%s` on domain  to `%s`",
-                            vendor_name, base_url)
+                vendor_name = dto.vendorName or base_url
+                log.info("Creating new Vendor `%s` on domain  to `%s`",
+                         vendor_name, base_url)
 
-                    v = Vendor(name=vendor_name,
-                            commercial_type=dto.commercialType.value)
-                    v.save()
-                    return v
+                v = Vendor(name=vendor_name,
+                           commercial_type=dto.commercialType.value)
+                v.save()
+                return v
 
     def to_dto(self, dao: Antibody) -> AntibodyDTO:
         dao_dict = dao.__dict__
