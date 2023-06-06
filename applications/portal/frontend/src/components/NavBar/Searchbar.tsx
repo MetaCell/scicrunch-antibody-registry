@@ -2,7 +2,7 @@ import React, { useContext, useRef, useCallback, useEffect } from "react";
 import {  useTheme } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
 import { SearchIcon, SlashIcon } from "../icons";
-import { Box, Autocomplete, InputAdornment, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Autocomplete, InputAdornment, Stack, Tooltip, Typography, Paper } from "@mui/material";
 import SearchContext from "../../context/search/SearchContext";
 import { useHistory } from 'react-router-dom';
 
@@ -80,15 +80,16 @@ export default function Searchbar() {
 
   
   return (<Stack direction="row" className="search-bar">
-    <Tooltip sx={{ opacity: 0.5 }}   title={<Typography sx={{ fontSize: "0.8rem", mb: 1 }}>
-      Search tips:
+    <Tooltip sx={{ opacity: 0.5 }}   title={<Paper elevation={1} sx={{ p:1 }}><Typography sx={{ fontSize: "0.8rem", mb: 1 }}>
+      <strong>Search tips:</strong>
       <Typography component="ul" sx={{ fontSize: "0.8rem", textAlign: "left" }}>
         <li>Catalog number is searched first if you type numbers</li>
         <li>Anything else is searched if no catalog number matches</li>
-        <li>Search is currently limited to a maximum of 100 elements; refine your search if you don&apos;t find what you&apos;re looking for with the filters</li>
+        <li>Search results are currently limited to a maximum of 100 elements; refine your search if you don&apos;t find what you&apos;re looking for (table filters <b>do not</b> refine the search)</li>
+        <li>If you are having trouble, please check <a href="//rrid.site">rrid.site</a></li>
         
       </Typography>
-    </Typography>}>
+    </Typography></Paper>}>
       <Autocomplete  
         sx={classes.input} 
         freeSolo 
