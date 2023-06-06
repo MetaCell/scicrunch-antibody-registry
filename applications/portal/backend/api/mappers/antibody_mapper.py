@@ -56,14 +56,17 @@ class AntibodyMapper(IDAOMapper):
         for k, v in ab_dict.items():
             if not v:
                 continue
-            if isinstance(v, str):
-                v = v.strip()
-            if isinstance(v, enum.Enum):
-                setattr(ab, k, v.value)
-            elif not isinstance(v, (list, tuple))\
-                and (getattr(ab, k, None) is None\
-                     or isinstance(getattr(ab, k, None), (int, str))):
-                setattr(ab, k, v)
+            try:
+                if isinstance(v, str):
+                    v = v.strip()
+                if isinstance(v, enum.Enum):
+                    setattr(ab, k, v.value)
+                elif not isinstance(v, (list, tuple))\
+                    and (getattr(ab, k, None) is None\
+                        or isinstance(getattr(ab, k, None), (int, str))):
+                    setattr(ab, k, v)
+            except Exception as e:
+                log.exception("Error setting attribute %s, value: %s", k, v)
 
         if dto.targetSpecies:
             # the logic to create species and fill the field is in the model save automations
@@ -103,10 +106,13 @@ class AntibodyMapper(IDAOMapper):
         for k, v in dao_dict.items():
             if k == "_state":
                 continue
-            if isinstance(v, models.TextChoices):
-                dao_dict[k] = v.value
-            elif isinstance(v, datetime.date):
-                dao_dict[k] = v.isoformat()
+            try:
+                if isinstance(v, models.TextChoices):
+                    dao_dict[k] = v.value
+                elif isinstance(v, datetime.date):
+                    dao_dict[k] = v
+            except Exception as e:
+                log.exception("Error on antibody %s marshaling. Cannot set attribute %s, value: %s", k, v)
         try:
             ab_dict = dict_to_camel(dao_dict)
             ab = AntibodyDTO(**ab_dict, )
