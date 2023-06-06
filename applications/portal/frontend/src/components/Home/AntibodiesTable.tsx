@@ -358,6 +358,7 @@ const AntibodiesTable = (props) => {
 
 
   const fetchUserAntibodies = () => {
+    setAntibodiesList(null);
     getUserAntibodies()
       .then((res) => {
         return setAntibodiesList(res.items);
@@ -370,7 +371,7 @@ const AntibodiesTable = (props) => {
   };
 
   useEffect(() => {
-    setFilterModel({ items: [] })
+    setFilterModel({ items: [] }); // reset filters on new search
   }, [activeSearch]);
   
 
