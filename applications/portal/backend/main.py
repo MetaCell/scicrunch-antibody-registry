@@ -294,3 +294,9 @@ app.mount("/", get_asgi_application())
 # if __name__ == "__main__":
 #    import uvicorn
 #    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+try:
+    import cloudharness.sentry as sentry
+    sentry.init(appname="portal", traces_sample_rate=1.0)
+except:
+    log.exception("Sentry initialization failed")
