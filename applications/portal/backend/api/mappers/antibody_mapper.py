@@ -58,6 +58,8 @@ class AntibodyMapper(IDAOMapper):
                 continue
             if isinstance(v, enum.Enum):
                 setattr(ab, k, v.value)
+            elif isinstance(v, str):
+                setattr(ab, k, v.strip())
             elif not isinstance(v, (list, tuple)) and (getattr(ab, k, None) is None or isinstance(getattr(ab, k, None),
                                                                                                   (int, str))):
                 setattr(ab, k, v)
