@@ -156,7 +156,7 @@ describe("E2E Flow for AntiBody Registry", () => {
     expect(targ_antigens[1]).not.toBeNull;
 
     const inputValue = await page.$eval(
-      'input[placeholder="Search for catalog number"]',
+      'input[placeholder="Search antibodies"]',
       (el) => el.value
     );
     await page.click(selectors.SEARCH_INPUT_SELECTOR)
