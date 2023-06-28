@@ -23,8 +23,8 @@ import FormLine from "./FormLine";
 
 const { bannerHeadingColor, backgroundColorForm } = vars;
 
-const useStyles = makeStyles((theme?: any) => ({
-  container: { padding: theme.spacing(10) },
+const styles = {
+  container: { padding: 10 },
   paper: {
     textAlign: "start",
     border: "1px solid #EAECF0",
@@ -48,11 +48,11 @@ const useStyles = makeStyles((theme?: any) => ({
     color: bannerHeadingColor,
     marginBottom: "0.375rem",
   },
-}));
+};
 
 const AntibodyForm = (props) => {
   const { initialValues, validationSchema, onSubmit, title } = props;
-  const classes = useStyles();
+
   const theme = useTheme();
   const classesToolbar = {
     toolbar: {
@@ -86,10 +86,11 @@ const AntibodyForm = (props) => {
       onSubmit={handleSubmit}
       autoComplete="off"
       style={{ background: backgroundColorForm }}
+      className="antibody-form"
     >
       {formik.isSubmitting && <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={true} ><CircularProgress color="primary" /></Backdrop>}
-      <Container maxWidth="xl" className={classes.container}>
-        <Paper className={classes.paper}>
+      <Container maxWidth="xl" sx={styles.container} className="form-container">
+        <Paper sx={styles.paper}>
           <Grid
             container
             direction="column"
@@ -99,11 +100,11 @@ const AntibodyForm = (props) => {
             height="100%"
           >
             <Grid item>
-              <Typography variant="h1" className={classes.header}>
+              <Typography variant="h1" sx={styles.header}>
                 {title}
               </Typography>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -127,7 +128,7 @@ const AntibodyForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -149,7 +150,7 @@ const AntibodyForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -171,7 +172,7 @@ const AntibodyForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -193,7 +194,7 @@ const AntibodyForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -215,7 +216,7 @@ const AntibodyForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -237,7 +238,7 @@ const AntibodyForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -282,7 +283,7 @@ const AntibodyForm = (props) => {
               </FormLine>
             </Grid>
             <Grid item>
-              <Typography variant="h5" className={classes.label}>
+              <Typography variant="h5" sx={styles.label}>
                 Comments
               </Typography>
               <TextField
@@ -305,7 +306,7 @@ const AntibodyForm = (props) => {
               variant="contained"
               color="primary"
               startIcon={<DoneIcon fontSize="small" />}
-
+              className="button-submit"
               type="submit"
               disabled={
                 formik && (!(formik.isValid && formik.dirty) || formik.isSubmitting )

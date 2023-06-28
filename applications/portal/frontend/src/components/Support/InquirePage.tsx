@@ -8,7 +8,7 @@ const InquirePage = () => {
   
   return (
     <SupportTabs>
-      <Container maxWidth="lg" sx={{ display: 'flex', alignItems: "center", flexDirection: "column" }}>
+      <Container maxWidth="lg" sx={{ display: 'flex', alignItems: "center", flexDirection: "column" }} className="container-inquire">
         <Typography component="p">
       For companies that would like to be members of the Antibody Registry, there are benefits to membership and there are steps that will need to be taken. 
 

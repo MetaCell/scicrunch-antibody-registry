@@ -1,5 +1,5 @@
 import React from "react";
-import { makeStyles } from "@mui/styles";
+
 import { vars } from "../../theme/variables";
 import {
   Box,
@@ -21,8 +21,8 @@ import { postNewAntibody } from "../../helpers/antibody";
 
 const { bannerHeadingColor, primaryTextColor } = vars;
 
-const useStyles = makeStyles((theme?: any) => ({
-  container: { padding: theme.spacing(10) },
+const styles ={
+  container: { padding: 10 },
   paper: {
     textAlign: "start",
     border: "1px solid #EAECF0",
@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme?: any) => ({
     color: primaryTextColor,
     fontWeight: 400,
   },
-}));
+};
 
 const requiredFieldValidation = yup.string().required("The field is mandatory");
 
@@ -70,10 +70,10 @@ const validationSchema = yup.object().shape({
 
 const Input = ({ formik, label, name, required, placeholder }) => {
   const { errors, touched, getFieldProps, values, handleChange } = formik;
-  const classes = useStyles();
+
   return (
     <>
-      <Typography variant="h5" className={classes.label}>
+      <Typography variant="h5" sx={styles.label} className={`label-${name}`}>
         {label} {required && "(Mandatory)"}
       </Typography>
       {name === "clonality" ? (
@@ -82,6 +82,7 @@ const Input = ({ formik, label, name, required, placeholder }) => {
           value={formik.values.clonality}
           onChange={formik.handleChange}
           fullWidth
+          className="select-clonality"
         >
           <MenuItem value={"unknown"}>Unknown</MenuItem>
           <MenuItem value={"cocktail"}>Cocktail</MenuItem>
@@ -128,9 +129,10 @@ const Input = ({ formik, label, name, required, placeholder }) => {
                 </InputAdornment>
               ),
             }}
+            className={`input-${name}`}
           />
           {!touched[name] && !errors[name] && name === "catalogNumber" && (
-            <Typography variant="subtitle1" className={classes.note}>
+            <Typography variant="subtitle1" sx={styles.note} className="note">
               Note: Submit unregistered antibodies only
             </Typography>
           )}
@@ -153,9 +155,9 @@ const FormLine = ({ children }) => {
     </Grid>
   );
 };
-const OtherForm = (props) => {
-  const classes = useStyles();
-  const { setAntibodyId, setApiResponse, next } = props;
+
+const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious }) => {
+
 
   const postAntibody = (antibody) => {
     let ab = { ...antibody, type: "other" };
@@ -195,8 +197,8 @@ const OtherForm = (props) => {
 
   return (
     <form className="antibody-form type-other" onSubmit={handleSubmit} autoComplete="off">
-      <Container maxWidth="xl" className={classes.container}>
-        <Paper className={classes.paper}>
+      <Container maxWidth="xl" sx={styles.container}>
+        <Paper sx={styles.paper}>
           <Grid
             container
             direction="column"
@@ -206,11 +208,11 @@ const OtherForm = (props) => {
             height="100%"
           >
             <Grid item>
-              <Typography variant="h1" className={classes.header}>
+              <Typography variant="h1" sx={styles.header}>
                 2. Antibody Details
               </Typography>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -232,7 +234,7 @@ const OtherForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -254,7 +256,7 @@ const OtherForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -276,7 +278,7 @@ const OtherForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -298,7 +300,7 @@ const OtherForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -320,7 +322,7 @@ const OtherForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -342,7 +344,7 @@ const OtherForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -387,7 +389,7 @@ const OtherForm = (props) => {
               </FormLine>
             </Grid>
             <Grid item>
-              <Typography variant="h5" className={classes.label}>
+              <Typography variant="h5" sx={styles.label}>
                 Comments
               </Typography>
               <TextField
@@ -404,9 +406,9 @@ const OtherForm = (props) => {
         </Paper>
       </Container>
       <StepNavigation
-        previous={props.previous}
+        previous={previous}
         next={next}
-        hasPrevious={props.hasPrevious}
+        hasPrevious={hasPrevious}
         isLastStep={true}
         activeStep={2}
         formik={formik}

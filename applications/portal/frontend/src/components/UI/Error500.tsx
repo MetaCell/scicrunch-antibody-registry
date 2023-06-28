@@ -19,7 +19,7 @@ const Error500 = () => {
     },
   };
   return (
-    <Container maxWidth="xl" sx={classes.container}>
+    <Container maxWidth="xl" sx={classes.container} className="error-container-500">
       <Stack spacing={3} sx={classes.stack}>
         <Typography variant="h1" color="grey.700">
           Internal Server Error
@@ -29,7 +29,7 @@ const Error500 = () => {
           If the problem persists, please contact us at <pre>abr-help -at- scicrunch -dot- org</pre>.
         </Typography>
         <Box>
-          <Button variant="contained" href="/" sx={{ width: "fit-content" }}>
+          <Button variant="contained" href="/" sx={{ width: "fit-content" }} className="button-return">
             Return to Home Page
           </Button>
         </Box>

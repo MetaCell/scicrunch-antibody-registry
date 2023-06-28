@@ -19,7 +19,7 @@ const Error = (props) => {
     },
   };
   return (
-    <Container maxWidth="xl" sx={classes.container}>
+    <Container maxWidth="xl" sx={classes.container} className="error-container">
       <Stack spacing={3} sx={classes.stack}>
         <Typography variant="h1" color="grey.700">
           Something went wrong
@@ -28,7 +28,7 @@ const Error = (props) => {
           Error message: {props.detail}. We are sorry for the inconvenience
         </Typography>
         <Box>
-          <Button variant="contained" href="/" sx={{ width: "fit-content" }}>
+          <Button variant="contained" href="/" sx={{ width: "fit-content" }} className="button-return">
             Return to Home Page
           </Button>
         </Box>

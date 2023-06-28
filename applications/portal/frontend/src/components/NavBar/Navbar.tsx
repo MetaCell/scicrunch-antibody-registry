@@ -23,7 +23,7 @@ const Navbar = () => {
     window.location.href = "/login";
   };
   return (
-    <Box>
+    <Box className="container-navbar">
       <AppBar className="top-bar" elevation={0}>
         <Container maxWidth="xl">
           <Toolbar
@@ -75,7 +75,7 @@ const Navbar = () => {
                   <Stack direction="row" spacing={1.5}>
                     <HelpMenu />
                     {!user ? (
-                      <Button onClick={login}>Log in / Register</Button>
+                      <Button className="btn-login" onClick={login}>Log in / Register</Button>
                     ) : (
                       <UserAccountMenu user={user} />
                     )}

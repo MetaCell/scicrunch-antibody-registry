@@ -50,7 +50,7 @@ const NavLinks = () => {
           onClick={() => history.push(link.href[0])}
         />
       ))} 
-          </>
+    </>
   );
 };
 

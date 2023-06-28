@@ -18,7 +18,7 @@ import {
 } from "../icons";
 import StepNavigation from "./StepNavigation";
 
-interface AbTypeStep extends FieldConfig {
+interface AbTypeStepProps extends FieldConfig {
   label: string;
   selectedValue: string;
   handleChange: (type: string) => void;
@@ -63,27 +63,28 @@ const TypeChoiceCard = ({ label, icon, handleClick, selectedValue, type }) => {
   );
 };
 
-const AbTypeStep = ({ label, ...props }: AbTypeStep) => {
-  const theme = useTheme();
-  const classes = {
-    title: {
-      paddingTop: theme.spacing(15),
-      paddingBottom: theme.spacing(5),
-    },
-    content: {
-      display: "flex",
-      justifyContent: "center",
-      flexWrap: "wrap",
-    },
-  };
+const styles = {
+  title: {
+    paddingTop: 15,
+    paddingBottom: 5,
+  },
+  content: {
+    display: "flex",
+    justifyContent: "center",
+    flexWrap: "wrap",
+  },
+};
+
+const AbTypeStep = ({ label, ...props }: AbTypeStepProps) => {
+  
 
   return (
     <>
       <Box className="antibody-type-choose">
-        <Typography sx={classes.title} variant="h1">
+        <Typography sx={styles.title} variant="h1">
           1. Type of antibody
         </Typography>
-        <Stack direction="row" spacing={1.5} sx={classes.content}>
+        <Stack direction="row" spacing={1.5} sx={styles.content}>
           <TypeChoiceCard
             label="Commercial Antibody/Kit"
             icon={<CompanyIcon />}
@@ -107,7 +108,7 @@ const AbTypeStep = ({ label, ...props }: AbTypeStep) => {
           />
         </Stack>
         <Typography variant="subtitle2" sx={{ color: "grey.500", mt: 5 }}>
-          Want to do a bulk upload? <Link href="/#">Contact us</Link>
+          Want to do a bulk upload? <Link className="link-contact" href="mailto:abr-help@scicrunch.org">Contact us</Link>
         </Typography>
       </Box>
       <StepNavigation

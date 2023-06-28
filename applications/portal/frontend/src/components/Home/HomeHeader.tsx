@@ -38,7 +38,7 @@ const HomeHeader = ({ activeSelection, handleExport, showFilterMenu, activeTab, 
   const { activeSearch, totalElements, lastUpdate } = useContext(searchContext)
 
   return (
-    <Box>
+    <Box className="container-home-header">
       <AppBar elevation={0} sx={{ top: "4.5rem" }}>
         <Container maxWidth="xl">
           <Stack direction="column" spacing={1.5} mb={1} width="100%">
@@ -57,14 +57,15 @@ const HomeHeader = ({ activeSelection, handleExport, showFilterMenu, activeTab, 
                         borderRadius={2}
                         py={0.25}
                         px={1.25}
+                        className="search-info"
                       >
                         <Typography
                           variant="h6"
                           color="common.white"
                           align="left"
                         >
-                          {totalElements && totalElements?.toLocaleString('en-US')} {Pluralize("antibody",totalElements)}
-                          {activeSearch && ` for "${activeSearch}"`}
+                          <span className="total-elements">{totalElements && totalElements?.toLocaleString('en-US')}</span> {Pluralize("antibody",totalElements)}
+                          <span className="active-search">{activeSearch && ` for "${activeSearch}"` }</span>
                         </Typography>
                       </Box>
                     </Grid>
@@ -73,6 +74,7 @@ const HomeHeader = ({ activeSelection, handleExport, showFilterMenu, activeTab, 
                         variant="subtitle1"
                         color="grey.400"
                         align="left"
+                        className="last-updated"
                       >
                         Last Updated: {lastUpdate?.toLocaleString('en-US', { day: '2-digit', month:'long', weekday: "long" })}
                       </Typography>
@@ -86,6 +88,7 @@ const HomeHeader = ({ activeSelection, handleExport, showFilterMenu, activeTab, 
                       variant="contained"
                       color="info"
                       onClick={() => handleExport({})}
+                      className="btn-download-selection"
                       startIcon={
                         <DownloadIcon
                           stroke={
@@ -110,6 +113,7 @@ const HomeHeader = ({ activeSelection, handleExport, showFilterMenu, activeTab, 
                         />
                       }
                       href="/add"
+                      className="btn-submit-antibody"
                     >
                       Submit an antibody
                     </Button>
@@ -118,7 +122,7 @@ const HomeHeader = ({ activeSelection, handleExport, showFilterMenu, activeTab, 
               </Box>
             </HideOnScroll>
             {shownResultsNum < totalElements && activeSearch && (
-              <Alert severity="warning" sx={{ mt: 1, mb: 1 }}>The search results are limited to a maximum of {shownResultsNum} elements. 
+              <Alert className="limit-alert" severity="warning" sx={{ mt: 1, mb: 1 }}>The search results are limited to a maximum of {shownResultsNum} elements. 
     Please refine your search if you cannot find the antibody you&apos;re looking for.
               </Alert>)
             }

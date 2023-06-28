@@ -8,7 +8,7 @@ import { Button, Toolbar, Container, Box, Stack,  Backdrop,
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DoneIcon from "@mui/icons-material/Done";
-import Steeper from "./Steeper";
+import Stepper from "./Stepper";
 
 interface NavigationProps {
   hasPrevious?: Boolean;
@@ -42,7 +42,7 @@ export const StepNavigation = (props: NavigationProps) => {
     <Toolbar sx={classes.toolbar}>
       <Container maxWidth="xl">
         <Box sx={classes.content} className="form-steps">
-          <Steeper
+          <Stepper
             activeStep={props.activeStep}
             //totalSteps={props.totalSteps}
           />

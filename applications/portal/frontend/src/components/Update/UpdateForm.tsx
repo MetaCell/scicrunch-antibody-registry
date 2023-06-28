@@ -85,6 +85,7 @@ const UpdateForm = () => {
           validationSchema={validationSchema}
           onSubmit={updateAntibody}
           title="Update Antibody Submission"
+          className="update-form"
         />
       ) : (
         <Box

@@ -34,6 +34,7 @@ const HelpMenu = () => {
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
+        className="btn-help-menu"
       >
         <HelpIcon />
       </IconButton>
@@ -62,7 +63,7 @@ const HelpMenu = () => {
         </ListItem>
         <Divider />
         <MenuList>
-          <MenuItem component={Link} to="/faq" onClick={handleClose}>
+          <MenuItem className="link-faq" component={Link} to="/faq" onClick={handleClose}>
             <ListItemIcon>
               <FaqIcon />
             </ListItemIcon>
@@ -70,7 +71,7 @@ const HelpMenu = () => {
               FAQ
             </Typography>
           </MenuItem>
-          <MenuItem component={Link} to="/membership" onClick={handleClose}>
+          <MenuItem className="link-membership" component={Link} to="/membership" onClick={handleClose}>
             <ListItemIcon>
               <Handshake fontSize="inherit" />
             </ListItemIcon>
@@ -79,7 +80,7 @@ const HelpMenu = () => {
             </Typography>
           </MenuItem>
 
-          <MenuItem component="a" href="mailto:abr-help@scicrunch.org" >
+          <MenuItem className="link-contact" component="a" href="mailto:abr-help@scicrunch.org" >
             <ListItemIcon>
               <EmailIcon />
             </ListItemIcon>
@@ -88,7 +89,7 @@ const HelpMenu = () => {
             </Typography>
           </MenuItem>
           <Divider />
-          <MenuItem component={Link} to="/terms-and-conditions">
+          <MenuItem className="link-terms-conditions" component={Link} to="/terms-and-conditions">
             <ListItemIcon>
               <InfoIcon />
             </ListItemIcon>

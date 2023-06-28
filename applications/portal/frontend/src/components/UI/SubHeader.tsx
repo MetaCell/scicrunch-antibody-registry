@@ -5,7 +5,7 @@ import { BackIcon } from "../icons";
 
 export const SubHeader = (props) => {
   const theme = useTheme();
-  const classes = {
+  const styles = {
     banner: {
       background: theme.palette.grey[100],
       padding: theme.spacing(10, 0),
@@ -24,7 +24,7 @@ export const SubHeader = (props) => {
     },
   };
   return (
-    <Box sx={classes.banner}>
+    <Box sx={styles.banner} className="sub-header">
       <Container maxWidth="xl">
         <Stack spacing={2}>
           <Box>
@@ -32,6 +32,7 @@ export const SubHeader = (props) => {
               variant="text"
               onClick={() => (window.location.href = "/")}
               startIcon={<BackIcon />}
+              className="button-return"
             >
               Back to Home
             </Button>

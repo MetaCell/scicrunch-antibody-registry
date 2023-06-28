@@ -16,13 +16,11 @@ import {
   Checkbox,
   Popover,
   Button,
-  Alert,
 } from "@mui/material";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
 //project imports
 import {
-  getAntibodies,
   getUserAntibodies,
 } from "../../services/AntibodiesService";
 import {
@@ -32,7 +30,6 @@ import {
   SortingIcon,
   CheckedIcon,
   UncheckedIcon,
-  FilterIcon,
   SettingsIcon,
   CopyIcon,
 } from "../icons";
@@ -102,7 +99,7 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
       ? `/update/${props.row.accession}`
       : `/AB_${props.row.abId}`;
   return (
-    <Link href={href}>
+    <Link href={href} className="col-name-id">
       <Typography
         variant="body2"
         align="left"
@@ -130,6 +127,7 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
       align="left"
       color={"grey.500"}
       component="div"
+      className="col-content"
     >
       {props.field === "targetAntigen"
         ? `${props.row.abTarget} ${props.row.targetSpecies.join(", ")}`
@@ -145,8 +143,9 @@ const RenderVendor = (props) => (
     align="left"
     color={"grey.500"}
     component="div"
+    className="col-vendor"
   >
-    {props.row.url ? <Link bgcolor="primary.light" px={0.5} py={0.25} display="block" underline="none" target="_blank" href={props.row.url}>
+    {props.row.url ? <Link className="link-vendor" bgcolor="primary.light" px={0.5} py={0.25} display="block" underline="none" target="_blank" href={props.row.url}>
       {props.value}
     </Link> : props.value}
   </Typography>
@@ -160,6 +159,7 @@ const RenderClonality = (props) => (
     bgcolor="grey.A200"
     component="div"
     px={1} py={0.25} borderRadius="1rem"
+    className="col-clonality"
   >
     {props.value}
   </Typography>
@@ -174,26 +174,29 @@ const RenderHtml = (props: GridRenderCellParams<String>) => {
       color="grey.500"
       component="div"
       dangerouslySetInnerHTML={{ __html: props.value }}
+      className="col-html"
     />
   );
 };
 
+
+const citationStyles = {
+  popover: (theme) => ({
+    p: 1,
+    backgroundColor: theme.palette.grey[900],
+    color: theme.palette.common.white,
+    fontSize: "1rem",
+  }),
+
+  citationColumn: {
+    cursor: "auto",
+    display: "flex",
+    alignItems: "center",
+  },
+};
+
 const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   const theme = useTheme();
-  const classes = {
-    popover: {
-      p: 1,
-      backgroundColor: theme.palette.grey[900],
-      color: theme.palette.common.white,
-      fontSize: "1rem",
-    },
-
-    citationColumn: {
-      cursor: "auto",
-      display: "flex",
-      alignItems: "center",
-    },
-  };
   const [anchorCitationPopover, setAnchorCitationPopover] =
     useState<HTMLButtonElement | null>(null);
 
@@ -209,7 +212,7 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   const open = Boolean(anchorCitationPopover);
   const id = open ? "simple-popover" : undefined;
   return (
-    <Box sx={classes.citationColumn}>
+    <Box sx={citationStyles.citationColumn} className="col-proper-citation">
       <Typography
         variant="caption"
         align="left"
@@ -218,7 +221,7 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
       >
         {props.value}
       </Typography>
-      <CopyToClipboard text={props.value}>
+      <CopyToClipboard text={props.value} >
         <Button
           onClick={handleClickCitation}
           size="small"
@@ -226,6 +229,7 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
           startIcon={
             <CopyIcon stroke={theme.palette.grey[500]} fontSize="inherit" />
           }
+          className="btn-citation-copy"
         />
       </CopyToClipboard>
       <Popover
@@ -242,7 +246,7 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
           horizontal: "center",
         }}
       >
-        <Typography sx={classes.popover}>Citation copied</Typography>
+        <Typography className="msg-citation-copied" sx={citationStyles.popover}>Citation copied</Typography>
       </Popover>
     </Box>
   );
@@ -261,6 +265,7 @@ const RenderStatus = (props: GridRenderCellParams<string>) => {
       px={1}
       py={0.25}
       borderRadius="1rem"
+      className="col-status"
     >
       <Typography
         variant="caption"

@@ -64,6 +64,7 @@ const TableToolbar = ({ showFilterMenu, activeTab }) => {
           }
           iconPosition="start"
           label="My Submissions"
+          className="btn-submissions"
           onClick={() => history.push("/submissions")}
         />
       </Tabs>

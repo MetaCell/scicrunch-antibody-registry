@@ -47,14 +47,14 @@ const SubmissionForm = (props) => {
       fullScreen
       open={true}
       onClose={handleClose}
-      className="submission-form"
+      id="dialog-submission-form"
       PaperProps={{
         style: {
           backgroundColor: theme.palette.grey[50],
         },
       }}
     >
-      <Box sx={classes.header}>
+      <Box sx={classes.header} className="buttons-container">
         <Container maxWidth="xl">
           <Toolbar sx={classes.header} disableGutters>
             <Button
@@ -62,6 +62,7 @@ const SubmissionForm = (props) => {
               variant="contained"
               color="info"
               startIcon={<CloseIcon fontSize="small" />}
+              className="btn-close btn-close--visible"
             >
               Close
             </Button>
@@ -70,20 +71,22 @@ const SubmissionForm = (props) => {
               src="./assets/logo.svg"
               title="Antibody Registry"
               justifySelf="center"
+              className="logo"
             />
             <Button
               startIcon={<CloseIcon fontSize="small" />}
+              onClick={handleClose}
               variant="contained"
               color="info"
               sx={{ visibility: "hidden" }}
-              className="close-button"
+              className="btn-close btn-close--hidden"
             >
               Close
             </Button>
           </Toolbar>
         </Container>
       </Box>
-      <Box sx={{ height: "100%" }}>
+      <Box sx={{ height: "100%" }} className="container-steps">
         <MultiStep>
           <AbTypeStep
             label="Type of Antibody"
