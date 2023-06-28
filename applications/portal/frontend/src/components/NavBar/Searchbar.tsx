@@ -4,45 +4,43 @@ import InputBase from "@mui/material/InputBase";
 import { SearchIcon, SlashIcon } from "../icons";
 import { Box, Autocomplete, InputAdornment, Stack, Tooltip, Typography, Paper } from "@mui/material";
 import SearchContext from "../../context/search/SearchContext";
-import { useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom'; 
 
+
+const styles={
+  input: (theme) => ({
+    display: "flex",
+    borderRadius: theme.shape,
+    backgroundColor: theme.palette.grey["100"],
+    padding: theme.spacing(0.5),
+    "&.Mui-focused":{
+      color:'grey.700',
+      backgroundColor:'common.white',
+      border:'solid 1px',
+      borderColor:'primary.main',
+      boxShadow: '0px 0px 0px 3px #E5E9FC',
+    },
+    "& .MuiInputBase-root.Mui-focused":{ 
+      "& .MuiSvgIcon-fontSizeInherit":{
+        "& path":{
+          stroke:'#344054'
+        }   
+      }
+    }
+  }),
+  slashIcon:{
+    bgcolor: "grey.200",
+    maxHeight: "2rem",
+    minWidth: "2rem",
+    borderRadius: "0.375rem",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    p: 1,
+  }
+}
 
 export default function Searchbar() {
-
-  const theme = useTheme()
-  const classes={
-    input:{
-      display: "flex",
-      borderRadius: theme.shape,
-      backgroundColor: theme.palette.grey["100"],
-      padding: theme.spacing(0.5),
-      "&.Mui-focused":{
-        color:'grey.700',
-        backgroundColor:'common.white',
-        border:'solid 1px',
-        borderColor:'primary.main',
-        boxShadow: '0px 0px 0px 3px #E5E9FC',
-      },
-      "& .MuiInputBase-root.Mui-focused":{ 
-        "& .MuiSvgIcon-fontSizeInherit":{
-          "& path":{
-            stroke:'#344054'
-          }   
-        }
-      }
-    },
-    slashIcon:{
-      bgcolor: "grey.200",
-      maxHeight: "2rem",
-      minWidth: "2rem",
-      borderRadius: "0.375rem",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      p: theme.spacing(1),
-    }
-  }
-
 
   const { getFilteredAntibodies, clearSearch, loader, activeSearch } = useContext(SearchContext)
 
@@ -91,7 +89,7 @@ export default function Searchbar() {
       </Typography>
     </Typography></Paper>}>
       <Autocomplete  
-        sx={classes.input} 
+        sx={styles.input} 
         freeSolo 
         options={autocompleteOps.map(option => option)} 
         fullWidth
@@ -116,7 +114,7 @@ export default function Searchbar() {
                 InputProps.endAdornment? InputProps.endAdornment:
                   <InputAdornment position='end'>
                     <Box
-                      sx={classes.slashIcon}
+                      sx={styles.slashIcon}
                     >
                       <SlashIcon  sx={{ width:'1rem', height:'1rem' }}/>
                     </Box>

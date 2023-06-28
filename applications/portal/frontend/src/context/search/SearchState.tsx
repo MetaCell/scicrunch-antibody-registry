@@ -9,6 +9,12 @@ const SearchState = (props) => {
     lastupdate: new Date()
   });
 
+  const [searchState, setSearch] = useState({
+    loader:true,
+    activeSearch:'',
+    totalElements:0,
+    searchedAntibodies:[]
+  })
 
   useEffect(() => {
     getDataInfo().then((res) => 
@@ -30,13 +36,7 @@ const SearchState = (props) => {
   },[]);
 
 
-  const [searchState, setSearch] = useState({
-    loader:true,
-    activeSearch:'',
-    totalElements:0,
-    searchedAntibodies:[]
-  })
-
+ 
 
 
 
@@ -67,11 +67,21 @@ const SearchState = (props) => {
 
   const clearSearch =() => {
     setSearch({
-      loader:false,
+      loader:true,
       activeSearch:'',
       totalElements:0,
       searchedAntibodies:[]
     })
+    getAntibodies()
+      .then((res) => {
+        setSearch({
+          loader:false,
+          activeSearch: "",
+          totalElements: res.totalElements,
+          searchedAntibodies: res.items
+        })
+      })
+      .catch((err) => console.error(err))
   }
 
   return (
