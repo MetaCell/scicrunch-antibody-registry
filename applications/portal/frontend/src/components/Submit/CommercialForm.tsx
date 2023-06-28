@@ -93,7 +93,7 @@ const styles = {
     justifyContent: "center",
     backgroundColor: theme.palette.grey[700],
     border: `0.25rem solid ${contentBorderColor}`,
-    borderRadius: theme.shape.borderRadius,
+    borderRadius: theme.shape.borderRadius + "px",
   }),
 };
 

@@ -39,7 +39,7 @@ def get_antibodies(page: int = 1, size: int = 50) -> PaginatedAntibodies:
 
 def get_user_antibodies(userid: str, page: int = 1, size: int = 50) -> PaginatedAntibodies:
     p = Paginator(Antibody.objects.filter(
-        uid=userid).order_by("lastedit_time"), size)
+        uid=userid).order_by("-ix"), size)
     items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
 
