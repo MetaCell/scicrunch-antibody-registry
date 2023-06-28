@@ -70,7 +70,7 @@ describe("E2E Flow for AntiBody Registry", () => {
         `--window-size=1600,1000`,
         "--ignore-certificate-errors",
       ],
-      headless: false,
+      headless: !process.env.PUPPETEER_DISPLAY,
       devtools: false,
       defaultViewport: {
         width: 1600,
