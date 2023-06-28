@@ -145,8 +145,8 @@ class Application(models.Model):
 
 
 class VendorDomain(models.Model):
-    base_url = models.URLField(max_length=URL_MAX_LEN,
-                               null=True, db_column='domain_name', db_index=True)
+    base_url = models.CharField(max_length=URL_MAX_LEN,
+                                null=True, db_column='domain_name', db_index=True)
     vendor = models.ForeignKey(
         Vendor, on_delete=models.CASCADE, null=True, db_column='vendor_id', db_index=True)
     is_domain_visible = models.BooleanField(default=True, db_column='link')
@@ -355,13 +355,14 @@ class Antibody(models.Model):
         """
         if self.vendor and self.catalog_num:
             duplicate_antibodies = Antibody.objects.filter(
-                vendor__id=self.vendor.id, 
+                vendor__id=self.vendor.id,
                 catalog_num__iexact=self.catalog_num
-            ).exclude( commercial_type=CommercialType.PERSONAL).exclude(ix=self.ix)
+            ).exclude(commercial_type=CommercialType.PERSONAL).exclude(ix=self.ix)
             duplicates_length = len(duplicate_antibodies)
             if duplicates_length == 0:  # Because the save happened before there will always be one antibody in the database
                 return None
-            if duplicates_length > 2 and len(set(ab.ab_id for ab in duplicate_antibodies if ab.ab_id is not None)) > 1:  # Work around to handle the temporary
+            # Work around to handle the temporary
+            if duplicates_length > 2 and len(set(ab.ab_id for ab in duplicate_antibodies if ab.ab_id is not None)) > 1:
                 # creation of entities on the confirmation step of django-import-export
                 log.error("Unexpectedly found multiple antibodies with catalog number %s and vendor %s",
                           self.catalog_num, self.vendor.name)
@@ -388,26 +389,41 @@ class Antibody(models.Model):
 
         base_url = url and extract_base_url(url)
         try:
+            # First, try to match by exact name
             vendor = Vendor.objects.get(name__iexact=name or base_url)
             self.vendor = vendor
             if base_url:
                 self.add_vendor_domain(base_url, vendor)
         except Vendor.DoesNotExist:
-
+            # Then, try to match by domain
             try:
                 vd = VendorDomain.objects.get(base_url__iexact=base_url)
-                self.vendor = vd.vendor
-                if name:
-                    VendorSynonym.objects.create(vendor=self.vendor, name=name)
             except VendorDomain.DoesNotExist:
-                vendor_name = name or base_url
-                log.info("Creating new Vendor `%s` on domain  to `%s`",
-                         vendor_name, base_url)
-                vendor = Vendor(name=vendor_name)
-                vendor.save()
-                self.vendor = vendor
-                if base_url:
-                    self.add_vendor_domain(base_url, vendor)
+                # If the domain is not matched, try to match by domain with and without www
+                try:
+                    if "www." in base_url:
+                        base_url = base_url.replace("www.", "")
+                    else:
+                        base_url = "www." + base_url
+                    vd = VendorDomain.objects.get(base_url__iexact=base_url)
+                    
+                except VendorDomain.DoesNotExist:
+                    # As it doesn't match, create a new vendor
+                    vendor_name = name or base_url
+                    log.info("Creating new Vendor `%s` on domain  to `%s`",
+                            vendor_name, base_url)
+                    vendor = Vendor(name=vendor_name,
+                                    commercial_type=self.commercial_type)
+                    vendor.save()
+                    self.vendor = vendor
+                    if base_url:
+                        self.add_vendor_domain(base_url, vendor)
+                    return
+
+            # Vendor domain matched one way or the other, so associate to existing vendor
+            self.vendor = vd.vendor
+            if name:
+                VendorSynonym.objects.create(vendor=self.vendor, name=name)
 
     def add_vendor_domain(self, base_url, vendor):
         try:

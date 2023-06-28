@@ -76,29 +76,6 @@ class AntibodyMapper(IDAOMapper):
 
         return ab
 
-    @staticmethod
-    def vendor_from_antibody(dto: AntibodyDTO):
-        # Vendor url check workflows https://github.com/MetaCell/scicrunch-antibody-registry/issues/51
-
-        base_url = extract_base_url(dto.url)
-        if not base_url:
-            raise AntibodyDataException("Not a valid url", "url", dto.url)
-        try:
-            return VendorDomain.objects.get(base_url=base_url).vendor
-        except VendorDomain.DoesNotExist:
-            try:
-                if "www." in base_url:
-                    return VendorDomain.objects.get(base_url=base_url.replace("www.", "")).vendor
-                return VendorDomain.objects.get(base_url="www." + base_url).vendor
-            except VendorDomain.DoesNotExist:
-                vendor_name = dto.vendorName or base_url
-                log.info("Creating new Vendor `%s` on domain  to `%s`",
-                         vendor_name, base_url)
-
-                v = Vendor(name=vendor_name,
-                           commercial_type=dto.commercialType.value)
-                v.save()
-                return v
 
     def to_dto(self, dao: Antibody) -> AntibodyDTO:
         dao_dict = dao.__dict__
