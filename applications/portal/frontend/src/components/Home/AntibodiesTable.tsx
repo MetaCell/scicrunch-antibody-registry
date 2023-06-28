@@ -196,22 +196,24 @@ const citationStyles = {
 };
 
 const RenderProperCitation = (props: GridRenderCellParams<String>) => {
-  const theme = useTheme();
+
   const [anchorCitationPopover, setAnchorCitationPopover] =
     useState<HTMLButtonElement | null>(null);
 
-  const handleClickCitation = (event) => {
+  const handleCloseCitation = useCallback(() => {
+    setAnchorCitationPopover(null);
+  }, [setAnchorCitationPopover]);
+    
+  const handleClickCitation = useCallback((event) => {
     setAnchorCitationPopover(event.currentTarget);
     setTimeout(handleCloseCitation, 1000);
-  };
+  }, [handleCloseCitation, setAnchorCitationPopover]);
 
-  const handleCloseCitation = () => {
-    setAnchorCitationPopover(null);
-  };
+  
 
   const open = Boolean(anchorCitationPopover);
-  const id = open ? "simple-popover" : undefined;
-  return (
+
+  return props && (
     <Box sx={citationStyles.citationColumn} className="col-proper-citation">
       <Typography
         variant="caption"
@@ -227,13 +229,12 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
           size="small"
           sx={{ minWidth: 0 }}
           startIcon={
-            <CopyIcon stroke={theme.palette.grey[500]} fontSize="inherit" />
+            <CopyIcon sx={{ stroke: theme => theme.palette.grey[500] }} fontSize="inherit" />
           }
           className="btn-citation-copy"
         />
       </CopyToClipboard>
-      <Popover
-        id={id}
+      {open && <Popover
         open={open}
         anchorEl={anchorCitationPopover}
         onClose={handleCloseCitation}
@@ -247,7 +248,7 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
         }}
       >
         <Typography className="msg-citation-copied" sx={citationStyles.popover}>Citation copied</Typography>
-      </Popover>
+      </Popover>}
     </Box>
   );
 };
@@ -297,7 +298,8 @@ const getNameAndId = (props: ValueProps) => {
 };
 
 const getValueForCitation = (props: ValueProps) => {
-  return getProperCitation(props.row);
+
+  return props?.row ? getProperCitation(props.row) : "";
 };
 
 const columnsDefaultProps = {
@@ -448,6 +450,7 @@ const AntibodiesTable = (props) => {
       valueGetter: getValueForCitation,
       renderCell: RenderProperCitation,
       type: "actions",
+      hideable: false
     },
     {
       ...columnsDefaultProps,
