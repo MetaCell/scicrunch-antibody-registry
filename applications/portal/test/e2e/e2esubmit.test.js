@@ -541,7 +541,7 @@ describe("E2E Flow for AntiBody Registry", () => {
     await page.click(selectors.FILTER);
     await page.waitForSelector(selectors.FILTER_TABLE);
 
-  
+    const ab_Target_names = getValues(selectors.ANTIBODY_TARGET_FIELD);
     expect(ab_Target_names.find(e => e === "TWIT")).toBeTruthy();
     expect(ab_Target_names.find(e => e === "INST")).toBeTruthy();
     expect(ab_Target_names.find(e => e === "MSN")).toBeTruthy();
