@@ -6,7 +6,7 @@ harness:
     auto: true
   deployment:
     auto: true
-    replicas: 3
+    replicas: 1
     port: 8080
   livenessProbe:
     path: /api/live
@@ -50,18 +50,17 @@ harness:
   database:
     auto: true
     type: postgres
-    image: postgres:15
     size: 40Gi
     postgres:
-      image: postgres:13
+      image: postgres:15
       initialdb: antibody_registry
     resources:
       requests:
-        memory: 640Mi
+        memory: 4Gi
         cpu: 200m
       limits:
-        memory: 640Mi
-        cpu: 2
+        memory: 1Gi
+        cpu: 8
   accounts:
     roles:
       - administrator
