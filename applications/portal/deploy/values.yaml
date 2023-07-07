@@ -52,7 +52,7 @@ harness:
     type: postgres
     size: 40Gi
     postgres:
-      image: postgres:15
+      image: postgres:13
       initialdb: antibody_registry
     resources:
       requests:
