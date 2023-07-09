@@ -7,7 +7,7 @@ const selectors = require("./selectors");
 const antibody_type = require("./submissions.json");
 
 //PAGE INFO:
-const baseURL = process.env.APP_URL || "https://www.areg.dev.metacell.us/";
+const baseURL = process.env.APP_URL || "https://www.areg.dev.metacell.us";
 const PAGE_WAIT = 3000;
 const TIMEOUT = 10000;
 
@@ -553,7 +553,7 @@ describe("E2E Flow for AntiBody Registry", () => {
   
     const idNames = await getValues(selectors.ANTIBODY_NAME_ID_FIELD);
     console.log(idNames[0]);
-    await page.goto(`${baseURL}update/${idNames[1].split("AB_")[1]}`);
+    await page.goto(`${baseURL}/update/${idNames[1].split("AB_")[1]}`);
 
     await page.waitForSelector(selectors.INPUT_NAME, {
       timeout: 15000,
