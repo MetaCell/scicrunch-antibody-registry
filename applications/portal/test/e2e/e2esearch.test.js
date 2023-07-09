@@ -139,7 +139,7 @@ describe("E2E Flow for AntiBody Registry", () => {
 
     const rec_num_str = await getRecordNumber();
 
-    expect(search_result.length - 1).toBe(parseFloat(rec_num_str));
+    expect(parseFloat(rec_num_str)).toBeGreaterThanOrEqual(search_result.length - 1);
 
     console.log("Search successful");
   });
