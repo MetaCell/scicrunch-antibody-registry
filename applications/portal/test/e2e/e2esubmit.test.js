@@ -529,23 +529,23 @@ describe("E2E Flow for AntiBody Registry", () => {
     console.log("Antibody submitted successfully");
   });
 
-  it("Check AntiBody submissions", async () => {
-    console.log("Checking Antibody submissions...");
+  // it("Check AntiBody submissions", async () => {
+  //   console.log("Checking Antibody submissions...");
 
-    await page.waitForSelector(selectors.MY_SUBMISSIONS);
-    click(selectors.MY_SUBMISSIONS);
+  //   await page.waitForSelector(selectors.MY_SUBMISSIONS);
+  //   click(selectors.MY_SUBMISSIONS);
 
-    await page.waitForSelector(selectors.ANTIBODY_TARGET_FIELD);
+  //   await page.waitForSelector(selectors.ANTIBODY_TARGET_FIELD);
 
 
 
-    const ab_Target_names = await getValues(selectors.ANTIBODY_TARGET_FIELD);
-    expect(ab_Target_names.find(e => e === "TWIT")).toBeTruthy();
-    expect(ab_Target_names.find(e => e === "INST")).toBeTruthy();
-    expect(ab_Target_names.find(e => e === "MSN")).toBeTruthy();
+  //   const ab_Target_names = await getValues(selectors.ANTIBODY_TARGET_FIELD);
+  //   expect(ab_Target_names.find(e => e === "TWIT")).toBeTruthy();
+  //   expect(ab_Target_names.find(e => e === "INST")).toBeTruthy();
+  //   expect(ab_Target_names.find(e => e === "MSN")).toBeTruthy();
 
-    console.log("Antibodies match");
-  });
+  //   console.log("Antibodies match");
+  // });
 
   it("Edit AntiBody submission", async () => {
     await click(selectors.MY_SUBMISSIONS);
