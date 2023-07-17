@@ -1,23 +1,34 @@
 from typing import Callable
+from api.repositories.maintainance import refresh_search_view
 
 from import_export.fields import Field
 from import_export.instance_loaders import ModelInstanceLoader
 from import_export.resources import ModelResource
 
-from api.models import Antibody, Vendor, Antigen, Specie, STATUS
+from api.models import Antibody, AntibodyClonality, CommercialType, Vendor, Specie, STATUS
 from api.services.gene_service import get_or_create_gene
-from api.services.import_antbody_service import filter_dataset_c1, filter_dataset_c2, get_antibody_q1, get_antibody_q2
+from api.import_export.import_antibody_helpers import filter_dataset_by_accession, filter_dataset_by_catnum_vendor, filter_dataset_by_ix, get_antibody_q1, get_antibody_q2
 from api.services.keycloak_service import KeycloakService
 from api.services.specie_service import get_or_create_specie
 from api.services.vendor_service import get_or_create_vendor
-from api.widgets.foreign_key_widget import ForeignKeyWidgetWithCreation
-from api.widgets.many_to_many_widget import ManyToManyWidgetWithCreation
+from .widgets.foreign_key_widget import ForeignKeyWidgetWithCreation
+from .widgets.many_to_many_widget import ManyToManyWidgetWithCreation
 from portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY, FILL_KEY, UPDATE_KEY, \
     DUPLICATE_KEY, KC_USER_ID_KEY, USER_KEY, REMOVE_KEYWORD
 
+from cloudharness import log
+
+CLONALITIES = {c[0] for c in AntibodyClonality.choices}
+COMMERCIAL_TYPES = {c[0] for c in CommercialType.choices}
 
 class AntibodyIdentifier:
     def __init__(self, fields, condition: Callable, q: Callable, filter_dataset: Callable):
+        """
+        :param fields: list of fields that are used to identify the antibody
+        :param condition: function that returns true if the identifier is activated
+        :param q: how to filter objects in the existing database: returns a Q object
+        :param filter_dataset: function that filters the dataset to be ingested (the data from the csv file). The mask to the pandas dataframe is returned
+        """
         self.fields = fields
         self.condition = condition
         self.q = q
@@ -31,53 +42,54 @@ class AntibodyInstanceLoaderClass(ModelInstanceLoader):
 
 
 class AntibodyResource(ModelResource):
-    name = Field(attribute='ab_name', column_name='NAME')
+    name = Field(attribute='ab_name', column_name='ab_name')
     vendor = Field(
-        column_name='VENDOR',
+        column_name='vendor',
         attribute='vendor',
         widget=ForeignKeyWidgetWithCreation(model=Vendor, field='name',
                                             get_or_create=lambda **kwargs: get_or_create_vendor(**kwargs)[0])
     )
-    catalog_num = Field(attribute='catalog_num', column_name='CAT NUM')
-    url = Field(attribute='url', column_name='URL')
+    catalog_num = Field(attribute='catalog_num', column_name='catalog_num')
+    url = Field(attribute='url', column_name='url')
+    link = Field(column_name='link')
     target = Field(
-        column_name='TARGET',
-        attribute='antigen',
-        widget=ForeignKeyWidgetWithCreation(model=Antigen, field='symbol',
-                                            get_or_create=lambda **kwargs: get_or_create_gene(**kwargs)[
-                                                0],
-                                            other_cols_map={'GID': 'entrez_id', 'UNIPROT': 'uniprot_id'})
+        column_name='ab_target',
+        attribute='ab_target'
     )
+
     species = Field(
-        column_name='SPECIES',
+        column_name='target_species',
         attribute='species',
         widget=ManyToManyWidgetWithCreation(model=Specie, separator=';', field='name',
                                             get_or_create=lambda **kwargs: get_or_create_specie(**kwargs)[0])
     )
-    clonality = Field(attribute='clonality', column_name='CLONALITY')
+    clonality = Field(attribute='clonality', column_name='clonality')
     host = Field(
-        column_name='HOST',
+        column_name='source_organism',
         attribute='source_organism',
         widget=ForeignKeyWidgetWithCreation(model=Specie, field='name',
                                             get_or_create=lambda **kwargs: get_or_create_specie(**kwargs)[0])
     )
-    clone_id = Field(attribute='clone_id', column_name='CLONE')
-    product_isotype = Field(attribute='product_isotype', column_name='ISOTYPE')
+    clone_id = Field(attribute='clone_id', column_name='clone_id')
+    product_isotype = Field(attribute='product_isotype',
+                            column_name='product_isotype')
     product_conjugate = Field(
-        attribute='product_conjugate', column_name='CONJUGATE')
-    product_form = Field(attribute='product_form', column_name='FORM')
-    comments = Field(attribute='comments', column_name='COMMENTS')
+        attribute='product_conjugate', column_name='product_conjugate')
+    product_form = Field(attribute='product_form', column_name='product_form')
+    comments = Field(attribute='comments', column_name='comments')
     defining_citation = Field(
-        attribute='defining_citation', column_name='CITATION')
-    subregion = Field(attribute='subregion', column_name='SUBREGION')
-    modifications = Field(attribute='modifications', column_name='MODIFICATION')
-    gene_id = Field(attribute='antigen__entrez_id', column_name='GeneID')
-    disc_date = Field(attribute='disc_date', column_name='DISC')
-    commercial_type = Field(attribute='commercial_type', column_name='TYPE')
-    uniprot = Field(attribute='antigen__uniprot_id', column_name='UNIPROT')
-    epitope = Field(attribute='epitope', column_name='EPITOPE')
-    cat_alt = Field(attribute='cat_alt', column_name='CAT ALT')
-    ab_id = Field(attribute='ab_id', column_name='id')
+        attribute='defining_citation', column_name='defining_citation')
+    subregion = Field(attribute='subregion', column_name='target_subregion')
+    modifications = Field(attribute='modifications',
+                          column_name='target_modification')
+    gene_id = Field(attribute='entrez_id', column_name='ab_target_entrez_gid')
+    disc_date = Field(attribute='disc_date', column_name='disc_date')
+    commercial_type = Field(attribute='commercial_type',
+                            column_name='commercial_type')
+    uniprot = Field(attribute='uniprot_id', column_name='uniprot_id')
+    epitope = Field(attribute='epitope', column_name='epitope')
+    cat_alt = Field(attribute='cat_alt', column_name='cat_alt')
+    ab_id = Field(attribute='ab_id', column_name='ab_id')
     accession = Field(attribute='accession', column_name='ab_id_old')
     ix = Field(attribute='ix', column_name='ix')
 
@@ -86,31 +98,36 @@ class AntibodyResource(ModelResource):
         super().__init__()
         self.antibody_identifiers = [
             AntibodyIdentifier(
-                [self.fields['ab_id'], self.fields['ix'], self.fields['accession']],
-                lambda row: self.fields['ab_id'].column_name in row and (
-                        self.fields['ix'].column_name in row or self.fields['accession'].column_name in row),
-                lambda dataset: get_antibody_q1(dataset, self.fields['ab_id'],
-                                                [self.fields['ix'], self.fields['accession']]),
-                lambda dataset, negate, antibodies: filter_dataset_c1(dataset, negate, antibodies, self.fields['ab_id'],
-                                                                      self.fields['ix'], self.fields['accession'])
+                [self.fields['ix']],
+                lambda row: self.fields['ix'].column_name in row,
+                lambda dataset: get_antibody_q1(dataset, self.fields['ix']),
+                lambda dataset, negate, antibodies: filter_dataset_by_ix(
+                    dataset, negate, antibodies)
+            ),
+            AntibodyIdentifier(
+                [self.fields['accession']],
+                lambda row: self.fields['accession'].column_name in row,
+                lambda dataset: get_antibody_q1(
+                    dataset, self.fields['accession']),
+                lambda dataset, negate, antibodies: filter_dataset_by_accession(
+                    dataset, negate, antibodies)
             ),
             AntibodyIdentifier(
                 [self.fields['vendor'], self.fields['catalog_num']],
                 lambda row: self.fields['vendor'].column_name in row and self.fields['catalog_num'].column_name in row,
                 lambda dataset: get_antibody_q2(
                     dataset, self.fields['catalog_num'], self.fields['vendor']),
-                lambda dataset, negate, antibodies: filter_dataset_c2(dataset, negate, antibodies,
-                                                                      self.fields['catalog_num'],
-                                                                      self.fields['vendor'])
+                lambda dataset, negate, antibodies: filter_dataset_by_catnum_vendor(dataset, negate, antibodies,
+                                                                                    self.fields['catalog_num'],
+                                                                                    self.fields['vendor'])
             )
         ]
-        self.keycloak_service = KeycloakService()
         self.request = request
 
     class Meta:
         model = Antibody
         fields = (
-            'name', 'vendor', 'catalog_num', 'url', 'target', 'species', 'clonality', 'host', 'clone_id',
+            'name', 'vendor', 'catalog_num', 'url', 'link', 'target', 'species', 'clonality', 'host', 'clone_id',
             'product_isotype', 'product_conjugate', 'product_form', 'comments', 'defining_citation', 'subregion',
             'modifications', 'gene_id', 'disc_date', 'commercial_type', 'epitope', 'cat_alt', 'ab_id',
             'accession', 'ix')
@@ -121,6 +138,36 @@ class AntibodyResource(ModelResource):
             if antibody_identifier.condition(row):
                 return antibody_identifier
         return None
+
+    def save_instance(self, instance, is_create, using_transactions=True, dry_run=False):
+        """
+        Takes care of saving the object to the database.
+
+        Objects can be created in bulk if ``use_bulk`` is enabled.
+
+        :param instance: The instance of the object to be persisted.
+        :param is_create: A boolean flag to indicate whether this is a new object
+        to be created, or an existing object to be updated.
+        :param using_transactions: A flag to indicate whether db transactions are used.
+        :param dry_run: A flag to indicate dry-run mode.
+        """
+        self.before_save_instance(instance, using_transactions, dry_run)
+        if self._meta.use_bulk:
+            if is_create:
+                self.create_instances.append(instance)
+            else:
+                self.update_instances.append(instance)
+        else:
+            if not using_transactions and dry_run:
+                # we don't have transactions and we want to do a dry_run
+                pass
+            else:
+                instance.save(update_search=False)
+        self.after_save_instance(instance, using_transactions, dry_run)
+
+    def after_import(self, dataset, result, using_transactions, dry_run, **kwargs):
+        super().after_import(dataset, result, using_transactions, dry_run, **kwargs)
+        refresh_search_view()
 
     def get_or_init_instance(self, instance_loader, row):
         """
@@ -161,8 +208,12 @@ class AntibodyResource(ModelResource):
             kwargs[FOR_NEW_KEY] = self.request.session[FOR_NEW_KEY]
             kwargs[FOR_EXTANT_KEY] = self.request.session[FOR_EXTANT_KEY]
             kwargs[METHOD_KEY] = self.request.session[METHOD_KEY]
-
-            kwargs[KC_USER_ID_KEY] = self.keycloak_service.get_user_id_from_django_user(kwargs[USER_KEY])
+            try:
+                kwargs[KC_USER_ID_KEY] = KeycloakService(
+                ).get_user_id_from_django_user(kwargs[USER_KEY])
+            except Exception as e:
+                log.exception("Cannot set user id for import")
+                kwargs[KC_USER_ID_KEY] = None
 
         else:  # if we are in the import form request we set the values in session using the request values
             self.request.session[FOR_NEW_KEY] = kwargs[FOR_NEW_KEY]
@@ -188,24 +239,51 @@ class AntibodyResource(ModelResource):
         dataset.df = dataset.df.dropna(axis=0, how='all')
 
     def _filter_dataset(self, dataset, negate_filter_condition=False):
-        ic = self.get_antibody_identifier(dataset.headers)
-        if ic is None:
+        antibody_identifier = self.get_antibody_identifier(dataset.headers)
+        if antibody_identifier is None:
             return
-        existent_antibodies = Antibody.objects.filter(ic.q(dataset))
-        dataset.df = dataset.df.where(ic.filter_dataset(
-            dataset, negate_filter_condition, existent_antibodies))
+        existent_antibodies = Antibody.objects.filter(
+            antibody_identifier.q(dataset))
+        dataset.df = dataset.df.where(
+            antibody_identifier.filter_dataset(
+                dataset, negate_filter_condition, existent_antibodies)
+        )
 
     def before_import_row(self, row, row_number=None, **kwargs):
         antibody_identifier = self.get_antibody_identifier(row)
         # modify empty strings to none on identifier columns
-        create_duplicate = self.request.session.get(FOR_EXTANT_KEY, UPDATE_KEY) == DUPLICATE_KEY
-        for field in antibody_identifier.fields:
-            # Exceptionally on the create_duplicate option we retain the ab_id
-            if field.attribute == 'ab_id' and create_duplicate:
-                continue
-            if field.column_name in row:
-                if row[field.column_name] == '':
-                    row[field.column_name] = None
+        create_duplicate = self.request.session.get(
+            FOR_EXTANT_KEY, UPDATE_KEY) == DUPLICATE_KEY
+        if antibody_identifier:
+            for field in antibody_identifier.fields:
+                # Exceptionally on the create_duplicate option we retain the ab_id
+                if field.attribute == 'ab_id' and create_duplicate:
+                    continue
+                elif field.attribute == 'ab_id' or field.attribute == "ab_id_old":
+                    row[field.column_name] = row[field.column_name].replace(
+                        "AB_", "")
+
+        for column_name in row:
+            if row[column_name] == '':
+                row[column_name] = None
+
+        if row.get('link', None):
+            row['link'] = 'y' in row['link'].lower()
+        else:
+            row['link'] = True
+        if row.get('clonality', None):
+            clonality = row['clonality'].lower()
+            
+            row['clonality'] = clonality if clonality in CLONALITIES else None
+            
+        if row.get('commercial_type', None):
+            commercial_type = row['commercial_type'].lower()
+            row['commercial_type'] = commercial_type if commercial_type in COMMERCIAL_TYPES else None
+        if row.get('species', None):
+            row['species'] = row['species'].lower().replace(",", ";")
+        if row.get('host_organism', None):
+            row['host_organism'] = row['host_organism'].lower()
+
         if KC_USER_ID_KEY in kwargs:
             row['uid'] = kwargs[KC_USER_ID_KEY]
 

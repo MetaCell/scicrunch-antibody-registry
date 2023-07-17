@@ -446,9 +446,7 @@ components:
             type: object
             allOf:
                 -
-                    required:
-                        - abId
-                        - insertTime
+                    required: []
                     type: object
                     properties:
                         accession:
@@ -509,8 +507,7 @@ components:
                     $ref: '#/components/schemas/AntibodyCoreId'
         AbstractAntibody:
             description: The common fields between all REST operations for the antibody resource.
-            required:
-                - commercialType
+            required: []
             type: object
             properties:
                 clonality:
@@ -654,8 +651,7 @@ components:
                     $ref: '#/components/schemas/AntibodyCoreId'
         AntibodyCoreId:
             description: Related attributes used to uniquely identify antibodies
-            required:
-                - catalogNum
+            required: []
             type: object
             properties:
                 catalogNum:

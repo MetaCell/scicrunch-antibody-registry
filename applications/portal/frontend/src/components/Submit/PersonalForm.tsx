@@ -1,5 +1,5 @@
 import React from "react";
-import { makeStyles } from "@mui/styles";
+
 import { vars } from "../../theme/variables";
 import {
   Box,
@@ -21,8 +21,8 @@ import { postNewAntibody } from "../../helpers/antibody";
 
 const { bannerHeadingColor, primaryTextColor } = vars;
 
-const useStyles = makeStyles((theme?: any) => ({
-  container: { padding: theme.spacing(10) },
+const styles = {
+  container: { padding: 10 },
   paper: {
     textAlign: "start",
     border: "1px solid #EAECF0",
@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme?: any) => ({
     color: primaryTextColor,
     fontWeight: 400,
   },
-}));
+};
 
 const requiredFieldValidation = yup.string().required("The field is mandatory");
 
@@ -70,10 +70,10 @@ const validationSchema = yup.object().shape({
 
 const Input = ({ formik, label, name, required, placeholder }) => {
   const { errors, touched, getFieldProps, values, handleChange } = formik;
-  const classes = useStyles();
+
   return (
     <>
-      <Typography variant="h5" className={classes.label}>
+      <Typography variant="h5" sx={styles.label}>
         {label} {required && "(Mandatory)"}
       </Typography>
       {name === "clonality" ? (
@@ -130,7 +130,7 @@ const Input = ({ formik, label, name, required, placeholder }) => {
             }}
           />
           {!touched[name] && !errors[name] && name === "catalogNumber" && (
-            <Typography variant="subtitle1" className={classes.note}>
+            <Typography variant="subtitle1" sx={styles.note}>
               Note: Submit unregistered antibodies only
             </Typography>
           )}
@@ -141,7 +141,7 @@ const Input = ({ formik, label, name, required, placeholder }) => {
 };
 
 const FormLine = ({ children }) => {
-  const child = React.Children.toArray(children) as React.ReactElement[];
+  const child = React.Children.toArray(children);
   return (
     <Grid container spacing={3}>
       <Grid item lg={6}>
@@ -154,7 +154,6 @@ const FormLine = ({ children }) => {
   );
 };
 const PersonalForm = (props) => {
-  const classes = useStyles();
 
   const { setAntibodyId, setApiResponse, next } = props;
 
@@ -195,9 +194,9 @@ const PersonalForm = (props) => {
   const { handleSubmit } = formik;
 
   return (
-    <form onSubmit={handleSubmit} autoComplete="off">
-      <Container maxWidth="xl" className={classes.container}>
-        <Paper className={classes.paper}>
+    <form onSubmit={handleSubmit} autoComplete="off" className="antibody-form type-personal">
+      <Container maxWidth="xl" sx={styles.container}>
+        <Paper sx={styles.paper}>
           <Grid
             container
             direction="column"
@@ -207,11 +206,11 @@ const PersonalForm = (props) => {
             height="100%"
           >
             <Grid item>
-              <Typography variant="h1" className={classes.header}>
+              <Typography variant="h1" sx={styles.header} className="title-antibody-details">
                 2. Antibody Details
               </Typography>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -233,7 +232,7 @@ const PersonalForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -255,7 +254,7 @@ const PersonalForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -277,7 +276,7 @@ const PersonalForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -299,7 +298,7 @@ const PersonalForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -321,7 +320,7 @@ const PersonalForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -343,7 +342,7 @@ const PersonalForm = (props) => {
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item className={classes.formItem}>
+            <Grid item sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -388,7 +387,7 @@ const PersonalForm = (props) => {
               </FormLine>
             </Grid>
             <Grid item>
-              <Typography variant="h5" className={classes.label}>
+              <Typography variant="h5" sx={styles.label}>
                 Comments
               </Typography>
               <TextField
@@ -399,6 +398,7 @@ const PersonalForm = (props) => {
                 placeholder="Antibody was produced by ... [Insert procedure]"
                 value={formik.values.comments}
                 onChange={formik.handleChange}
+                className="input-comments"
               />
             </Grid>
           </Grid>

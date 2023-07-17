@@ -193,8 +193,8 @@ ANTIBODY_ID_MAX_LEN = 32  # 8
 ANTIBODY_UID_MAX_LEN = 256
 STATUS_MAX_LEN = 8
 ANTIBODY_CAT_ALT_MAX_LEN = 512  # 334
-VENDOR_COMMERCIAL_TYPE_MAX_LEN = 10  # 10
-ANTIGEN_UNIPROT_ID_MAX_LEN = 64  # 32
+VENDOR_COMMERCIAL_TYPE_MAX_LEN = 32  # 10
+ANTIGEN_UNIPROT_ID_MAX_LEN = 255  # 32
 ANTIBODY_TARGET_EPITOPE_MAX_LEN = 1024  # 897
 VENDOR_NIF_MAX_LEN = 32  # 14
 VENDOR_EU_ID_MAX_LEN = 255
@@ -215,7 +215,7 @@ RAW_VENDOR_DOMAIN_DATA_BASENAME = 'antibody_vendors_domain'
 RAW_USERS_DATA_BASENAME = 'users_antibody'
 RAW_ANTIBODY_FILES_BASENAME = 'antibody_files'
 
-CHUNK_SIZE = 10 ** 5
+CHUNK_SIZE = 10 ** 4
 
 UID_KEY = 'uid'
 GUID_KEY = 'guid'
@@ -231,7 +231,7 @@ ANTIBODY_HEADER = {'ab_name': "text", 'ab_target': "text", 'target_species': "te
                    'id': "text", 'ab_id': "text", 'ab_id_old': "text",
                    'of_record': "text", 'ix': "int", UID_KEY: "text", 'status': "text",
                    'insert_time': "text", 'curate_time': "text", 'cat_alt': "text", 'commercial_type': "text",
-                   'uniprot_id': "text", 'epitope': "text", 'uid_legacy': "text"}
+                   'uniprot_id': "text", 'epitope': "text", 'uid_legacy': "text", 'catalog_num_search': "text"}
 
 D_TYPES = ANTIBODY_HEADER.copy()
 for dt in D_TYPES:
@@ -250,6 +250,7 @@ USERS_RELEVANT_HEADER = ['id', GUID_KEY, 'email', 'level', 'firstName', 'middleI
 
 UID_INDEX = list(ANTIBODY_HEADER.keys()).index(UID_KEY)
 GUID_INDEX = USERS_RELEVANT_HEADER.index(GUID_KEY)
+EMAIL_INDEX = USERS_RELEVANT_HEADER.index('email')
 
 DEFAULT_UID = '43'
 

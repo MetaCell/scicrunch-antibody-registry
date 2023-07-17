@@ -11,3 +11,4 @@ skaffold.yaml
 /deployment/helm/*
 .overrides
 .hypothesis
+*.ipynb

@@ -37,13 +37,14 @@ const UserAccountMenu = (props: UserProps) => {
   };
   return (
         <>
-            <Stack direction="row" spacing={1}>
+            <Stack direction="row" spacing={1} className="user-menu">
               <div>
                 <Typography variant="subtitle1" color="grey.400" align="left">Account</Typography>
                 <Typography variant="subtitle2" color="grey.700" align="left">{user.firstName ? `${user.firstName} ${user.lastName}` : user.email}</Typography>
               </div>
               <IconButton
                 disableRipple
+                className="btn-user-menu"
                 sx={{
                   p: 1.25,
                 }}
@@ -84,27 +85,27 @@ const UserAccountMenu = (props: UserProps) => {
               </ListItem>
               <Divider />
               <MenuList sx={{ "& .MuiMenuItem-root": { paddingTop: "0.4rem" } }}>
-                <MenuItem onClick={() => {
+                <MenuItem className="btn-account-details" onClick={() => {
                   history.push("/user"); setAnchorEl(null)}} component={Link}>
                   <ListItemIcon>
                     <UserIcon />
                   </ListItemIcon>
                   <Typography variant="h5" color="grey.500">Account details</Typography>
                 </MenuItem>
-                <MenuItem>
+                {/* <MenuItem>
                   <ListItemIcon>
                     <CubeIcon />
                   </ListItemIcon>
                   <Typography variant="h5" color="grey.500">API Key</Typography>
-                </MenuItem>
-                {user.realmAccess.roles.includes("administrator") && <MenuItem onClick={() => window.location.href = "/admin/"}>
+                </MenuItem> */}
+                {user.realmAccess.roles.includes("administrator") && <MenuItem className="btn-admin-panel" onClick={() => window.location.href = "/admin/"}>
                   <ListItemIcon>
                     <AdminPanelSettingsIcon fontSize="small" sx={{ pl: 0 }}  />
                   </ListItemIcon>
                   <Typography variant="h5" color="grey.500">Admin panel</Typography>
                 </MenuItem> }
                 <Divider />
-                <MenuItem onClick={() => 
+                <MenuItem className="btn-logout" onClick={() => 
                   fetch("/oauth/logout").then(() => window.location.href = "/", () => window.location.href = "/oauth/logout")
                 }>
                   <ListItemIcon>

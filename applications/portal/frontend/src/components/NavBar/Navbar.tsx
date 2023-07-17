@@ -23,8 +23,8 @@ const Navbar = () => {
     window.location.href = "/login";
   };
   return (
-    <Box>
-      <AppBar elevation={0}>
+    <Box className="container-navbar">
+      <AppBar className="top-bar" elevation={0}>
         <Container maxWidth="xl">
           <Toolbar
             sx={{
@@ -44,7 +44,7 @@ const Navbar = () => {
                   }}
                 >
                   <Stack direction="row" spacing={2}>
-                    <Link href="/">
+                    <Link className="logo" href="/">
                       <img src={logo} title="Antibody Registry" />
                     </Link>
 
@@ -75,7 +75,7 @@ const Navbar = () => {
                   <Stack direction="row" spacing={1.5}>
                     <HelpMenu />
                     {!user ? (
-                      <Button onClick={login}>Log in / Register</Button>
+                      <Button className="btn-login" onClick={login}>Log in / Register</Button>
                     ) : (
                       <UserAccountMenu user={user} />
                     )}

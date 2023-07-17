@@ -1,5 +1,6 @@
 import { Antibody } from "../rest";
 
 export function getProperCitation(a: Antibody) {
-  return `(${a.vendorName} Cat# ${a.catalogNum}, RRID:AB_${a.abId})`;
+  if(!a) {return "ERROR";}
+  return a.catalogNum && a.vendorName ? `(${a.vendorName} Cat# ${a?.catalogNum?.split(" (")[0]}, RRID:AB_${a.abId})`: "ERROR";
 }

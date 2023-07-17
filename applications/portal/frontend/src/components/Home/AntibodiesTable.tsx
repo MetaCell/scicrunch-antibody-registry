@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 //MUI
 import {
   DataGrid,
@@ -7,6 +7,7 @@ import {
   GridRenderCellParams,
   GridCsvExportOptions,
   GridNoRowsOverlay,
+  GridFilterModel,
 } from "@mui/x-data-grid";
 import {
   Typography,
@@ -20,7 +21,6 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 
 //project imports
 import {
-  getAntibodies,
   getUserAntibodies,
 } from "../../services/AntibodiesService";
 import {
@@ -30,10 +30,10 @@ import {
   SortingIcon,
   CheckedIcon,
   UncheckedIcon,
-  FilterIcon,
   SettingsIcon,
   CopyIcon,
 } from "../icons";
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import HomeHeader from "./HomeHeader";
 import { Antibody } from "../../rest";
 import { getProperCitation } from "../../utils/antibody";
@@ -47,25 +47,9 @@ import Error500 from "../UI/Error500";
 
 
 
-const StyledBadge = (props) => {
-  if (props.field === "vendorName") {
-    return (
-      <Box bgcolor="primary.light" px={0.5} py={0.25} borderRadius="0.25rem">
-        <Link underline="none" target="_blank" href={props.row.url}>
-          {props.children}
-        </Link>
-      </Box>
-    );
-  } else if (props.field === "clonality") {
-    return (
-      <Box bgcolor="grey.A200" px={1} py={0.25} borderRadius="1rem">
-        {props.children}
-      </Box>
-    );
-  } else {
-    return <Box>{props.children}</Box>;
-  }
-};
+
+
+
 const StyledCheckBox = (props) => {
   return (
     <Checkbox
@@ -78,9 +62,9 @@ const StyledCheckBox = (props) => {
 
 const getRowId = (ab: Antibody) => `${ab.abId}${Math.random()}`;
 
-const CustomToolbar = ({ activeTab }) => {
+const CustomToolbar = ({ activeTab, antibodiesList }) => {
   const [activeSelection, setActiveSelection] = useState(true);
-
+  
   const apiRef = useGridApiContext();
   const selectedRows = apiRef.current.getSelectedRows();
 
@@ -96,12 +80,15 @@ const CustomToolbar = ({ activeTab }) => {
   }, [selectedRows]);
 
   return (
-    <HomeHeader
+    <><HomeHeader
       activeSelection={activeSelection}
       handleExport={handleExport}
       showFilterMenu={showFilterMenu}
       activeTab={activeTab}
+      shownResultsNum={antibodiesList?.length}
     />
+    
+    </>
   );
 };
 
@@ -112,7 +99,7 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
       ? `/update/${props.row.accession}`
       : `/AB_${props.row.abId}`;
   return (
-    <Link href={href}>
+    <Link href={href} className="col-name-id">
       <Typography
         variant="body2"
         align="left"
@@ -135,104 +122,134 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
 
 const RenderCellContent = (props: GridRenderCellParams<String>) => {
   return (
-    <StyledBadge {...props}>
-      <Typography
-        variant="caption"
-        align="left"
-        color={props.field === "vendorName" ? "primary.main" : "grey.500"}
-        component="div"
-      >
-        {props.field === "targetAntigen"
-          ? `${props.row.abTarget} ${props.row.targetSpecies.join(", ")}`
-          : props.value}
-      </Typography>
-    </StyledBadge>
+    <Typography
+      variant="caption"
+      align="left"
+      color={"grey.500"}
+      component="div"
+      className="col-content"
+    >
+      {props.field === "targetAntigen"
+        ? `${props.row.abTarget} ${props.row.targetSpecies.join(", ")}`
+        : props.value}
+    </Typography>
   );
 };
+
+const RenderVendor = (props) => ( 
+  
+  <Typography
+    variant="caption"
+    align="left"
+    color={"grey.500"}
+    component="div"
+    className="col-vendor"
+  >
+    {props.row.url ? <Link className="link-vendor" bgcolor="primary.light" px={0.5} py={0.25} display="block" underline="none" target="_blank" href={props.row.url}>
+      {props.value}
+    </Link> : props.value}
+  </Typography>
+)
+
+const RenderClonality = (props) => (
+  <Typography
+    variant="caption"
+    align="left"
+    color={"grey.500"}
+    bgcolor="grey.A200"
+    component="div"
+    px={1} py={0.25} borderRadius="1rem"
+    className="col-clonality"
+  >
+    {props.value}
+  </Typography>
+);
+
 
 const RenderHtml = (props: GridRenderCellParams<String>) => {
   return (
-    <StyledBadge {...props}>
-      <Typography
-        variant="caption"
-        align="left"
-        color="grey.500"
-        component="div"
-        dangerouslySetInnerHTML={{ __html: props.value }}
-      />
-    </StyledBadge>
+    <Typography
+      variant="caption"
+      align="left"
+      color="grey.500"
+      component="div"
+      dangerouslySetInnerHTML={{ __html: props.value }}
+      className="col-html"
+    />
   );
 };
 
-const RenderProperCitation = (props: GridRenderCellParams<String>) => {
-  const theme = useTheme();
-  const classes = {
-    popover: {
-      p: 1,
-      backgroundColor: theme.palette.grey[900],
-      color: theme.palette.common.white,
-      fontSize: "1rem",
-    },
 
-    citationColumn: {
-      cursor: "auto",
-      display: "flex",
-      alignItems: "center",
-    },
-  };
+const citationStyles = {
+  popover: (theme) => ({
+    p: 1,
+    backgroundColor: theme.palette.grey[900],
+    color: theme.palette.common.white,
+    fontSize: "1rem",
+  }),
+
+  citationColumn: {
+    cursor: "auto",
+    display: "flex",
+    alignItems: "center",
+  },
+};
+
+const RenderProperCitation = (props: GridRenderCellParams<String>) => {
+
   const [anchorCitationPopover, setAnchorCitationPopover] =
     useState<HTMLButtonElement | null>(null);
 
-  const handleClickCitation = (event) => {
+  const handleCloseCitation = useCallback(() => {
+    setAnchorCitationPopover(null);
+  }, [setAnchorCitationPopover]);
+    
+  const handleClickCitation = useCallback((event) => {
     setAnchorCitationPopover(event.currentTarget);
     setTimeout(handleCloseCitation, 1000);
-  };
+  }, [handleCloseCitation, setAnchorCitationPopover]);
 
-  const handleCloseCitation = () => {
-    setAnchorCitationPopover(null);
-  };
+  
 
   const open = Boolean(anchorCitationPopover);
-  const id = open ? "simple-popover" : undefined;
-  return (
-    <StyledBadge {...props}>
-      <Box sx={classes.citationColumn}>
-        <Typography
-          variant="caption"
-          align="left"
-          color={props.field === "vendor" ? "primary.main" : "grey.500"}
-          component="div"
-        >
-          {props.value}
-        </Typography>
-        <CopyToClipboard text={props.value}>
-          <Button
-            onClick={handleClickCitation}
-            size="small"
-            sx={{ minWidth: 0 }}
-            startIcon={
-              <CopyIcon stroke={theme.palette.grey[500]} fontSize="inherit" />
-            }
-          />
-        </CopyToClipboard>
-        <Popover
-          id={id}
-          open={open}
-          anchorEl={anchorCitationPopover}
-          onClose={handleCloseCitation}
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "right",
-          }}
-          transformOrigin={{
-            vertical: "center",
-            horizontal: "center",
-          }}
-        >
-          <Typography sx={classes.popover}>Citation copied</Typography>
-        </Popover>
-      </Box>
-    </StyledBadge>
+
+  return props && (
+    <Box sx={citationStyles.citationColumn} className="col-proper-citation">
+      <Typography
+        variant="caption"
+        align="left"
+        color={props.field === "vendor" ? "primary.main" : "grey.500"}
+        component="div"
+      >
+        {props.value}
+      </Typography>
+      <CopyToClipboard text={props.value} >
+        <Button
+          onClick={handleClickCitation}
+          size="small"
+          sx={{ minWidth: 0 }}
+          startIcon={
+            <CopyIcon sx={{ stroke: theme => theme.palette.grey[500] }} fontSize="inherit" />
+          }
+          className="btn-citation-copy"
+        />
+      </CopyToClipboard>
+      {open && <Popover
+        open={open}
+        anchorEl={anchorCitationPopover}
+        onClose={handleCloseCitation}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "center",
+          horizontal: "center",
+        }}
+      >
+        <Typography className="msg-citation-copied" sx={citationStyles.popover}>Citation copied</Typography>
+      </Popover>}
+    </Box>
   );
 };
 
@@ -249,6 +266,7 @@ const RenderStatus = (props: GridRenderCellParams<string>) => {
       px={1}
       py={0.25}
       borderRadius="1rem"
+      className="col-status"
     >
       <Typography
         variant="caption"
@@ -280,7 +298,8 @@ const getNameAndId = (props: ValueProps) => {
 };
 
 const getValueForCitation = (props: ValueProps) => {
-  return getProperCitation(props.row);
+
+  return props?.row ? getProperCitation(props.row) : "";
 };
 
 const columnsDefaultProps = {
@@ -340,32 +359,32 @@ const AntibodiesTable = (props) => {
   const user = useContext(UserContext)[0];
 
   const [antibodiesList, setAntibodiesList] = useState<Antibody[]>();
+  const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
   const { activeSearch, searchedAntibodies, loader } =
     useContext(SearchContext);
 
-  const fetchAntibodies = () => {
-    !activeSearch
-      ? getAntibodies()
-        .then((res) => {
-          return setAntibodiesList(res.items);
-        })
-        .catch((err) => alert(err))
-      : setAntibodiesList(searchedAntibodies);
-  };
 
   const fetchUserAntibodies = () => {
+    setAntibodiesList(null);
     getUserAntibodies()
       .then((res) => {
         return setAntibodiesList(res.items);
       })
-      .catch((err) => alert(err));
+      .catch((err) => console.error(err));
+  };
+
+  const handleSetFilterModel = (model: GridFilterModel) => {
+    setFilterModel(model);
   };
 
   useEffect(() => {
-    props.activeTab === ALLRESULTS
-      ? fetchAntibodies()
-      : user && fetchUserAntibodies();
-  }, [activeSearch, searchedAntibodies]);
+    setFilterModel({ items: [] }); // reset filters on new search
+  }, [activeSearch]);
+  
+
+  useEffect(() => {
+    props.activeTab === ALLRESULTS ? setAntibodiesList(searchedAntibodies) : user && fetchUserAntibodies();
+  }, [searchedAntibodies, props.activeTab, user]);
 
   const columns: GridColDef[] = [
     {
@@ -378,6 +397,12 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "abId",
       headerName: "ID",
+      hide: true,
+    },
+    {
+      ...columnsDefaultProps,
+      field: "accession",
+      headerName: "Accession",
       hide: true,
     },
     {
@@ -425,11 +450,13 @@ const AntibodiesTable = (props) => {
       valueGetter: getValueForCitation,
       renderCell: RenderProperCitation,
       type: "actions",
+      hideable: false
     },
     {
       ...columnsDefaultProps,
       field: "clonality",
       headerName: "Clonality",
+      renderCell: RenderClonality,
     },
     {
       ...columnsDefaultProps,
@@ -461,9 +488,10 @@ const AntibodiesTable = (props) => {
     {
       ...columnsDefaultProps,
       field: "vendorName",
-      headerName: "Link to Vendor",
+      headerName: "Vendor",
       flex: 1.5,
-      type: "actions",
+      renderCell: RenderVendor,
+
     },
     {
       ...columnsDefaultProps,
@@ -489,6 +517,7 @@ const AntibodiesTable = (props) => {
   const compProps = {
     toolbar: {
       activeTab: props.activeTab,
+      antibodiesList
     },
     noRowsOverlay: {
       activeSearch: activeSearch,
@@ -561,11 +590,14 @@ const AntibodiesTable = (props) => {
   const currentPath = window.location.pathname;
   return (
     <Box>
+      
       <Box sx={{ flexGrow: 1, height: "90vh" }}>
+        
         {currentPath === "/submissions" && !user ? (
           <ConnectAccount />
         ) : (
           <DataGrid
+            className="antibodies-table"
             sx={dataGridStyles}
             rows={antibodiesList ?? []}
             getRowId={getRowId}
@@ -576,6 +608,8 @@ const AntibodiesTable = (props) => {
             disableSelectionOnClick
             getRowHeight={() => "auto"}
             loading={!antibodiesList || loader}
+            filterModel={filterModel}
+            onFilterModelChange={handleSetFilterModel}
             components={{
               BaseCheckbox: StyledCheckBox,
               ColumnFilteredIcon: FilteredColumnIcon,
@@ -583,9 +617,10 @@ const AntibodiesTable = (props) => {
               ColumnSortedAscendingIcon: AscSortedIcon,
               ColumnSortedDescendingIcon: DescSortedIcon,
               Toolbar: CustomToolbar,
-              ColumnMenuIcon: FilterIcon,
+              ColumnMenuIcon: MoreVertIcon,
               ColumnSelectorIcon: SettingsIcon,
               NoRowsOverlay: NoRowsOverlay,
+    
             }}
             componentsProps={compProps}
             localeText={{

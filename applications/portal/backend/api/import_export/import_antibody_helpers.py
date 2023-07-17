@@ -5,7 +5,7 @@ from django.db.models import Q
 from api.utilities.functions import remove_empty_string
 
 
-def get_antibody_q1(dataset, mandatory_id_field, alternative_id_fields) -> Q:
+def get_antibody_q1(dataset, mandatory_id_field, alternative_id_fields=[]) -> Q:
     q = Q(
         **{"%s__in" % mandatory_id_field.attribute: remove_empty_string(dataset[mandatory_id_field.column_name])})
 
@@ -30,8 +30,18 @@ def get_antibody_q2(dataset, catalog_number_field, vendor_field) -> Q:
         **{"%s__%s__in" % (vendor_field.attribute, vendor_field.widget.field): remove_empty_string(
             dataset[vendor_field.column_name])})
 
+def filter_dataset_by_ix(dataset, negate, antibodies):
+    values = (str(antibody.ix) for antibody in antibodies)
+    condition = dataset.df['ix'].isin(values)
+    return ~condition if negate else condition
 
-def filter_dataset_c1(dataset, negate, antibodies, ab_id_field, ix_field, accession_field):
+def filter_dataset_by_accession(dataset, negate, antibodies):
+    values = (str(antibody.accession) for antibody in antibodies)
+    condition = dataset.df['accession'].isin(values)
+    return ~condition if negate else condition
+
+
+def filter_dataset_by_abid_ix_accession(dataset, negate, antibodies, ab_id_field, ix_field, accession_field):
     antibody_ids = []
     antibody_ixs = []
     antibody_accessions = []
@@ -47,7 +57,7 @@ def filter_dataset_c1(dataset, negate, antibodies, ab_id_field, ix_field, access
     return ~condition if negate else condition
 
 
-def filter_dataset_c2(dataset, negate, antibodies, catalog_number_field, vendor_field):
+def filter_dataset_by_catnum_vendor(dataset, negate, antibodies, catalog_number_field, vendor_field):
     antibody_catalog_numbers = []
     antibody_vendor_names = []
     for antibody in antibodies:

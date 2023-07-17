@@ -1,4 +1,6 @@
 from typing import List, Union
+
+from cloudharness import log
 from api.models import Antibody
 from api.services.user_service import UnrecognizedUser, get_current_user_id
 
@@ -38,6 +40,11 @@ def create_antibody(body: AddAntibodyDTO) -> Union[AntibodyDTO, JSONResponse]:
             name=e.field_name, value=e.field_value))
     except antibody_service.DuplicatedAntibody as e:
         return JSONResponse(status_code=409, content=jsonable_encoder(e.antibody))
+    except Exception as e:
+        log.error("Error creating antibody: %s", e, exc_info=True)
+        from pprint import pprint
+        pprint(body.dict())
+        raise e
 
 
 def get_antibody(antibody_id: int) -> List[AntibodyDTO]:

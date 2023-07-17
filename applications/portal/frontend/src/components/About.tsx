@@ -8,7 +8,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 const { footerBg, whiteColor, sepratorColor, primaryColor, contentBg, contentBorderColor, primaryTextColor, bannerHeadingColor } = vars;
 
-const useStyles = makeStyles(() => ({
+const styles = {
   footer: {
     background: footerBg,
     height: '5rem',
@@ -141,10 +141,10 @@ const useStyles = makeStyles(() => ({
   m0: {
     margin: '0 !important',
   }
-}));
+};
 
 const About = () => {
-  const classes = useStyles();
+
   const settings = {
     dots: false,
     autoplay: true,
@@ -189,12 +189,13 @@ const About = () => {
     { name: 'licor', url: 'https://www.licor.com/' },
     { name: 'hytest', url: 'https://www.hytest.fi/home' },
     { name: 'cytoskeleton', url: 'https://www.cytoskeleton.com/' },
+    { name: 'Ansh Labs', url: 'https://www.anshlabs.com/', img: './assets/partners/anshlabs.png' },
   ]
   const history = useHistory();
   const navigate = () => history.push('/');
   return (
     <>
-      <Box className={classes.banner}>
+      <Box sx={styles.banner} className="about-banner">
         <Container maxWidth="xl">
           <Typography>
             <img src='./assets/logo-dark.svg' alt="LOGO" />
@@ -203,22 +204,25 @@ const About = () => {
           <img src='./assets/ipad.webp' alt="" />
         </Container>
       </Box>
-      <Box className={classes.mainContent}>
-        <Box className={classes.content}>
-          <Typography align='center' marginBottom={1.5} component="h3">
+      <Box sx={styles.mainContent} className="about-main">
+        <Box sx={styles.content} className="about-content">
+          <Typography variant="body1" align='center' marginBottom={1.5} component="h3">
             Antibody Registry Partners
           </Typography>
 
-          <Typography align='center' marginBottom={8}>
-            We would like to thank our partners, who submit data to us regularly making author's jobs easier. Would you like to become a partner? <Link href="#">Inquire here</Link>.
+          <Typography variant="body1" align='center' marginBottom={8}>
+            We would like to thank our partners, who submit data to us regularly making author&pos;s jobs easier. Would you like to become a partner? <Link href="/membership">Inquire here</Link>.
           </Typography>
 
-          <Slider {...settings}>
+          <Slider {...settings} className="about-slider">
             {
-              partners.map((elementInArray, index) => (
-                <Box px={3} key={index}>
-                  <a href={elementInArray.url} target="_blank" rel="noreferrer">
-                    <img src={`./assets/partners/${index+1}.svg`} alt={elementInArray.name}/>
+              partners.map((partner, index) => (
+                <Box px={3} key={index} className="partner">
+                  <a href={partner.url} target="_blank" rel="noreferrer">
+                    <Box component="img" src={partner.img || `./assets/partners/${index+1}.svg`} 
+                      alt={partner.name} 
+                      title={partner.name} 
+                      sx={{ maxHeight: "85px", filter: "grayscale(1)" }} />
                   </a>
                 </Box>
               )
@@ -226,9 +230,9 @@ const About = () => {
             }
           </Slider>
         </Box>
-        <Container maxWidth="xl">
+        <Container maxWidth="xl" className="about-search-info">
           <Divider />
-          <Box className={classes.content}>
+          <Box sx={styles.content}>
             <Grid container spacing={9} alignItems="center">
               <Grid item md={5}>
                 <img src='./assets/search-icon.svg' alt="SEARCH" />
@@ -246,7 +250,7 @@ const About = () => {
             </Grid>
           </Box>
 
-          <Box className={classes.content}>
+          <Box sx={styles.content} className="about-submit-info">
             <Grid container spacing={9} alignItems="center">
               <Grid item md={7}>
                 <img src='./assets/submit.svg' alt="SUBMIT" />
@@ -264,7 +268,7 @@ const About = () => {
             </Grid>
           </Box>
 
-          <Box className={classes.content}>
+          <Box sx={styles.content} className="about-records-info">
             <Grid container spacing={9} alignItems="center">
               <Grid item md={5}>
                 <img src='./assets/trace-icon.svg' alt="TRACE" />
@@ -273,7 +277,7 @@ const About = () => {
                 </Typography>
 
                 <Typography>
-                  We never delete records, so even when an antibody disappears from a vendor's catalog, or is sold to another vendor, we can trace the provenance of that antibody. (Bandrowski et al).
+                  We never delete records, so even when an antibody disappears from a vendor&pos;s catalog, or is sold to another vendor, we can trace the provenance of that antibody. (Bandrowski et al).
                 </Typography>
               </Grid>
               <Grid item md={7}>
@@ -282,10 +286,10 @@ const About = () => {
             </Grid>
           </Box>
 
-          <Box className={`${classes.content} ${classes.contentWithBg}`}>
+          <Box sx={{ ...styles.content, ...styles.contentWithBg }} className="about-database-info">
             <Grid container spacing={9} alignItems="center">
               <Grid item md={3}>
-                <Typography component="h3" className={classes.m0}>
+                <Typography component="h3" sx={styles.m0}>
                   Integration with The Journal of Comparative Neurology
                 </Typography>
               </Grid>
@@ -298,19 +302,19 @@ const About = () => {
           </Box>
         </Container>
       </Box>
-      <Box className={`${classes.banner} ${classes.bannerWithBg}`}>
+      <Box sx={{ ...styles.banner, ...styles.bannerWithBg }} className="about-call">
         <Container maxWidth="xl">
           <Typography>
             Ready to get started?
           </Typography>
-          <Button variant="contained" color='secondary' onClick={navigate}>Search for antibodies</Button>
+          <Button className="go-home-button" variant="contained" color='secondary' onClick={navigate}>Search for antibodies</Button>
           <img src="./assets/ipad.webp" alt="" />
         </Container>
       </Box>
-      <Box className={classes.footer}>
-        <Typography>
+      <Box sx={styles.footer} className="about-footer">
+        <Typography variant="body1">
           Powered by
-          <a href="https://www.metacell.us/" target="_blank">
+          <a href="https://www.metacell.us/" target="_blank" rel="noreferrer">
             <img src='./assets/matacell.svg' alt="metacell" />
           </a>
         </Typography>

@@ -6,12 +6,11 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import { AlertIcon } from "../icons";
 
-import { makeStyles } from "@mui/styles";
 import { vars } from "../../theme/variables";
 
 const { bannerHeadingColor, primaryTextColor } = vars;
 
-const useStyles = makeStyles(() => ({
+const styles = {
   label: {
     color: bannerHeadingColor,
     marginBottom: "0.375rem",
@@ -20,7 +19,7 @@ const useStyles = makeStyles(() => ({
     color: primaryTextColor,
     fontWeight: 400,
   },
-}));
+};
 
 const Input = ({
   formik,
@@ -31,10 +30,10 @@ const Input = ({
   readOnly = false,
 }) => {
   const { errors, touched, getFieldProps, values, handleChange } = formik;
-  const classes = useStyles();
+
   return (
     <>
-      <Typography variant="h5" className={classes.label}>
+      <Typography variant="h5" sx={styles.label}>
         {label} {required && "(Mandatory)"}
       </Typography>
       {name === "clonality" ? (
@@ -43,6 +42,7 @@ const Input = ({
           value={formik.values.clonality}
           onChange={formik.handleChange}
           fullWidth
+          className="clonality-select"
         >
           <MenuItem value={"unknown"}>Unknown</MenuItem>
           <MenuItem value={"cocktail"}>Cocktail</MenuItem>
@@ -83,6 +83,7 @@ const Input = ({
             {...getFieldProps(name)}
             error={Boolean(touched[name] && errors[name])}
             helperText={touched[name] && errors[name]}
+            className={`input-${name}`}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">

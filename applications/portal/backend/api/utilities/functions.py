@@ -1,4 +1,5 @@
 from typing import List, Union
+import re
 from urllib.parse import urlsplit
 
 from django.db.models import AutoField
@@ -32,3 +33,11 @@ def extract_base_url(url: Union[str, URLField]) -> str:
 
 def get_antibody_persistence_directory(ab_id: str, filename: str) -> str:
     return f'{ANTIBODY_PERSISTENCE}/{ab_id}/{filename}'
+
+def catalog_number_chunked(catalog_number: str, fill=' ') -> List[str]:
+    if not catalog_number:
+        return ""
+    try:
+        return fill.join(c for c in re.split(r'(\d+)',re.sub(r'[^\w]', '', catalog_number)) if c).strip().lower()
+    except Exception as e:
+        return ""

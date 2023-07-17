@@ -19,7 +19,7 @@ antibody_mapper = AntibodyMapper()
 
 def search_antibodies_by_catalog(search: str, page: int = 1, size: int = 50,
                                  status=STATUS.CURATED) -> PaginatedAntibodies:
-    p = Paginator(Antibody.objects.select_related("antigen", "vendor", "source_organism").prefetch_related(
+    p = Paginator(Antibody.objects.select_related("vendor", "source_organism").prefetch_related(
         "species").all().filter(
         status=status, catalog_num__iregex=".*" + re.sub('[^0-9a-zA-Z]+', '.*', search) + ".*").order_by("-ix"), size)
     items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
@@ -27,16 +27,19 @@ def search_antibodies_by_catalog(search: str, page: int = 1, size: int = 50,
 
 
 def get_antibodies(page: int = 1, size: int = 50) -> PaginatedAntibodies:
-    p = Paginator(Antibody.objects.select_related("antigen", "vendor", "source_organism").
-                  prefetch_related("species").all()
-                  .filter(status=STATUS.CURATED).order_by("-ix"), size)
-    items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
+    try:
+        p = Paginator(Antibody.objects.select_related("vendor", "source_organism").
+                    prefetch_related("species")
+                    .filter(status=STATUS.CURATED).order_by("-ix"), size)
+        items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
+    except Antibody.DoesNotExist:
+        return PaginatedAntibodies(page=int(page), totalElements=0, items=[])
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
 
 
 def get_user_antibodies(userid: str, page: int = 1, size: int = 50) -> PaginatedAntibodies:
-    p = Paginator(Antibody.objects.all().filter(
-        uid=userid).order_by("lastedit_time"), size)
+    p = Paginator(Antibody.objects.filter(
+        uid=userid).order_by("-ix"), size)
     items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
 
@@ -58,6 +61,7 @@ def get_antibody(antibody_id: int, status=STATUS.CURATED) -> List[AntibodyDTO]:
     except Antibody.DoesNotExist:
         return None
 
+
 def get_antibody_by_accession(accession: int) -> List[AntibodyDTO]:
     try:
         return antibody_mapper.to_dto(Antibody.objects.get(accession=accession))
@@ -67,12 +71,16 @@ def get_antibody_by_accession(accession: int) -> List[AntibodyDTO]:
         log.warning(f"Multiple antibodies with accession {accession}")
         raise
 
+
 def update_antibody(user_id: str, antibody_accession_number: str, body: UpdateAntibodyDTO) -> AntibodyDTO:
     if getattr(body, 'vendorName', None) is not None:
-        raise AntibodyDataException("Vendor name cannot be updated", 'vendorName', None)
+        raise AntibodyDataException(
+            "Vendor name cannot be updated", 'vendorName', None)
     if getattr(body, 'catalogNum', None) is not None:
-        raise AntibodyDataException("Catalog number cannot be updated", 'catalogNum', None)
-    current_antibody = Antibody.objects.get(accession=antibody_accession_number, uid=user_id)
+        raise AntibodyDataException(
+            "Catalog number cannot be updated", 'catalogNum', None)
+    current_antibody = Antibody.objects.get(
+        accession=antibody_accession_number, uid=user_id)
     updated_antibody = antibody_mapper.from_dto(AntibodyDTO(**body.__dict__, abId=current_antibody.ab_id,
                                                             catalogNum=current_antibody.catalog_num,
                                                             vendorName=current_antibody.vendor.name,
@@ -96,4 +104,7 @@ def last_update():
         return Antibody.objects.filter(status=STATUS.CURATED, curate_time__gte=last_date) \
             .latest("curate_time").curate_time
     except Antibody.DoesNotExist:
-        return Antibody.objects.filter(status=STATUS.CURATED).latest("curate_time").curate_time
+        try:
+            return Antibody.objects.filter(status=STATUS.CURATED).latest("curate_time").curate_time
+        except Antibody.DoesNotExist:
+            return datetime.now()

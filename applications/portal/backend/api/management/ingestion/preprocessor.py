@@ -3,7 +3,8 @@ import json
 import logging
 import os
 from datetime import datetime
-from typing import List
+from typing import List, TypedDict
+from dataclasses import dataclass
 
 import pandas as pd
 
@@ -24,23 +25,21 @@ UNKNOWN_USERS = {'3483', '1473', '3208', '3519', '21828', '30083', '7650', '7574
                  '2209', '3082', '31464', '32106', '1282', '3671', '9132', '2892', '22915', '5047', '1175', '1883',
                  '31166', '8612', '8016', '7706'}
 
-
-class AntibodyMetadata:
-    def __init__(self, antibody_data_paths: List[str], vendor_data_path: str, vendor_domain_data_path: str,
-                 users_data_path: str, antibody_files_path: str):
-        self.antibody_data_paths = antibody_data_paths
-        self.vendor_data_path = vendor_data_path
-        self.vendor_domain_data_path = vendor_domain_data_path
-        self.users_data_path = users_data_path
-        self.antibody_files_path = antibody_files_path
+@dataclass
+class AntibodyDataPaths:
+    antibodies: str
+    vendors: str
+    vendor_domains: str
+    users: str
+    antibody_files: str
 
 
 def clean_df(df):
     df.replace(to_replace=['(null)', '(NaN)'], value=None, inplace=True)
 
 
-def update_vendors(csv_path: str):
-    logging.info("Updating vendors")
+def preprocess_vendors(csv_path: str):
+    logging.info("Preprocess vendors %s", csv_path)
     df_vendors = pd.read_csv(csv_path)
     clean_df(df_vendors)
     valid_commercial_types = ('commercial', 'personal', 'other', 'non-profit')
@@ -50,8 +49,8 @@ def update_vendors(csv_path: str):
     df_vendors.to_csv(csv_path, index=False, mode='w+')
 
 
-def update_users(csv_path: str):
-    logging.info("Updating users")
+def preprocess_users(csv_path: str):
+    logging.info("Preprocess users")
     df_users = pd.read_csv(csv_path)
     # df_users = df_users.drop(['password', 'salt'], axis=1)
     df_users = df_users.drop_duplicates(
@@ -63,8 +62,8 @@ def update_users(csv_path: str):
     df_users.to_csv(csv_path, index=False, mode='w+')
 
 
-def update_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_mapping.json'):
-    logging.info("Updating vendor domains")
+def preprocess_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_mapping.json'):
+    logging.info("Preprocessing vendor domains %s", vendors_map_path)
     with open(vendors_map_path, 'r') as f:
         vendors_map = json.load(f)
         df_vendor_domain = pd.read_csv(csv_path)
@@ -75,8 +74,8 @@ def update_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_mapp
         df_vendor_domain.to_csv(csv_path, index=False, mode='w+')
 
 
-def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibodies_mapping.json'):
-    logging.info("Updating antibodies")
+def preprocess_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibodies_mapping.json'):
+    logging.info("Preprocessing antibodies")
     with open(antibodies_map_path, 'r') as f:
         antibodies_map = json.load(f)
         for antibody_data_path in csv_paths:
@@ -127,8 +126,8 @@ def update_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibo
             replace_file(antibody_data_path, tmp_antibody_data_path)
 
 
-def update_antibody_files(csv_path: str):
-    logging.info("Updating antibody files")
+def preprocess_antibody_files(csv_path: str):
+    logging.info("Updating antibody files", csv_path)
     df_antibody_files = pd.read_csv(csv_path)
     df_antibody_files['filename'] = df_antibody_files.apply(
         lambda row: get_antibody_persistence_directory(row['id'], os.path.basename(row['filename'])), axis=1)
@@ -143,23 +142,33 @@ class Preprocessor:
         self.dest = dest
 
     @timed_class_method('Preprocessing finished')
-    def preprocess(self) -> AntibodyMetadata:
+    def preprocess(self) -> AntibodyDataPaths:
         logging.info("Preprocessing started")
 
         was_downloaded = GDDownloader(self.file_id, self.dest).download()
 
-        metadata = AntibodyMetadata(glob.glob(os.path.join(self.dest, '*', f"{RAW_ANTIBODY_DATA_BASENAME}*.csv")),
-                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DATA_BASENAME}.csv"))[0],
-                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_VENDOR_DOMAIN_DATA_BASENAME}.csv"))[
-                                        0],
-                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_USERS_DATA_BASENAME}.csv"))[0],
-                                    glob.glob(os.path.join(self.dest, '*', f"{RAW_ANTIBODY_FILES_BASENAME}.csv"))[0])
+        def get_metadata_file(file_name: str) -> str:
+            fnames = glob.glob(os.path.join(
+                self.dest, '**', f"{file_name}.csv"), recursive=True)
+            return fnames and fnames[0]
 
-        if was_downloaded:
-            update_vendor_domains(metadata.vendor_domain_data_path)
-            update_vendors(metadata.vendor_data_path)
-            update_antibodies(metadata.antibody_data_paths)
-            update_users(metadata.users_data_path)
-            update_antibody_files(metadata.antibody_files_path)
+        metadata = AntibodyDataPaths(
+            antibodies=glob.glob(os.path.join(self.dest, '**',
+                      f"{RAW_ANTIBODY_DATA_BASENAME}*.csv"), recursive=True),
+            vendors=get_metadata_file(RAW_VENDOR_DATA_BASENAME),
+            vendor_domains=get_metadata_file(RAW_VENDOR_DOMAIN_DATA_BASENAME),
+            users=get_metadata_file(RAW_USERS_DATA_BASENAME),
+            antibody_files=get_metadata_file(RAW_ANTIBODY_FILES_BASENAME)
+        )
+
+        if was_downloaded or os.getenv('FORCE_PREPROCESSING', False):
+            metadata.vendor_domains and preprocess_vendor_domains(metadata.vendor_domains)
+            metadata.vendors and preprocess_vendors(metadata.vendors)
+            metadata.antibodies and preprocess_antibodies(metadata.antibodies)
+            metadata.users and preprocess_users(metadata.users)
+            try:
+                metadata.antibody_files and preprocess_antibody_files(metadata.antibody_files)
+            except Exception as e:
+                logging.exception("Failed to update antibody files")
 
         return metadata

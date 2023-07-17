@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Box } from "@mui/material";
 
-interface MultiStep {
+interface MultiStepProps {
   children: React.ReactNode;
 }
 
-const MultiStep = (props: MultiStep) => {
+const MultiStep = (props: MultiStepProps) => {
   const { children } = props;
   const [stepNumber, setStepNumber] = useState(0);
 
@@ -28,7 +28,7 @@ const MultiStep = (props: MultiStep) => {
 
   const stepWithProps = React.cloneElement(step, { ...stepProps });
 
-  return <Box sx={{ height: "100%" }}>{stepWithProps}</Box>;
+  return <Box sx={{ height: "100%" }} className="step">{stepWithProps}</Box>;
 };
 
 export default MultiStep;

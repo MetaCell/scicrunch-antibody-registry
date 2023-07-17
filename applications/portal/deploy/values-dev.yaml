@@ -1,0 +1,5 @@
+harness:
+  deployment:
+    replicas: 1
+  database:
+    size: 20Gi

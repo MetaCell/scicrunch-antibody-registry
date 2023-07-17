@@ -2,7 +2,7 @@ import { ThemeContext } from "@emotion/react";
 import { createTheme, darken } from "@mui/material/styles";
 import { vars } from "./variables";
 
-const { primaryFont, whiteColor, primaryColor, btnBorderColor, shadow } = vars;
+const { primaryFont, whiteColor, primaryColor, btnBorderColor, shadow, primaryTextColor } = vars;
 
 declare module "@mui/material/styles" {
   interface Theme {}
@@ -75,6 +75,11 @@ const theme = createTheme({
       fontFamily: "'proxima-nova', 'sans-serif'",
       fontWeight: 600,
       fontSize: "0.875rem",
+    },
+    body1: {
+      fontSize: "0.9rem",
+      color: primaryTextColor,
+      fontWeight: 400
     },
     subtitle1: {
       fontSize: "0.875rem",
@@ -209,6 +214,15 @@ const theme = createTheme({
           padding: theme.spacing(1.5, 2),
         }),
       },
+    },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          background: "white",
+          color: "#98A2B3",
+          maxWidth: "30rem",
+        }
+      }
     },
   },
 });

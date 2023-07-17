@@ -10,11 +10,18 @@ def _create_task(image_name, **kwargs):
     from cloudharness.workflows import tasks
 
     return tasks.CustomTask(
-        name=f"{image_name}-{str(uuid.uuid4())[:8]}", image_name=image_name, **kwargs
+        name=f"{image_name}-{str(uuid.uuid4())[:8]}", image_name=image_name, **kwargs,
+        resources={"requests": {"cpu": "100m", "memory": "3Gi"}}
     )
 
 
+
 def execute_ingestion_workflow(file_id: str):
+    ttl_strategy={
+    'secondsAfterCompletion': 60 * 60 * 24,
+    'secondsAfterSuccess': 60 * 20,
+    'secondsAfterFailure': 60 * 60 * 24
+    }       
     operations.PipelineOperation(
         basename=INGEST_OP,
         tasks=(
@@ -23,4 +30,5 @@ def execute_ingestion_workflow(file_id: str):
                 command=["python", "manage.py", "ingest", file_id]
             ),
         ),
+        ttl_strategy=ttl_strategy
     ).execute()

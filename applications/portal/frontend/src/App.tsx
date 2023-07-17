@@ -6,6 +6,7 @@ import theme from "./theme/Theme";
 import Navbar from "./components/NavBar/Navbar";
 import About from "./components/About";
 import Home from "./components/Home";
+import InquirePage from "./components/Support/InquirePage";
 import AntibodyDetail from "./components/AntibodyDetail";
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import Submit from "./components/Submit";
@@ -75,6 +76,10 @@ const App = () => {
               <Route path="/contact-us">
                 <Navbar />
                 <ContactUs />
+              </Route>
+              <Route path="/membership">
+                <Navbar />
+                <InquirePage />
               </Route>
               <Route path="/terms-and-conditions">
                 <Navbar />
