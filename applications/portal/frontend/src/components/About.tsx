@@ -321,7 +321,7 @@ const About = () => {
       <Box className={classes.footer}>
         <Typography>
           Powered by
-          <a href="https://www.metacell.us/" target="_blank" rel="noreferrer">
+          <a href="https://www.metacell.us/" target="_blank">
             <img src='./assets/matacell.svg' alt="metacell" />
           </a>
         </Typography>
