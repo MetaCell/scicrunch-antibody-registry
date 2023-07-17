@@ -192,7 +192,6 @@ const About = () => {
     { name: 'NIH', url: 'https://www.cytoskeleton.com/', src: '36.png' },
     { name: 'ichorbio', url: 'https://www.cytoskeleton.com/', src: '37.png' },
   ]
-  console.log(partners)
   const history = useHistory();
   const navigate = () => history.push('/');
   return (
