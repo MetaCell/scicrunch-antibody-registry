@@ -168,8 +168,6 @@ const About = () => {
     { name: 'fortis', url: 'https://www.fortislife.com/' },
     { name: 'leinco', url: 'https://www.leinco.com/' },
     { name: 'jacksonimmuno', url: 'https://www.jacksonimmuno.com/' },
-    { name: 'phosphosolutions', url: 'https://www.phosphosolutions.com/' },
-    { name: 'bethyl', url: 'https://www.bethyl.com/' },
     { name: 'dshb', url: 'http://dshb.biology.uiowa.edu/' },
     { name: 'immunostar', url: 'http://immunostar.com/' },
     { name: 'neuromab', url: 'http://neuromab.ucdavis.edu/' },
@@ -181,15 +179,19 @@ const About = () => {
     { name: 'miltenyibiotec', url: 'https://www.miltenyibiotec.com/US-en/' },
     { name: 'revmab', url: 'https://www.revmab.com/' },
     { name: 'southernbiotech', url: 'https://www.southernbiotech.com/' },
-    { name: 'stressmarq', url: 'https://www.stressmarq.com/?v=7516fd43adaa' },
     { name: 'wagner', url: 'http://gwagner.med.harvard.edu/' },
     { name: 'zebrafish', url: 'https://zebrafish.org/home/guide.php' },
     { name: 'genetex', url: 'https://www.genetex.com/' },
-    { name: 'encorbio', url: 'https://www.activemotif.com/' },
     { name: 'licor', url: 'https://www.licor.com/' },
     { name: 'hytest', url: 'https://www.hytest.fi/home' },
-    { name: 'cytoskeleton', url: 'https://www.cytoskeleton.com/' },
     { name: 'Ansh Labs', url: 'https://www.anshlabs.com/', img: './assets/partners/anshlabs.png' },
+    { name: 'Oasis Biofarm', url: 'https://www.anshlabs.com/', img: './assets/partners/oasis.png' },
+    { name: 'Nittobo Medical', url: 'https://www.anshlabs.com/', img: './assets/partners/Nittobo.png' },
+    { name: 'SICGEN', url: 'https://www.anshlabs.com/', img: './assets/partners/Sicgen_antibodies.png' },
+    { name: 'Sino Biological', url: 'https://www.anshlabs.com/', img: './assets/partners/Sino-Biological.png' },
+    { name: 'Niels Danbolt University of Oslo', url: 'https://www.anshlabs.com/', img: './assets/partners/University_of_Oslo.png' },
+    { name: 'NIH', url: 'https://www.anshlabs.com/', img: './assets/partners/NIH.png' },
+    { name: 'ichorbio', url: 'https://www.anshlabs.com/', img: './assets/partners/ichorbio.png' },
   ]
   const history = useHistory();
   const navigate = () => history.push('/');
@@ -219,10 +221,19 @@ const About = () => {
               partners.map((partner, index) => (
                 <Box px={3} key={index} className="partner">
                   <a href={partner.url} target="_blank" rel="noreferrer">
-                    <Box component="img" src={partner.img || `./assets/partners/${index+1}.svg`} 
-                      alt={partner.name} 
-                      title={partner.name} 
-                      sx={{ maxHeight: "85px", filter: "grayscale(1)" }} />
+                    <Box sx={{
+                      display: 'flex !important',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '85px',
+                      width: '150px',
+                    }}>
+                      <Box
+                        component="img" src={partner.img || `./assets/partners/${index+1}.svg`}
+                        alt={partner.name}
+                        title={partner.name}
+                        sx={{  filter: "grayscale(1)", width: '100%' }} />
+                    </Box>
                   </a>
                 </Box>
               )
@@ -308,7 +319,7 @@ const About = () => {
             Ready to get started?
           </Typography>
           <Button className="go-home-button" variant="contained" color='secondary' onClick={navigate}>Search for antibodies</Button>
-          <img src="./assets/ipad.webp" alt="" />
+          <img src="./assets/ipad.webp" width="100%" alt="" />
         </Container>
       </Box>
       <Box sx={styles.footer} className="about-footer">
