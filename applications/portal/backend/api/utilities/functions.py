@@ -24,7 +24,7 @@ def remove_empty_string(str_list) -> List[str]:
 
 
 def strip_ab_from_id(ab_id: str) -> str:
-    return ab_id if not ab_id.startswith(prefix) else ab_id.strip(prefix)[1]
+    return ab_id if not ab_id.startswith(prefix) else ab_id.strip(prefix)
 
 
 def extract_base_url(url: Union[str, URLField]) -> str:

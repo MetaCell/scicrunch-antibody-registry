@@ -8,7 +8,6 @@ from django.core.paginator import Paginator
 from api.mappers.antibody_mapper import AntibodyMapper
 from api.models import STATUS, Antibody, CommercialType
 from api.utilities.exceptions import DuplicatedAntibody, AntibodyDataException
-from api.utilities.functions import generate_id_aux, strip_ab_from_id
 from cloudharness import log
 from openapi.models import AddAntibody as AddAntibodyDTO
 from openapi.models import UpdateAntibody as UpdateAntibodyDTO
