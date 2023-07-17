@@ -225,14 +225,14 @@ const About = () => {
                       display: 'flex !important',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      height: '100px',
+                      height: '85px',
                       width: '150px',
                     }}>
                       <Box
                         component="img" src={partner.img || `./assets/partners/${index+1}.svg`}
                         alt={partner.name}
                         title={partner.name}
-                        sx={{ maxHeight: "85px", filter: "grayscale(1)", width: '100%' }} />
+                        sx={{  filter: "grayscale(1)", width: '100%' }} />
                     </Box>
                   </a>
                 </Box>
