@@ -315,7 +315,7 @@ const About = () => {
             Ready to get started?
           </Typography>
           <Button variant="contained" color='secondary' onClick={navigate}>Search for antibodies</Button>
-          <img src="./assets/ipad.webp" alt="" />
+          <img src="./assets/ipad.webp" width='100%' alt="" />
         </Container>
       </Box>
       <Box className={classes.footer}>
