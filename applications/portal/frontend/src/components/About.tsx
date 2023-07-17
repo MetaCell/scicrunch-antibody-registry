@@ -158,38 +158,41 @@ const About = () => {
     cssEase: "linear"
   };
   const partners = [
-    { name: 'thermofisher', url: 'https://www.thermofisher.com/' },
-    { name: 'proteintech', url: 'https://www.ptglab.com/' },
-    { name: 'biocell', url: 'https://bxcell.com/' },
-    { name: 'chromotek', url: 'http://www.chromotek.com/home-of-alpaca-antibodies/' },
-    { name: 'jesselllab', url: 'https://jesselllab.com/' },
-    { name: 'encorbio', url: 'https://encorbio.com/' },
-    { name: 'biolegend', url: 'https://www.biolegend.com/' },
-    { name: 'fortis', url: 'https://www.fortislife.com/' },
-    { name: 'leinco', url: 'https://www.leinco.com/' },
-    { name: 'jacksonimmuno', url: 'https://www.jacksonimmuno.com/' },
-    { name: 'phosphosolutions', url: 'https://www.phosphosolutions.com/' },
-    { name: 'bethyl', url: 'https://www.bethyl.com/' },
-    { name: 'dshb', url: 'http://dshb.biology.uiowa.edu/' },
-    { name: 'immunostar', url: 'http://immunostar.com/' },
-    { name: 'neuromab', url: 'http://neuromab.ucdavis.edu/' },
-    { name: 'sysy', url: 'https://www.sysy.com/' },
-    { name: 'atlasantibodies', url: 'https://atlasantibodies.com/' },
-    { name: 'frontier', url: 'https://www.frontier-institute.com/wp/antibodies/?lang=en' },
-    { name: 'aeonianbiotech', url: 'https://aeonianbiotech.com/' },
-    { name: 'bdbiosciences', url: 'http://www.bdbiosciences.com/us/home' },
-    { name: 'miltenyibiotec', url: 'https://www.miltenyibiotec.com/US-en/' },
-    { name: 'revmab', url: 'https://www.revmab.com/' },
-    { name: 'southernbiotech', url: 'https://www.southernbiotech.com/' },
-    { name: 'stressmarq', url: 'https://www.stressmarq.com/?v=7516fd43adaa' },
-    { name: 'wagner', url: 'http://gwagner.med.harvard.edu/' },
-    { name: 'zebrafish', url: 'https://zebrafish.org/home/guide.php' },
-    { name: 'genetex', url: 'https://www.genetex.com/' },
-    { name: 'encorbio', url: 'https://www.activemotif.com/' },
-    { name: 'licor', url: 'https://www.licor.com/' },
-    { name: 'hytest', url: 'https://www.hytest.fi/home' },
-    { name: 'cytoskeleton', url: 'https://www.cytoskeleton.com/' },
+    { name: 'thermofisher', url: 'https://www.thermofisher.com/', src: '1.svg' },
+    { name: 'proteintech', url: 'https://www.ptglab.com/', src: '2.svg'  },
+    { name: 'biocell', url: 'https://bxcell.com/', src: '3.svg'  },
+    { name: 'chromotek', url: 'http://www.chromotek.com/home-of-alpaca-antibodies/', src: '4.svg'  },
+    { name: 'jesselllab', url: 'https://jesselllab.com/', src: '5.svg'  },
+    { name: 'encorbio', url: 'https://encorbio.com/', src: '6.svg'  },
+    { name: 'biolegend', url: 'https://www.biolegend.com/', src: '7.svg'  },
+    { name: 'fortis', url: 'https://www.fortislife.com/', src: '8.svg'  },
+    { name: 'leinco', url: 'https://www.leinco.com/', src: '9.svg'  },
+    { name: 'jacksonimmuno', url: 'https://www.jacksonimmuno.com/', src: '10.svg' },
+    { name: 'dshb', url: 'http://dshb.biology.uiowa.edu/', src: '13.svg' },
+    { name: 'immunostar', url: 'http://immunostar.com/', src: '14.svg' },
+    { name: 'neuromab', url: 'http://neuromab.ucdavis.edu/', src: '15.svg' },
+    { name: 'sysy', url: 'https://www.sysy.com/', src: '16.svg' },
+    { name: 'atlasantibodies', url: 'https://atlasantibodies.com/', src: '17.svg' },
+    { name: 'frontier', url: 'https://www.frontier-institute.com/wp/antibodies/?lang=en', src: '18.svg' },
+    { name: 'aeonianbiotech', url: 'https://aeonianbiotech.com/', src: '19.svg' },
+    { name: 'bdbiosciences', url: 'http://www.bdbiosciences.com/us/home', src: '20.svg' },
+    { name: 'miltenyibiotec', url: 'https://www.miltenyibiotec.com/US-en/', src: '21.svg' },
+    { name: 'revmab', url: 'https://www.revmab.com/', src: '22.svg' },
+    { name: 'southernbiotech', url: 'https://www.southernbiotech.com/', src: '23.svg' },
+    { name: 'wagner', url: 'http://gwagner.med.harvard.edu/', src: '25.svg' },
+    { name: 'zebrafish', url: 'https://zebrafish.org/home/guide.php', src: '26.svg' },
+    { name: 'genetex', url: 'https://www.genetex.com/', src: '27.svg' },
+    { name: 'licor', url: 'https://www.licor.com/', src: '29.svg' },
+    { name: 'hytest', url: 'https://www.hytest.fi/home', src: '30.svg' },
+    { name: 'OasisBiofarm', url: 'https://www.cytoskeleton.com/', src: '31.png' },
+    { name: 'NittoboMedical', url: 'https://www.cytoskeleton.com/', src: '32.png' },
+    { name: 'SICGEN', url: 'https://www.cytoskeleton.com/', src: '33.png' },
+    { name: 'SinoBiological', url: 'https://www.cytoskeleton.com/', src: '34.png' },
+    { name: 'NielsDanboltUniversityofOslo', url: 'https://www.cytoskeleton.com/', src: '35.png' },
+    { name: 'NIH', url: 'https://www.cytoskeleton.com/', src: '36.png' },
+    { name: 'ichorbio', url: 'https://www.cytoskeleton.com/', src: '37.png' },
   ]
+  console.log(partners)
   const history = useHistory();
   const navigate = () => history.push('/');
   return (
@@ -218,7 +221,15 @@ const About = () => {
               partners.map((elementInArray, index) => (
                 <Box px={3} key={index}>
                   <a href={elementInArray.url} target="_blank" rel="noreferrer">
-                    <img src={`./assets/partners/${index+1}.svg`} alt={elementInArray.name}/>
+                    <Box sx={{
+                      display: 'flex !important',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100px',
+                      width: '100px',
+                    }}>
+                      <img src={`./assets/partners/${elementInArray.src}`} alt={elementInArray.name} width='100%' />
+                    </Box>
                   </a>
                 </Box>
               )
@@ -310,7 +321,7 @@ const About = () => {
       <Box className={classes.footer}>
         <Typography>
           Powered by
-          <a href="https://www.metacell.us/" target="_blank">
+          <a href="https://www.metacell.us/" target="_blank" rel="noreferrer">
             <img src='./assets/matacell.svg' alt="metacell" />
           </a>
         </Typography>
