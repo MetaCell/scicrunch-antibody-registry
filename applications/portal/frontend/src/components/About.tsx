@@ -185,11 +185,11 @@ const About = () => {
     { name: 'licor', url: 'https://www.licor.com/' },
     { name: 'hytest', url: 'https://www.hytest.fi/home' },
     { name: 'Ansh Labs', url: 'https://www.anshlabs.com/', img: './assets/partners/anshlabs.png' },
-    { name: 'Oasis Biofarm', url: 'https://www.oasisbiofarm.cn/', img: './assets/partners/oasis.png' },
+    { name: 'Oasis Biofarm', url: 'https://www.oasisbiofarm.net', img: './assets/partners/oasis.png' },
     { name: 'Nittobo Medical', url: 'https://www.nittobo.co.jp/', img: './assets/partners/Nittobo.png' },
     { name: 'SICGEN', url: 'https://sicgen.pt/', img: './assets/partners/Sicgen_antibodies.png' },
     { name: 'Sino Biological', url: 'https://www.sinobiological.com/', img: './assets/partners/Sino-Biological.png' },
-    { name: 'Niels Danbolt University of Oslo', url: 'https://www.med.uio.no/imb/english/people/aca/ncd/index.html', img: './assets/partners/University_of_Oslo.png' },
+    { name: 'Niels Danbolt University of Oslo', url: 'https://www.uio.no/', img: './assets/partners/University_of_Oslo.png' },
     { name: 'NIH', url: 'https://www.nhpreagents.org/', img: './assets/partners/NIH.png' },
     { name: 'ichorbio', url: 'https://ichor.bio/', img: './assets/partners/ichorbio.png' },
   ]
