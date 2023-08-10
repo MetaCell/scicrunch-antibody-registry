@@ -52,13 +52,22 @@ def _mark_species_to_delete(post_data, updated_target_species_raw):
 
 def _add_new_species(post_data, updated_formset_species, updated_target_species_raw):
     new_species_names = updated_target_species_raw - updated_formset_species
-    new_species_ids = Specie.objects.filter(name__in=new_species_names).values_list('id', flat=True)
+    new_species_ids = []
+    for name in new_species_names:
+        specie, created = Specie.objects.get_or_create(name=name)
+        new_species_ids.append(specie.id)
 
-    # Get the current total forms count and update it
-    total_forms = int(post_data.get('antibodyspecies_set-TOTAL_FORMS'))
-    post_data['antibodyspecies_set-TOTAL_FORMS'] = str(total_forms + len(new_species_ids))
+    # Extract indices from keys that match the pattern
+    indices = [int(key.split('-')[1]) for key in post_data.keys() if _is_species_formset_id_field(key)]
 
-    for idx, species_id in enumerate(new_species_ids, start=total_forms):
+    # Determine the starting index
+    start_index = max(indices, default=-1) + 1 if indices else 0
+
+    # Adjust the TOTAL_FORMS count
+    total_forms = start_index + len(new_species_ids)
+    post_data['antibodyspecies_set-TOTAL_FORMS'] = str(total_forms)
+
+    for idx, species_id in enumerate(new_species_ids, start=start_index):
         post_data[f'antibodyspecies_set-{idx}-specie'] = str(species_id)
 
 

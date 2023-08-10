@@ -32,7 +32,7 @@ from api.models import (
 )
 from api.services.keycloak_service import KeycloakService
 from cloudharness import log
-from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
+from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY, TEXT_FIELD_SIZE_DJANGO_ADMIN
 
 
 @admin.display(description="ab_id")
@@ -141,7 +141,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     show_save = False
 
     formfield_overrides = {
-        models.CharField: {'widget': TextInput(attrs={'size': '120'})},
+        models.CharField: {'widget': TextInput(attrs={'size': TEXT_FIELD_SIZE_DJANGO_ADMIN})},
         models.TextField: {'widget': Textarea(attrs={'rows': 2, 'cols': 120})}
     }
 

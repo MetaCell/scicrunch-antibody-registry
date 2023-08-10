@@ -275,3 +275,4 @@ REMOVE_KEYWORD = 'remove'
 ANTIBODY_PERSISTENCE = 'antibodies'
 
 TARGET_SPECIES_RAW = 'target_species_raw'
+TEXT_FIELD_SIZE_DJANGO_ADMIN = '120'
