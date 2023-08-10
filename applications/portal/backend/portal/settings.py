@@ -124,9 +124,9 @@ from cloudharness.utils.config import ALLVALUES_PATH, CloudharnessConfig
 from cloudharness_django.settings import *
 
 DATABASES["default"]["TEST"] = {
-                                   "ENGINE": "django.db.backends.postgres",
-                                   "NAME": "testdb",
-                               }
+    "ENGINE": "django.db.backends.postgres",
+    "NAME": "testdb",
+}
 
 # add the local apps
 INSTALLED_APPS += [
@@ -203,7 +203,6 @@ ANTIBODY_FILE_DISPLAY_NAME_MAX_LEN = 256
 ANTIBODY_FILES_HASH_MAX_LEN = 32
 ANTIBODY_FILE_TYPE_MAX_LEN = 32
 
-
 ANTIBODY_ANTIBODY_START_SEQ = 3000000  # 2858735
 ANTIBODY_VENDOR_DOMAIN_START_SEQ = 1000  # 813
 ANTIBODY_VENDOR_START_SEQ = 20000  # 12233
@@ -274,3 +273,5 @@ USER_KEY = 'user'
 REMOVE_KEYWORD = 'remove'
 
 ANTIBODY_PERSISTENCE = 'antibodies'
+
+TARGET_SPECIES_RAW = 'target_species_raw'

@@ -1,22 +1,26 @@
 from functools import cache
 
+from cloudharness_django.models import Member
 from django.contrib import admin
-from django.contrib.admin.widgets import ManyToManyRawIdWidget, FilteredSelectMultiple
-from django.forms import CheckboxSelectMultiple
-from django.db.models import Q
+from django.contrib.admin.widgets import ManyToManyRawIdWidget
 from django.contrib.auth.models import User
-from django.forms import TextInput, Textarea, URLInput
 from django.db import models
+from django.db.models import Q
 from django.db.models.functions import Length
+from django.forms import CheckboxSelectMultiple
+from django.forms import TextInput, Textarea
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
 from django.utils.html import escape, format_html, format_html_join, mark_safe
-from django.utils.text import format_lazy
+from django.views.decorators.csrf import csrf_protect
 from import_export.admin import ImportMixin
 from keycloak.exceptions import KeycloakGetError
-from cloudharness_django.models import Member
 
+from api.forms.AntibodyAdminForm import AntibodyForm
 from api.forms.AntibodyImportForm import AntibodyImportForm
+from api.helpers.target_species_sync_helper import synchronize_target_species
+from api.import_export import AntibodyResource
 from api.models import (
     STATUS,
     Antibody,
@@ -26,7 +30,6 @@ from api.models import (
     VendorDomain,
     VendorSynonym, AntibodyFiles,
 )
-from api.import_export import AntibodyResource
 from api.services.keycloak_service import KeycloakService
 from cloudharness import log
 from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
@@ -36,13 +39,14 @@ from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 def id_with_ab(obj: Antibody):
     return f"AB_{obj.ab_id}"
 
+
 @cache
 def get_user_by_kc_id(kc_id) -> User:
     try:
         return Member.objects.get(kc_id=kc_id).user
     except Member.DoesNotExist:
         return None
-    
+
 
 class VerboseManyToManyRawIdWidget(ManyToManyRawIdWidget):
     """
@@ -99,9 +103,11 @@ class AntibodyFilesAdmin(admin.TabularInline):
     exclude = ("uploader_uid", 'filehash', 'timestamp', 'display_name')
     extra = 1
 
+
 @admin.register(Antibody)
 class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
-    
+    form = AntibodyForm
+
     change_form_template = "admin/antibody_change_form.html"
 
     # Import/Export module settings
@@ -111,14 +117,15 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
 
     # list display settings
     list_filter = ("status",)
-    list_display = (id_with_ab, "ab_name", "submitter_name", "status", "vendor", "catalog_num", "accession", "insert_time")
+    list_display = (
+        id_with_ab, "ab_name", "submitter_name", "status", "vendor", "catalog_num", "accession", "insert_time")
     search_fields = ("ab_id", "ab_name", "catalog_num")
 
     # Edit form settings
-    exclude= ("catalog_num_search",)
+    exclude = ("catalog_num_search",)
 
     inlines = [TargetSpeciesInlineAdmin, AntibodyFilesAdmin]
-    
+
     readonly_fields = (
         "submitter_name",
         "submitter_email",
@@ -131,11 +138,11 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     )
     autocomplete_fields = ("vendor", "source_organism")
     save_on_top = True
-    show_save=False
+    show_save = False
 
     formfield_overrides = {
-        models.CharField: {'widget': TextInput(attrs={'size':'120'})},
-        models.TextField: {'widget': Textarea(attrs={'rows':2, 'cols':120})}
+        models.CharField: {'widget': TextInput(attrs={'size': '120'})},
+        models.TextField: {'widget': Textarea(attrs={'rows': 2, 'cols': 120})}
     }
 
     @property
@@ -151,7 +158,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     def submitter_name(self, obj: Antibody):
         if not obj.uid:
             return "Unknown"
-        
+
         dj_user: User = get_user_by_kc_id(obj.uid)
         if dj_user:
             return f"{dj_user.get_full_name()} ({dj_user.username})"
@@ -173,7 +180,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         dj_user: User = get_user_by_kc_id(obj.uid)
         if dj_user:
             return dj_user.email
-            
+
         try:
             submitter = self.get_user(user_id=obj.uid)
             return f"{submitter['email']}"
@@ -207,9 +214,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
         if db_field.name not in ("species", "applications"):
             return super().formfield_for_manytomany(db_field, request, **kwargs)
         if db_field.name == "applications":
-            kwargs["widget"] = CheckboxSelectMultiple(
-
-            )
+            kwargs["widget"] = CheckboxSelectMultiple()
             if "queryset" not in kwargs:
                 queryset = db_field.related_model.objects.all()
                 if queryset is not None:
@@ -241,14 +246,13 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
             instance.save()
         formset.save_m2m()
 
+    @method_decorator(csrf_protect)
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        if request.method == "POST":
+            request = synchronize_target_species(object_id, request)
 
-# @admin.register(Antigen)
-# class GeneAdmin(admin.ModelAdmin):
-#     search_fields = ("symbol",)
-#     list_display = ("symbol",)
-#     formfield_overrides = {
-#         models.CharField: {'widget': TextInput(attrs={'size':'150'})},
-#     }
+        return super().changeform_view(request, object_id, form_url, extra_context)
+
 
 @admin.register(Specie)
 class SpecieAdmin(admin.ModelAdmin):
