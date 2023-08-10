@@ -61,21 +61,15 @@ class AntibodyMapper(IDAOMapper):
                     v = v.strip()
                 if isinstance(v, enum.Enum):
                     setattr(ab, k, v.value)
-                elif not isinstance(v, (list, tuple))\
-                    and (getattr(ab, k, None) is None\
-                        or isinstance(getattr(ab, k, None), (int, str))):
+                elif not isinstance(v, (list, tuple)) \
+                        and (getattr(ab, k, None) is None or isinstance(getattr(ab, k, None), (int, str))):
                     setattr(ab, k, v)
             except Exception as e:
                 log.exception("Error setting attribute %s, value: %s", k, v)
 
-        if dto.targetSpecies:
-            # the logic to create species and fill the field is in the model save automations
-            ab.target_species_raw = ','.join(dto.targetSpecies)
-
         ab.save()  # Need to save to set the manytomany
 
         return ab
-
 
     def to_dto(self, dao: Antibody) -> AntibodyDTO:
         dao_dict = dao.__dict__
