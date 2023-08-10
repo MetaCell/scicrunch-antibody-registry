@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
             sql="""
             DROP MATERIALIZED VIEW IF EXISTS antibody_search;
             CREATE MATERIALIZED VIEW antibody_search AS 
-            SELECT ix, 
+            SELECT api_antibody.ix, 
             (
                 setweight(to_tsvector('english'::regconfig, 
                     COALESCE(ab_name, ''::text) || ' ' ||
