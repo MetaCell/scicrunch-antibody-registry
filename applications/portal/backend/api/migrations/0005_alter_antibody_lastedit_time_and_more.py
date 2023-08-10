@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='antibody',
             name='lastedit_time',
-            field=models.DateTimeField(auto_now=True, db_index=True),
+            field=models.DateTimeField(auto_now=True, db_index=True, null=True),
         ),
         migrations.AlterField(
             model_name='vendordomain',

@@ -261,8 +261,7 @@ class Antibody(models.Model):
     )
     insert_time = models.DateTimeField(
         auto_now_add=True, db_index=True, null=True, blank=True)
-    lastedit_time = models.DateTimeField(
-        auto_now=True, db_index=True, blank=True)
+    lastedit_time = models.DateTimeField(auto_now=True, db_index=True, blank=True, null=True)
     curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
     # whether the full link to the antibody is shown. If None, the vendor's default is used
     show_link = models.BooleanField(null=True, blank=True)
