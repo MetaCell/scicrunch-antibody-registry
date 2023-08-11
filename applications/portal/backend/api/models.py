@@ -274,7 +274,9 @@ class Antibody(models.Model):
 
         first_save = self.ix is None
         self._handle_status_changes(first_save)
-        has_target_species_changed, has_target_species_raw_changed = self.has_target_species_fields_changed()
+
+        old_instance = Antibody.objects.filter(pk=self.pk).first()
+        old_species = self.species_from_raw(old_instance.target_species_raw) if old_instance else set()
 
         super(Antibody, self).save(*args, **kwargs)
 
@@ -282,7 +284,7 @@ class Antibody(models.Model):
             self.catalog_num_search = catalog_number_chunked(self.catalog_num)
         self._handle_duplicates(*args, **kwargs)
         self._generate_related_fields(*args, **kwargs)
-        self._synchronize_target_species(has_target_species_raw_changed, has_target_species_changed)
+        self._synchronize_target_species(old_species)
 
         if first_save:  # Newly instantiated instances have ix = None
             self._generate_automatic_attributes(*args, **kwargs)
@@ -293,25 +295,13 @@ class Antibody(models.Model):
         if update_search and self.status == STATUS.CURATED:
             refresh_search_view()
 
-    def has_target_species_fields_changed(self):
-        old_instance = Antibody.objects.filter(pk=self.pk).first()
-        has_target_species_raw_changed = self._has_target_species_raw_changed(old_instance)
-        has_target_species_changed = self._has_target_species_changed(old_instance)
-        return has_target_species_changed, has_target_species_raw_changed
 
     def _has_target_species_raw_changed(self, old_instance):
         if old_instance:
             return self.target_species_raw != old_instance.target_species_raw
         return self.target_species_raw is not None
 
-    def _has_target_species_changed(self, old_instance):
-        if old_instance:
-            original_species = set(old_instance.species.values_list('name', flat=True))
-        else:
-            original_species = set()
-        current_species = set(self.species.values_list('name', flat=True))
-        return original_species != current_species
-
+ 
     def delete(self, *args, **kwargs):
         super(Antibody, self).delete(*args, **kwargs)
         if self.status == STATUS.CURATED:
@@ -361,13 +351,35 @@ class Antibody(models.Model):
     def _generate_ab_id(self) -> int:
         return generate_id_aux(self.ix)
 
-    def _synchronize_target_species(self, has_target_species_raw_changed, has_target_species_changed):
-        if has_target_species_raw_changed and not has_target_species_changed:
-            self._fill_target_species_from_raw()
-        else:
-            self._fill_target_species_raw_from_species()
+    @staticmethod
+    def species_from_raw(raw):
+        if raw:
+            return {specie_name.strip().lower() for specie_name in raw.split(',')}
+        return set()
 
-    def _fill_target_species_from_raw(self):
+    def _synchronize_target_species(self, old_species):
+        new_species = self.species_from_raw(self.target_species_raw)
+        if new_species != old_species:
+            to_remove =  old_species - new_species
+            if to_remove:
+                for specie_name in to_remove:
+                    specie_name = specie_name.strip().lower()
+                    specie = Specie.objects.get(name=specie_name)
+                    self.species.remove(specie)
+            to_add = new_species - old_species
+            if to_add:
+                for specie_name in to_add:
+                    specie_name = specie_name.strip().lower()
+                    specie, _ = Specie.objects.get_or_create(name=specie_name)
+                    self.species.add(specie)
+        
+        self._fill_target_species_raw_from_species()
+
+            
+
+            
+
+    def _target_species_from_raw(self):
         species = []
         if self.target_species_raw:
             for specie_name in self.target_species_raw.split(','):
@@ -375,7 +387,7 @@ class Antibody(models.Model):
                 specie, _ = Specie.objects.get_or_create(name=specie_name)
                 species.append(specie)
 
-            self.species.set(species)
+        return species
 
     def _fill_target_species_raw_from_species(self):
         self.refresh_from_db(fields=['species'])
@@ -435,9 +447,9 @@ class Antibody(models.Model):
                 # If the domain is not matched, try to match by domain with and without www
                 try:
                     if "www." in base_url:
-                        base_url = base_url.replace("www.", "")
+                        alt_base_url = base_url.replace("www.", "")
                     else:
-                        base_url = "www." + base_url
+                        alt_base_url = "www." + base_url
                     vd = VendorDomain.objects.get(base_url__iexact=base_url)
 
                 except VendorDomain.DoesNotExist:
