@@ -12,7 +12,8 @@ from django.utils import timezone
 
 from api.services.user_service import UnrecognizedUser, get_current_user_id
 from api.utilities.exceptions import RequiredParameterMissing
-from api.utilities.functions import catalog_number_chunked, generate_id_aux, extract_base_url, get_antibody_persistence_directory
+from api.utilities.functions import catalog_number_chunked, generate_id_aux, extract_base_url, \
+    get_antibody_persistence_directory
 from cloudharness import log
 from portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
@@ -209,7 +210,8 @@ class Antibody(models.Model):
     # antigen = models.ForeignKey(
     #     Antigen, on_delete=models.SET_NULL, db_column='antigen_id', null=True, blank=True)
     ab_target = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN,
-                                 db_column='ab_target', null=True, db_index=True, blank=True, verbose_name="Target antigen")
+                                 db_column='ab_target', null=True, db_index=True, blank=True,
+                                 verbose_name="Target antigen")
     entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
                                  null=True, db_index=True, blank=True)
     uniprot_id = models.CharField(
@@ -262,16 +264,17 @@ class Antibody(models.Model):
     )
     insert_time = models.DateTimeField(
         auto_now_add=True, db_index=True, null=True, blank=True)
-    lastedit_time = models.DateTimeField(
-        auto_now=True, db_index=True, blank=True)
+    lastedit_time = models.DateTimeField(auto_now=True, db_index=True, null=True, blank=True)
     curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
     # whether the full link to the antibody is shown. If None, the vendor's default is used
     show_link = models.BooleanField(null=True, blank=True)
 
     @transaction.atomic
     def save(self, *args, update_search=True, **kwargs):
+
         first_save = self.ix is None
         self._handle_status_changes(first_save)
+        has_target_species_changed, has_target_species_raw_changed = self.has_target_species_fields_changed()
 
         super(Antibody, self).save(*args, **kwargs)
 
@@ -279,7 +282,7 @@ class Antibody(models.Model):
             self.catalog_num_search = catalog_number_chunked(self.catalog_num)
         self._handle_duplicates(*args, **kwargs)
         self._generate_related_fields(*args, **kwargs)
-        self._fill_target_species_from_raw()
+        self._synchronize_target_species(has_target_species_raw_changed, has_target_species_changed)
 
         if first_save:  # Newly instantiated instances have ix = None
             self._generate_automatic_attributes(*args, **kwargs)
@@ -289,6 +292,25 @@ class Antibody(models.Model):
             raise Exception(f"Error during antibody id assignment: {self.ix}")
         if update_search and self.status == STATUS.CURATED:
             refresh_search_view()
+
+    def has_target_species_fields_changed(self):
+        old_instance = Antibody.objects.filter(pk=self.pk).first()
+        has_target_species_raw_changed = self._has_target_species_raw_changed(old_instance)
+        has_target_species_changed = self._has_target_species_changed(old_instance)
+        return has_target_species_changed, has_target_species_raw_changed
+
+    def _has_target_species_raw_changed(self, old_instance):
+        if old_instance:
+            return self.target_species_raw != old_instance.target_species_raw
+        return self.target_species_raw is not None
+
+    def _has_target_species_changed(self, old_instance):
+        if old_instance:
+            original_species = set(old_instance.species.values_list('name', flat=True))
+        else:
+            original_species = set()
+        current_species = set(self.species.values_list('name', flat=True))
+        return original_species != current_species
 
     def delete(self, *args, **kwargs):
         super(Antibody, self).delete(*args, **kwargs)
@@ -339,6 +361,12 @@ class Antibody(models.Model):
     def _generate_ab_id(self) -> int:
         return generate_id_aux(self.ix)
 
+    def _synchronize_target_species(self, has_target_species_raw_changed, has_target_species_changed):
+        if has_target_species_raw_changed and not has_target_species_changed:
+            self._fill_target_species_from_raw()
+        else:
+            self._fill_target_species_raw_from_species()
+
     def _fill_target_species_from_raw(self):
         species = []
         if self.target_species_raw:
@@ -347,7 +375,12 @@ class Antibody(models.Model):
                 specie, _ = Specie.objects.get_or_create(name=specie_name)
                 species.append(specie)
 
-                self.species.add(specie)
+            self.species.set(species)
+
+    def _fill_target_species_raw_from_species(self):
+        self.refresh_from_db(fields=['species'])
+        species_names = self.species.values_list('name', flat=True)
+        self.target_species_raw = ', '.join(species_names)
 
     def get_duplicate(self) -> Optional['Antibody']:
         """
@@ -406,12 +439,12 @@ class Antibody(models.Model):
                     else:
                         base_url = "www." + base_url
                     vd = VendorDomain.objects.get(base_url__iexact=base_url)
-                    
+
                 except VendorDomain.DoesNotExist:
                     # As it doesn't match, create a new vendor
                     vendor_name = name or base_url
                     log.info("Creating new Vendor `%s` on domain  to `%s`",
-                            vendor_name, base_url)
+                             vendor_name, base_url)
                     vendor = Vendor(name=vendor_name,
                                     commercial_type=self.commercial_type)
                     vendor.save()
@@ -457,9 +490,9 @@ class Antibody(models.Model):
                                    name='curated_constraints'),
         ]
         indexes = [
-            GinIndex(SearchVector('catalog_num_search', config='simple'),  # TODO the english configurations has stop words we don't want here
+            GinIndex(SearchVector('catalog_num_search', config='simple'),
+                     # TODO the english configurations has stop words we don't want here
                      name='antibody_catalog_num_fts_idx'),
-
 
             Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
 
