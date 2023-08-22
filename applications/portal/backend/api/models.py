@@ -184,7 +184,7 @@ class Antibody(models.Model):
     ab_id = models.CharField(
         max_length=ANTIBODY_ID_MAX_LEN, null=True, db_index=True)
     accession = models.CharField(
-        max_length=ANTIBODY_ID_MAX_LEN, null=True, blank=True)
+        max_length=ANTIBODY_ID_MAX_LEN, null=True, blank=True, db_index=True)
     commercial_type = models.CharField(
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
         choices=CommercialType.choices,
