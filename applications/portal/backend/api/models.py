@@ -1,4 +1,5 @@
 import os
+import re
 from random import randint
 from typing import Optional, Tuple
 from api.repositories.maintainance import refresh_search_view
@@ -382,7 +383,7 @@ class Antibody(models.Model):
     def _target_species_from_raw(self):
         species = []
         if self.target_species_raw:
-            for specie_name in self.target_species_raw.split(','):
+            for specie_name in re.split(r'[:;]', self.target_species_raw):
                 specie_name = specie_name.strip().lower()
                 specie, _ = Specie.objects.get_or_create(name=specie_name)
                 species.append(specie)
