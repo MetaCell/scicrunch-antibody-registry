@@ -251,7 +251,7 @@ class Antibody(models.Model):
         max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True, blank=True, db_index=True)
     product_form = models.CharField(
         max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True, db_index=True, blank=True)
-    comments = models.TextField(null=True, blank=True, db_index=True)
+    comments = models.TextField(null=True, blank=True, db_index=False)
     applications = models.ManyToManyField(
         Application, through='AntibodyApplications', blank=True)
     kit_contents = models.TextField(null=True, db_index=True, blank=True)
