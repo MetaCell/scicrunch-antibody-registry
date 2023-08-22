@@ -59,9 +59,7 @@ class AntibodyResource(ModelResource):
 
     species = Field(
         column_name='target_species',
-        attribute='species',
-        widget=ManyToManyWidgetWithCreation(model=Specie, separator=';', field='name',
-                                            get_or_create=lambda **kwargs: get_or_create_specie(**kwargs)[0])
+        attribute='target_species_raw'
     )
     clonality = Field(attribute='clonality', column_name='clonality')
     host = Field(
