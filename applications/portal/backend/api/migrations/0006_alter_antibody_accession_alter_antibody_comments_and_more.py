@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="antibody",
             name="comments",
-            field=models.TextField(blank=True, db_index=True, null=True),
+            field=models.TextField(blank=True, db_index=False, null=True),
         ),
         migrations.AlterField(
             model_name="antibody",
