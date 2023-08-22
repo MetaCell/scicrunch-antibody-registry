@@ -355,7 +355,7 @@ class Antibody(models.Model):
     @staticmethod
     def species_from_raw(raw):
         if raw:
-            return {specie_name.strip().lower() for specie_name in re.split(r'[:;]', self.raw)}
+            return {specie_name.strip().lower() for specie_name in re.split(r'[:;]', raw)}
         return set()
 
     def _synchronize_target_species(self, old_species):
