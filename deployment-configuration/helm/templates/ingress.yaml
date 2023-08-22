@@ -42,8 +42,8 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-buffer-size: '128k'
     nginx.ingress.kubernetes.io/from-to-www-redirect: 'true'
     nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/proxy-read-timeout: 999999
-    nginx.ingress.kubernetes.io/proxy-send-timeout: 999999
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '99999'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '99999'
 spec:
   rules:
   {{- range $app := .Values.apps }}
