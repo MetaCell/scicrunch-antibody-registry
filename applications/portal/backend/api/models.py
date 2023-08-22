@@ -355,12 +355,13 @@ class Antibody(models.Model):
     @staticmethod
     def species_from_raw(raw):
         if raw:
-            return {specie_name.strip().lower() for specie_name in re.split(r'[:;]', raw)}
+            return {specie_name.strip().lower() for specie_name in re.split(r'[,;]', raw)}
         return set()
 
     def _synchronize_target_species(self, old_species):
         new_species = self.species_from_raw(self.target_species_raw)
-        if new_species != old_species:
+
+        if new_species != old_species or len(new_species) != self.species.count():
             to_remove =  old_species - new_species
             if to_remove:
                 for specie_name in to_remove:
@@ -383,7 +384,7 @@ class Antibody(models.Model):
     def _target_species_from_raw(self):
         species = []
         if self.target_species_raw:
-            for specie_name in re.split(r'[:;]', self.target_species_raw):
+            for specie_name in re.split(r'[,;]', self.target_species_raw):
                 specie_name = specie_name.strip().lower()
                 specie, _ = Specie.objects.get_or_create(name=specie_name)
                 species.append(specie)
@@ -393,7 +394,7 @@ class Antibody(models.Model):
     def _fill_target_species_raw_from_species(self):
         self.refresh_from_db(fields=['species'])
         species_names = self.species.values_list('name', flat=True)
-        self.target_species_raw = ', '.join(species_names)
+        self.target_species_raw = ','.join(species_names)
 
     def get_duplicate(self) -> Optional['Antibody']:
         """
