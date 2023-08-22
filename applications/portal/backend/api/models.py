@@ -95,9 +95,10 @@ class Vendor(models.Model):
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
         choices=CommercialType.choices,
         default=CommercialType.OTHER,
-        null=True
+        null=True,
+        db_index=True,
     )
-    show_link = models.BooleanField(default=False, null=True, blank=True)
+    show_link = models.BooleanField(default=False, null=True, blank=True, db_index=True)
 
     class Meta:
         indexes = [
@@ -120,7 +121,7 @@ class VendorSynonym(models.Model):
 
 class Specie(models.Model):
     name = models.CharField(
-        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, unique=True)
+        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, unique=True, db_index=True)
 
     class Meta:
         indexes = [
@@ -134,7 +135,7 @@ class Specie(models.Model):
 
 class Application(models.Model):
     name = models.CharField(
-        max_length=APPLICATION_MAX_LEN, unique=True)
+        max_length=APPLICATION_MAX_LEN, unique=True, db_index=True)
 
     class Meta:
         indexes = [
@@ -189,7 +190,8 @@ class Antibody(models.Model):
         choices=CommercialType.choices,
         default=CommercialType.OTHER,
         null=True,
-        blank=True
+        blank=True,
+        db_index=True,
     )
     # This user id maps the users in keycloak
     uid = models.CharField(
@@ -218,7 +220,7 @@ class Antibody(models.Model):
     uniprot_id = models.CharField(
         unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True, blank=True)
     target_species_raw = models.CharField(
-        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True, verbose_name="Target species (csv)",
+        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True, verbose_name="Target species (csv)", db_index=True,
         help_text="Comma separated value for target species. Values filled here will be parsed and assigned to the 'Target species' field.")
 
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
@@ -246,10 +248,10 @@ class Antibody(models.Model):
     product_conjugate = models.CharField(
         max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, null=True, db_index=True, blank=True)
     defining_citation = models.CharField(
-        max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True, blank=True)
+        max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True, blank=True, db_index=True)
     product_form = models.CharField(
         max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True, db_index=True, blank=True)
-    comments = models.TextField(null=True, blank=True)
+    comments = models.TextField(null=True, blank=True, db_index=True)
     applications = models.ManyToManyField(
         Application, through='AntibodyApplications', blank=True)
     kit_contents = models.TextField(null=True, db_index=True, blank=True)
@@ -268,7 +270,7 @@ class Antibody(models.Model):
     lastedit_time = models.DateTimeField(auto_now=True, db_index=True, null=True, blank=True)
     curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
     # whether the full link to the antibody is shown. If None, the vendor's default is used
-    show_link = models.BooleanField(null=True, blank=True)
+    show_link = models.BooleanField(null=True, blank=True, db_index=True)
 
     @transaction.atomic
     def save(self, *args, update_search=True, **kwargs):
