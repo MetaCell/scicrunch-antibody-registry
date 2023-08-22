@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
             model_name="antibody",
             name="defining_citation",
             field=models.CharField(
-                blank=True, db_index=True, max_length=16384, null=True
+                blank=True, db_index=False, max_length=16384, null=True
             ),
         ),
         migrations.AlterField(
