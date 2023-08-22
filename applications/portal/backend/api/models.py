@@ -396,7 +396,7 @@ class Antibody(models.Model):
     def _fill_target_species_raw_from_species(self):
         self.refresh_from_db(fields=['species'])
         species_names = self.species.values_list('name', flat=True)
-        self.target_species_raw = ','.join(species_names)
+        self.target_species_raw = ';'.join(species_names)
 
     def get_duplicate(self) -> Optional['Antibody']:
         """
