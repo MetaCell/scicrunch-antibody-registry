@@ -49,7 +49,7 @@ const styles = {
   }),
   leftContainer: (theme) => ({
     padding: { 
-      lg: theme.spacing(10, 0, 10, 10),
+      lg: theme.spacing(10, 10, 0, 10),
       xs: 0,
     },
   }),
