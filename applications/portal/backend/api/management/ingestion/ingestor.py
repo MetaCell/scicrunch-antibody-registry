@@ -103,7 +103,10 @@ class Ingestor:
         species_map = self._insert_species(species_map)
         self._swap_antibodies(self.ANTIBODIES_TMP_TABLE, self.ANTIBODY_TABLE)
         self._insert_antibody_species(species_map)
-        self.data_paths.antibody_files and self._insert_antibody_files(self.data_paths.antibody_files)
+        try:
+            self.data_paths.antibody_files and self._insert_antibody_files(self.data_paths.antibody_files)
+        except Exception as e:
+            log.error(f"Cannot ingest antibody files: {str(e)}", exc_info=True)
         self._reset_auto_increment()
         self._drop_tmp_table()
 

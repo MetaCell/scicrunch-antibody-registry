@@ -74,15 +74,17 @@ def preprocess_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_
         df_vendor_domain.to_csv(csv_path, index=False, mode='w+')
 
 
-def preprocess_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibodies_mapping.json'):
+def preprocess_antibodies(paths: List[str], antibodies_map_path: str = './antibodies_mapping.json'):
     logging.info("Preprocessing antibodies")
     with open(antibodies_map_path, 'r') as f:
         antibodies_map = json.load(f)
-        for antibody_data_path in csv_paths:
+        for antibody_data_path in paths:
             logging.info(f"Processing {antibody_data_path} file")
             tmp_antibody_data_path = antibody_data_path.replace(
                 '.csv', '_tmp.csv')
-            for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode')):
+            read_fn = pd.read_csv if antibody_data_path.endswith(
+                '.csv') else pd.read_excel
+            for i, chunk in enumerate(read_fn(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode')):
 
                 # converge null values to None
                 clean_df(chunk)
@@ -127,12 +129,16 @@ def preprocess_antibodies(csv_paths: List[str], antibodies_map_path: str = './an
 
 
 def preprocess_antibody_files(csv_path: str):
-    logging.info("Updating antibody files", csv_path)
+    logging.info("Updating antibody files %s", csv_path)
     df_antibody_files = pd.read_csv(csv_path)
     df_antibody_files['filename'] = df_antibody_files.apply(
         lambda row: get_antibody_persistence_directory(row['id'], os.path.basename(row['filename'])), axis=1)
-    df_antibody_files['timestamp'] = df_antibody_files.apply(
-        lambda row: datetime.utcfromtimestamp(row['timestamp']), axis=1)
+    try:
+        df_antibody_files['timestamp'] = df_antibody_files.apply(
+            lambda row: datetime.utcfromtimestamp(int(row['timestamp'])), axis=1)
+    except ValueError:
+        # timestamp is already in datetime format
+        pass
     df_antibody_files.to_csv(csv_path, index=False, mode='w+')
 
 
@@ -149,7 +155,7 @@ class Preprocessor:
 
         def get_metadata_file(file_name: str) -> str:
             fnames = glob.glob(os.path.join(
-                self.dest, '**', f"{file_name}.csv"), recursive=True)
+                self.dest, '**', f"{file_name}.*"), recursive=True)
             return fnames and fnames[0]
 
         metadata = AntibodyDataPaths(
