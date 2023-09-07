@@ -73,6 +73,11 @@ def preprocess_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_
             lambda x: vendors_map[str(x)] if str(x) in vendors_map else x)
         df_vendor_domain.to_csv(csv_path, index=False, mode='w+')
 
+def to_pandas(filename):
+    if filename.endswith('.xlsx'):
+        return pd.read_excel(filename)
+    else:
+        return pd.read_csv(filename, chunksize=CHUNK_SIZE, dtype='unicode')
 
 def preprocess_antibodies(paths: List[str], antibodies_map_path: str = './antibodies_mapping.json'):
     logging.info("Preprocessing antibodies")
@@ -80,11 +85,9 @@ def preprocess_antibodies(paths: List[str], antibodies_map_path: str = './antibo
         antibodies_map = json.load(f)
         for antibody_data_path in paths:
             logging.info(f"Processing {antibody_data_path} file")
-            tmp_antibody_data_path = antibody_data_path.replace(
-                '.csv', '_tmp.csv')
-            read_fn = pd.read_csv if antibody_data_path.endswith(
-                '.csv') else pd.read_excel
-            for i, chunk in enumerate(read_fn(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode')):
+            tmp_antibody_data_path = antibody_data_path + '_tmp.csv'
+
+            for i, chunk in enumerate(to_pandas(antibody_data_path)):
 
                 # converge null values to None
                 clean_df(chunk)
@@ -124,8 +127,8 @@ def preprocess_antibodies(paths: List[str], antibodies_map_path: str = './antibo
                 # save chunk temp file
                 chunk.to_csv(tmp_antibody_data_path, mode='a',
                              header=ANTIBODY_HEADER.keys() if i == 0 else False, index=False)
-
-            replace_file(antibody_data_path, tmp_antibody_data_path)
+            if antibody_data_path.endswith('.csv'):
+                replace_file(antibody_data_path, tmp_antibody_data_path)
 
 
 def preprocess_antibody_files(csv_path: str):
@@ -160,7 +163,7 @@ class Preprocessor:
 
         metadata = AntibodyDataPaths(
             antibodies=glob.glob(os.path.join(self.dest, '**',
-                      f"{RAW_ANTIBODY_DATA_BASENAME}*.csv"), recursive=True),
+                      f"{RAW_ANTIBODY_DATA_BASENAME}*.*"), recursive=True),
             vendors=get_metadata_file(RAW_VENDOR_DATA_BASENAME),
             vendor_domains=get_metadata_file(RAW_VENDOR_DOMAIN_DATA_BASENAME),
             users=get_metadata_file(RAW_USERS_DATA_BASENAME),
