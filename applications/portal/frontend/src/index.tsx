@@ -4,7 +4,7 @@ import App from './App';
 import TagManager from 'react-gtm-module'
 
 
-const gtmId = "G-T5N7J7V9CN";
+const gtmId = "G-JSRSCQE0R7"; // "G-T5N7J7V9CN";
 
 if(gtmId) {
   TagManager.initialize({ gtmId })
