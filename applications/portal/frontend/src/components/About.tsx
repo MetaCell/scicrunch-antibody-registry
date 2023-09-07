@@ -1,5 +1,5 @@
 import React from 'react'
-import { makeStyles } from '@mui/styles';
+
 import { Box, Button, Container, Divider, Grid, Link, Typography } from '@mui/material';
 import Slider from "react-slick";
 import { vars } from "../theme/variables";
@@ -165,7 +165,6 @@ const About = () => {
     { name: 'jesselllab', url: 'https://jesselllab.com/' },
     { name: 'encorbio', url: 'https://encorbio.com/' },
     { name: 'biolegend', url: 'https://www.biolegend.com/' },
-    { name: 'fortis', url: 'https://www.fortislife.com/' },
     { name: 'leinco', url: 'https://www.leinco.com/' },
     { name: 'jacksonimmuno', url: 'https://www.jacksonimmuno.com/' },
     { name: 'dshb', url: 'http://dshb.biology.uiowa.edu/' },
