@@ -36,7 +36,7 @@ const HomeHeader = ({ activeSelection, handleExport, showFilterMenu, activeTab, 
   const theme = useTheme();
  
   const { activeSearch, totalElements, lastUpdate } = useContext(searchContext)
-
+  const showAlert = shownResultsNum < totalElements && activeSearch;
   return (
     <Box className="container-home-header">
       <AppBar elevation={0} sx={{ top: "4.5rem" }}>
@@ -121,7 +121,7 @@ const HomeHeader = ({ activeSelection, handleExport, showFilterMenu, activeTab, 
                 </Box>
               </Box>
             </HideOnScroll>
-            {shownResultsNum < totalElements && activeSearch && (
+            {showAlert && (
               <Alert className="limit-alert" severity="warning" sx={{ mt: 1, mb: 1 }}>The search results are limited to a maximum of {shownResultsNum} elements. 
     Please refine your search if you cannot find the antibody you&apos;re looking for.
               </Alert>)
@@ -130,10 +130,11 @@ const HomeHeader = ({ activeSelection, handleExport, showFilterMenu, activeTab, 
               showFilterMenu={showFilterMenu}
               activeTab={activeTab}
             />
+            
           </Stack>
         </Container>
       </AppBar>
-      <Box sx={{ height: "12.5rem" }} component="div" />
+      <Box sx={{ height: showAlert ? "16.5rem" : "12.5rem" }} component="div" />
     </Box>
   );
 };

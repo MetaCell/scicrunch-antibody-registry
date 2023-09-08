@@ -95,6 +95,15 @@ const theme = createTheme({
         * {
           font-family: ${primaryFont}
         }
+        ::-webkit-scrollbar {
+          height: 0.5rem;
+          width: 0.5rem;
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background-color: ${btnBorderColor};
+          border-radius: 3rem;
+        }
       `,
     },
     MuiAppBar: {

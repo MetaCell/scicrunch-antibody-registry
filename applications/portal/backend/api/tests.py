@@ -79,8 +79,9 @@ class AntibodiesTestCase(TestCase):
         self.assertEquals(ab.commercialType, CommercialType.commercial)
         self.assertIsNotNone(ab.vendorId)
         self.assertEquals(ab.vendorName, "My vendorname")
-        self.assertEquals(ab.url, '//www.bdbiosciences.com'), "Show link is false by default, so the vendor url is returned"
+        self.assertTrue( 'www.bdbiosciences.com' in ab.vendorUrl)
         self.assertEquals(ab.status, Status.QUEUE)
+        self.assertEquals(ab.url, example_ab['url'])
 
         self.assertIsNotNone(ab.insertTime)
 
@@ -160,7 +161,17 @@ class AntibodiesTestCase(TestCase):
         ab = create_antibody(AddAntibodyDTO(**example_ab2), "aaaa")
         a: Antibody = Antibody.objects.get(ab_id=ab.abId)
         a.status = STATUS.CURATED
+        a.entrez_id = "entrez"
+        a.uniprot_id = "uniprot"
+        a.show_link = True
         a.save(update_search=False)
+        
+
+        ab = get_antibody(ab.abId)[0]
+        assert ab.abTargetEntrezId == "entrez"
+        assert ab.abTargetUniprotId == "uniprot"
+        assert ab.ix
+        assert ab.showLink is not None
 
         # Search by catalog number
         self.assertEquals(len(fts_antibodies(search="N176A").items), 2)

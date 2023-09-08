@@ -501,6 +501,17 @@ components:
                             format: date-time
                             description: ''
                             type: string
+                        ix:
+                            description: ''
+                            type: integer
+                        showLink:
+                            description: ''
+                            type: boolean
+                        vendorUrl:
+                            description: ''
+                            type: array
+                            items:
+                                type: string
                 -
                     $ref: '#/components/schemas/AbstractAntibody'
                 -
@@ -618,6 +629,12 @@ components:
                     example: >-
                         Sheep polyclonal anti-FSH antibody labeled with acridinium ester. Mouse monoclonal
                         anti-FSH antibody covalently coupled to paramagnetic particles.
+                abTargetEntrezId:
+                    description: ''
+                    type: string
+                abTargetUniprotId:
+                    description: ''
+                    type: string
         DataInfo:
             description: Information about the data in the system
             required:

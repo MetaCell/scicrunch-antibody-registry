@@ -333,6 +333,7 @@ class VendorAdmin(admin.ModelAdmin):
         "nif_id",
         "eu_id",
         "commercial_type",
+        "show_link"
     )
     readonly_fields = ("nb_antibodies", "recent_antibodies")
     inlines = [

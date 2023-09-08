@@ -37,7 +37,6 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import HomeHeader from "./HomeHeader";
 import { Antibody } from "../../rest";
 import { getProperCitation } from "../../utils/antibody";
-import { useTheme } from "@mui/system";
 import { UserContext } from "../../services/UserService";
 import ConnectAccount from "./ConnectAccount";
 import { ALLRESULTS } from "../../constants/constants";

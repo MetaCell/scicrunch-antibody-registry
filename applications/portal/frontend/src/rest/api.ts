@@ -129,6 +129,18 @@ export interface AbstractAntibody {
      * @memberof AbstractAntibody
      */
     'kitContents'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AbstractAntibody
+     */
+    'abTargetEntrezId'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AbstractAntibody
+     */
+    'abTargetUniprotId'?: string;
 }
 
 export const AbstractAntibodyClonalityEnum = {
@@ -266,6 +278,18 @@ export interface AddAntibody {
      * @memberof AddAntibody
      */
     'kitContents'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AddAntibody
+     */
+    'abTargetEntrezId'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AddAntibody
+     */
+    'abTargetUniprotId'?: string;
     /**
      * For company antibodies, the catalog number of the antibody. For personal/other antibodies, an identifier unique to the antibody.
      * @type {string}
@@ -405,6 +429,24 @@ export interface Antibody {
      */
     'lastEditTime'?: string;
     /**
+     * 
+     * @type {number}
+     * @memberof Antibody
+     */
+    'ix'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Antibody
+     */
+    'showLink'?: boolean;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof Antibody
+     */
+    'vendorUrl'?: Array<string>;
+    /**
      * Can include the following options: Unknown, Cocktail, Control, Isotype Control, Monoclonal, Monoclonal Secondary, Polyclonal, Polyclonal Secondary, Oligoclonal, Recombinant, Recombinant Monoclonal, Recombinant Monoclonal Secondary, Recombinant Polyclonal, Recombinant Polyclonal Secondary
      * @type {string}
      * @memberof Antibody
@@ -506,6 +548,18 @@ export interface Antibody {
      * @memberof Antibody
      */
     'kitContents'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Antibody
+     */
+    'abTargetEntrezId'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Antibody
+     */
+    'abTargetUniprotId'?: string;
     /**
      * For company antibodies, the catalog number of the antibody. For personal/other antibodies, an identifier unique to the antibody.
      * @type {string}
@@ -638,6 +692,24 @@ export interface AntibodyAllOf {
      * @memberof AntibodyAllOf
      */
     'lastEditTime'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AntibodyAllOf
+     */
+    'ix'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AntibodyAllOf
+     */
+    'showLink'?: boolean;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof AntibodyAllOf
+     */
+    'vendorUrl'?: Array<string>;
 }
 
 export const AntibodyAllOfStatusEnum = {
@@ -893,6 +965,18 @@ export interface UpdateAntibody {
      * @memberof UpdateAntibody
      */
     'kitContents'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateAntibody
+     */
+    'abTargetEntrezId'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateAntibody
+     */
+    'abTargetUniprotId'?: string;
 }
 
 export const UpdateAntibodyClonalityEnum = {
