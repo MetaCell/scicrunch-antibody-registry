@@ -25,6 +25,11 @@ UNKNOWN_USERS = {'3483', '1473', '3208', '3519', '21828', '30083', '7650', '7574
                  '2209', '3082', '31464', '32106', '1282', '3671', '9132', '2892', '22915', '5047', '1175', '1883',
                  '31166', '8612', '8016', '7706'}
 
+antibodies_map_path: str = './antibodies_mapping.json'
+with open(antibodies_map_path, 'r') as f:
+    antibodies_map = json.load(f)
+
+
 @dataclass
 class AntibodyDataPaths:
     antibodies: str
@@ -73,62 +78,63 @@ def preprocess_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_
             lambda x: vendors_map[str(x)] if str(x) in vendors_map else x)
         df_vendor_domain.to_csv(csv_path, index=False, mode='w+')
 
+
 def to_pandas(filename):
     if filename.endswith('.xlsx'):
         return pd.read_excel(filename)
     else:
         return pd.read_csv(filename, chunksize=CHUNK_SIZE, dtype='unicode')
 
-def preprocess_antibodies(paths: List[str], antibodies_map_path: str = './antibodies_mapping.json'):
+
+def preprocess_antibodies(paths: List[str]):
     logging.info("Preprocessing antibodies")
-    with open(antibodies_map_path, 'r') as f:
-        antibodies_map = json.load(f)
-        for antibody_data_path in paths:
-            logging.info(f"Processing {antibody_data_path} file")
-            tmp_antibody_data_path = antibody_data_path + '_tmp.csv'
 
-            for i, chunk in enumerate(to_pandas(antibody_data_path)):
+    for antibody_data_path in paths:
+        logging.info(f"Processing {antibody_data_path} file")
+        tmp_antibody_data_path = antibody_data_path + '_tmp.csv'
 
-                # converge null values to None
-                clean_df(chunk)
+        for i, chunk in enumerate(to_pandas(antibody_data_path)):
 
-                # lowercase necessary columns
-                chunk["source_organism"] = chunk["source_organism"].str.lower()
-                chunk["link"] = chunk["link"].str.lower()
+            # converge null values to None
+            clean_df(chunk)
 
-                # point unknown vendor_id to None
-                chunk['vendor_id'] = chunk['vendor_id'].where(
-                    ~chunk['vendor_id'].isin(UNKNOWN_VENDORS), None)
+            # lowercase necessary columns
+            chunk["source_organism"] = chunk["source_organism"].str.lower()
+            chunk["link"] = chunk["link"].str.lower()
 
-                # point unknown user_id to None
-                chunk['uid'] = chunk['uid'].where(
-                    ~chunk['uid'].isin(UNKNOWN_USERS), DEFAULT_UID)
+            # point unknown vendor_id to None
+            chunk['vendor_id'] = chunk['vendor_id'].where(
+                ~chunk['vendor_id'].isin(UNKNOWN_VENDORS), None)
 
-                # point unknown commercial type to None
-                chunk['commercial_type'] = chunk['commercial_type'].where(
-                    chunk['commercial_type'].isin(
-                        {c[0] for c in CommercialType.choices}),
-                    None)
+            # point unknown user_id to None
+            chunk['uid'] = chunk['uid'].where(
+                ~chunk['uid'].isin(UNKNOWN_USERS), DEFAULT_UID)
 
-                # point unknown clonality to 'unknown'
-                chunk['clonality'] = chunk['clonality'].where(
-                    chunk['clonality'].isin({c[0] for c in AntibodyClonality.choices}), 'unknown')
+            # point unknown commercial type to None
+            chunk['commercial_type'] = chunk['commercial_type'].where(
+                chunk['commercial_type'].isin(
+                    {c[0] for c in CommercialType.choices}),
+                None)
 
-                # get rows that need custom update
-                relevant_rows = chunk.loc[chunk['ix'].isin(
-                    antibodies_map.keys())]
+            # point unknown clonality to 'unknown'
+            chunk['clonality'] = chunk['clonality'].where(
+                chunk['clonality'].isin({c[0] for c in AntibodyClonality.choices}), 'unknown')
 
-                # apply custom update to relevant rows
-                for index, row in relevant_rows.iterrows():
-                    for atr in antibodies_map[row['ix']]:
-                        chunk.loc[chunk['ix'] == row['ix'],
-                                  atr] = antibodies_map[row['ix']][atr]
+            # get rows that need custom update
+            relevant_rows = chunk.loc[chunk['ix'].isin(
+                antibodies_map.keys())]
 
-                # save chunk temp file
-                chunk.to_csv(tmp_antibody_data_path, mode='a',
-                             header=ANTIBODY_HEADER.keys() if i == 0 else False, index=False)
-            if antibody_data_path.endswith('.csv'):
-                replace_file(antibody_data_path, tmp_antibody_data_path)
+            # apply custom update to relevant rows
+            for index, row in relevant_rows.iterrows():
+                for atr in antibodies_map[row['ix']]:
+                    chunk.loc[chunk['ix'] == row['ix'],
+                              atr] = antibodies_map[row['ix']][atr]
+
+            # save chunk temp file
+            chunk.to_csv(tmp_antibody_data_path, mode='a',
+                         header=ANTIBODY_HEADER.keys() if i == 0 else False, index=False)
+        if antibody_data_path.endswith('.csv'):
+            replace_file(antibody_data_path, tmp_antibody_data_path)
 
 
 def preprocess_antibody_files(csv_path: str):
@@ -163,7 +169,7 @@ class Preprocessor:
 
         metadata = AntibodyDataPaths(
             antibodies=glob.glob(os.path.join(self.dest, '**',
-                      f"{RAW_ANTIBODY_DATA_BASENAME}*.*"), recursive=True),
+                                              f"{RAW_ANTIBODY_DATA_BASENAME}*.*"), recursive=True),
             vendors=get_metadata_file(RAW_VENDOR_DATA_BASENAME),
             vendor_domains=get_metadata_file(RAW_VENDOR_DOMAIN_DATA_BASENAME),
             users=get_metadata_file(RAW_USERS_DATA_BASENAME),
@@ -171,12 +177,14 @@ class Preprocessor:
         )
 
         if was_downloaded or os.getenv('FORCE_PREPROCESSING', False):
-            metadata.vendor_domains and preprocess_vendor_domains(metadata.vendor_domains)
+            metadata.vendor_domains and preprocess_vendor_domains(
+                metadata.vendor_domains)
             metadata.vendors and preprocess_vendors(metadata.vendors)
             metadata.antibodies and preprocess_antibodies(metadata.antibodies)
             metadata.users and preprocess_users(metadata.users)
             try:
-                metadata.antibody_files and preprocess_antibody_files(metadata.antibody_files)
+                metadata.antibody_files and preprocess_antibody_files(
+                    metadata.antibody_files)
             except Exception as e:
                 logging.exception("Failed to update antibody files")
 

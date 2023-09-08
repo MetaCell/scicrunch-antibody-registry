@@ -192,13 +192,16 @@ paths:
                 content:
                     application/json:
                         schema:
-                            type: string
+                            $ref: '#/components/schemas/IngestRequest'
                 required: true
             tags:
                 - ingest
             responses:
                 '200':
                     description: Successful response - returns an 200.
+            security:
+                -
+                    cookieAuth: []
             operationId: ingest
             summary: Ingest antibody's csv data into the database
             description: Ingest antibody's csv data into the database
@@ -696,6 +699,16 @@ components:
                             type: string
                 -
                     $ref: '#/components/schemas/AbstractAntibody'
+        IngestRequest:
+            description: ''
+            type: object
+            properties:
+                driveLinkOrId:
+                    description: ''
+                    type: string
+                hot:
+                    description: Whether to add directly to the current data without reset
+                    type: boolean
     responses:
         PaginatedAntibodies:
             content:

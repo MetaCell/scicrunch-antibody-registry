@@ -12,6 +12,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("file_id", type=str)
+        parser.add_argument("--hot", action="store_true",
+            help="execute a hot load (no replacements)",)
 
     def handle(self, *args, **options):
         metadata = Preprocessor(options["file_id"]).preprocess()
@@ -19,11 +21,11 @@ class Command(BaseCommand):
         transaction_start = timer()
         logging.info("Ingestion process started")
 
-        self.ingest(metadata)
+        self.ingest(metadata, options["hot"])
 
         transaction_end = timer()
         logging.info(f"Ingestion finished in {transaction_end - transaction_start} seconds")
 
-    def ingest(self, metadata):
+    def ingest(self, metadata, hot=False):
         with transaction.atomic():
-            Ingestor(metadata, connection).ingest()
+            Ingestor(metadata, connection, hot).ingest()
