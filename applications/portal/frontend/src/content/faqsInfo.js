@@ -109,7 +109,7 @@ export const faqsInfo = [
       The Antibody Registry is maintained with public support from the NIH and membership fees of partner companies.
       Transfer of the database to a non-for-profit organization, stipulated as part of the GM144308 award, will ensure longer term stability.<br />
       However if all else fails, the data licensed at CC-0 will be archived in Zenodo, the University of California San Diego Data Repository, and the California Digital Library.<br />
-      Current data are stored within Google Cloud Platform designed to provide 99.999999999% annual durability; automated database backups happen three times every day as GCP volume snapshots;
+      Current data are stored within Google Cloud Platform designed to provide 99.999999999% annual durability; automated database backups happen every hour on dedicated GCP volumes and once a day as GCP volume snapshots;
       Data is permanently archived in a third party archival system to ensure long term data preservation.<br />
       Certification of CoreTrustSeal will be sought under the GM144308 funding mechanism.
     </>
