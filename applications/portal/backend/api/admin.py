@@ -122,7 +122,7 @@ class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
     readonly_fields = (
         "submitter_name",
         "submitter_email",
-        "ab_id",
+        "accession",
         "insert_time",
         "lastedit_time",
         "curate_time",
