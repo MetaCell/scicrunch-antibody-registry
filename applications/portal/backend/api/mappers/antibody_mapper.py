@@ -1,5 +1,6 @@
 import datetime
 import enum
+from functools import cache
 from urllib.parse import urlsplit
 
 from django.db import models
@@ -21,7 +22,10 @@ dto_fields = {to_snake(f) for f in AntibodyDTO.__fields__}
 def extract_base_url(url):
     return urlsplit(url).hostname
 
-
+@cache
+def get_vendor_domains(vendor_id):
+    return [vd.base_url for vd in VendorDomain.objects.filter(
+                        vendor_id=vendor_id)]
 class AntibodyMapper(IDAOMapper):
 
     def from_dto(self, dto: AbstractAntibodyDTO) -> Antibody:
@@ -111,6 +115,10 @@ class AntibodyMapper(IDAOMapper):
             ab = AntibodyDTO(abId=dao.ab_id, abName=dao.ab_name)
         if dao.ab_target:
             ab.abTarget = dao.ab_target
+        if dao.entrez_id:
+            ab.abTargetEntrezId = dao.entrez_id
+        if dao.uniprot_id:
+            ab.abTargetUniprotId = dao.uniprot_id
         if dao.vendor:
             ab.vendorName = dao.vendor.name
         if dao.source_organism:
@@ -118,16 +126,9 @@ class AntibodyMapper(IDAOMapper):
         if dao.species and not ab.targetSpecies:
             ab.targetSpecies = [s.name for s in dao.species.all()]
 
-        if not dao.show_link:
-            if dao.show_link is not None or (dao.vendor and not dao.vendor.show_link):
-                try:
-                    ab.url = VendorDomain.objects.filter(
-                        vendor=dao.vendor).first().base_url
-                except (VendorDomain.DoesNotExist, AttributeError):
-                    ab.url = None
+        ab.vendorUrl = get_vendor_domains(dao.vendor.id)
 
-        if ab.url and "//" not in ab.url:
-            ab.url = "//" + ab.url
+        ab.showLink = dao.show_link if dao.show_link is not None else (dao.vendor and dao.vendor.show_link)
 
         if dao.cat_alt:
             ab.catalogNum = ab.catalogNum + " (also " + dao.cat_alt + ")"

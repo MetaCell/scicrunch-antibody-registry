@@ -192,13 +192,16 @@ paths:
                 content:
                     application/json:
                         schema:
-                            type: string
+                            $ref: '#/components/schemas/IngestRequest'
                 required: true
             tags:
                 - ingest
             responses:
                 '200':
                     description: Successful response - returns an 200.
+            security:
+                -
+                    cookieAuth: []
             operationId: ingest
             summary: Ingest antibody's csv data into the database
             description: Ingest antibody's csv data into the database
@@ -501,6 +504,17 @@ components:
                             format: date-time
                             description: ''
                             type: string
+                        ix:
+                            description: ''
+                            type: integer
+                        showLink:
+                            description: ''
+                            type: boolean
+                        vendorUrl:
+                            description: ''
+                            type: array
+                            items:
+                                type: string
                 -
                     $ref: '#/components/schemas/AbstractAntibody'
                 -
@@ -618,6 +632,12 @@ components:
                     example: >-
                         Sheep polyclonal anti-FSH antibody labeled with acridinium ester. Mouse monoclonal
                         anti-FSH antibody covalently coupled to paramagnetic particles.
+                abTargetEntrezId:
+                    description: ''
+                    type: string
+                abTargetUniprotId:
+                    description: ''
+                    type: string
         DataInfo:
             description: Information about the data in the system
             required:
@@ -679,6 +699,16 @@ components:
                             type: string
                 -
                     $ref: '#/components/schemas/AbstractAntibody'
+        IngestRequest:
+            description: ''
+            type: object
+            properties:
+                driveLinkOrId:
+                    description: ''
+                    type: string
+                hot:
+                    description: Whether to add directly to the current data without reset
+                    type: boolean
     responses:
         PaginatedAntibodies:
             content:

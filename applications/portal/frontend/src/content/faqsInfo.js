@@ -63,7 +63,7 @@ export const faqsInfo = [
   {
     question: "How can I download data?",
     answer: <> <b>Humans: </b>Selecting a handful of antibodies and downloading the list is accomplished by clicking the box icon on the left of each antibody.<br />
-      <b>Humans Bulk: </b>Downloading all data in bulk requires that you are logged into the AntibodyRegistry. A new tab opens called “Download”. The following information is provided:
+      <b>Humans Bulk: </b>Downloading all data in bulk requires API access via <a href="https://scicrunch.org/">scicrunch.org</a> (see above). We currently do not have a method to access the data via the AntibodyRegistry website. 
       <ul>
         <li>We are now providing a full csv of the more important data for the Antibody Registry. The CSV is rather large, and contains 6 columns (our ID, AB Name, Vendor, Catalog Number, Citation, and Reference). This file is updated weekly on Friday night (Pacific time).</li>
       </ul>
@@ -109,7 +109,7 @@ export const faqsInfo = [
       The Antibody Registry is maintained with public support from the NIH and membership fees of partner companies.
       Transfer of the database to a non-for-profit organization, stipulated as part of the GM144308 award, will ensure longer term stability.<br />
       However if all else fails, the data licensed at CC-0 will be archived in Zenodo, the University of California San Diego Data Repository, and the California Digital Library.<br />
-      Current data are stored within Amazon S3, part of Amazon Web Services (AWS) designed to provide 99.9% durability of object over a given year/years; automated database backups happen every day in a relevant AWS S3 bucket;
+      Current data are stored within Google Cloud Platform designed to provide 99.999999999% annual durability; automated database backups happen every hour on dedicated GCP volumes and once a day as GCP volume snapshots;
       Data is permanently archived in a third party archival system to ensure long term data preservation.<br />
       Certification of CoreTrustSeal will be sought under the GM144308 funding mechanism.
     </>
@@ -122,7 +122,7 @@ export const faqsInfo = [
     question: "How do publishers access records?",
     answer: <>
       Antibody data can be downloaded as a CSV file (see instructions above) and accessed via the scicrunch API (see instructions above) in json and xml format. Each record in the RRID resolver is also available without login as json and xml by simply adding the .json or .xml suffix to the URL.<br />
-      <ul><li>Example: https://scicrunch.org/RRID:AB_90755.json</li></ul>
+      <ul><li>Example: https://scicrunch.org/resolver/RRID:AB_90755.json</li></ul>
     </>
   },
   {
@@ -134,8 +134,8 @@ export const faqsInfo = [
   },
   {
     question: "What is the antibody data to paper relationship?",
-    answer: <>Some antibodies are used in scientific papers, and where authors list the RRID they used, if the submitter specifies the paper where origination of the antibody was described, or curators discover and annotate the RRID in the paper, there is a link between the antibody records and a PubMed identifier (paper). <br />
-      Note to authors, it may take a month or more for your paper to show up as associated with your registered antibody. The delay is sometimes that closed access publications delay our curation. If your manuscript has been out for ~6 months or is in the open access literature but you do not see it associated with your antibody, please contact us (abr-help -at- scicrunch -dot- org).
+    answer: <>Some antibodies are used in scientific papers, and where authors list the RRID they used, if the submitter specifies the paper where origination of the antibody was described, or curators discover and annotate the RRID in the paper, there is a link between the antibody records and a PubMed identifier (paper).
+    Note to authors, the current version of the AntibodyRegistry does not have a place for this information. Please search for your antibody in the RRID.site portal or the resolver to find the data for which manuscripts used the antibody. Additionally, it may take a month or more for your paper to show up as associated with your registered antibody. The delay is sometimes that closed access publications delay our curation. If your manuscript has been out for ~6 months or is in the open access literature but you do not see it associated with your antibody, please contact us (abr-help -at- scicrunch -dot- org).
     </>
   },
   {

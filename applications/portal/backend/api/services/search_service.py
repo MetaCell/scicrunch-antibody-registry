@@ -12,7 +12,7 @@ from . import antibody_service
 antibody_mapper = AntibodyMapper()
 
 
-def fts_antibodies(page: int = 0, size: int = 50, search: str = '') -> List[AntibodyDTO]:
+def fts_antibodies(page: int = 1, size: int = 50, search: str = '') -> List[AntibodyDTO]:
     page = page or 0  # required at the moment, issue with default values in main.py-L134
     size = size or 50  # required at the moment, issue with default values in main.py-L134
     if "AB_" in search:

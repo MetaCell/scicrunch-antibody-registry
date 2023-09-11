@@ -36,7 +36,8 @@ const App = () => {
   }
 
   if (user === undefined) {
-    return [refreshUser(), refreshUser];
+    refreshUser();
+    return <></>
   }
 
   return (

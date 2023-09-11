@@ -5,6 +5,11 @@ from django.contrib.auth.models import User
 
 from api.utilities.decorators import refresh_keycloak_client
 from cloudharness.auth import AuthClient
+from cloudharness import log
+
+# Reuse AuthClient to benefit from valid token
+# AuthClient will try to refresh automatically once token expired
+
 
 
 class KeycloakService:
@@ -15,8 +20,18 @@ class KeycloakService:
         self.keycloak_admin = self.auth_client.get_admin_client()
 
     @refresh_keycloak_client
+    def get_current_userid(self):
+        return self.auth_client.get_current_user().get("id", None)
+    
+
+    @refresh_keycloak_client
     def create_user(self, payload, **kwargs):
         return self.keycloak_admin.create_user(payload, **kwargs)
+    
+    @refresh_keycloak_client
+    def current_user_has_realm_role(self, role):
+        return self.auth_client.user_has_realm_role(user_id=self.get_current_userid(), role=role)
+
 
     @refresh_keycloak_client
     def add_user_social_login(self, user_id, provider_id, provider_user_id, provider_user_name):

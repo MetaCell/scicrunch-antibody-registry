@@ -1,4 +1,5 @@
 import os
+import re
 from random import randint
 from typing import Optional, Tuple
 from api.repositories.maintainance import refresh_search_view
@@ -12,7 +13,8 @@ from django.utils import timezone
 
 from api.services.user_service import UnrecognizedUser, get_current_user_id
 from api.utilities.exceptions import RequiredParameterMissing
-from api.utilities.functions import catalog_number_chunked, generate_id_aux, extract_base_url, get_antibody_persistence_directory
+from api.utilities.functions import catalog_number_chunked, generate_id_aux, extract_base_url, \
+    get_antibody_persistence_directory
 from cloudharness import log
 from portal.settings import ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, APPLICATION_MAX_LEN, VENDOR_MAX_LEN, \
     ANTIBODY_CATALOG_NUMBER_MAX_LEN, ANTIBODY_CLONALITY_MAX_LEN, \
@@ -93,9 +95,10 @@ class Vendor(models.Model):
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
         choices=CommercialType.choices,
         default=CommercialType.OTHER,
-        null=True
+        null=True,
+        db_index=True,
     )
-    show_link = models.BooleanField(default=False, null=True, blank=True)
+    show_link = models.BooleanField(default=False, null=True, blank=True, db_index=True)
 
     class Meta:
         indexes = [
@@ -118,7 +121,7 @@ class VendorSynonym(models.Model):
 
 class Specie(models.Model):
     name = models.CharField(
-        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, unique=True)
+        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, unique=True, db_index=True)
 
     class Meta:
         indexes = [
@@ -132,7 +135,7 @@ class Specie(models.Model):
 
 class Application(models.Model):
     name = models.CharField(
-        max_length=APPLICATION_MAX_LEN, unique=True)
+        max_length=APPLICATION_MAX_LEN, unique=True, db_index=True)
 
     class Meta:
         indexes = [
@@ -181,13 +184,14 @@ class Antibody(models.Model):
     ab_id = models.CharField(
         max_length=ANTIBODY_ID_MAX_LEN, null=True, db_index=True)
     accession = models.CharField(
-        max_length=ANTIBODY_ID_MAX_LEN, null=True, blank=True)
+        max_length=ANTIBODY_ID_MAX_LEN, null=True, blank=True, db_index=True)
     commercial_type = models.CharField(
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
         choices=CommercialType.choices,
         default=CommercialType.OTHER,
         null=True,
-        blank=True
+        blank=True,
+        db_index=True,
     )
     # This user id maps the users in keycloak
     uid = models.CharField(
@@ -209,13 +213,14 @@ class Antibody(models.Model):
     # antigen = models.ForeignKey(
     #     Antigen, on_delete=models.SET_NULL, db_column='antigen_id', null=True, blank=True)
     ab_target = models.CharField(max_length=ANTIBODY_TARGET_MAX_LEN,
-                                 db_column='ab_target', null=True, db_index=True, blank=True, verbose_name="Target antigen")
+                                 db_column='ab_target', null=True, db_index=True, blank=True,
+                                 verbose_name="Target antigen")
     entrez_id = models.CharField(unique=False, max_length=ANTIGEN_ENTREZ_ID_MAX_LEN, db_column='ab_target_entrez_gid',
                                  null=True, db_index=True, blank=True)
     uniprot_id = models.CharField(
         unique=False, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN, null=True, db_index=True, blank=True)
     target_species_raw = models.CharField(
-        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True, verbose_name="Target species (csv)",
+        max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, null=True, blank=True, verbose_name="Target species (csv)", db_index=True,
         help_text="Comma separated value for target species. Values filled here will be parsed and assigned to the 'Target species' field.")
 
     species = models.ManyToManyField(Specie, db_column='target_species', related_name="targets",
@@ -243,10 +248,10 @@ class Antibody(models.Model):
     product_conjugate = models.CharField(
         max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, null=True, db_index=True, blank=True)
     defining_citation = models.CharField(
-        max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True, blank=True)
+        max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True, blank=True, db_index=False)
     product_form = models.CharField(
         max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True, db_index=True, blank=True)
-    comments = models.TextField(null=True, blank=True)
+    comments = models.TextField(null=True, blank=True, db_index=False)
     applications = models.ManyToManyField(
         Application, through='AntibodyApplications', blank=True)
     kit_contents = models.TextField(null=True, db_index=True, blank=True)
@@ -262,16 +267,19 @@ class Antibody(models.Model):
     )
     insert_time = models.DateTimeField(
         auto_now_add=True, db_index=True, null=True, blank=True)
-    lastedit_time = models.DateTimeField(
-        auto_now=True, db_index=True, blank=True)
+    lastedit_time = models.DateTimeField(auto_now=True, db_index=True, null=True, blank=True)
     curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
     # whether the full link to the antibody is shown. If None, the vendor's default is used
-    show_link = models.BooleanField(null=True, blank=True)
+    show_link = models.BooleanField(null=True, blank=True, db_index=True)
 
     @transaction.atomic
     def save(self, *args, update_search=True, **kwargs):
+
         first_save = self.ix is None
         self._handle_status_changes(first_save)
+
+        old_instance = Antibody.objects.filter(pk=self.pk).first()
+        old_species = self.species_from_raw(old_instance.target_species_raw) if old_instance else set()
 
         super(Antibody, self).save(*args, **kwargs)
 
@@ -279,7 +287,7 @@ class Antibody(models.Model):
             self.catalog_num_search = catalog_number_chunked(self.catalog_num)
         self._handle_duplicates(*args, **kwargs)
         self._generate_related_fields(*args, **kwargs)
-        self._fill_target_species_from_raw()
+        self._synchronize_target_species(old_species)
 
         if first_save:  # Newly instantiated instances have ix = None
             self._generate_automatic_attributes(*args, **kwargs)
@@ -290,6 +298,13 @@ class Antibody(models.Model):
         if update_search and self.status == STATUS.CURATED:
             refresh_search_view()
 
+
+    def _has_target_species_raw_changed(self, old_instance):
+        if old_instance:
+            return self.target_species_raw != old_instance.target_species_raw
+        return self.target_species_raw is not None
+
+ 
     def delete(self, *args, **kwargs):
         super(Antibody, self).delete(*args, **kwargs)
         if self.status == STATUS.CURATED:
@@ -339,15 +354,49 @@ class Antibody(models.Model):
     def _generate_ab_id(self) -> int:
         return generate_id_aux(self.ix)
 
-    def _fill_target_species_from_raw(self):
+    @staticmethod
+    def species_from_raw(raw):
+        if raw:
+            return {specie_name.strip().lower() for specie_name in re.split(r'[,;]', raw)}
+        return set()
+
+    def _synchronize_target_species(self, old_species):
+        new_species = self.species_from_raw(self.target_species_raw)
+
+        if new_species != old_species or len(new_species) != self.species.count():
+            to_remove =  old_species - new_species
+            if to_remove:
+                for specie_name in to_remove:
+                    specie_name = specie_name.strip().lower()
+                    specie = Specie.objects.get(name=specie_name)
+                    self.species.remove(specie)
+            to_add = new_species - old_species
+            if to_add:
+                for specie_name in to_add:
+                    specie_name = specie_name.strip().lower()
+                    specie, _ = Specie.objects.get_or_create(name=specie_name)
+                    self.species.add(specie)
+        
+        self._fill_target_species_raw_from_species()
+
+            
+
+            
+
+    def _target_species_from_raw(self):
         species = []
         if self.target_species_raw:
-            for specie_name in self.target_species_raw.split(','):
+            for specie_name in re.split(r'[,;]', self.target_species_raw):
                 specie_name = specie_name.strip().lower()
                 specie, _ = Specie.objects.get_or_create(name=specie_name)
                 species.append(specie)
 
-                self.species.add(specie)
+        return species
+
+    def _fill_target_species_raw_from_species(self):
+        self.refresh_from_db(fields=['species'])
+        species_names = self.species.values_list('name', flat=True)
+        self.target_species_raw = ';'.join(species_names)
 
     def get_duplicate(self) -> Optional['Antibody']:
         """
@@ -402,16 +451,16 @@ class Antibody(models.Model):
                 # If the domain is not matched, try to match by domain with and without www
                 try:
                     if "www." in base_url:
-                        base_url = base_url.replace("www.", "")
+                        alt_base_url = base_url.replace("www.", "")
                     else:
-                        base_url = "www." + base_url
+                        alt_base_url = "www." + base_url
                     vd = VendorDomain.objects.get(base_url__iexact=base_url)
-                    
+
                 except VendorDomain.DoesNotExist:
                     # As it doesn't match, create a new vendor
                     vendor_name = name or base_url
                     log.info("Creating new Vendor `%s` on domain  to `%s`",
-                            vendor_name, base_url)
+                             vendor_name, base_url)
                     vendor = Vendor(name=vendor_name,
                                     commercial_type=self.commercial_type)
                     vendor.save()
@@ -457,9 +506,9 @@ class Antibody(models.Model):
                                    name='curated_constraints'),
         ]
         indexes = [
-            GinIndex(SearchVector('catalog_num_search', config='simple'),  # TODO the english configurations has stop words we don't want here
+            GinIndex(SearchVector('catalog_num_search', config='simple'),
+                     # TODO the english configurations has stop words we don't want here
                      name='antibody_catalog_num_fts_idx'),
-
 
             Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
 

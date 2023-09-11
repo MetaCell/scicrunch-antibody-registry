@@ -1,5 +1,5 @@
 import React from 'react'
-import { makeStyles } from '@mui/styles';
+
 import { Box, Button, Container, Divider, Grid, Link, Typography } from '@mui/material';
 import Slider from "react-slick";
 import { vars } from "../theme/variables";
@@ -165,7 +165,6 @@ const About = () => {
     { name: 'jesselllab', url: 'https://jesselllab.com/' },
     { name: 'encorbio', url: 'https://encorbio.com/' },
     { name: 'biolegend', url: 'https://www.biolegend.com/' },
-    { name: 'fortis', url: 'https://www.fortislife.com/' },
     { name: 'leinco', url: 'https://www.leinco.com/' },
     { name: 'jacksonimmuno', url: 'https://www.jacksonimmuno.com/' },
     { name: 'dshb', url: 'http://dshb.biology.uiowa.edu/' },
@@ -213,7 +212,7 @@ const About = () => {
           </Typography>
 
           <Typography variant="body1" align='center' marginBottom={8}>
-            We would like to thank our partners, who submit data to us regularly making author&pos;s jobs easier. Would you like to become a partner? <Link href="/membership">Inquire here</Link>.
+            We would like to thank our partners, who submit data to us regularly making author's jobs easier. Would you like to become a partner? <Link href="/membership">Inquire here</Link>.
           </Typography>
 
           <Slider {...settings} className="about-slider">
@@ -229,10 +228,10 @@ const About = () => {
                       width: '150px',
                     }}>
                       <Box
-                        component="img" src={partner.img || `./assets/partners/${index+1}.svg`}
+                        component="img" src={partner.img || `./assets/partners/${partner.name}.svg`}
                         alt={partner.name}
                         title={partner.name}
-                        sx={{  filter: "grayscale(1)", width: '100%' }} />
+                        sx={{  filter: "grayscale(1)", width: '100%', '&:hover': { opacity: 0.9 } }} />
                     </Box>
                   </a>
                 </Box>
@@ -246,7 +245,7 @@ const About = () => {
           <Box sx={styles.content}>
             <Grid container spacing={9} alignItems="center">
               <Grid item md={5}>
-                <img src='./assets/search-icon.svg' alt="SEARCH" />
+                <img src='./assets/search-icon.svg' alt="Search icon" />
                 <Typography component="h3">
                   <Typography component="span">Search.</Typography> The Antibody Registry gives researchers a way to universally identify antibodies used in their research.
                 </Typography>
@@ -256,7 +255,7 @@ const About = () => {
                 </Typography>
               </Grid>
               <Grid item md={7}>
-                <img src='./assets/search.svg' alt="SEARCH" />
+                <img src='./assets/search.svg' alt="Search result skeleton" />
               </Grid>
             </Grid>
           </Box>
@@ -264,7 +263,7 @@ const About = () => {
           <Box sx={styles.content} className="about-submit-info">
             <Grid container spacing={9} alignItems="center">
               <Grid item md={7}>
-                <img src='./assets/submit.svg' alt="SUBMIT" />
+                <img src='./assets/submit.svg' alt="Plus icon" />
               </Grid>
               <Grid item md={5}>
                 <img src='./assets/submit-icon.svg' alt="SUBMIT" />
@@ -282,17 +281,17 @@ const About = () => {
           <Box sx={styles.content} className="about-records-info">
             <Grid container spacing={9} alignItems="center">
               <Grid item md={5}>
-                <img src='./assets/trace-icon.svg' alt="TRACE" />
+                <img src='./assets/trace-icon.svg' alt="Trace icon" />
                 <Typography component="h3">
                   <Typography component="span">Trace.</Typography> We never delete records, so when an antibody changes, we still can trace its provenance.
                 </Typography>
 
                 <Typography>
-                  We never delete records, so even when an antibody disappears from a vendor&pos;s catalog, or is sold to another vendor, we can trace the provenance of that antibody. (Bandrowski et al).
+                  We never delete records, so even when an antibody disappears from a vendor's catalog, or is sold to another vendor, we can trace the provenance of that antibody. (Bandrowski et al).
                 </Typography>
               </Grid>
               <Grid item md={7}>
-                <img src='./assets/trace.webp' alt="TRACE" />
+                <img src='./assets/trace.webp' alt="Trace timeline" />
               </Grid>
             </Grid>
           </Box>

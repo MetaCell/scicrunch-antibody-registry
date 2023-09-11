@@ -129,6 +129,18 @@ export interface AbstractAntibody {
      * @memberof AbstractAntibody
      */
     'kitContents'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AbstractAntibody
+     */
+    'abTargetEntrezId'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AbstractAntibody
+     */
+    'abTargetUniprotId'?: string;
 }
 
 export const AbstractAntibodyClonalityEnum = {
@@ -266,6 +278,18 @@ export interface AddAntibody {
      * @memberof AddAntibody
      */
     'kitContents'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AddAntibody
+     */
+    'abTargetEntrezId'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AddAntibody
+     */
+    'abTargetUniprotId'?: string;
     /**
      * For company antibodies, the catalog number of the antibody. For personal/other antibodies, an identifier unique to the antibody.
      * @type {string}
@@ -405,6 +429,24 @@ export interface Antibody {
      */
     'lastEditTime'?: string;
     /**
+     * 
+     * @type {number}
+     * @memberof Antibody
+     */
+    'ix'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Antibody
+     */
+    'showLink'?: boolean;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof Antibody
+     */
+    'vendorUrl'?: Array<string>;
+    /**
      * Can include the following options: Unknown, Cocktail, Control, Isotype Control, Monoclonal, Monoclonal Secondary, Polyclonal, Polyclonal Secondary, Oligoclonal, Recombinant, Recombinant Monoclonal, Recombinant Monoclonal Secondary, Recombinant Polyclonal, Recombinant Polyclonal Secondary
      * @type {string}
      * @memberof Antibody
@@ -506,6 +548,18 @@ export interface Antibody {
      * @memberof Antibody
      */
     'kitContents'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Antibody
+     */
+    'abTargetEntrezId'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Antibody
+     */
+    'abTargetUniprotId'?: string;
     /**
      * For company antibodies, the catalog number of the antibody. For personal/other antibodies, an identifier unique to the antibody.
      * @type {string}
@@ -638,6 +692,24 @@ export interface AntibodyAllOf {
      * @memberof AntibodyAllOf
      */
     'lastEditTime'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AntibodyAllOf
+     */
+    'ix'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AntibodyAllOf
+     */
+    'showLink'?: boolean;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof AntibodyAllOf
+     */
+    'vendorUrl'?: Array<string>;
 }
 
 export const AntibodyAllOfStatusEnum = {
@@ -740,6 +812,25 @@ export interface FilterRequest {
      * @memberof FilterRequest
      */
     'startsWith'?: Array<KeyValuePair>;
+}
+/**
+ * 
+ * @export
+ * @interface IngestRequest
+ */
+export interface IngestRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof IngestRequest
+     */
+    'driveLinkOrId'?: string;
+    /**
+     * Whether to add directly to the current data without reset
+     * @type {boolean}
+     * @memberof IngestRequest
+     */
+    'hot'?: boolean;
 }
 /**
  * Utility type to represent a key-value object
@@ -893,6 +984,18 @@ export interface UpdateAntibody {
      * @memberof UpdateAntibody
      */
     'kitContents'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateAntibody
+     */
+    'abTargetEntrezId'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateAntibody
+     */
+    'abTargetUniprotId'?: string;
 }
 
 export const UpdateAntibodyClonalityEnum = {
@@ -1580,13 +1683,13 @@ export const IngestApiAxiosParamCreator = function (configuration?: Configuratio
         /**
          * Ingest antibody\'s csv data into the database
          * @summary Ingest antibody\'s csv data into the database
-         * @param {string} body The google drive file id of the zipped data to ingest.
+         * @param {IngestRequest} ingestRequest The google drive file id of the zipped data to ingest.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        ingest: async (body: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'body' is not null or undefined
-            assertParamExists('ingest', 'body', body)
+        ingest: async (ingestRequest: IngestRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'ingestRequest' is not null or undefined
+            assertParamExists('ingest', 'ingestRequest', ingestRequest)
             const localVarPath = `/ingest`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1599,6 +1702,8 @@ export const IngestApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication cookieAuth required
+
 
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
@@ -1606,7 +1711,7 @@ export const IngestApiAxiosParamCreator = function (configuration?: Configuratio
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(ingestRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1626,12 +1731,12 @@ export const IngestApiFp = function(configuration?: Configuration) {
         /**
          * Ingest antibody\'s csv data into the database
          * @summary Ingest antibody\'s csv data into the database
-         * @param {string} body The google drive file id of the zipped data to ingest.
+         * @param {IngestRequest} ingestRequest The google drive file id of the zipped data to ingest.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async ingest(body: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.ingest(body, options);
+        async ingest(ingestRequest: IngestRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.ingest(ingestRequest, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -1647,12 +1752,12 @@ export const IngestApiFactory = function (configuration?: Configuration, basePat
         /**
          * Ingest antibody\'s csv data into the database
          * @summary Ingest antibody\'s csv data into the database
-         * @param {string} body The google drive file id of the zipped data to ingest.
+         * @param {IngestRequest} ingestRequest The google drive file id of the zipped data to ingest.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        ingest(body: string, options?: any): AxiosPromise<void> {
-            return localVarFp.ingest(body, options).then((request) => request(axios, basePath));
+        ingest(ingestRequest: IngestRequest, options?: any): AxiosPromise<void> {
+            return localVarFp.ingest(ingestRequest, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1667,13 +1772,13 @@ export class IngestApi extends BaseAPI {
     /**
      * Ingest antibody\'s csv data into the database
      * @summary Ingest antibody\'s csv data into the database
-     * @param {string} body The google drive file id of the zipped data to ingest.
+     * @param {IngestRequest} ingestRequest The google drive file id of the zipped data to ingest.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof IngestApi
      */
-    public ingest(body: string, options?: AxiosRequestConfig) {
-        return IngestApiFp(this.configuration).ingest(body, options).then((request) => request(this.axios, this.basePath));
+    public ingest(ingestRequest: IngestRequest, options?: AxiosRequestConfig) {
+        return IngestApiFp(this.configuration).ingest(ingestRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

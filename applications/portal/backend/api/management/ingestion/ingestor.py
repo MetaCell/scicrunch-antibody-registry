@@ -76,10 +76,11 @@ class Ingestor:
     VENDOR_TABLE = Vendor.objects.model._meta.db_table
     ANTIBODIES_TMP_TABLE = 'tmp_table'
 
-    def __init__(self, data_paths: AntibodyDataPaths, connection):
+    def __init__(self, data_paths: AntibodyDataPaths, connection, hot=False):
         self.data_paths = data_paths
         self.connection = connection
         self.keycloak_service = KeycloakService()
+        self.hot=hot
         self.users_map = {}
         if data_paths.users:
             try:
@@ -93,18 +94,25 @@ class Ingestor:
             with connection.cursor() as cursor:
                 cursor.execute(statement, params)
 
+    def hot_ingest_antibodies(self):
+        self._insert_antibodies(self.ANTIBODIES_TMP_TABLE)
+
     def ingest(self):
         species_map = {}
-
-        self._truncate_tables()
+        if not self.hot:
+            self._truncate_tables()
         self.data_paths.vendors and self._insert_vendors(self.data_paths.vendors)
         self.data_paths.vendor_domains and self._insert_vendor_domains(self.data_paths.vendor_domains)
         self._insert_antibodies(self.ANTIBODIES_TMP_TABLE)
         species_map = self._insert_species(species_map)
         self._swap_antibodies(self.ANTIBODIES_TMP_TABLE, self.ANTIBODY_TABLE)
         self._insert_antibody_species(species_map)
-        self.data_paths.antibody_files and self._insert_antibody_files(self.data_paths.antibody_files)
-        self._reset_auto_increment()
+        try:
+            self.data_paths.antibody_files and self._insert_antibody_files(self.data_paths.antibody_files)
+        except Exception as e:
+            log.error(f"Cannot ingest antibody files: {str(e)}", exc_info=True)
+        if not self.hot:
+            self._reset_auto_increment()
         self._drop_tmp_table()
 
     @timed_class_method('Tables truncated')
@@ -199,6 +207,10 @@ class Ingestor:
             len_csv = sum(1 for _ in open(antibody_data_path, 'r'))
             for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype=D_TYPES)):
                 chunk = chunk.where(pd.notnull(chunk), None)
+                if self.hot:
+                    existing = set(str(ix) for ix in Antibody.objects.filter(ix__in=chunk.ix).values_list('ix', flat=True))
+                    chunk = chunk[~chunk.ix.isin(existing)]
+
                 chunk['uid_legacy'] = chunk['uid']
                 chunk['uid'] = chunk['uid_legacy'].apply(lambda x: self._get_keycloak_id(x))
                 chunk['catalog_num_search'] = chunk['catalog_num'].apply(catalog_number_chunked)
@@ -219,12 +231,13 @@ class Ingestor:
 
     @timed_class_method('Species added')
     def _insert_species(self, species_map):
-        get_species_stm = f"SELECT DISTINCT target_species FROM {self.ANTIBODIES_TMP_TABLE} " \
-                          f"UNION " \
-                          f"SELECT DISTINCT source_organism FROM {self.ANTIBODIES_TMP_TABLE}"
+        get_species_stm = f"""SELECT DISTINCT target_species FROM {self.ANTIBODIES_TMP_TABLE}
+                           UNION
+                           SELECT DISTINCT source_organism FROM {self.ANTIBODIES_TMP_TABLE}"""
+        new_species = {}
         with connection.cursor() as cursor:
             cursor.execute(get_species_stm)
-            species_id = 1
+            species_id = Specie.objects.all().count() + 1 if self.hot else 1
             for row in cursor:
                 specie_str = row[0]
                 if specie_str:
@@ -232,14 +245,23 @@ class Ingestor:
                         if not is_valid_specie(specie): continue
 
                         clean_specie = get_clean_species_str(specie)
+                        if self.hot:
+                            try:
+                                sp = Specie.objects.get(name=clean_specie)
+                                species_map[clean_specie] = sp.id
+                                continue
+                            except Specie.DoesNotExist:
+                                pass
+                            
                         if clean_specie not in species_map:
-                            species_map[clean_specie] = species_id
+                            new_species[clean_specie] = species_id
                             species_id += 1
             species_insert_stm = get_insert_values_into_table_stm(self.SPECIE_TABLE,
                                                                 ['name', 'id'],
-                                                                len(species_map.keys()))
+                                                                len(new_species.keys()))
             if len(species_map) > 0:
-                cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(species_map.items())))
+                cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(new_species.items())))
+        species_map.update(new_species)
         return species_map
 
     @timed_class_method('Antibodies added')
@@ -273,7 +295,9 @@ class Ingestor:
             logging.info("Inserting species from %s", antibody_data_path)
             for chunk in pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype=D_TYPES):
                 chunk = chunk.where(pd.notnull(chunk), None)
-
+                if self.hot:
+                    existing = set(str(ix) for ix in Antibody.objects.filter(ix__in=chunk.ix).values_list('ix', flat=True))
+                    chunk = chunk[~chunk.ix.isin(existing)]
                 species_params = []
                 for index, row in chunk.iterrows():
                     target_species = row['target_species']

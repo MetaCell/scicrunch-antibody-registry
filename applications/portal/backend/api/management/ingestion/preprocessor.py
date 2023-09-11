@@ -25,6 +25,11 @@ UNKNOWN_USERS = {'3483', '1473', '3208', '3519', '21828', '30083', '7650', '7574
                  '2209', '3082', '31464', '32106', '1282', '3671', '9132', '2892', '22915', '5047', '1175', '1883',
                  '31166', '8612', '8016', '7706'}
 
+antibodies_map_path: str = './antibodies_mapping.json'
+with open(antibodies_map_path, 'r') as f:
+    antibodies_map = json.load(f)
+
+
 @dataclass
 class AntibodyDataPaths:
     antibodies: str
@@ -74,65 +79,75 @@ def preprocess_vendor_domains(csv_path: str, vendors_map_path: str = './vendors_
         df_vendor_domain.to_csv(csv_path, index=False, mode='w+')
 
 
-def preprocess_antibodies(csv_paths: List[str], antibodies_map_path: str = './antibodies_mapping.json'):
+def to_pandas(filename):
+    if filename.endswith('.xlsx'):
+        return pd.read_excel(filename)
+    else:
+        return pd.read_csv(filename, chunksize=CHUNK_SIZE, dtype='unicode')
+
+
+def preprocess_antibodies(paths: List[str]):
     logging.info("Preprocessing antibodies")
-    with open(antibodies_map_path, 'r') as f:
-        antibodies_map = json.load(f)
-        for antibody_data_path in csv_paths:
-            logging.info(f"Processing {antibody_data_path} file")
-            tmp_antibody_data_path = antibody_data_path.replace(
-                '.csv', '_tmp.csv')
-            for i, chunk in enumerate(pd.read_csv(antibody_data_path, chunksize=CHUNK_SIZE, dtype='unicode')):
 
-                # converge null values to None
-                clean_df(chunk)
+    for antibody_data_path in paths:
+        logging.info(f"Processing {antibody_data_path} file")
+        tmp_antibody_data_path = antibody_data_path + '_tmp.csv'
 
-                # lowercase necessary columns
-                chunk["source_organism"] = chunk["source_organism"].str.lower()
-                chunk["link"] = chunk["link"].str.lower()
+        for i, chunk in enumerate(to_pandas(antibody_data_path)):
 
-                # point unknown vendor_id to None
-                chunk['vendor_id'] = chunk['vendor_id'].where(
-                    ~chunk['vendor_id'].isin(UNKNOWN_VENDORS), None)
+            # converge null values to None
+            clean_df(chunk)
 
-                # point unknown user_id to None
-                chunk['uid'] = chunk['uid'].where(
-                    ~chunk['uid'].isin(UNKNOWN_USERS), DEFAULT_UID)
+            # lowercase necessary columns
+            chunk["source_organism"] = chunk["source_organism"].str.lower()
+            chunk["link"] = chunk["link"].str.lower()
 
-                # point unknown commercial type to None
-                chunk['commercial_type'] = chunk['commercial_type'].where(
-                    chunk['commercial_type'].isin(
-                        {c[0] for c in CommercialType.choices}),
-                    None)
+            # point unknown vendor_id to None
+            chunk['vendor_id'] = chunk['vendor_id'].where(
+                ~chunk['vendor_id'].isin(UNKNOWN_VENDORS), None)
 
-                # point unknown clonality to 'unknown'
-                chunk['clonality'] = chunk['clonality'].where(
-                    chunk['clonality'].isin({c[0] for c in AntibodyClonality.choices}), 'unknown')
+            # point unknown user_id to None
+            chunk['uid'] = chunk['uid'].where(
+                ~chunk['uid'].isin(UNKNOWN_USERS), DEFAULT_UID)
 
-                # get rows that need custom update
-                relevant_rows = chunk.loc[chunk['ix'].isin(
-                    antibodies_map.keys())]
+            # point unknown commercial type to None
+            chunk['commercial_type'] = chunk['commercial_type'].where(
+                chunk['commercial_type'].isin(
+                    {c[0] for c in CommercialType.choices}),
+                None)
 
-                # apply custom update to relevant rows
-                for index, row in relevant_rows.iterrows():
-                    for atr in antibodies_map[row['ix']]:
-                        chunk.loc[chunk['ix'] == row['ix'],
-                                  atr] = antibodies_map[row['ix']][atr]
+            # point unknown clonality to 'unknown'
+            chunk['clonality'] = chunk['clonality'].where(
+                chunk['clonality'].isin({c[0] for c in AntibodyClonality.choices}), 'unknown')
 
-                # save chunk temp file
-                chunk.to_csv(tmp_antibody_data_path, mode='a',
-                             header=ANTIBODY_HEADER.keys() if i == 0 else False, index=False)
+            # get rows that need custom update
+            relevant_rows = chunk.loc[chunk['ix'].isin(
+                antibodies_map.keys())]
 
+            # apply custom update to relevant rows
+            for index, row in relevant_rows.iterrows():
+                for atr in antibodies_map[row['ix']]:
+                    chunk.loc[chunk['ix'] == row['ix'],
+                              atr] = antibodies_map[row['ix']][atr]
+
+            # save chunk temp file
+            chunk.to_csv(tmp_antibody_data_path, mode='a',
+                         header=ANTIBODY_HEADER.keys() if i == 0 else False, index=False)
+        if antibody_data_path.endswith('.csv'):
             replace_file(antibody_data_path, tmp_antibody_data_path)
 
 
 def preprocess_antibody_files(csv_path: str):
-    logging.info("Updating antibody files", csv_path)
+    logging.info("Updating antibody files %s", csv_path)
     df_antibody_files = pd.read_csv(csv_path)
     df_antibody_files['filename'] = df_antibody_files.apply(
         lambda row: get_antibody_persistence_directory(row['id'], os.path.basename(row['filename'])), axis=1)
-    df_antibody_files['timestamp'] = df_antibody_files.apply(
-        lambda row: datetime.utcfromtimestamp(row['timestamp']), axis=1)
+    try:
+        df_antibody_files['timestamp'] = df_antibody_files.apply(
+            lambda row: datetime.utcfromtimestamp(int(row['timestamp'])), axis=1)
+    except ValueError:
+        # timestamp is already in datetime format
+        pass
     df_antibody_files.to_csv(csv_path, index=False, mode='w+')
 
 
@@ -149,12 +164,12 @@ class Preprocessor:
 
         def get_metadata_file(file_name: str) -> str:
             fnames = glob.glob(os.path.join(
-                self.dest, '**', f"{file_name}.csv"), recursive=True)
+                self.dest, '**', f"{file_name}.*"), recursive=True)
             return fnames and fnames[0]
 
         metadata = AntibodyDataPaths(
             antibodies=glob.glob(os.path.join(self.dest, '**',
-                      f"{RAW_ANTIBODY_DATA_BASENAME}*.csv"), recursive=True),
+                                              f"{RAW_ANTIBODY_DATA_BASENAME}*.*"), recursive=True),
             vendors=get_metadata_file(RAW_VENDOR_DATA_BASENAME),
             vendor_domains=get_metadata_file(RAW_VENDOR_DOMAIN_DATA_BASENAME),
             users=get_metadata_file(RAW_USERS_DATA_BASENAME),
@@ -162,12 +177,14 @@ class Preprocessor:
         )
 
         if was_downloaded or os.getenv('FORCE_PREPROCESSING', False):
-            metadata.vendor_domains and preprocess_vendor_domains(metadata.vendor_domains)
+            metadata.vendor_domains and preprocess_vendor_domains(
+                metadata.vendor_domains)
             metadata.vendors and preprocess_vendors(metadata.vendors)
             metadata.antibodies and preprocess_antibodies(metadata.antibodies)
             metadata.users and preprocess_users(metadata.users)
             try:
-                metadata.antibody_files and preprocess_antibody_files(metadata.antibody_files)
+                metadata.antibody_files and preprocess_antibody_files(
+                    metadata.antibody_files)
             except Exception as e:
                 logging.exception("Failed to update antibody files")
 
