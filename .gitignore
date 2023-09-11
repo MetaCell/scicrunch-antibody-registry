@@ -1,6 +1,6 @@
 /cloud-harness
 .idea
-**/helm
+
 build/
 .vscode
 skaffold.yaml
@@ -10,3 +10,5 @@ skaffold.yaml
 /build
 /deployment/helm/*
 .overrides
+.hypothesis
+*.ipynb

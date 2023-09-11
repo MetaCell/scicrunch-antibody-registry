@@ -1,46 +1,69 @@
+from typing import List, Union
+
+from cloudharness import log
+from api.models import Antibody
+from api.services.user_service import UnrecognizedUser, get_current_user_id
+
 
 from fastapi import HTTPException
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 
-from typing import List
-import jwt
 from api.services import antibody_service
+from api.utilities.exceptions import AntibodyDataException
 
-from openapi.models import AddUpdateAntibody as AddUpdateAntibodyDTO
+from openapi.models import AddAntibody as AddAntibodyDTO, PaginatedAntibodies
+from openapi.models import UpdateAntibody as UpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO
 
-from cloudharness.auth import AuthClient
-from cloudharness.middleware import get_authentication_token
 
-def get_antibodies(page: int = 0, size: int = 50) -> List[AntibodyDTO]:
+def get_antibodies(page: int = 0, size: int = 50) -> PaginatedAntibodies:
     return antibody_service.get_antibodies(page, size)
 
-def get_user_id():
-    token = get_authentication_token()
+
+def get_user_id() -> str:
     try:
-        return jwt.decode(token, verify=False, algorithms='RS256')['sub']
-    except Exception as e:
+        return get_current_user_id()
+    except UnrecognizedUser:
         raise HTTPException(status_code=401, detail="Unrecognized user")
 
-def get_user_antibodies(page: int = 1, size: int = 50) -> List[AntibodyDTO]:
-    
-    return antibody_service.get_user_antibodies(get_user_id(), page, size)
 
-def create_antibody(body: AddUpdateAntibodyDTO) -> None:
+def get_user_antibodies(page: int = 1, size: int = 50) -> PaginatedAntibodies:
+    return antibody_service.get_user_antibodies(get_current_user_id(), page, size)
+
+
+def create_antibody(body: AddAntibodyDTO) -> Union[AntibodyDTO, JSONResponse]:
     try:
         return antibody_service.create_antibody(body, get_user_id())
-    except antibody_service.AntibodyDataException as e:
-        raise HTTPException(status_code=400, detail=dict(name=e.field_name, value=e.field_value))
+    except AntibodyDataException as e:
+        raise HTTPException(status_code=400, detail=dict(
+            name=e.field_name, value=e.field_value))
     except antibody_service.DuplicatedAntibody as e:
-        raise HTTPException(status_code=409, detail="Antibody already exist with this catalog number: %s" % e.ab_id)
+        return JSONResponse(status_code=409, content=jsonable_encoder(e.antibody))
+    except Exception as e:
+        log.error("Error creating antibody: %s", e, exc_info=True)
+        from pprint import pprint
+        pprint(body.dict())
+        raise e
 
 
-def get_antibody(antibody_id: int) -> AntibodyDTO:
+def get_antibody(antibody_id: int) -> List[AntibodyDTO]:
     return antibody_service.get_antibody(antibody_id)
 
 
-def update_antibody(antibody_id: str, body: AddUpdateAntibodyDTO) -> None:
-    return antibody_service.update_antibody(antibody_id, body)
+def update_user_antibody(accession_number: str, body: UpdateAntibodyDTO) -> AntibodyDTO:
+    try:
+        return antibody_service.update_antibody(get_user_id(), accession_number, body)
+    except AntibodyDataException as e:
+        raise HTTPException(status_code=400, detail=dict(
+            name=e.field_name, value=e.field_value))
 
 
 def delete_antibody(antibody_id: str) -> None:
     return antibody_service.delete_antibody(antibody_id)
+
+def get_by_accession(accession_number: int) -> AntibodyDTO:
+    try:
+        return antibody_service.get_antibody_by_accession(accession_number)
+    except Antibody.DoesNotExist as e:
+        raise HTTPException(status_code=404, detail=e.message)

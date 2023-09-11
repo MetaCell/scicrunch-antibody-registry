@@ -34,8 +34,16 @@ module.exports = env => {
         target: replaceHost( proxyTarget, 'portal'),
         secure: false,
         changeOrigin: true,
-        cookieDomainRewrite: {  "localhost": "osb.local" },
+        cookieDomainRewrite: {  "localhost": "areg" },
         withCredentials: true,
+      },
+      '/proxy/accounts-api/': {
+        target: env.ACCOUNTS_API_DOMAIN ? (env.ACCOUNTS_API_DOMAIN) : replaceHost(proxyTarget, 'api.accounts'),
+        secure: false,
+        changeOrigin: true,
+        cookieDomainRewrite: {  "localhost": "areg" },
+        withCredentials: true,
+        pathRewrite: { '^/proxy/accounts-api': '' }
       }
     },
   };

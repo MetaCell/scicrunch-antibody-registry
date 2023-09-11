@@ -1,14 +1,16 @@
 import React from "react";
+import { useHistory } from "react-router-dom";
 import { Box, Button, Stack, Tab, Tabs } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { GridToolbarColumnsButton } from "@mui/x-data-grid";
 import { HouseIcon, SendIcon, FilteringIcon } from "../icons";
-import { useUser, User } from "../../services/UserService";
+import { UserContext } from "../../services/UserService";
 import { ALLRESULTS } from "../../constants/constants";
 
 const TableToolbar = ({ showFilterMenu, activeTab }) => {
-  const user: User = useUser();
+  const user = React.useContext(UserContext)[0];
   const theme = useTheme();
+  const history = useHistory();
   return (
     <Box
       sx={(theme) => ({
@@ -41,7 +43,7 @@ const TableToolbar = ({ showFilterMenu, activeTab }) => {
           }
           iconPosition="start"
           label="All Results"
-          onClick={() => (window.location.href = "/")}
+          onClick={() => history.push("/")}
         />
         <Tab
           sx={{
@@ -62,7 +64,8 @@ const TableToolbar = ({ showFilterMenu, activeTab }) => {
           }
           iconPosition="start"
           label="My Submissions"
-          onClick={() => (window.location.href = "/submissions")}
+          className="btn-submissions"
+          onClick={() => history.push("/submissions")}
         />
       </Tabs>
       <Box display="flex" flexDirection="row">

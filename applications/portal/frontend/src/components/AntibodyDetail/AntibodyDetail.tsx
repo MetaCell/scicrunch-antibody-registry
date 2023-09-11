@@ -97,6 +97,7 @@ export const AntibodyDetail = () => {
   const { antibody_id } = useParams();
   const abId = antibody_id.slice(3);
   const [antibodies, setAntibodies] = useState<Antibody[]>(null);
+  const [error, setError] = useState<string>(null);
   const accession = document.location.hash ? document.location.hash.split("#")[1]: abId;
 
   const antibody = antibodies && (antibodies.find(a => a.accession === accession) || antibodies[0]);
@@ -118,13 +119,23 @@ export const AntibodyDetail = () => {
   const fetchAntibody = (id) => {
     getAntibody(id)
       .then((res) => {
+        if(res.length === 0){
+          setError("There is currently no public record with this antibody RRID. This is likely due to this record not yet being curated. Please contact the antibody registry curation team if this antibody is needed for your manuscript. abr-help -at- scicrunch -dot- org")
+        }
         return setAntibodies(res);
+      },
+      () => {
+        setError("An unexpected error occurred. Please try again later.")
       })
-      .catch((err) => alert(err));
   };
 
   
   useEffect(() => fetchAntibody(abId), []);
+  if(error) {
+    return (
+      <Alert sx={{ m: 7 }} severity="error">{error}</Alert>
+    )
+  }
   if (!antibody) {
     return (
       <Backdrop open={true} sx={{ zIndex: 1000 }}
@@ -153,7 +164,7 @@ export const AntibodyDetail = () => {
                   flexDirection="column"
                   alignItems="flex-start"
                 >
-                  <Typography variant="h6">Antibody details</Typography>
+                  <Typography className="title" variant="h6">Antibody details</Typography>
                   <Typography variant="caption">
                     Find all info about this record
                   </Typography>
@@ -166,37 +177,45 @@ export const AntibodyDetail = () => {
                 </Grid>
                 <Grid item xs={3}>
                   <Typography variant="h4">Name</Typography>
-                  <Typography variant="subtitle2">{antibody.abName}</Typography>
+                  <Typography className="ab-name" variant="subtitle2">{antibody.abName}</Typography>
                 </Grid>
                 <Grid item xs={3}>
                   <Typography variant="h4">ID</Typography>
-                  <Typography variant="subtitle2">
+                  <Typography className="ab-id" variant="subtitle2">
                     AB_{antibody.abId}
                   </Typography>
                 </Grid>
                 <Grid item xs={3}>
-                  <Typography variant="h4">Target antigen</Typography>
-                  <Typography variant="subtitle2">
-                    {antibody.abTarget} {antibody.targetSpecies}
+                  <Typography variant="h4">Catalog number</Typography>
+                  <Typography className="ab-catnum" variant="subtitle2">
+                    {antibody.catalogNum}
                   </Typography>
                 </Grid>
-                <Grid item xs={3}></Grid>
+                <Grid item xs={3} />
+                <Grid item xs={3}>
+                  <Typography variant="h4">Target antigen</Typography>
+                  <Typography className="ab-target" variant="subtitle2">
+                    {antibody.abTarget} - {antibody.targetSpecies.join(", ")}
+                  </Typography>
+                </Grid>
+                
                 <Grid item xs={3}>
                   <Typography variant="h4">Clonality</Typography>
-                  <Typography variant="subtitle2">
+                  <Typography className="ab-clonality" variant="subtitle2">
                     {antibody.clonality}
                   </Typography>
                 </Grid>
                 <Grid item xs={3}>
                   <Typography variant="h4">Clone ID</Typography>
-                  <Typography variant="subtitle2">
-                    {antibody.cloneId}
+                  <Typography className="ab-cloneid" variant="subtitle2">
+                    {antibody.cloneId || "N/A"}
                   </Typography>
                 </Grid>
+                <Grid item xs={3} />
                 <Grid item xs={3}>
                   <Typography variant="h4">Host organism</Typography>
-                  <Typography variant="subtitle2">
-                    {antibody.sourceOrganism}
+                  <Typography className="ab-sourceorganism" variant="subtitle2">
+                    {antibody.sourceOrganism || "N/A"}
                   </Typography>
                 </Grid>
               </Grid>
@@ -206,7 +225,7 @@ export const AntibodyDetail = () => {
                   <Typography variant="subtitle1">Proper citation</Typography>
                 </Grid>
                 <Grid item xs={8}>
-                  <Typography variant="subtitle2">{citation}</Typography>
+                  <Typography className="ab-propercitation" variant="subtitle2">{citation}</Typography>
                   <CopyToClipboard text={citation}>
                     <Button
                       variant="text"
@@ -216,6 +235,7 @@ export const AntibodyDetail = () => {
                       }
                       onClick={handleClickCitation}
                       sx={classes.buttonText}
+                      className="copy-citation-button"
                     >
                       Copy citation
                     </Button>
@@ -246,9 +266,8 @@ export const AntibodyDetail = () => {
                   <Typography variant="subtitle1">Comments</Typography>
                 </Grid>
                 <Grid item xs={8}>
-                  <Typography variant="subtitle2">
-                    {antibody.comments}
-                  </Typography>
+                  <Typography className="ab-comments" variant="subtitle2" dangerouslySetInnerHTML={{ __html: antibody.comments }} />
+
                 </Grid>
               </Grid>
               <Divider />
@@ -257,11 +276,11 @@ export const AntibodyDetail = () => {
                   <Typography variant="subtitle1">Vendor</Typography>
                 </Grid>
                 <Grid item xs={8}>
-                  <Typography variant="subtitle2">
+                  <Typography className="ab-vendorname" variant="subtitle2">
                     {antibody.vendorName}
                   </Typography>
 
-                  <Button
+                  {antibody.url && <Button
                     variant="text"
                     size="small"
                     sx={classes.buttonText}
@@ -269,9 +288,10 @@ export const AntibodyDetail = () => {
                       <ExternalLinkIcon stroke={theme.palette.primary.dark} />
                     }
                     href={antibody.url}
+                    className="open-vendor-website-button"
                   >
                     Open in vendor website
-                  </Button>
+                  </Button>}
                 </Grid>
               </Grid>
               <Divider />
@@ -293,6 +313,7 @@ export const AntibodyDetail = () => {
                           <CopyIcon stroke={theme.palette.grey[700]} />
                         }
                         sx={classes.buttonGrey}
+                        className="copy-link-button"
                       >
                         Copy link
                       </Button>
@@ -307,7 +328,7 @@ export const AntibodyDetail = () => {
           </Grid>
         </Grid>
         {antibodies && antibodies.length > 1 && 
-        <Alert severity="info">Multiple antibodies have been found for this id: showing accession AB_{antibody.accession}. Other entries:&nbsp;
+        <Alert severity="info" className="ab-duplicates-info">Multiple antibodies have been found for this id: showing accession AB_{antibody.accession}. Other entries:&nbsp;
           {antibodies.filter((a) => a.accession != accession).map((a, i, arr) => <>
           <Link href={"#" + a.accession}>
             AB_{a.accession}

@@ -1,23 +1,53 @@
-import React, { useState } from 'react'
-import { getSearchAtibodies } from '../../services/AntibodiesService'
+import React, { useState, useCallback, useEffect } from 'react'
+import { getSearchAntibodies, getAntibodies } from '../../services/AntibodiesService'
 import SearchContext from './SearchContext'
+import { getDataInfo } from "../../services/InfoService";
 
 const SearchState = (props) => {
+  const [baseData, setBaseData] = useState({
+    total: 0,
+    lastupdate: new Date()
+  });
 
   const [searchState, setSearch] = useState({
-    loader:false,
+    loader:true,
     activeSearch:'',
     totalElements:0,
     searchedAntibodies:[]
   })
-  const getFilteredAntibodies = async(query:string) => {
+
+  useEffect(() => {
+    getDataInfo().then((res) => 
+      setBaseData({ total: res.total, lastupdate: new Date(res.lastupdate) })
+    ).catch((err) => {
+      console.log("Error: ", err)
+    })
+    getAntibodies()
+      .then((res) => {
+        setSearch({
+          loader:false,
+          activeSearch: "",
+          totalElements: res.totalElements,
+          searchedAntibodies: res.items
+        })
+      })
+      .catch((err) => console.error(err))
+  
+  },[]);
+
+
+ 
+
+
+
+  const getFilteredAntibodies = async (query:string) => {
     setSearch((prev) => ({
       ...prev,
       loader:true
     }))
     const _=undefined
     try {
-      const filteredAntibodies = await getSearchAtibodies(_,_,query)
+      const filteredAntibodies = await getSearchAntibodies(_,_,query)
       setSearch({
         loader:false,
         activeSearch:query,
@@ -37,11 +67,21 @@ const SearchState = (props) => {
 
   const clearSearch =() => {
     setSearch({
-      loader:false,
+      loader:true,
       activeSearch:'',
       totalElements:0,
       searchedAntibodies:[]
     })
+    getAntibodies()
+      .then((res) => {
+        setSearch({
+          loader:false,
+          activeSearch: "",
+          totalElements: res.totalElements,
+          searchedAntibodies: res.items
+        })
+      })
+      .catch((err) => console.error(err))
   }
 
   return (
@@ -49,7 +89,8 @@ const SearchState = (props) => {
       loader: searchState.loader,
       activeSearch: searchState.activeSearch,
       searchedAntibodies: searchState.searchedAntibodies,
-      totalElements: searchState.totalElements,
+      totalElements: searchState.activeSearch ? searchState.totalElements: baseData.total,
+      lastUpdate: baseData.lastupdate,
       getFilteredAntibodies,
       clearSearch,
     }}>

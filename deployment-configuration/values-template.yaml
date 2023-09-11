@@ -2,4 +2,14 @@ domain: areg.metacell.us
 mainapp: areg-portal
 tls: true
 backup:
-  active: false
+  active: true
+  dir: /backups
+  keep_days: '7'
+  keep_months: '6'
+  keep_weeks: '4'
+  resources:
+    limits: {cpu: 50m, memory: 64Mi}
+    requests: {cpu: 25m, memory: 32Mi}
+  schedule: '0 * * * *'
+  suffix: .gz
+  volumesize: 20Gi

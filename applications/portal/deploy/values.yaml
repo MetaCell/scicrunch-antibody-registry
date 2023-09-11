@@ -6,6 +6,7 @@ harness:
     auto: true
   deployment:
     auto: true
+    replicas: 1
     port: 8080
   livenessProbe:
     path: /api/live
@@ -22,8 +23,10 @@ harness:
       - argo
     soft:
       - pgadmin
+      - accounts-api
   use_services:
     - name: common
+    - name: accounts_api
   uri_role_mapping:
     - uri: /admin/*
       roles:
@@ -47,9 +50,22 @@ harness:
   database:
     auto: true
     type: postgres
-    size: 10Gi
+    size: 40Gi
+    postgres:
+      image: postgres:13
+      initialdb: antibody_registry
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 200m
+      limits:
+        memory: 4Gi
+        cpu: 8
   accounts:
     roles:
       - administrator
       - manager
       - user
+  test:
+    e2e:
+      enabled: true

@@ -51,7 +51,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/AddUpdateAntibody'
+                            $ref: '#/components/schemas/AddAntibody'
                 required: true
             tags:
                 - antibody
@@ -67,6 +67,10 @@ paths:
                         application/json: {}
                     description: some valiidation error. The name of the errored field is returned
                 '409':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Antibody'
                     description: >-
                         Raised when the antibody is duplicated (catalog number already present for the same
                         vendor)
@@ -126,9 +130,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                type: array
-                                items:
-                                    $ref: '#/components/schemas/Antibody'
+                                $ref: '#/components/schemas/PaginatedAntibodies'
                     description: Successful response - returns an array of `Antibody` entities.
             operationId: filterAntibodies
             summary: Search on Antibodies with custom filters
@@ -190,13 +192,16 @@ paths:
                 content:
                     application/json:
                         schema:
-                            type: string
+                            $ref: '#/components/schemas/IngestRequest'
                 required: true
             tags:
                 - ingest
             responses:
                 '200':
                     description: Successful response - returns an 200.
+            security:
+                -
+                    cookieAuth: []
             operationId: ingest
             summary: Ingest antibody's csv data into the database
             description: Ingest antibody's csv data into the database
@@ -221,25 +226,6 @@ paths:
             operationId: getAntibody
             summary: Get a Antibody
             description: Gets the details of a single instance of a `Antibody`.
-        put:
-            requestBody:
-                description: Updated `Antibody` information.
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/AddUpdateAntibody'
-                required: true
-            tags:
-                - antibody
-            responses:
-                '202':
-                    description: Successful response.
-            security:
-                -
-                    cookieAuth: []
-            operationId: updateAntibody
-            summary: Update a Antibody
-            description: Updates an existing `Antibody`.
         delete:
             tags:
                 - antibody
@@ -311,22 +297,69 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/DataInfo'
                     description: Returns info
+    '/antibodies/user/{accession_number}':
+        summary: Path used to manage a single submitted Antibody.
+        description: >-
+            The REST endpoint/path used to update a single instances of an `Antibody` submitted.  This path
+            contains `PUT` operation used to perform the update task.
+        get:
+            tags:
+                - antibody
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Antibody'
+                    description: antibody found
+                '400':
+                    content:
+                        application/json: {}
+                    description: Accession number is in the wrong format
+                '401':
+                    content:
+                        application/json: {}
+                    description: The antibody cannot be accessed by this user
+                '404':
+                    content:
+                        application/json: {}
+                    description: Not found
+            operationId: getByAccession
+            summary: Get antibody by the accession number
+        put:
+            requestBody:
+                description: Updated `Antibody` information.
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateAntibody'
+                required: true
+            tags:
+                - antibody
+            responses:
+                '202':
+                    description: Successful response.
+            security:
+                -
+                    cookieAuth: []
+                -
+                    bearerAuth: []
+            operationId: updateUserAntibody
+            summary: Update a submitted Antibody
+            description: Updates a submitted `Antibody`.
+        parameters:
+            -
+                examples:
+                    ex1:
+                        value: '1234567'
+                name: accession_number
+                description: An unique identifier for a `Antibody` -- stripped from "AB_"
+                schema:
+                    type: integer
+                in: path
+                required: true
 components:
     schemas:
-        AddUpdateAntibody:
-            description: The data type associated with the POST and PUT methods of the antibody resource
-            type: object
-            allOf:
-                -
-                    required:
-                        - url
-                    type: object
-                    properties:
-                        url:
-                            description: ''
-                            type: string
-                -
-                    $ref: '#/components/schemas/AbstractAntibody'
         FilterRequest:
             description: The search request body that allows filtering combinations over multiple columns
             type: object
@@ -416,9 +449,7 @@ components:
             type: object
             allOf:
                 -
-                    required:
-                        - abId
-                        - insertTime
+                    required: []
                     type: object
                     properties:
                         accession:
@@ -473,13 +504,24 @@ components:
                             format: date-time
                             description: ''
                             type: string
+                        ix:
+                            description: ''
+                            type: integer
+                        showLink:
+                            description: ''
+                            type: boolean
+                        vendorUrl:
+                            description: ''
+                            type: array
+                            items:
+                                type: string
                 -
                     $ref: '#/components/schemas/AbstractAntibody'
+                -
+                    $ref: '#/components/schemas/AntibodyCoreId'
         AbstractAntibody:
             description: The common fields between all REST operations for the antibody resource.
-            required:
-                - catalogNum
-                - commercialType
+            required: []
             type: object
             properties:
                 clonality:
@@ -527,12 +569,6 @@ components:
                     description: The symbol of the antigen molecule that the antibody was raised against.
                     type: string
                     example: LRKK2
-                catalogNum:
-                    description: |-
-                        For company antibodies, the catalog number of the antibody.
-                        For personal/other antibodies, an identifier unique to the antibody.
-                    type: string
-                    example: N176A/35
                 cloneId:
                     description: >-
                         The identifier given by the manufacturer or creator of monoclonal antibodies,
@@ -584,11 +620,6 @@ components:
                     description: |
                         Protein identifier from UNIPROT
                     type: string
-                vendorName:
-                    description: |
-                        The name of the company or laboratory for commercial antibodies.
-                        The principal investigator name for personal/other antibodies.
-                    type: string
                 applications:
                     description: ''
                     type: array
@@ -601,6 +632,12 @@ components:
                     example: >-
                         Sheep polyclonal anti-FSH antibody labeled with acridinium ester. Mouse monoclonal
                         anti-FSH antibody covalently coupled to paramagnetic particles.
+                abTargetEntrezId:
+                    description: ''
+                    type: string
+                abTargetUniprotId:
+                    description: ''
+                    type: string
         DataInfo:
             description: Information about the data in the system
             required:
@@ -616,6 +653,62 @@ components:
                     format: date
                     description: ''
                     type: string
+        AddAntibody:
+            description: The data type associated with the POST and PUT methods of the antibody resource
+            type: object
+            allOf:
+                -
+                    required:
+                        - url
+                    type: object
+                    properties:
+                        url:
+                            description: ''
+                            type: string
+                -
+                    $ref: '#/components/schemas/AbstractAntibody'
+                -
+                    $ref: '#/components/schemas/AntibodyCoreId'
+        AntibodyCoreId:
+            description: Related attributes used to uniquely identify antibodies
+            required: []
+            type: object
+            properties:
+                catalogNum:
+                    description: |-
+                        For company antibodies, the catalog number of the antibody.
+                        For personal/other antibodies, an identifier unique to the antibody.
+                    type: string
+                    example: N176A/35
+                vendorName:
+                    description: |-
+                        The name of the company or laboratory for commercial antibodies.
+                        The principal investigator name for personal/other antibodies.
+                    type: string
+        UpdateAntibody:
+            description: The data type associated with the POST and PUT methods of the antibody resource
+            type: object
+            allOf:
+                -
+                    required:
+                        - url
+                    type: object
+                    properties:
+                        url:
+                            description: ''
+                            type: string
+                -
+                    $ref: '#/components/schemas/AbstractAntibody'
+        IngestRequest:
+            description: ''
+            type: object
+            properties:
+                driveLinkOrId:
+                    description: ''
+                    type: string
+                hot:
+                    description: Whether to add directly to the current data without reset
+                    type: boolean
     responses:
         PaginatedAntibodies:
             content:

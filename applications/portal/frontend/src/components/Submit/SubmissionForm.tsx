@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 
 import { Box, Button, Container, Dialog, Toolbar } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -31,14 +32,14 @@ const SubmissionForm = (props) => {
   const [antibodyId, setAntibodyId] = useState("");
   const [apiResponse, setApiResponse] = useState({ status: 0, detail: "" });
 
+  const history = useHistory();
+
   const handleTypeSelector = (value: string) => {
     setSelectedType(value);
   };
 
   const handleClose = () => {
-    window.location.href = "/";
-    setSelectedType("commercial");
-    setAntibodyId("");
+    history.push("/");
   };
 
   return (
@@ -46,13 +47,14 @@ const SubmissionForm = (props) => {
       fullScreen
       open={true}
       onClose={handleClose}
+      id="dialog-submission-form"
       PaperProps={{
         style: {
           backgroundColor: theme.palette.grey[50],
         },
       }}
     >
-      <Box sx={classes.header}>
+      <Box sx={classes.header} className="buttons-container">
         <Container maxWidth="xl">
           <Toolbar sx={classes.header} disableGutters>
             <Button
@@ -60,6 +62,7 @@ const SubmissionForm = (props) => {
               variant="contained"
               color="info"
               startIcon={<CloseIcon fontSize="small" />}
+              className="btn-close btn-close--visible"
             >
               Close
             </Button>
@@ -68,19 +71,22 @@ const SubmissionForm = (props) => {
               src="./assets/logo.svg"
               title="Antibody Registry"
               justifySelf="center"
+              className="logo"
             />
             <Button
               startIcon={<CloseIcon fontSize="small" />}
+              onClick={handleClose}
               variant="contained"
               color="info"
               sx={{ visibility: "hidden" }}
+              className="btn-close btn-close--hidden"
             >
               Close
             </Button>
           </Toolbar>
         </Container>
       </Box>
-      <Box sx={{ height: "100%" }}>
+      <Box sx={{ height: "100%" }} className="container-steps">
         <MultiStep>
           <AbTypeStep
             label="Type of Antibody"
@@ -90,6 +96,7 @@ const SubmissionForm = (props) => {
             next={props.next}
             previous={props.previous}
             hasPrevious={props.hasPrevious}
+            
           />
 
           {selectedType === "commercial" ? (

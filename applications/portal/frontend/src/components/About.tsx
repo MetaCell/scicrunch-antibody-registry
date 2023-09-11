@@ -1,5 +1,5 @@
 import React from 'react'
-import { makeStyles } from '@mui/styles';
+
 import { Box, Button, Container, Divider, Grid, Link, Typography } from '@mui/material';
 import Slider from "react-slick";
 import { vars } from "../theme/variables";
@@ -8,7 +8,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 const { footerBg, whiteColor, sepratorColor, primaryColor, contentBg, contentBorderColor, primaryTextColor, bannerHeadingColor } = vars;
 
-const useStyles = makeStyles(() => ({
+const styles = {
   footer: {
     background: footerBg,
     height: '5rem',
@@ -141,10 +141,10 @@ const useStyles = makeStyles(() => ({
   m0: {
     margin: '0 !important',
   }
-}));
+};
 
 const About = () => {
-  const classes = useStyles();
+
   const settings = {
     dots: false,
     autoplay: true,
@@ -165,11 +165,8 @@ const About = () => {
     { name: 'jesselllab', url: 'https://jesselllab.com/' },
     { name: 'encorbio', url: 'https://encorbio.com/' },
     { name: 'biolegend', url: 'https://www.biolegend.com/' },
-    { name: 'fortis', url: 'https://www.fortislife.com/' },
     { name: 'leinco', url: 'https://www.leinco.com/' },
     { name: 'jacksonimmuno', url: 'https://www.jacksonimmuno.com/' },
-    { name: 'phosphosolutions', url: 'https://www.phosphosolutions.com/' },
-    { name: 'bethyl', url: 'https://www.bethyl.com/' },
     { name: 'dshb', url: 'http://dshb.biology.uiowa.edu/' },
     { name: 'immunostar', url: 'http://immunostar.com/' },
     { name: 'neuromab', url: 'http://neuromab.ucdavis.edu/' },
@@ -181,20 +178,25 @@ const About = () => {
     { name: 'miltenyibiotec', url: 'https://www.miltenyibiotec.com/US-en/' },
     { name: 'revmab', url: 'https://www.revmab.com/' },
     { name: 'southernbiotech', url: 'https://www.southernbiotech.com/' },
-    { name: 'stressmarq', url: 'https://www.stressmarq.com/?v=7516fd43adaa' },
     { name: 'wagner', url: 'http://gwagner.med.harvard.edu/' },
     { name: 'zebrafish', url: 'https://zebrafish.org/home/guide.php' },
     { name: 'genetex', url: 'https://www.genetex.com/' },
-    { name: 'encorbio', url: 'https://www.activemotif.com/' },
     { name: 'licor', url: 'https://www.licor.com/' },
     { name: 'hytest', url: 'https://www.hytest.fi/home' },
-    { name: 'cytoskeleton', url: 'https://www.cytoskeleton.com/' },
+    { name: 'Ansh Labs', url: 'https://www.anshlabs.com/', img: './assets/partners/anshlabs.png' },
+    { name: 'Oasis Biofarm', url: 'https://www.oasisbiofarm.net', img: './assets/partners/oasis.png' },
+    { name: 'Nittobo Medical', url: 'https://www.nittobo.co.jp/', img: './assets/partners/Nittobo.png' },
+    { name: 'SICGEN', url: 'https://sicgen.pt/', img: './assets/partners/Sicgen_antibodies.png' },
+    { name: 'Sino Biological', url: 'https://www.sinobiological.com/', img: './assets/partners/Sino-Biological.png' },
+    { name: 'Niels Danbolt University of Oslo', url: 'https://www.uio.no/', img: './assets/partners/University_of_Oslo.png' },
+    { name: 'NIH', url: 'https://www.nhpreagents.org/', img: './assets/partners/NIH.png' },
+    { name: 'ichorbio', url: 'https://ichor.bio/', img: './assets/partners/ichorbio.png' },
   ]
   const history = useHistory();
   const navigate = () => history.push('/');
   return (
     <>
-      <Box className={classes.banner}>
+      <Box sx={styles.banner} className="about-banner">
         <Container maxWidth="xl">
           <Typography>
             <img src='./assets/logo-dark.svg' alt="LOGO" />
@@ -203,22 +205,34 @@ const About = () => {
           <img src='./assets/ipad.webp' alt="" />
         </Container>
       </Box>
-      <Box className={classes.mainContent}>
-        <Box className={classes.content}>
-          <Typography align='center' marginBottom={1.5} component="h3">
+      <Box sx={styles.mainContent} className="about-main">
+        <Box sx={styles.content} className="about-content">
+          <Typography variant="body1" align='center' marginBottom={1.5} component="h3">
             Antibody Registry Partners
           </Typography>
 
-          <Typography align='center' marginBottom={8}>
-            We would like to thank our partners, who submit data to us regularly making author's jobs easier. Would you like to become a partner? <Link>Inquire here</Link>.
+          <Typography variant="body1" align='center' marginBottom={8}>
+            We would like to thank our partners, who submit data to us regularly making author's jobs easier. Would you like to become a partner? <Link href="/membership">Inquire here</Link>.
           </Typography>
 
-          <Slider {...settings}>
+          <Slider {...settings} className="about-slider">
             {
-              partners.map((elementInArray, index) => (
-                <Box px={3} key={index}>
-                  <a href={elementInArray.url} target="_blank" rel="noreferrer">
-                    <img src={`./assets/partners/${index+1}.svg`} alt={elementInArray.name}/>
+              partners.map((partner, index) => (
+                <Box px={3} key={index} className="partner">
+                  <a href={partner.url} target="_blank" rel="noreferrer">
+                    <Box sx={{
+                      display: 'flex !important',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '85px',
+                      width: '150px',
+                    }}>
+                      <Box
+                        component="img" src={partner.img || `./assets/partners/${partner.name}.svg`}
+                        alt={partner.name}
+                        title={partner.name}
+                        sx={{  filter: "grayscale(1)", width: '100%', '&:hover': { opacity: 0.9 } }} />
+                    </Box>
                   </a>
                 </Box>
               )
@@ -226,12 +240,12 @@ const About = () => {
             }
           </Slider>
         </Box>
-        <Container maxWidth="xl">
+        <Container maxWidth="xl" className="about-search-info">
           <Divider />
-          <Box className={classes.content}>
+          <Box sx={styles.content}>
             <Grid container spacing={9} alignItems="center">
               <Grid item md={5}>
-                <img src='./assets/search-icon.svg' alt="SEARCH" />
+                <img src='./assets/search-icon.svg' alt="Search icon" />
                 <Typography component="h3">
                   <Typography component="span">Search.</Typography> The Antibody Registry gives researchers a way to universally identify antibodies used in their research.
                 </Typography>
@@ -241,15 +255,15 @@ const About = () => {
                 </Typography>
               </Grid>
               <Grid item md={7}>
-                <img src='./assets/search.svg' alt="SEARCH" />
+                <img src='./assets/search.svg' alt="Search result skeleton" />
               </Grid>
             </Grid>
           </Box>
 
-          <Box className={classes.content}>
+          <Box sx={styles.content} className="about-submit-info">
             <Grid container spacing={9} alignItems="center">
               <Grid item md={7}>
-                <img src='./assets/submit.svg' alt="SUBMIT" />
+                <img src='./assets/submit.svg' alt="Plus icon" />
               </Grid>
               <Grid item md={5}>
                 <img src='./assets/submit-icon.svg' alt="SUBMIT" />
@@ -264,10 +278,10 @@ const About = () => {
             </Grid>
           </Box>
 
-          <Box className={classes.content}>
+          <Box sx={styles.content} className="about-records-info">
             <Grid container spacing={9} alignItems="center">
               <Grid item md={5}>
-                <img src='./assets/trace-icon.svg' alt="TRACE" />
+                <img src='./assets/trace-icon.svg' alt="Trace icon" />
                 <Typography component="h3">
                   <Typography component="span">Trace.</Typography> We never delete records, so when an antibody changes, we still can trace its provenance.
                 </Typography>
@@ -277,15 +291,15 @@ const About = () => {
                 </Typography>
               </Grid>
               <Grid item md={7}>
-                <img src='./assets/trace.webp' alt="TRACE" />
+                <img src='./assets/trace.webp' alt="Trace timeline" />
               </Grid>
             </Grid>
           </Box>
 
-          <Box className={`${classes.content} ${classes.contentWithBg}`}>
+          <Box sx={{ ...styles.content, ...styles.contentWithBg }} className="about-database-info">
             <Grid container spacing={9} alignItems="center">
               <Grid item md={3}>
-                <Typography component="h3" className={classes.m0}>
+                <Typography component="h3" sx={styles.m0}>
                   Integration with The Journal of Comparative Neurology
                 </Typography>
               </Grid>
@@ -298,19 +312,19 @@ const About = () => {
           </Box>
         </Container>
       </Box>
-      <Box className={`${classes.banner} ${classes.bannerWithBg}`}>
+      <Box sx={{ ...styles.banner, ...styles.bannerWithBg }} className="about-call">
         <Container maxWidth="xl">
           <Typography>
             Ready to get started?
           </Typography>
-          <Button variant="contained" color='secondary' onClick={navigate}>Search for antibodies</Button>
-          <img src="./assets/ipad.webp" alt="" />
+          <Button className="go-home-button" variant="contained" color='secondary' onClick={navigate}>Search for antibodies</Button>
+          <img src="./assets/ipad.webp" width="100%" alt="" />
         </Container>
       </Box>
-      <Box className={classes.footer}>
-        <Typography>
+      <Box sx={styles.footer} className="about-footer">
+        <Typography variant="body1">
           Powered by
-          <a href="https://www.metacell.us/" target="_blank">
+          <a href="https://www.metacell.us/" target="_blank" rel="noreferrer">
             <img src='./assets/matacell.svg' alt="metacell" />
           </a>
         </Typography>

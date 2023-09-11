@@ -2,12 +2,13 @@ import React from "react";
 
 import { useTheme } from "@mui/system";
 
-import { Button, Toolbar, Container, Box, Stack } from "@mui/material";
+import { Button, Toolbar, Container, Box, Stack,  Backdrop,
+  CircularProgress, } from "@mui/material";
 
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DoneIcon from "@mui/icons-material/Done";
-import Steeper from "./Steeper";
+import Stepper from "./Stepper";
 
 interface NavigationProps {
   hasPrevious?: Boolean;
@@ -37,10 +38,11 @@ export const StepNavigation = (props: NavigationProps) => {
     },
   };
   return (
+    <>{props.formik?.isSubmitting && <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={true} ><CircularProgress color="primary" /></Backdrop>}
     <Toolbar sx={classes.toolbar}>
       <Container maxWidth="xl">
-        <Box sx={classes.content}>
-          <Steeper
+        <Box sx={classes.content} className="form-steps">
+          <Stepper
             activeStep={props.activeStep}
             //totalSteps={props.totalSteps}
           />
@@ -51,6 +53,7 @@ export const StepNavigation = (props: NavigationProps) => {
               color="info"
               onClick={props.previous}
               startIcon={<ChevronLeftIcon fontSize="small" />}
+              className="previous-button"
             >
               Previous
             </Button>
@@ -61,8 +64,9 @@ export const StepNavigation = (props: NavigationProps) => {
                 startIcon={<DoneIcon fontSize="small" />}
                 type="submit"
                 disabled={
-                  props.formik && !(props.formik.isValid && props.formik.dirty)
+                  props.formik && !(props.formik.isValid && props.formik.dirty) || props.formik.isSubmitting
                 }
+                className="submit-button"
               >
                 Submit
               </Button>
@@ -72,6 +76,7 @@ export const StepNavigation = (props: NavigationProps) => {
                 color="secondary"
                 endIcon={<ChevronRightIcon fontSize="small" />}
                 onClick={(e) => props.next(e)}
+                className="next-button"
               >
                 Next
               </Button>
@@ -80,6 +85,7 @@ export const StepNavigation = (props: NavigationProps) => {
         </Box>
       </Container>
     </Toolbar>
+    </>
   );
 };
 

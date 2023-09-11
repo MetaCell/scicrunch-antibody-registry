@@ -13,17 +13,18 @@ import {
 import Searchbar from "./Searchbar";
 import NavLinks from "./NavLinks";
 import HelpMenu from "./HelpMenu";
-import { useUser, User } from "../../services/UserService";
+import { UserContext, User } from "../../services/UserService";
 import UserAccountMenu from "./UserAccountMenu";
+import logo from "../../assets/logo.svg";
 
 const Navbar = () => {
-  const user: User = useUser();
+  const user: User = React.useContext(UserContext)[0];
   const login = () => {
     window.location.href = "/login";
   };
   return (
-    <Box>
-      <AppBar elevation={0}>
+    <Box className="container-navbar">
+      <AppBar className="top-bar" elevation={0}>
         <Container maxWidth="xl">
           <Toolbar
             sx={{
@@ -43,8 +44,8 @@ const Navbar = () => {
                   }}
                 >
                   <Stack direction="row" spacing={2}>
-                    <Link href="/">
-                      <img src="./assets/logo.svg" title="Antibody Registry" />
+                    <Link className="logo" href="/">
+                      <img src={logo} title="Antibody Registry" />
                     </Link>
 
                     <Divider
@@ -74,7 +75,7 @@ const Navbar = () => {
                   <Stack direction="row" spacing={1.5}>
                     <HelpMenu />
                     {!user ? (
-                      <Button onClick={login}>Log in / Register</Button>
+                      <Button className="btn-login" onClick={login}>Log in / Register</Button>
                     ) : (
                       <UserAccountMenu user={user} />
                     )}

@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useContext } from "react";
 import Pluralize from "pluralize";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import {
+  Alert,
   AppBar,
   Box,
   Button,
@@ -13,7 +14,6 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { AddAntibodyIcon, DownloadIcon } from "../icons";
 import TableToolbar from "./TableToolbar";
-import { getDataInfo } from "../../services/InfoService";
 import searchContext from "../../context/search/SearchContext";
 
 interface Props {
@@ -32,32 +32,13 @@ const HideOnScroll = (props: Props) => {
   return <Box display={trigger ? "none" : "block"}>{children}</Box>;
 };
 
-const HomeHeader = (props) => {
+const HomeHeader = ({ activeSelection, handleExport, showFilterMenu, activeTab, shownResultsNum }) => {
   const theme = useTheme();
-  const [records, setRecords] = useState<number>();
-  const [lastupdate,setLastupdate] = useState<string>();
-  const { activeSelection, handleExport, showFilterMenu, activeTab } = props;
-  const { activeSearch, totalElements } = useContext(searchContext)
-  const fetchRecords = () => {
-    getDataInfo()
-      .then((res) => {
-        setLastupdate(res.lastupdate);
-        activeSearch === ''
-          ? setRecords(res.total)
-          : setRecords(totalElements)
-      }).catch((err) => {
-        console.log("Error: ", err)
-      })
-  }
-  useEffect(fetchRecords,[activeSearch]);
-
-  const date = new Date(lastupdate);
-  const day = date.toLocaleString('en-US', { day: '2-digit' });
-  const month = date.toLocaleString('en-US', { month:'long' });
-  const dayOfWeek = date.toLocaleString('en-US',{ weekday:'long' })
-
+ 
+  const { activeSearch, totalElements, lastUpdate } = useContext(searchContext)
+  const showAlert = shownResultsNum < totalElements && activeSearch;
   return (
-    <Box>
+    <Box className="container-home-header">
       <AppBar elevation={0} sx={{ top: "4.5rem" }}>
         <Container maxWidth="xl">
           <Stack direction="column" spacing={1.5} mb={1} width="100%">
@@ -76,13 +57,15 @@ const HomeHeader = (props) => {
                         borderRadius={2}
                         py={0.25}
                         px={1.25}
+                        className="search-info"
                       >
                         <Typography
                           variant="h6"
                           color="common.white"
                           align="left"
                         >
-                          {records?.toLocaleString('en-US')} {Pluralize("record",records)}
+                          <span className="total-elements">{totalElements && totalElements?.toLocaleString('en-US')}</span> {Pluralize("antibody",totalElements)}
+                          <span className="active-search">{activeSearch && ` for "${activeSearch}"` }</span>
                         </Typography>
                       </Box>
                     </Grid>
@@ -91,8 +74,9 @@ const HomeHeader = (props) => {
                         variant="subtitle1"
                         color="grey.400"
                         align="left"
+                        className="last-updated"
                       >
-                        Last Updated: {date?.toLocaleString('en-US', { day: '2-digit', month:'long', weekday: "long" })}
+                        Last Updated: {lastUpdate?.toLocaleString('en-US', { day: '2-digit', month:'long', weekday: "long" })}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -104,6 +88,7 @@ const HomeHeader = (props) => {
                       variant="contained"
                       color="info"
                       onClick={() => handleExport({})}
+                      className="btn-download-selection"
                       startIcon={
                         <DownloadIcon
                           stroke={
@@ -128,6 +113,7 @@ const HomeHeader = (props) => {
                         />
                       }
                       href="/add"
+                      className="btn-submit-antibody"
                     >
                       Submit an antibody
                     </Button>
@@ -135,14 +121,20 @@ const HomeHeader = (props) => {
                 </Box>
               </Box>
             </HideOnScroll>
+            {showAlert && (
+              <Alert className="limit-alert" severity="warning" sx={{ mt: 1, mb: 1 }}>The search results are limited to a maximum of {shownResultsNum} elements. 
+    Please refine your search if you cannot find the antibody you&apos;re looking for.
+              </Alert>)
+            }
             <TableToolbar
               showFilterMenu={showFilterMenu}
               activeTab={activeTab}
             />
+            
           </Stack>
         </Container>
       </AppBar>
-      <Box sx={{ height: "12.5rem" }} component="div" />
+      <Box sx={{ height: showAlert ? "16.5rem" : "12.5rem" }} component="div" />
     </Box>
   );
 };

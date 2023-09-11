@@ -150,14 +150,13 @@ These "Terms of Use" were adapted from the PLoS Terms of Use which are licensed 
 }]
 
 const TermsAndConditions = () => {
-  const classes = {
-
+  const styles = {
     container:{ display:'flex', justifyContent:'center' }
   }
   
   return (
     <SupportTabs>
-      <Container maxWidth='xl' sx={classes.container}>
+      <Container maxWidth='xl' sx={styles.container} className="container-terms-conditions">
         <Stack spacing={4}>
           <Typography variant='h1' color='grey.700'>Terms and Conditions</Typography>
           {termsArray.map((ele,index) => <BasicCard key={index}title={ele.title} >{ele.content}{ele.link && <Link href={ele.url}>{ele.link}</Link>}{ele.content2? ele.content2:null}</BasicCard>)}

@@ -4,7 +4,7 @@ import SupportTabs from "../UI/SupportTabs";
 import { Link, Container, Typography } from "@mui/material";
 
 const ContactUs = () => {
-  const classes = {
+  const styles = {
 
     message: {
       color: "grey.500",
@@ -17,13 +17,14 @@ const ContactUs = () => {
   
   return (
     <SupportTabs>
-      <Container maxWidth='xl' sx={classes.container}>
+      <Container maxWidth='xl' sx={styles.container} className="container-contact-us">
      
-        <Typography variant="subtitle1" align="center" sx={classes.message}>
+        <Typography variant="subtitle1" align="center" sx={styles.message}>
 Have any questions? Please feel free to{" "}
           <Link
             target="_blank"
             href="https://www.scicrunch.com/contact"
+            className="link-contact-us"
           >
       contact us
           </Link>

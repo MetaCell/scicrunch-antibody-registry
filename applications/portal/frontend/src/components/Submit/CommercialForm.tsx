@@ -28,30 +28,31 @@ const {
   contentBorderColor,
 } = vars;
 
-const useStyles = makeStyles((theme?: any) => ({
+const styles = {
   background: {
-    background: `linear-gradient(90deg, ${contentBorderColor} 50%, ${backgroundColorForm} 50%)`,
-    [theme.breakpoints.down("lg")]: {
-      background: contentBorderColor,
-    },
+    background: {
+      lg: `linear-gradient(90deg, ${contentBorderColor} 50%, ${backgroundColorForm} 50%)`,
+      xs: contentBorderColor
+    }
   },
-  rightContainer: {
-    padding: theme.spacing(10, 0, 10, 10),
-    [theme.breakpoints.down("lg")]: {
-      padding: 0,
+  rightContainer: (theme) => ({
+    padding: { 
+      lg: theme.spacing(10, 0, 10, 10),
+      xs: 0,
     },
+    pr: 0,
     height: "90vh",
     overflow: "auto",
     "&::-webkit-scrollbar": {
       display: "none",
     },
-  },
-  leftContainer: {
-    padding: theme.spacing(10, 10, 10, 0),
-    [theme.breakpoints.down("lg")]: {
-      padding: 0,
+  }),
+  leftContainer: (theme) => ({
+    padding: { 
+      lg: theme.spacing(10, 10, 0, 10),
+      xs: 0,
     },
-  },
+  }),
   paper: {
     textAlign: "start",
     border: "1px solid #EAECF0",
@@ -79,12 +80,12 @@ const useStyles = makeStyles((theme?: any) => ({
     color: primaryTextColor,
     fontWeight: 400,
   },
-  leftBox: {
+  leftBox: (theme) => ({
     padding: theme.spacing(6, 0, 3, 0),
     textAlign: "start",
     height: "100%",
-  },
-  iframeDefault: {
+  }),
+  iframeDefault: (theme) => ({
     height: "100%",
     minHeight: "320px",
     display: "flex",
@@ -92,9 +93,9 @@ const useStyles = makeStyles((theme?: any) => ({
     justifyContent: "center",
     backgroundColor: theme.palette.grey[700],
     border: `0.25rem solid ${contentBorderColor}`,
-    borderRadius: theme.shape.borderRadius,
-  },
-}));
+    borderRadius: theme.shape.borderRadius + "px",
+  }),
+};
 
 const validationSchema = yup.object().shape({
   catalogNumber: yup.string().required("The field is mandatory"),
@@ -106,10 +107,10 @@ const validationSchema = yup.object().shape({
 
 const Iframe = ({ formik }) => {
   const { errors, touched, getFieldProps } = formik;
-  const classes = useStyles();
+
 
   return (
-    <Box className={classes.leftBox}>
+    <Box sx={styles.leftBox}>
       <Grid
         container
         direction="column"
@@ -120,12 +121,12 @@ const Iframe = ({ formik }) => {
         wrap="nowrap"
       >
         <Grid item>
-          <Typography variant="h1" className={classes.header}>
+          <Typography variant="h1" sx={styles.header}>
             2. Product Page Link
           </Typography>
         </Grid>
         <Grid item>
-          <Typography variant="h5" className={classes.label}>
+          <Typography variant="h5" sx={styles.label}>
             Vendor Product Page Link (Mandatory)
           </Typography>
           <TextField
@@ -148,7 +149,7 @@ const Iframe = ({ formik }) => {
             }}
           />
           {!touched.catalogNumber && !errors.catalogNumber && (
-            <Typography variant="subtitle1" className={classes.note}>
+            <Typography variant="subtitle1" sx={styles.note}>
               Enter a link to the product's page on the vendor's website
             </Typography>
           )}
@@ -157,12 +158,12 @@ const Iframe = ({ formik }) => {
         <Grid item lg={8}>
           {touched.url && !errors.url ? (
             <CardMedia
-              className={classes.iframeDefault}
+              sx={styles.iframeDefault}
               component="iframe"
               src={formik.values.url}
             />
           ) : (
-            <Box className={classes.iframeDefault}>
+            <Box sx={styles.iframeDefault}>
               <Typography variant="subtitle1" sx={{ color: "grey.400" }}>
                 Enter a link in the field above to get a preview of the website
               </Typography>
@@ -188,7 +189,7 @@ const FormLine = ({ children }) => {
   );
 };
 const CommercialForm = (props) => {
-  const classes = useStyles();
+
   const { setAntibodyId, setApiResponse, next } = props;
 
   const postAntibody = (antibody) => {
@@ -227,26 +228,27 @@ const CommercialForm = (props) => {
   const { errors, touched, handleSubmit, getFieldProps } = formik;
 
   return (
-    <form
+    <Box component="form"
       onSubmit={handleSubmit}
-      className={classes.background}
+      sx={styles.background}
       autoComplete="off"
+      className="antibody-form type-commercial"
     >
       <Container maxWidth="xl">
         <Grid container>
-          <Grid item lg={6} className={classes.leftContainer}>
+          <Grid item lg={6} sx={styles.leftContainer}>
             <Iframe formik={formik} />
           </Grid>
-          <Grid item lg={6} className={classes.rightContainer} sx={{ pr: 0 }}>
-            <Paper className={classes.paper}>
+          <Grid item lg={6} sx={styles.rightContainer} >
+            <Paper sx={styles.paper}>
               <Grid container direction="column" gap={3} m={0} width="100%">
                 <Grid item>
-                  <Typography variant="h1" className={classes.header}>
+                  <Typography variant="h1" sx={styles.header}>
                     3. Antibody Details
                   </Typography>
                 </Grid>
                 <Grid item>
-                  <Typography variant="h5" className={classes.label}>
+                  <Typography variant="h5" sx={styles.label}>
                     Catalog Number (Mandatory)
                   </Typography>
                   <TextField
@@ -271,13 +273,13 @@ const CommercialForm = (props) => {
                     }}
                   />
                   {!touched.catalogNumber && !errors.catalogNumber && (
-                    <Typography variant="subtitle1" className={classes.note}>
+                    <Typography variant="subtitle1" sx={styles.note}>
                       Note: Submit unregistered antibodies only
                     </Typography>
                   )}
                 </Grid>
                 <Grid item>
-                  <Typography variant="h5" className={classes.label}>
+                  <Typography variant="h5" sx={styles.label}>
                     Vendor
                   </Typography>
                   <TextField
@@ -289,10 +291,10 @@ const CommercialForm = (props) => {
                     onChange={formik.handleChange}
                   />
                 </Grid>
-                <Grid item className={classes.formItem}>
+                <Grid item sx={styles.formItem}>
                   <FormLine>
                     <Box>
-                      <Typography variant="h5" className={classes.label}>
+                      <Typography variant="h5" sx={styles.label}>
                         Antibody Name
                       </Typography>
                       <TextField
@@ -305,7 +307,7 @@ const CommercialForm = (props) => {
                       />
                     </Box>
                     <Box>
-                      <Typography variant="h5" className={classes.label}>
+                      <Typography variant="h5" sx={styles.label}>
                         Host Species
                       </Typography>
                       <TextField
@@ -319,10 +321,10 @@ const CommercialForm = (props) => {
                     </Box>
                   </FormLine>
                 </Grid>
-                <Grid item className={classes.formItem}>
+                <Grid item sx={styles.formItem}>
                   <FormLine>
                     <Box>
-                      <Typography variant="h5" className={classes.label}>
+                      <Typography variant="h5" sx={styles.label}>
                         Target/Reactive Species
                       </Typography>
                       <TextField
@@ -334,7 +336,7 @@ const CommercialForm = (props) => {
                       />
                     </Box>
                     <Box>
-                      <Typography variant="h5" className={classes.label}>
+                      <Typography variant="h5" sx={styles.label}>
                         Antibody Target
                       </Typography>
                       <TextField
@@ -347,10 +349,10 @@ const CommercialForm = (props) => {
                     </Box>
                   </FormLine>
                 </Grid>
-                <Grid item className={classes.formItem}>
+                <Grid item sx={styles.formItem}>
                   <FormLine>
                     <Box>
-                      <Typography variant="h5" className={classes.label}>
+                      <Typography variant="h5" sx={styles.label}>
                         Clonality
                       </Typography>
 
@@ -391,7 +393,7 @@ const CommercialForm = (props) => {
                       </Select>
                     </Box>
                     <Box>
-                      <Typography variant="h5" className={classes.label}>
+                      <Typography variant="h5" sx={styles.label}>
                         Clone ID
                       </Typography>
                       <TextField
@@ -404,10 +406,10 @@ const CommercialForm = (props) => {
                     </Box>
                   </FormLine>
                 </Grid>
-                <Grid item className={classes.formItem}>
+                <Grid item sx={styles.formItem}>
                   <FormLine>
                     <Box>
-                      <Typography variant="h5" className={classes.label}>
+                      <Typography variant="h5" sx={styles.label}>
                         Isotype
                       </Typography>
                       <TextField
@@ -419,7 +421,7 @@ const CommercialForm = (props) => {
                       />
                     </Box>
                     <Box>
-                      <Typography variant="h5" className={classes.label}>
+                      <Typography variant="h5" sx={styles.label}>
                         Conjugate
                       </Typography>
                       <TextField
@@ -432,10 +434,10 @@ const CommercialForm = (props) => {
                     </Box>
                   </FormLine>
                 </Grid>
-                <Grid item className={classes.formItem}>
+                <Grid item sx={styles.formItem}>
                   <FormLine>
                     <Box>
-                      <Typography variant="h5" className={classes.label}>
+                      <Typography variant="h5" sx={styles.label}>
                         Antibody Form/Format
                       </Typography>
                       <TextField
@@ -447,7 +449,7 @@ const CommercialForm = (props) => {
                       />
                     </Box>
                     <Box>
-                      <Typography variant="h5" className={classes.label}>
+                      <Typography variant="h5" sx={styles.label}>
                         Uniprot ID
                       </Typography>
                       <TextField
@@ -460,10 +462,10 @@ const CommercialForm = (props) => {
                     </Box>
                   </FormLine>
                 </Grid>
-                <Grid item className={classes.formItem}>
+                <Grid item sx={styles.formItem}>
                   <FormLine>
                     <Box>
-                      <Typography variant="h5" className={classes.label}>
+                      <Typography variant="h5" sx={styles.label}>
                         Epitope
                       </Typography>
                       <TextField
@@ -475,7 +477,7 @@ const CommercialForm = (props) => {
                       />
                     </Box>
                     <Box>
-                      <Typography variant="h5" className={classes.label}>
+                      <Typography variant="h5" sx={styles.label}>
                         Applications
                       </Typography>
                       <TextField
@@ -489,7 +491,7 @@ const CommercialForm = (props) => {
                   </FormLine>
                 </Grid>
                 <Grid item>
-                  <Typography variant="h5" className={classes.label}>
+                  <Typography variant="h5" sx={styles.label}>
                     Comments
                   </Typography>
                   <TextField
@@ -515,7 +517,7 @@ const CommercialForm = (props) => {
         activeStep={2}
         formik={formik}
       />
-    </form>
+    </Box>
   );
 };
 

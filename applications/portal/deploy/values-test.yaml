@@ -1,16 +1,22 @@
 harness:
+  database:
+    auto: true
+    type: postgres
+    size: 10Gi
   accounts:
     roles:
-    - areg_portal:administrator
-    - areg_portal:manager
+      - portal:administrator
+      - portal:manager
     users:
-    - username: admin
-      email: admin@testuser.com
-      realmRoles:
-      - administrator
-      clientRoles:
-      - administrator
-    - username: manager
-      email: manager@testuser.com
-      clientRoles:
-      - manager
+      - username: admin
+        email: admin@testuser.com
+        realmRoles:
+          - administrator
+        clientRoles:
+          - administrator
+          - portal:administrator
+      - username: manager
+        email: manager@testuser.com
+        clientRoles:
+          - manager
+          - portal:manager
