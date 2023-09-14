@@ -20,13 +20,13 @@ const ContactUs = () => {
       <Container maxWidth='xl' sx={styles.container} className="container-contact-us">
      
         <Typography variant="subtitle1" align="center" sx={styles.message}>
-Have any questions? Please feel free to{" "}
+Have any questions? Please feel free to email us at {" "}
           <Link
             target="_blank"
-            href="https://www.scicrunch.com/contact"
+            href="mailto:rii-help@scicrunch.org"
             className="link-contact-us"
           >
-      contact us
+            rii-help@scicrunch.org
           </Link>
         </Typography>
    
