@@ -38,6 +38,18 @@ export const faqsInfo = [
     </>
   },
   {
+    question: "How can I cite the Antibody Registry?",
+    answer: <>If you need to cite the AntibodyRegistry (as opposed to any antibody)<br /><br />
+
+    <b>In the body of your methods</b><br />
+    
+    antibodyregistry.org , [access date], RRID:SCR_006397
+    <br /><br />
+    <b>In your references section</b> <br />
+    Bandrowski A, Pairish M, Eckmann P, Grethe J, Martone ME. The Antibody Registry: ten years of registering antibodies. Nucleic Acids Res. 2023 Jan 6;51(D1):D358-D367. doi: 10.1093/nar/gkac927. PMID: 36370112; PMCID: PMC9825422.
+    </>
+  },
+  {
     question: "Why do you only require catalog numbers, vendor URLs?",
     answer: <>Every vendor has their own way of formatting their catalog numbers.
       We try to reproduce those catalog numbers exactly as they are on the vendors websites.
@@ -62,11 +74,9 @@ export const faqsInfo = [
   },
   {
     question: "How can I download data?",
-    answer: <> <b>Humans: </b>Selecting a handful of antibodies and downloading the list is accomplished by clicking the box icon on the left of each antibody.<br />
-      <b>Humans Bulk: </b>Downloading all data in bulk requires API access via <a href="https://scicrunch.org/">scicrunch.org</a> (see above). We currently do not have a method to access the data via the AntibodyRegistry website. 
-      <ul>
-        <li>We are now providing a full csv of the more important data for the Antibody Registry. The CSV is rather large, and contains 6 columns (our ID, AB Name, Vendor, Catalog Number, Citation, and Reference). This file is updated weekly on Friday night (Pacific time).</li>
-      </ul>
+    answer: <> <b>Humans: </b> Selecting a handful of antibodies and downloading the list is accomplished by clicking the box icon on the left of each antibody.<br />
+      <b>Humans Bulk: </b>Downloading all data in bulk requires API access via <a href="https://scicrunch.org/">scicrunch.org</a> (see above). 
+      We currently do not have a method to access the data via the AntibodyRegistry website. 
     </>
   },
   {

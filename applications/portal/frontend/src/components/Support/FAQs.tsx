@@ -2,7 +2,7 @@ import React from "react";
 
 import { vars } from "../../theme/variables";
 import { AccordionPlusIcon, AccordionMinusIcon } from "../icons";
-import { Box, Grid, Typography, Accordion, AccordionSummary, AccordionDetails, Container } from "@mui/material";
+import { Box, Grid, Typography, Accordion, AccordionSummary, AccordionDetails, Container, Link } from "@mui/material";
 import { faqsInfo } from "../../content/faqsInfo";
 const { primaryTextColor, primarySubheaderColor, primaryHeaderColor } = vars;
 import SupportTabs from "../UI/SupportTabs";
@@ -96,7 +96,8 @@ const FAQs = () => {
         <Box sx={styles.faqBox}>
           <Typography sx={styles.faqBoxSubheader}>Support</Typography>
           <Typography sx={styles.faqBoxHeader}>FAQs</Typography>
-          <Typography sx={styles.faqBoxText}>Everything you need to know about the Antibody Registry. Can’t find the answer you’re looking for? Please chat to our team.</Typography>
+          <Typography sx={styles.faqBoxText}>Everything you need to know about the Antibody Registry. Can’t find the answer you’re looking for? 
+            Please contact our team at <Link href="mailto:rii-help@scicrunch.org">rii-help@scicrunch.org</Link></Typography>
         </Box>
       </Container>
       <Grid container spacing={2} direction="row" alignItems="start" justifyContent="center" sx={styles.grid}>
