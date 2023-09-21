@@ -372,7 +372,10 @@ class Antibody(models.Model):
             if to_remove:
                 for specie_name in to_remove:
                     specie_name = specie_name.strip().lower()
-                    specie = Specie.objects.get(name=specie_name)
+                    try:
+                        specie = Specie.objects.get(name=specie_name)
+                    except Specie.DoesNotExist:
+                        continue
                     self.species.remove(specie)
             to_add = new_species - old_species
             if to_add:
