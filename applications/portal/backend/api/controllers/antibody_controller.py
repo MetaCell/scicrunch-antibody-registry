@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Union
 
 from cloudharness import log
@@ -17,8 +18,19 @@ from openapi.models import UpdateAntibody as UpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO
 
 
-def get_antibodies(page: int = 0, size: int = 50) -> PaginatedAntibodies:
-    return antibody_service.get_antibodies(page, size)
+def get_antibodies(page: int, size: int, updated_from: datetime, updated_to: datetime) -> PaginatedAntibodies:
+    if page is None:
+        page = 1
+    if size is None:
+        size = 50
+    if page < 1:
+        raise HTTPException(status_code=400, detail="Pages start at 1")
+    if size < 1:
+        raise HTTPException(status_code=400, detail="Size must be greater than 0")
+    try:
+        return antibody_service.get_antibodies(int(page), int(size), updated_from, updated_to)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Page and size must be integers")
 
 
 def get_user_id() -> str:

@@ -121,12 +121,11 @@ class AntibodyMapper(IDAOMapper):
             ab.abTargetUniprotId = dao.uniprot_id
         if dao.vendor:
             ab.vendorName = dao.vendor.name
+            ab.vendorUrl = get_vendor_domains(dao.vendor.id)
         if dao.source_organism:
             ab.sourceOrganism = dao.source_organism.name
         if dao.species and not ab.targetSpecies:
             ab.targetSpecies = [s.name for s in dao.species.all()]
-
-        ab.vendorUrl = get_vendor_domains(dao.vendor.id)
 
         ab.showLink = dao.show_link if dao.show_link is not None else (dao.vendor and dao.vendor.show_link)
 

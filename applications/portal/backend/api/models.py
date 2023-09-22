@@ -316,8 +316,12 @@ class Antibody(models.Model):
         """
         if not self.ab_id:
             self.ab_id = self._generate_ab_id()
+        elif type(self.ab_id) is str:
+            self.ab_id = int(self.ab_id.replace('AB_', ''))
         if not self.accession:
             self.accession = self.ab_id
+        elif type(self.accession) is str:
+            self.accession = int(self.accession.replace('AB_', ''))
         if self.status is None:
             self.status = STATUS.QUEUE
         if not self.uid:
@@ -368,7 +372,10 @@ class Antibody(models.Model):
             if to_remove:
                 for specie_name in to_remove:
                     specie_name = specie_name.strip().lower()
-                    specie = Specie.objects.get(name=specie_name)
+                    try:
+                        specie = Specie.objects.get(name=specie_name)
+                    except Specie.DoesNotExist:
+                        continue
                     self.species.remove(specie)
             to_add = new_species - old_species
             if to_add:

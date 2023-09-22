@@ -156,7 +156,7 @@ class AntibodyResource(ModelResource):
             else:
                 self.update_instances.append(instance)
         else:
-            if not using_transactions and dry_run:
+            if dry_run:
                 # we don't have transactions and we want to do a dry_run
                 pass
             else:
@@ -242,10 +242,13 @@ class AntibodyResource(ModelResource):
             return
         existent_antibodies = Antibody.objects.filter(
             antibody_identifier.q(dataset))
-        dataset.df = dataset.df.where(
-            antibody_identifier.filter_dataset(
-                dataset, negate_filter_condition, existent_antibodies)
-        )
+        try:
+            dataset.df = dataset.df.where(
+                antibody_identifier.filter_dataset(
+                    dataset, negate_filter_condition, existent_antibodies)
+            )
+        except KeyError as e:
+            raise Exception("There is a problem with the identifier. Please check your csv file and eventually remove empty columns") from e
 
     def before_import_row(self, row, row_number=None, **kwargs):
         antibody_identifier = self.get_antibody_identifier(row)
