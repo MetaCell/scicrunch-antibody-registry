@@ -52,7 +52,7 @@ def execute_ingestion_workflow(drive_link_or_id: str, hot: bool=False):
         tasks=(
             _create_task(
                 INGEST_IMAGE,
-                command=["python", "manage.py", "ingest", file_id] + ["--hot"] if hot else []
+                command=["python", "manage.py", "ingest", file_id] + (["--hot"] if hot else [])
             ),
         ),
         ttl_strategy=ttl_strategy
