@@ -452,18 +452,18 @@ class Antibody(models.Model):
                 self.add_vendor_domain(base_url, vendor)
         except Vendor.DoesNotExist:
             # Then, try to match by domain
-            try:
-                vd = VendorDomain.objects.get(base_url__iexact=base_url)
-            except VendorDomain.DoesNotExist:
+            
+            vds = VendorDomain.objects.filter(base_url__iexact=base_url, status=STATUS.CURATED)
+            if len(vds) == 0:
                 # If the domain is not matched, try to match by domain with and without www
-                try:
-                    if "www." in base_url:
-                        alt_base_url = base_url.replace("www.", "")
-                    else:
-                        alt_base_url = "www." + base_url
-                    vd = VendorDomain.objects.get(base_url__iexact=base_url)
+                
+                if "www." in base_url:
+                    alt_base_url = base_url.replace("www.", "")
+                else:
+                    alt_base_url = "www." + base_url
+                vds = VendorDomain.objects.filter(base_url__iexact=base_url, status=STATUS.CURATED)
 
-                except VendorDomain.DoesNotExist:
+                if len(vds) == 0:
                     # As it doesn't match, create a new vendor
                     vendor_name = name or base_url
                     log.info("Creating new Vendor `%s` on domain  to `%s`",
@@ -475,9 +475,13 @@ class Antibody(models.Model):
                     if base_url:
                         self.add_vendor_domain(base_url, vendor)
                     return
+            
 
             # Vendor domain matched one way or the other, so associate to existing vendor
-            self.vendor = vd.vendor
+            if len(vds) > 1:
+                log.error("Unexpectedly found multiple vendor domains for %s", base_url)
+
+            self.vendor = vds[0].vendor
             if name:
                 VendorSynonym.objects.create(vendor=self.vendor, name=name)
 

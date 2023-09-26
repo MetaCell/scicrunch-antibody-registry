@@ -105,6 +105,7 @@ class Ingestor:
         self.data_paths.vendor_domains and self._insert_vendor_domains(self.data_paths.vendor_domains)
         self._insert_antibodies(self.ANTIBODIES_TMP_TABLE)
         species_map = self._insert_species(species_map)
+        
         self._swap_antibodies(self.ANTIBODIES_TMP_TABLE, self.ANTIBODY_TABLE)
         self._insert_antibody_species(species_map)
         try:
@@ -148,6 +149,7 @@ class Ingestor:
             if synonyms_str:
                 for s in synonyms_str.split(','):
                     vendor_synonyms_params.extend([row['id'], s])
+        logging.info("Inserting %s vendors", len(vendor_params) / 4)
         self._execute(vendor_insert_stm, vendor_params)
 
         # insert vendors synonyms
@@ -155,6 +157,7 @@ class Ingestor:
             self.VENDOR_SYNONYM_TABLE,
             ['vendor_id', 'name'],
             int(len(vendor_synonyms_params) / 2))
+        logging.info("Inserting %s vendor synonyms", len(vendor_synonyms_params) / 2)
         self._execute(vendor_synonyms_insert_stm, vendor_synonyms_params)
 
     @timed_class_method('Vendor domains added ')
@@ -177,6 +180,7 @@ class Ingestor:
                 [row['id'], row['domain_name'], row['vendor_id'],
                  row['status'].upper(), False])
         try:
+            logging.info("Inserting %s vendor domains", len(vendor_domain_params) / 5)
             self._execute(vendor_domain_insert_stm, vendor_domain_params)
         except:
             logging.exception("Error inserting vendor domains")
@@ -259,8 +263,13 @@ class Ingestor:
             species_insert_stm = get_insert_values_into_table_stm(self.SPECIE_TABLE,
                                                                 ['name', 'id'],
                                                                 len(new_species.keys()))
-            if len(species_map) > 0:
+            
+            
+            if len(new_species) > 0:
+                logging.info("Inserting %s species", len(new_species.keys()))
                 cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(new_species.items())))
+            else:
+                logging.info("No new species to insert")
         species_map.update(new_species)
         return species_map
 
@@ -307,7 +316,7 @@ class Ingestor:
                             clean_specie = get_clean_species_str(specie)
                             species_params.extend(
                                 [row['ix'], species_map[clean_specie]])
-
+                logging.info("Mapping %s species to antibodies", len(species_params) / 2)
                 antibody_species_insert_stm = get_insert_values_into_table_stm(
                     AntibodySpecies.objects.model._meta.db_table, [
                         'antibody_id', 'specie_id'],

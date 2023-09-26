@@ -376,8 +376,13 @@ class VendorAdmin(admin.ModelAdmin):
 
     def _swap_ownership(self, src_vendor, target_vendor):
         # We transfer the antibodies to the new vendor
-        target_vendor.antibody_set.set(src_vendor.antibody_set.all())
-        target_vendor.vendordomain_set.set(src_vendor.vendordomain_set.all())
+        for ab in src_vendor.antibody_set.all():
+            target_vendor.antibody_set.add(ab)
+        for domain in src_vendor.vendordomain_set.all():
+            target_vendor.vendordomain_set.add(domain)
+        for synonym in src_vendor.vendorsynonym_set.all():
+            target_vendor.vendorsynonym_set.add(synonym)
+        VendorSynonym.objects.create(name=src_vendor.name, vendor=target_vendor)
         src_vendor.antibody_set.remove()
         src_vendor.vendordomain_set.remove()
 
