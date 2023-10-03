@@ -6,7 +6,7 @@ harness:
     auto: true
   deployment:
     auto: true
-    replicas: 1
+    replicas: 3
     port: 8080
   livenessProbe:
     path: /api/live
