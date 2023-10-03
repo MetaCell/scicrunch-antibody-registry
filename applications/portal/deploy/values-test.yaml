@@ -3,6 +3,9 @@ harness:
     auto: true
     type: postgres
     size: 10Gi
+  deployment:
+    replicas: 1
+  
   accounts:
     roles:
       - portal:administrator

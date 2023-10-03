@@ -343,7 +343,7 @@ class VendorAdmin(admin.ModelAdmin):
 
     @admin.display(description="Number of antibodies")
     def nb_antibodies(self, obj):
-        return len(Antibody.objects.filter(vendor=obj))
+        return Antibody.objects.filter(vendor=obj).count()
 
     @admin.display(description=format_html("Recent antibodies<br/>(in queue)"))
     def recent_antibodies(self, obj, limit=10):
