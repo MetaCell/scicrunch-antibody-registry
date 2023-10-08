@@ -1,5 +1,4 @@
 import React, { useContext, useRef, useCallback, useEffect } from "react";
-import {  useTheme } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
 import { SearchIcon, SlashIcon } from "../icons";
 import { Box, Autocomplete, InputAdornment, Stack, Tooltip, Typography, Paper } from "@mui/material";
@@ -93,10 +92,11 @@ export default function Searchbar() {
         freeSolo 
         options={autocompleteOps.map(option => option)} 
         fullWidth
+
         clearOnEscape
         disabled={loader}
         className="search-autocomplete"
-       
+        value={activeSearch}
         renderInput={(params) => { 
           const  { InputProps, ...rest } = params;
   
@@ -104,6 +104,7 @@ export default function Searchbar() {
             <InputBase 
               id="search-main"
               inputRef={ref}
+              
               {...InputProps}
                 
               {...rest}  
