@@ -28,7 +28,11 @@ module.exports = env => {
     https: env.DOMAIN.includes("https"),
     port: Number(env.devPort),
     allowedHosts: "all",
-    historyApiFallback: true,
+    historyApiFallback: {
+      rewrites: [
+        { from: /^\/search\.php$/, to: '/' }
+      ]
+    },
     proxy: {
       '/api/': {
         target: replaceHost( proxyTarget, 'portal'),

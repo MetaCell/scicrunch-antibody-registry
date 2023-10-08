@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { getSearchAntibodies, getAntibodies } from '../../services/AntibodiesService'
 import SearchContext from './SearchContext'
 import { getDataInfo } from "../../services/InfoService";
@@ -8,6 +8,12 @@ const SearchState = (props) => {
     total: 0,
     lastupdate: new Date()
   });
+
+  const searchParams = new URLSearchParams(window.location.search);
+  const query = searchParams.get('q');
+
+
+  
 
   const [searchState, setSearch] = useState({
     loader:true,
@@ -22,16 +28,20 @@ const SearchState = (props) => {
     ).catch((err) => {
       console.log("Error: ", err)
     })
-    getAntibodies()
-      .then((res) => {
-        setSearch({
-          loader:false,
-          activeSearch: "",
-          totalElements: res.totalElements,
-          searchedAntibodies: res.items
+    if(query) {
+      getFilteredAntibodies(query)
+    } else {
+      getAntibodies()
+        .then((res) => {
+          setSearch({
+            loader:false,
+            activeSearch: "",
+            totalElements: res.totalElements,
+            searchedAntibodies: res.items
+          })
         })
-      })
-      .catch((err) => console.error(err))
+        .catch((err) => console.error(err))
+    }
   
   },[]);
 

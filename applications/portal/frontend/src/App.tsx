@@ -19,6 +19,33 @@ import SearchState from "./context/search/SearchState";
 import * as UserService from "./services/UserService";
 import UpdateForm from "./components/Update/UpdateForm";
 
+function SearchRedirect() {
+  const searchParams = new URLSearchParams(window.location.search);
+  const query = searchParams.get('q');
+
+  if(query) {
+    if(query.startsWith('RRID:') || query.startsWith('AB_')) {
+      const id = query?.replace('RRID:', '');
+      if (id) {
+        const newUrl = `/${id}`;
+        return <Redirect to={newUrl} />;
+      } else {
+        return <Redirect to={"/"} />;
+      }
+    } else {
+      return <>
+        <Navbar />
+        <Home activeTab={ALLRESULTS} />
+      </>
+    }
+    
+  }
+  
+
+  return <Redirect to={"/"} />;
+}
+
+
 const App = () => {
   const [user, setUser] = useState(undefined);
 
@@ -66,6 +93,8 @@ const App = () => {
                 <Navbar />
                 <AntibodyDetail />
               </Route>
+              <Route path="/search" render={SearchRedirect} />
+              <Route path="/search.php" render={SearchRedirect} />
               <Route path="/user">
                 <Navbar />
                 <AccountDetails />
