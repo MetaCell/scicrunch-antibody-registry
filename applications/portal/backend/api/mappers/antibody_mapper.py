@@ -28,9 +28,9 @@ def get_vendor_domains(vendor_id):
                         vendor_id=vendor_id)]
 class AntibodyMapper(IDAOMapper):
 
-    def from_dto(self, dto: AbstractAntibodyDTO) -> Antibody:
-        if hasattr(dto, "abId") and dto.abId:
-            ab: Antibody = Antibody.objects.get(ab_id=dto.abId)
+    def from_dto(self, dto: AntibodyDTO) -> Antibody:
+        if hasattr(dto, "ix") and dto.ix:
+            ab: Antibody = Antibody.objects.get(pk=dto.ix)
         else:
             ab = Antibody()
             ab.ab_id = 0
