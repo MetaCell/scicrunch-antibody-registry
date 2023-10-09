@@ -89,7 +89,7 @@ const App = () => {
               <Route path="/oauth/logout">
                 <Redirect to="/" />
               </Route>
-              <Route path="/:antibody_id(AB_.*)">
+              <Route path="/:antibody_id(AB_.*|RRID:AB_.*)">
                 <Navbar />
                 <AntibodyDetail />
               </Route>
