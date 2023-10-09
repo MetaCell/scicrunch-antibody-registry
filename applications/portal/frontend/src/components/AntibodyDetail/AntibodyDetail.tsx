@@ -95,7 +95,7 @@ export const AntibodyDetail = () => {
     },
   };
   const { antibody_id } = useParams();
-  const abId = antibody_id.slice(3);
+  const abId = antibody_id.replace("AB_", "").replace("RRID:", "");
   const [antibodies, setAntibodies] = useState<Antibody[]>(null);
   const [error, setError] = useState<string>(null);
   const accession = document.location.hash ? document.location.hash.split("#")[1]: abId;
