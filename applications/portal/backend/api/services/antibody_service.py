@@ -29,13 +29,13 @@ def get_antibodies(page: int = 1, size: int = 50, date_from: datetime = None, da
     try:
         query = Antibody.objects.filter(status=STATUS.CURATED)
         if date_from:
-            query = query.filter(curate_time__gte=date_from)
+            query = query.filter(lastedit_time__gte=date_from)
         if date_to:
-            query = query.filter(curate_time__lte=date_to)
+            query = query.filter(lastedit_time__lte=date_to)
 
         p = Paginator(query.select_related("vendor", "source_organism").prefetch_related("species").order_by("-ix"), size)
         items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
-        
+
     except Antibody.DoesNotExist:
         return PaginatedAntibodies(page=int(page), totalElements=0, items=[])
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)

@@ -96,6 +96,7 @@ class AntibodyMapper(IDAOMapper):
                 log.exception("Error on antibody %s marshaling. Cannot set attribute %s, value: %s", k, v)
         try:
             ab_dict = dict_to_camel(dao_dict)
+            ab_dict['lastEditTime'] = dao_dict['lastedit_time']  # mandatory, the dao dict key is not a proper snake-case variable name
             ab = AntibodyDTO(**ab_dict, )
         except ValidationError as e:
             log.error("Validation errors on antibody %s",
