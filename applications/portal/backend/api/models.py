@@ -335,7 +335,7 @@ class Antibody(models.Model):
         if not self.accession:
             self.accession = self.ab_id
         elif type(self.accession) is str:
-            self.accession = int(self.accession.replace('AB_', ''))
+            self.accession = int(float(self.accession.replace('AB_', '')))
         if self.status is None:
             self.status = STATUS.QUEUE
         if not self.uid:
