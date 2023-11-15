@@ -280,15 +280,9 @@ class Antibody(models.Model):
             super().save()
 
     @transaction.atomic
-    def save(self, *args, update_search=True, from_import=False, **kwargs):
+    def save(self, *args, update_search=True, **kwargs):
         first_save = self.ix is None
         self._handle_status_changes(first_save)
-        if from_import:
-            super().save(*args, **kwargs)
-            if first_save:
-                self._generate_automatic_attributes(*args, **kwargs)
-                super().save()
-            return
 
         # It's not an import that activated the save
         # We need to merge the data in a smart way
