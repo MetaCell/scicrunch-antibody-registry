@@ -172,7 +172,7 @@ class AntibodyResource(ModelResource):
         super().after_import(dataset, result, using_transactions, dry_run, **kwargs)
         from multiprocessing.pool import ThreadPool
 
-        with ThreadPool() as pool:  # Set by default to the number of CPUs
+        with ThreadPool(processes=8) as pool:  # Set by default to the number of CPUs
             for result in pool.map(lambda instance: instance.save(update_search=False, from_import=True), self.instances):
                 ...
         refresh_search_view()
