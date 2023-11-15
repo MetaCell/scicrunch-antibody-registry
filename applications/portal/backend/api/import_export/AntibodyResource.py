@@ -163,7 +163,7 @@ class AntibodyResource(ModelResource):
                 # we don't have transactions and we want to do a dry_run
                 pass
             else:
-                self.instances.append(instance)
+                # self.instances.append(instance)
                 # instance.save(update_search=False, from_import=True)
                 instance.import_save()
         self.after_save_instance(instance, using_transactions, dry_run)
