@@ -274,8 +274,8 @@ class Antibody(models.Model):
 
     def import_save(self):
         first_save = self.ix is None
-        self._generate_automatic_attributes(first_save)
         super().save()
+        self._generate_automatic_attributes(first_save)
         if first_save:
             super().save()
 
