@@ -38,7 +38,7 @@ class AntibodyIdentifier:
 class AntibodyInstanceLoaderClass(ModelInstanceLoader):
     def get_instance(self, q):
         instances = self.get_queryset().filter(q).order_by('insert_time')
-        return instances[0] if len(instances) > 0 else None
+        return instances.first()
 
 
 class AntibodyResource(ModelResource):
@@ -160,7 +160,7 @@ class AntibodyResource(ModelResource):
                 # we don't have transactions and we want to do a dry_run
                 pass
             else:
-                instance.save(update_search=False)
+                instance.save(update_search=False, from_import=True)
         self.after_save_instance(instance, using_transactions, dry_run)
 
     def after_import(self, dataset, result, using_transactions, dry_run, **kwargs):

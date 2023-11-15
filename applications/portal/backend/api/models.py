@@ -273,11 +273,17 @@ class Antibody(models.Model):
     show_link = models.BooleanField(null=True, blank=True, db_index=True)
 
     @transaction.atomic
-    def save(self, *args, update_search=True, **kwargs):
-
+    def save(self, *args, update_search=True, from_import=False, **kwargs):
         first_save = self.ix is None
         self._handle_status_changes(first_save)
+        if from_import:
+            if first_save:
+                self._generate_automatic_attributes(*args, **kwargs)
+            super().save(*args, **kwargs)
+            return
 
+        # It's not an import that activated the save
+        # We need to merge the data in a smart way
         old_instance = Antibody.objects.filter(pk=self.pk).first()
         old_species = self.species_from_raw(old_instance.target_species_raw) if old_instance else set()
 
@@ -304,7 +310,7 @@ class Antibody(models.Model):
             return self.target_species_raw != old_instance.target_species_raw
         return self.target_species_raw is not None
 
- 
+
     def delete(self, *args, **kwargs):
         super(Antibody, self).delete(*args, **kwargs)
         if self.status == STATUS.CURATED:
@@ -383,12 +389,12 @@ class Antibody(models.Model):
                     specie_name = specie_name.strip().lower()
                     specie, _ = Specie.objects.get_or_create(name=specie_name)
                     self.species.add(specie)
-        
+
         self._fill_target_species_raw_from_species()
 
-            
 
-            
+
+
 
     def _target_species_from_raw(self):
         species = []
@@ -452,11 +458,11 @@ class Antibody(models.Model):
                 self.add_vendor_domain(base_url, vendor)
         except Vendor.DoesNotExist:
             # Then, try to match by domain
-            
+
             vds = VendorDomain.objects.filter(base_url__iexact=base_url, status=STATUS.CURATED)
             if len(vds) == 0:
                 # If the domain is not matched, try to match by domain with and without www
-                
+
                 if "www." in base_url:
                     alt_base_url = base_url.replace("www.", "")
                 else:
@@ -475,7 +481,7 @@ class Antibody(models.Model):
                     if base_url:
                         self.add_vendor_domain(base_url, vendor)
                     return
-            
+
 
             # Vendor domain matched one way or the other, so associate to existing vendor
             if len(vds) > 1:
