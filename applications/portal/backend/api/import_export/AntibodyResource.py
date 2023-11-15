@@ -164,17 +164,17 @@ class AntibodyResource(ModelResource):
                 pass
             else:
                 self.instances.append(instance)
-                # instance.save(update_search=False, from_import=True)
+                instance.save(update_search=False, from_import=True)
                 # instance.save.__wrapped__(instance, update_search=False, from_import=True)
         self.after_save_instance(instance, using_transactions, dry_run)
 
     def after_import(self, dataset, result, using_transactions, dry_run, **kwargs):
         super().after_import(dataset, result, using_transactions, dry_run, **kwargs)
-        from multiprocessing.pool import ThreadPool
+        # from multiprocessing.pool import ThreadPool
 
-        with ThreadPool(processes=8) as pool:  # Set by default to the number of CPUs
-            for result in pool.map(lambda instance: instance.save(update_search=False, from_import=True), self.instances):
-                ...
+        # with ThreadPool(processes=8) as pool:  # Set by default to the number of CPUs
+        #     for result in pool.map(lambda instance: instance.save(update_search=False, from_import=True), self.instances):
+        #       ...
         refresh_search_view()
 
     def get_or_init_instance(self, instance_loader, row):
