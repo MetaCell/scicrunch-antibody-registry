@@ -274,10 +274,14 @@ class Antibody(models.Model):
 
     def import_save(self):
         first_save = self.ix is None
-        super().save()
         if first_save:
-            self._generate_automatic_attributes()
             super().save()
+            self._handle_duplicates()
+        if self.catalog_num:
+            self.catalog_num_search = catalog_number_chunked(self.catalog_num)
+        if not self.accession or not self.ab_id:
+            self._generate_automatic_attributes()
+        super().save()
 
     @transaction.atomic
     def save(self, *args, update_search=True, **kwargs):
