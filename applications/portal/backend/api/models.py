@@ -277,9 +277,10 @@ class Antibody(models.Model):
         first_save = self.ix is None
         self._handle_status_changes(first_save)
         if from_import:
+            super().save(*args, **kwargs)
             if first_save:
                 self._generate_automatic_attributes(*args, **kwargs)
-            super().save(*args, **kwargs)
+                super().save()
             return
 
         # It's not an import that activated the save
