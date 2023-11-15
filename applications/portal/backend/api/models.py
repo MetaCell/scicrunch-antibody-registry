@@ -272,6 +272,14 @@ class Antibody(models.Model):
     # whether the full link to the antibody is shown. If None, the vendor's default is used
     show_link = models.BooleanField(null=True, blank=True, db_index=True)
 
+    def import_save(self):
+        first_save = self.ix is None
+        self._handle_status_changes(first_save)
+        super().save()
+        if first_save:
+            self._generate_automatic_attributes()
+            super().save()
+
     @transaction.atomic
     def save(self, *args, update_search=True, from_import=False, **kwargs):
         first_save = self.ix is None

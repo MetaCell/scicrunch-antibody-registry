@@ -164,8 +164,8 @@ class AntibodyResource(ModelResource):
                 pass
             else:
                 self.instances.append(instance)
-                instance.save(update_search=False, from_import=True)
-                # instance.save.__wrapped__(instance, update_search=False, from_import=True)
+                # instance.save(update_search=False, from_import=True)
+                instance.import_save()
         self.after_save_instance(instance, using_transactions, dry_run)
 
     def after_import(self, dataset, result, using_transactions, dry_run, **kwargs):
