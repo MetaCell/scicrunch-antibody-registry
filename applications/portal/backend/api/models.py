@@ -461,7 +461,7 @@ class Antibody(models.Model):
                     alt_base_url = base_url.replace("www.", "")
                 else:
                     alt_base_url = "www." + base_url
-                vds = VendorDomain.objects.filter(base_url__iexact=base_url, status=STATUS.CURATED)
+                vds = VendorDomain.objects.filter(base_url__iexact=alt_base_url, status=STATUS.CURATED)
 
                 if len(vds) == 0:
                     # As it doesn't match, create a new vendor
