@@ -90,6 +90,7 @@ def update_antibody(user_id: str, antibody_accession_number: str, body: UpdateAn
                                                             catalogNum=current_antibody.catalog_num,
                                                             vendorName=current_antibody.vendor.name,
                                                             insertTime=current_antibody.insert_time))
+    updated_antibody.status = STATUS.QUEUE
     updated_antibody.save()
     return antibody_mapper.to_dto(updated_antibody)
 

@@ -412,8 +412,8 @@ class Antibody(models.Model):
         if self.vendor and self.catalog_num:
             duplicate_antibodies = Antibody.objects.filter(
                 vendor__id=self.vendor.id,
-                catalog_num__iexact=self.catalog_num
-            ).exclude(commercial_type=CommercialType.PERSONAL).exclude(ix=self.ix)
+                catalog_num__iexact=self.catalog_num, 
+            ).exclude(commercial_type=CommercialType.PERSONAL).exclude(ix=self.ix).exclude(status=STATUS.REJECTED)
             duplicates_length = len(duplicate_antibodies)
             if duplicates_length == 0:  # Because the save happened before there will always be one antibody in the database
                 return None
