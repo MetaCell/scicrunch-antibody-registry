@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import AntibodyForm from "../UI/AntibodyForm";
-import { Antibody } from "../../rest";
+import { Antibody, AntibodyStatusEnum } from "../../rest";
 import {
   getAntibodyByAccessionNumber,
   updateSubmittedAntibody,
@@ -58,6 +58,7 @@ const UpdateForm = () => {
   useEffect(() => fetchAntibody(ab_accession_number), []);
 
   const mapInitialValues = (antibody: Antibody) => ({
+    ix: antibody.status === AntibodyStatusEnum.Queue ? antibody.ix : undefined,
     catalogNumber: antibody.catalogNum,
     vendor: antibody.vendorName,
     url: antibody.url,

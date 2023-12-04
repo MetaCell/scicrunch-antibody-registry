@@ -86,6 +86,7 @@ def update_antibody(user_id: str, antibody_accession_number: str, body: UpdateAn
     current_antibody = Antibody.objects.get(
         accession=antibody_accession_number, uid=user_id)
     updated_antibody = antibody_mapper.from_dto(AntibodyDTO(**body.__dict__, abId=current_antibody.ab_id,
+                                                            ix=current_antibody.ix,
                                                             catalogNum=current_antibody.catalog_num,
                                                             vendorName=current_antibody.vendor.name,
                                                             insertTime=current_antibody.insert_time))
