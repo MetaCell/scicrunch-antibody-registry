@@ -450,6 +450,11 @@ class Antibody(models.Model):
             self.vendor = vendor
             if base_url:
                 self.add_vendor_domain(base_url, vendor)
+        except Vendor.MultipleObjectsReturned:
+            log.exception("Multiple vendors with name %s", name)
+            vendor = self.vendor = Vendor.objects.filter(name__iexact=name or base_url)[0]
+            if base_url:
+                self.add_vendor_domain(base_url, vendor)
         except Vendor.DoesNotExist:
             # Then, try to match by domain
             
