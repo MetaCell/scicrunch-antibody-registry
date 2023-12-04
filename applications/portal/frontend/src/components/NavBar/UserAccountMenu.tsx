@@ -76,7 +76,7 @@ const UserAccountMenu = (props: UserProps) => {
               <ListItem sx={{ py: 1.5, pr: 20 }}>
                 <Stack spacing={0}>
                   <Typography variant="subtitle2" color="grey.600">
-                    {user.firstName ? `${user.firstName} ${user.lastName}` : user.preferredUsername}
+                    {user.firstName ? `${user.firstName} ${user.lastName}` : user?.preferredUsername}
                   </Typography>
                   <Typography variant="subtitle1" color="grey.400">
                     {user.email}
