@@ -38,7 +38,7 @@ class AntibodyIdentifier:
 class AntibodyInstanceLoaderClass(ModelInstanceLoader):
     def get_instance(self, q):
         instances = self.get_queryset().filter(q).order_by('insert_time')
-        return instances[0] if len(instances) > 0 else None
+        return instances.first()
 
 
 class AntibodyResource(ModelResource):
@@ -122,6 +122,9 @@ class AntibodyResource(ModelResource):
         ]
         self.request = request
 
+        self.instances = []
+
+
     class Meta:
         model = Antibody
         fields = (
@@ -160,11 +163,18 @@ class AntibodyResource(ModelResource):
                 # we don't have transactions and we want to do a dry_run
                 pass
             else:
-                instance.save(update_search=False)
+                # self.instances.append(instance)
+                # instance.save(update_search=False, from_import=True)
+                instance.import_save()
         self.after_save_instance(instance, using_transactions, dry_run)
 
     def after_import(self, dataset, result, using_transactions, dry_run, **kwargs):
         super().after_import(dataset, result, using_transactions, dry_run, **kwargs)
+        # from multiprocessing.pool import ThreadPool
+
+        # with ThreadPool(processes=8) as pool:  # Set by default to the number of CPUs
+        #     for result in pool.map(lambda instance: instance.save(update_search=False, from_import=True), self.instances):
+        #       ...
         refresh_search_view()
 
     def get_or_init_instance(self, instance_loader, row):
@@ -274,9 +284,9 @@ class AntibodyResource(ModelResource):
             row['link'] = True
         if row.get('clonality', None):
             clonality = row['clonality'].lower()
-            
+
             row['clonality'] = clonality if clonality in CLONALITIES else None
-            
+
         if row.get('commercial_type', None):
             commercial_type = row['commercial_type'].lower()
             row['commercial_type'] = commercial_type if commercial_type in COMMERCIAL_TYPES else None
