@@ -29,13 +29,13 @@ def get_antibodies(page: int = 1, size: int = 50, date_from: datetime = None, da
     try:
         query = Antibody.objects.filter(status=STATUS.CURATED)
         if date_from:
-            query = query.filter(curate_time__gte=date_from)
+            query = query.filter(lastedit_time__gte=date_from)
         if date_to:
-            query = query.filter(curate_time__lte=date_to)
+            query = query.filter(lastedit_time__lte=date_to)
 
         p = Paginator(query.select_related("vendor", "source_organism").prefetch_related("species").order_by("-ix"), size)
         items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
-        
+
     except Antibody.DoesNotExist:
         return PaginatedAntibodies(page=int(page), totalElements=0, items=[])
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
@@ -86,9 +86,11 @@ def update_antibody(user_id: str, antibody_accession_number: str, body: UpdateAn
     current_antibody = Antibody.objects.get(
         accession=antibody_accession_number, uid=user_id)
     updated_antibody = antibody_mapper.from_dto(AntibodyDTO(**body.__dict__, abId=current_antibody.ab_id,
+                                                            ix=current_antibody.ix,
                                                             catalogNum=current_antibody.catalog_num,
                                                             vendorName=current_antibody.vendor.name,
                                                             insertTime=current_antibody.insert_time))
+    updated_antibody.status = STATUS.QUEUE
     updated_antibody.save()
     return antibody_mapper.to_dto(updated_antibody)
 

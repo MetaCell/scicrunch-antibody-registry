@@ -28,9 +28,9 @@ def get_vendor_domains(vendor_id):
                         vendor_id=vendor_id)]
 class AntibodyMapper(IDAOMapper):
 
-    def from_dto(self, dto: AbstractAntibodyDTO) -> Antibody:
-        if hasattr(dto, "abId") and dto.abId:
-            ab: Antibody = Antibody.objects.get(ab_id=dto.abId)
+    def from_dto(self, dto: AntibodyDTO) -> Antibody:
+        if hasattr(dto, "ix") and dto.ix:
+            ab: Antibody = Antibody.objects.get(pk=dto.ix)
         else:
             ab = Antibody()
             ab.ab_id = 0
@@ -96,6 +96,7 @@ class AntibodyMapper(IDAOMapper):
                 log.exception("Error on antibody %s marshaling. Cannot set attribute %s, value: %s", k, v)
         try:
             ab_dict = dict_to_camel(dao_dict)
+            ab_dict['lastEditTime'] = dao_dict['lastedit_time']  # mandatory, the dao dict key is not a proper snake-case variable name
             ab = AntibodyDTO(**ab_dict, )
         except ValidationError as e:
             log.error("Validation errors on antibody %s",

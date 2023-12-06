@@ -412,8 +412,8 @@ class Antibody(models.Model):
         if self.vendor and self.catalog_num:
             duplicate_antibodies = Antibody.objects.filter(
                 vendor__id=self.vendor.id,
-                catalog_num__iexact=self.catalog_num
-            ).exclude(commercial_type=CommercialType.PERSONAL).exclude(ix=self.ix)
+                catalog_num__iexact=self.catalog_num, 
+            ).exclude(commercial_type=CommercialType.PERSONAL).exclude(ix=self.ix).exclude(status=STATUS.REJECTED)
             duplicates_length = len(duplicate_antibodies)
             if duplicates_length == 0:  # Because the save happened before there will always be one antibody in the database
                 return None
@@ -450,6 +450,11 @@ class Antibody(models.Model):
             self.vendor = vendor
             if base_url:
                 self.add_vendor_domain(base_url, vendor)
+        except Vendor.MultipleObjectsReturned:
+            log.exception("Multiple vendors with name %s", name)
+            vendor = self.vendor = Vendor.objects.filter(name__iexact=name or base_url)[0]
+            if base_url:
+                self.add_vendor_domain(base_url, vendor)
         except Vendor.DoesNotExist:
             # Then, try to match by domain
             
@@ -461,7 +466,7 @@ class Antibody(models.Model):
                     alt_base_url = base_url.replace("www.", "")
                 else:
                     alt_base_url = "www." + base_url
-                vds = VendorDomain.objects.filter(base_url__iexact=base_url, status=STATUS.CURATED)
+                vds = VendorDomain.objects.filter(base_url__iexact=alt_base_url, status=STATUS.CURATED)
 
                 if len(vds) == 0:
                     # As it doesn't match, create a new vendor

@@ -63,7 +63,7 @@ function mapAntibodyFromForm(antibody): AddAntibody {
     productForm: antibody.format,
     productIsotype: antibody.isotype,
     sourceOrganism: antibody.host,
-    targetSpecies: antibody.targetSpecies.split(/\W/),
+    targetSpecies: antibody.targetSpecies.split(/;,/),
     uniprotId: antibody.uniprotID,
     vendorName: antibody.vendor,
     applications: antibody.applications?.split(/\W/),
