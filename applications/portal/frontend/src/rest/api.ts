@@ -1075,40 +1075,6 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * Deletes an existing `Antibody`.
-         * @summary Delete a Antibody
-         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        deleteAntibody: async (antibodyId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'antibodyId' is not null or undefined
-            assertParamExists('deleteAntibody', 'antibodyId', antibodyId)
-            const localVarPath = `/antibodies/{antibody_id}`
-                .replace(`{${"antibody_id"}}`, encodeURIComponent(String(antibodyId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Gets a list of `Antibody` entities.
          * @summary List Antibodies
          * @param {number} [page] Represents the page requested, considering the size parameter
@@ -1344,17 +1310,6 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Deletes an existing `Antibody`.
-         * @summary Delete a Antibody
-         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async deleteAntibody(antibodyId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteAntibody(antibodyId, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
          * Gets a list of `Antibody` entities.
          * @summary List Antibodies
          * @param {number} [page] Represents the page requested, considering the size parameter
@@ -1435,16 +1390,6 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.createAntibody(addAntibody, options).then((request) => request(axios, basePath));
         },
         /**
-         * Deletes an existing `Antibody`.
-         * @summary Delete a Antibody
-         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        deleteAntibody(antibodyId: number, options?: any): AxiosPromise<void> {
-            return localVarFp.deleteAntibody(antibodyId, options).then((request) => request(axios, basePath));
-        },
-        /**
          * Gets a list of `Antibody` entities.
          * @summary List Antibodies
          * @param {number} [page] Represents the page requested, considering the size parameter
@@ -1519,18 +1464,6 @@ export class AntibodyApi extends BaseAPI {
      */
     public createAntibody(addAntibody: AddAntibody, options?: AxiosRequestConfig) {
         return AntibodyApiFp(this.configuration).createAntibody(addAntibody, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Deletes an existing `Antibody`.
-     * @summary Delete a Antibody
-     * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AntibodyApi
-     */
-    public deleteAntibody(antibodyId: number, options?: AxiosRequestConfig) {
-        return AntibodyApiFp(this.configuration).deleteAntibody(antibodyId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
