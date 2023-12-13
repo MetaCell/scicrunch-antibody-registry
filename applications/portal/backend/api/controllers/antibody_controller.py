@@ -72,6 +72,7 @@ def update_user_antibody(accession_number: str, body: UpdateAntibodyDTO) -> Anti
 
 
 def delete_antibody(antibody_id: str) -> None:
+    #FIXME this must be protected
     return antibody_service.delete_antibody(antibody_id)
 
 def get_by_accession(accession_number: int) -> AntibodyDTO:

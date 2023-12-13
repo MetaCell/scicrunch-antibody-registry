@@ -246,15 +246,6 @@ paths:
             operationId: getAntibody
             summary: Get a Antibody
             description: Gets the details of a single instance of a `Antibody`.
-        delete:
-            tags:
-                - antibody
-            responses:
-                '204':
-                    description: Successful response.
-            operationId: deleteAntibody
-            summary: Delete a Antibody
-            description: Deletes an existing `Antibody`.
         parameters:
             -
                 examples:
