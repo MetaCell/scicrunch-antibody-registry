@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import "./styles/style.less";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./theme/Theme";

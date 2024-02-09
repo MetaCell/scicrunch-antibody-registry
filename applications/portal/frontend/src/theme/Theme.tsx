@@ -99,6 +99,11 @@ const theme = createTheme({
           height: 0.5rem;
           width: 0.5rem;
         }
+        body {
+          text-align: center;
+          background-color: "#eeeeee";
+        }
+        
 
         ::-webkit-scrollbar-thumb {
           background-color: ${btnBorderColor};
