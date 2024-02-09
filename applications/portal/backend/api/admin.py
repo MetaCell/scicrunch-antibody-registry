@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.utils.encoding import smart_str
 from django.utils.html import escape, format_html, format_html_join, mark_safe
 from django.utils.text import format_lazy
-from import_export.admin import ImportMixin
+from import_export.admin import ImportExportModelAdmin
 from keycloak.exceptions import KeycloakGetError
 from cloudharness_django.models import Member
 
@@ -100,7 +100,7 @@ class AntibodyFilesAdmin(admin.TabularInline):
     extra = 1
 
 @admin.register(Antibody)
-class AntibodyAdmin(ImportMixin, admin.ModelAdmin):
+class AntibodyAdmin(ImportExportModelAdmin):
     
     change_form_template = "admin/antibody_change_form.html"
 
