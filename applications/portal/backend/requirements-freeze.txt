@@ -1,0 +1,136 @@
+anyio==4.2.0
+argcomplete==2.1.2
+argo-workflows==5.0.0
+asgiref==3.7.2
+attrs==23.2.0
+beautifulsoup4==4.12.3
+black==24.1.1
+blinker==1.7.0
+Brotli @ file:///home/conda/feedstock_root/build_artifacts/brotli-split_1648883617327/work
+CacheControl @ file:///home/conda/feedstock_root/build_artifacts/cachecontrol-split_1706895135817/work
+cachetools==5.3.2
+certifi @ file:///home/conda/feedstock_root/build_artifacts/certifi_1707022139797/work/certifi
+cffi==1.16.0
+chardet==5.2.0
+charset-normalizer @ file:///home/conda/feedstock_root/build_artifacts/charset-normalizer_1698833585322/work
+click==8.1.7
+cloudharness @ file:///home/user/ucsd-antibody-registry/cloud-harness/libraries/cloudharness-common
+-e git+https://github.com/MetaCell/cloud-harness.git@c958a9e17dd094c1b4990c177ed68536baabda0a#egg=cloudharness_django&subdirectory=infrastructure/common-images/cloudharness-django/libraries/cloudharness-django
+-e git+https://github.com/MetaCell/cloud-harness.git@c958a9e17dd094c1b4990c177ed68536baabda0a#egg=cloudharness_model&subdirectory=libraries/models
+colorama==0.4.6
+cryptography==42.0.2
+cyclonedx-python-lib @ file:///home/conda/feedstock_root/build_artifacts/cyclonedx-python-lib_1659363848869/work/dist
+datamodel-code-generator==0.11.19
+defusedxml==0.7.1
+deprecation==2.1.0
+diff-match-patch==20230430
+Django==4.2.10
+django-admin-extra-buttons==1.5.7
+django-import-export==3.0.1
+dnspython==2.5.0
+ecdsa==0.18.0
+email-validator==2.1.0.post1
+et-xmlfile==1.1.0
+exceptiongroup==1.2.0
+fastapi==0.109.2
+fastapi-code-generator==0.3.5
+filelock==3.13.1
+Flask==3.0.2
+fonttools==4.38.0
+gdown==5.1.0
+genson==1.2.2
+google-auth==2.27.0
+h11==0.14.0
+html5lib @ file:///home/conda/feedstock_root/build_artifacts/html5lib_1592930327044/work
+httpcore==1.0.2
+httpx==0.26.0
+idna @ file:///home/conda/feedstock_root/build_artifacts/idna_1701026962277/work
+importlib-metadata @ file:///home/conda/feedstock_root/build_artifacts/importlib-metadata_1703269254275/work
+inflect==5.6.2
+isodate==0.6.1
+isort==5.13.2
+itsdangerous==2.1.2
+Jinja2==3.1.3
+jsonschema==3.2.0
+kafka-python==2.0.2
+kubernetes==29.0.0
+markdown-it-py @ file:///home/conda/feedstock_root/build_artifacts/markdown-it-py_1686175045316/work
+MarkupPy==1.14
+MarkupSafe==2.1.5
+mdurl @ file:///home/conda/feedstock_root/build_artifacts/mdurl_1704317613764/work
+msgpack @ file:///opt/conda/conda-bld/msgpack-python_1652362659880/work
+mypy-extensions==1.0.0
+nlopt==2.7.1
+numpy==1.26.4
+oauthlib==3.2.2
+odfpy==1.4.1
+openapi-schema-validator==0.1.6
+openapi-spec-validator==0.3.3
+openpyxl==3.1.2
+oyaml==1.0
+packageurl-python @ file:///home/conda/feedstock_root/build_artifacts/packageurl-python_1704811825047/work
+packaging @ file:///home/conda/feedstock_root/build_artifacts/packaging_1696202382185/work
+pandas==1.4.4
+pathspec==0.12.1
+pillow==10.2.0
+pip-api @ file:///home/conda/feedstock_root/build_artifacts/pip-api_1658274893957/work
+pip-requirements-parser @ file:///home/conda/feedstock_root/build_artifacts/pip-requirements-parser_1672265598496/work
+pip_audit @ file:///home/conda/feedstock_root/build_artifacts/pip-audit_1683232118275/work
+platformdirs==4.2.0
+-e git+ssh://git@github.com/MetaCell/scicrunch-antibody-registry.git@1f4c2ac43ac61b7ddb2cc5b754f9c4f01e5e8120#egg=portal&subdirectory=applications/portal/backend
+prance==0.22.2.22.0
+psutil==5.9.4
+psycopg2-binary==2.9.6
+pyaml==23.12.0
+pyasn1==0.5.1
+pyasn1-modules==0.3.0
+pycparser==2.21
+pydantic==1.10.14
+Pygments @ file:///home/conda/feedstock_root/build_artifacts/pygments_1700607939962/work
+pyhumps==3.8.0
+PyJWT==2.8.0
+PyOpenGL==3.1.6
+pyparsing @ file:///home/conda/feedstock_root/build_artifacts/pyparsing_1690737849915/work
+PyQt5==5.15.7
+PyQt5-Qt5==5.15.2
+PyQt5-sip==12.11.0
+pyrsistent==0.16.1
+PySnooper==0.5.0
+PySocks @ file:///home/conda/feedstock_root/build_artifacts/pysocks_1648857263093/work
+python-dateutil==2.8.2
+python-jose==3.3.0
+python-keycloak==3.7.0
+pytz==2024.1
+PyYAML==6.0.1
+requests @ file:///home/conda/feedstock_root/build_artifacts/requests_1684774241324/work
+requests-oauthlib==1.3.1
+requests-toolbelt==1.0.0
+rich @ file:///home/conda/feedstock_root/build_artifacts/rich-split_1700160075651/work/dist
+rsa==4.9
+ruamel.yaml==0.18.6
+ruamel.yaml.clib==0.2.8
+sentry-sdk==1.40.3
+shellingham==1.5.4
+six @ file:///home/conda/feedstock_root/build_artifacts/six_1620240208055/work
+sniffio==1.3.0
+sortedcontainers @ file:///home/conda/feedstock_root/build_artifacts/sortedcontainers_1621217038088/work
+soupsieve==2.5
+sqlparse==0.4.4
+starlette==0.36.3
+stringcase==1.2.0
+swagger_ui_bundle==1.1.0
+tablib==3.5.0
+toml @ file:///home/conda/feedstock_root/build_artifacts/toml_1604308577558/work
+tomli==2.0.1
+tqdm==4.66.1
+typed-ast==1.5.5
+typer==0.4.2
+typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/typing_extensions_1702176139754/work
+urllib3 @ file:///home/conda/feedstock_root/build_artifacts/urllib3_1706638047111/work
+uvicorn==0.17.6
+webencodings @ file:///home/conda/feedstock_root/build_artifacts/webencodings_1694681268211/work
+websocket-client==1.7.0
+Werkzeug==3.0.1
+xlrd==2.0.1
+xlwt==1.3.0
+zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1695255097490/work

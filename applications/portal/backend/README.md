@@ -10,6 +10,17 @@ This example uses the [Django](https://www.djangoproject.com/) library on top of
 ## Requirements
 Python >= 3
 
+Cloudharness libraries (check also dockerfile chain)
+
+```
+pip install -e cloud-harness/libraries/models
+pip install -e cloud-harness/libraries/cloudharness-common
+pip install -r cloud-harness/infrastructure/common-images/cloudharness-fastapi/libraries/fastapi/requirements.txt 
+pip install -e cloud-harness/infrastructure/common-images/cloudharness-django/libraries/cloudharness-django
+pip install -r applications/portal/backend/requirements.txt
+pip install -e applications/portal/backend
+```
+
 ## Local backend development
 ```
 # store the accounts api admin password on the local disk

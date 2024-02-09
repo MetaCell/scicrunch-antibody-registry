@@ -218,7 +218,7 @@ const About = () => {
           </Typography>
 
           <Typography variant="body1" align='center' marginBottom={8}>
-            We would like to thank our partners, who submit data to us regularly making author's jobs easier. Would you like to become a partner? <Link href="/membership">Inquire here</Link>.
+            We would like to thank our partners, who submit data to us regularly making author&apos;s jobs easier. Would you like to become a partner? <Link href="/membership">Inquire here</Link>.
           </Typography>
 
           <Slider {...settings} className="about-slider">
@@ -293,7 +293,7 @@ const About = () => {
                 </Typography>
 
                 <Typography>
-                  We never delete records, so even when an antibody disappears from a vendor's catalog, or is sold to another vendor, we can trace the provenance of that antibody. (Bandrowski et al).
+                  We never delete records, so even when an antibody disappears from a vendor&apos;s catalog, or is sold to another vendor, we can trace the provenance of that antibody. (Bandrowski et al).
                 </Typography>
               </Grid>
               <Grid item md={7}>
