@@ -190,6 +190,13 @@ const About = () => {
     { name: 'Niels Danbolt University of Oslo', url: 'https://www.uio.no/', img: './assets/partners/University_of_Oslo.png' },
     { name: 'NIH', url: 'https://www.nhpreagents.org/', img: './assets/partners/NIH.png' },
     { name: 'ichorbio', url: 'https://ichor.bio/', img: './assets/partners/ichorbio.png' },
+    { name: 'Antibodies Incorporated', url: 'https://www.antibodiesinc.com/', img: './assets/partners/antibodies_incorporated.jpg' },
+    { name: 'HUABIO', url: 'https://www.huabio.com/', img: './assets/partners/HUABIO.png' },
+    { name: 'NanoTag', url: 'https://nano-tag.com/', img: './assets/partners/NanoTag.jpg' },
+    { name: 'Institute for Protein Innovation', url: 'https://proteininnovation.org/', img: './assets/partners/Institute_for_Protein_Innovation.png' },
+    { name: 'Fujirebio', url: 'https://www.fujirebio.com/en', img: './assets/partners/Fujirebio.jpeg' },
+    { name: 'Boster Biological Technology', url: 'https://www.bosterbio.com/', img: './assets/partners/Boster_Biological-logo.png' },
+    { name: 'Fujifilm Wako USA', url: 'https://wakousa.com/', img: './assets/partners/fujifilm-wako-chemicals-usa-corporation-logo-vector.png' }
   ]
   const history = useHistory();
   const navigate = () => history.push('/');
