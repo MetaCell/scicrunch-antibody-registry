@@ -1033,6 +1033,35 @@ export type UpdateAntibodyCommercialTypeEnum = typeof UpdateAntibodyCommercialTy
 export const AntibodyApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        antibodiesExportGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/antibodies/export`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Creates a new instance of a `Antibody`.
          * @summary Create a Antibody
          * @param {AddAntibody} addAntibody A new &#x60;Antibody&#x60; to be created.
@@ -1299,6 +1328,15 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = AntibodyApiAxiosParamCreator(configuration)
     return {
         /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async antibodiesExportGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.antibodiesExportGet(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Creates a new instance of a `Antibody`.
          * @summary Create a Antibody
          * @param {AddAntibody} addAntibody A new &#x60;Antibody&#x60; to be created.
@@ -1380,6 +1418,14 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
     const localVarFp = AntibodyApiFp(configuration)
     return {
         /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        antibodiesExportGet(options?: any): AxiosPromise<void> {
+            return localVarFp.antibodiesExportGet(options).then((request) => request(axios, basePath));
+        },
+        /**
          * Creates a new instance of a `Antibody`.
          * @summary Create a Antibody
          * @param {AddAntibody} addAntibody A new &#x60;Antibody&#x60; to be created.
@@ -1454,6 +1500,16 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
  * @extends {BaseAPI}
  */
 export class AntibodyApi extends BaseAPI {
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AntibodyApi
+     */
+    public antibodiesExportGet(options?: AxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).antibodiesExportGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Creates a new instance of a `Antibody`.
      * @summary Create a Antibody
