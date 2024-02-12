@@ -8,7 +8,7 @@ from api.services.user_service import UnrecognizedUser, get_current_user_id
 
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from api.services import antibody_service
 from api.utilities.exceptions import AntibodyDataException
@@ -84,6 +84,7 @@ def get_by_accession(accession_number: int) -> AntibodyDTO:
 
 def get_antibodies_export():
     from api.services.export_service import generate_antibodies_csv_file
-    fname = "/tmp/antibodies_export.csv"
+    fname = "static/www/antibodies_export.csv"
     generate_antibodies_csv_file(fname)
-    return FileResponse(fname, filename="antibodies_export.csv")
+    return RedirectResponse("/" + fname)
+    # return FileResponse(fname, filename="antibodies_export.csv")
