@@ -55,6 +55,16 @@ paths:
                         format: date-time
                         type: string
                     in: query
+                -
+                    examples:
+                        query parameter added as - status=rejected:
+                            value: /api/antibodies?page=1&size=100&status=rejected
+                    name: status
+                    description: 'Add a status to filter the query - CURATED, REJECTED, QUEUE. '
+                    schema:
+                        type: string
+                    in: query
+                    required: false
             responses:
                 '200':
                     content:
