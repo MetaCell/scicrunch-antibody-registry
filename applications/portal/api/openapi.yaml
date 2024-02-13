@@ -369,6 +369,16 @@ paths:
                     type: integer
                 in: path
                 required: true
+    /antibodies/export:
+        summary: Exports all antobodies in csv format
+        get:
+            tags:
+                - antibody
+            responses:
+                '200':
+                    content:
+                        text/csv: {}
+                    description: All antibodies in csv format
 components:
     schemas:
         FilterRequest:
@@ -739,3 +749,19 @@ components:
             bearerFormat: JWT
             type: http
             x-bearerInfoFunc: cloudharness.auth.decode_token
+tags:
+    -
+        name: antibody
+        description: ''
+    -
+        name: search
+        description: ''
+    -
+        name: api
+        description: ''
+    -
+        name: test
+        description: ''
+    -
+        name: ingest
+        description: ''

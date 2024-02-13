@@ -1,7 +1,6 @@
-ARG CLOUDHARNESS_FRONTEND_BUILD
 ARG CLOUDHARNESS_DJANGO
 
-FROM $CLOUDHARNESS_FRONTEND_BUILD as frontend
+FROM node:20 as frontend
 
 ENV APP_DIR=/app
 
@@ -16,6 +15,10 @@ RUN yarn build
 #####
 
 FROM $CLOUDHARNESS_DJANGO
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR ${APP_DIR}
 RUN mkdir -p ${APP_DIR}/static/www

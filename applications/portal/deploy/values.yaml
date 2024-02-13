@@ -14,7 +14,6 @@ harness:
     path: /api/ready
   dependencies:
     build:
-      - cloudharness-frontend-build
       - cloudharness-django
     hard:
       - common
@@ -69,3 +68,5 @@ harness:
   test:
     e2e:
       enabled: true
+
+export_query: "SELECT 'AB_' || ab_id as rrid, ab_name, catalog_num, cat_alt, api_vendor.vendor as vendor_name, api_vendor.vendor || ' Cat# ' || catalog_num || ', RRID:AB_' || ab_id AS proper_citation from api_antibody LEFT JOIN api_vendor on api_vendor.id = vendor_id WHERE true"

@@ -4,8 +4,7 @@ import { Box, Button, Container, Divider, Grid, Link, Typography } from '@mui/ma
 import Slider from "react-slick";
 import { vars } from "../theme/variables";
 import { useHistory } from 'react-router-dom';
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+
 const { footerBg, whiteColor, sepratorColor, primaryColor, contentBg, contentBorderColor, primaryTextColor, bannerHeadingColor } = vars;
 
 const styles = {
@@ -191,6 +190,13 @@ const About = () => {
     { name: 'Niels Danbolt University of Oslo', url: 'https://www.uio.no/', img: './assets/partners/University_of_Oslo.png' },
     { name: 'NIH', url: 'https://www.nhpreagents.org/', img: './assets/partners/NIH.png' },
     { name: 'ichorbio', url: 'https://ichor.bio/', img: './assets/partners/ichorbio.png' },
+    { name: 'Antibodies Incorporated', url: 'https://www.antibodiesinc.com/', img: './assets/partners/antibodies_incorporated.jpg' },
+    { name: 'HUABIO', url: 'https://www.huabio.com/', img: './assets/partners/HUABIO.png' },
+    { name: 'NanoTag', url: 'https://nano-tag.com/', img: './assets/partners/NanoTag.jpg' },
+    { name: 'Institute for Protein Innovation', url: 'https://proteininnovation.org/', img: './assets/partners/Institute_for_Protein_Innovation.png' },
+    { name: 'Fujirebio', url: 'https://www.fujirebio.com/en', img: './assets/partners/Fujirebio.jpeg' },
+    { name: 'Boster Biological Technology', url: 'https://www.bosterbio.com/', img: './assets/partners/Boster_Biological-logo.png' },
+    { name: 'Fujifilm Wako USA', url: 'https://wakousa.com/', img: './assets/partners/fujifilm-wako-chemicals-usa-corporation-logo-vector.png' }
   ]
   const history = useHistory();
   const navigate = () => history.push('/');
@@ -212,7 +218,7 @@ const About = () => {
           </Typography>
 
           <Typography variant="body1" align='center' marginBottom={8}>
-            We would like to thank our partners, who submit data to us regularly making author's jobs easier. Would you like to become a partner? <Link href="/membership">Inquire here</Link>.
+            We would like to thank our partners, who submit data to us regularly making author&apos;s jobs easier. Would you like to become a partner? <Link href="/membership">Inquire here</Link>.
           </Typography>
 
           <Slider {...settings} className="about-slider">
@@ -287,7 +293,7 @@ const About = () => {
                 </Typography>
 
                 <Typography>
-                  We never delete records, so even when an antibody disappears from a vendor's catalog, or is sold to another vendor, we can trace the provenance of that antibody. (Bandrowski et al).
+                  We never delete records, so even when an antibody disappears from a vendor&apos;s catalog, or is sold to another vendor, we can trace the provenance of that antibody. (Bandrowski et al).
                 </Typography>
               </Grid>
               <Grid item md={7}>

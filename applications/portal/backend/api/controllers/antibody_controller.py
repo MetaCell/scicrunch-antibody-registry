@@ -8,7 +8,7 @@ from api.services.user_service import UnrecognizedUser, get_current_user_id
 
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from api.services import antibody_service
 from api.utilities.exceptions import AntibodyDataException
@@ -80,3 +80,11 @@ def get_by_accession(accession_number: int) -> AntibodyDTO:
         return antibody_service.get_antibody_by_accession(accession_number)
     except Antibody.DoesNotExist as e:
         raise HTTPException(status_code=404, detail=e.message)
+
+
+def get_antibodies_export():
+    from api.services.export_service import generate_antibodies_csv_file
+    fname = "static/www/antibodies_export.csv"
+    generate_antibodies_csv_file(fname)
+    return RedirectResponse("/" + fname)
+    # return FileResponse(fname, filename="antibodies_export.csv")
