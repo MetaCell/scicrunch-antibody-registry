@@ -41,3 +41,7 @@ def catalog_number_chunked(catalog_number: str, fill=' ') -> List[str]:
         return fill.join(c for c in re.split(r'(\d+)',re.sub(r'[^\w]', '', catalog_number)) if c).strip().lower()
     except Exception as e:
         return ""
+
+def check_if_status_exists_or_curated(status: str) -> bool:
+    from api.models import STATUS
+    return status.upper() if (status and (status.upper() in STATUS.__members__)) else STATUS.CURATED 
