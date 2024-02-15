@@ -61,3 +61,7 @@ def catalog_number_chunked(catalog_number: str, catalog_alt_number: str=None, fi
         return joined_catalog_chunk.strip().lower()
     except Exception as e:
         return ""
+
+def check_if_status_exists_or_curated(status: str) -> bool:
+    from api.models import STATUS
+    return status.upper() if (status and (status.upper() in STATUS.__members__)) else STATUS.CURATED 

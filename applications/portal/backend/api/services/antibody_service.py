@@ -10,9 +10,9 @@ from api.models import STATUS, Antibody, CommercialType
 from api.utilities.exceptions import DuplicatedAntibody, AntibodyDataException
 from cloudharness import log
 from openapi.models import AddAntibody as AddAntibodyDTO
-from openapi.models import UpdateAntibody as UpdateAntibodyDTO
+from openapi.models import UpdateAntibody as UpdateAntibodyDTO, Status
 from openapi.models import Antibody as AntibodyDTO, PaginatedAntibodies
-
+from api.utilities.functions import check_if_status_exists_or_curated
 antibody_mapper = AntibodyMapper()
 
 
@@ -25,9 +25,9 @@ def search_antibodies_by_catalog(search: str, page: int = 1, size: int = 50,
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
 
 
-def get_antibodies(page: int = 1, size: int = 50, date_from: datetime = None, date_to: datetime = None) -> PaginatedAntibodies:
+def get_antibodies(page: int = 1, size: int = 50, date_from: datetime = None, date_to: datetime = None, status:str=None) -> PaginatedAntibodies:
     try:
-        query = Antibody.objects.filter(status=STATUS.CURATED)
+        query = Antibody.objects.filter(status=check_if_status_exists_or_curated(status))
         if date_from:
             query = query.filter(lastedit_time__gte=date_from)
         if date_to:

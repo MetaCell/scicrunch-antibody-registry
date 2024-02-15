@@ -1110,10 +1110,11 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
          * @param {number} [size] Corresponds to the cardinality of antibodies requested
          * @param {string} [updatedFrom] start date to include. ISO format
          * @param {string} [updatedTo] end update date to include. ISO format
+         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE. 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAntibodies: async (page?: number, size?: number, updatedFrom?: string, updatedTo?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getAntibodies: async (page?: number, size?: number, updatedFrom?: string, updatedTo?: string, status?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/antibodies`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1144,6 +1145,10 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
                 localVarQueryParameter['updated_to'] = (updatedTo as any instanceof Date) ?
                     (updatedTo as any).toISOString() :
                     updatedTo;
+            }
+
+            if (status !== undefined) {
+                localVarQueryParameter['status'] = status;
             }
 
 
@@ -1354,11 +1359,12 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
          * @param {number} [size] Corresponds to the cardinality of antibodies requested
          * @param {string} [updatedFrom] start date to include. ISO format
          * @param {string} [updatedTo] end update date to include. ISO format
+         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE. 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAntibodies(page?: number, size?: number, updatedFrom?: string, updatedTo?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAntibodies>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getAntibodies(page, size, updatedFrom, updatedTo, options);
+        async getAntibodies(page?: number, size?: number, updatedFrom?: string, updatedTo?: string, status?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAntibodies>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAntibodies(page, size, updatedFrom, updatedTo, status, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1442,11 +1448,12 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
          * @param {number} [size] Corresponds to the cardinality of antibodies requested
          * @param {string} [updatedFrom] start date to include. ISO format
          * @param {string} [updatedTo] end update date to include. ISO format
+         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE. 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAntibodies(page?: number, size?: number, updatedFrom?: string, updatedTo?: string, options?: any): AxiosPromise<PaginatedAntibodies> {
-            return localVarFp.getAntibodies(page, size, updatedFrom, updatedTo, options).then((request) => request(axios, basePath));
+        getAntibodies(page?: number, size?: number, updatedFrom?: string, updatedTo?: string, status?: string, options?: any): AxiosPromise<PaginatedAntibodies> {
+            return localVarFp.getAntibodies(page, size, updatedFrom, updatedTo, status, options).then((request) => request(axios, basePath));
         },
         /**
          * Gets the details of a single instance of a `Antibody`.
@@ -1529,12 +1536,13 @@ export class AntibodyApi extends BaseAPI {
      * @param {number} [size] Corresponds to the cardinality of antibodies requested
      * @param {string} [updatedFrom] start date to include. ISO format
      * @param {string} [updatedTo] end update date to include. ISO format
+     * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE. 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AntibodyApi
      */
-    public getAntibodies(page?: number, size?: number, updatedFrom?: string, updatedTo?: string, options?: AxiosRequestConfig) {
-        return AntibodyApiFp(this.configuration).getAntibodies(page, size, updatedFrom, updatedTo, options).then((request) => request(this.axios, this.basePath));
+    public getAntibodies(page?: number, size?: number, updatedFrom?: string, updatedTo?: string, status?: string, options?: AxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).getAntibodies(page, size, updatedFrom, updatedTo, status, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
