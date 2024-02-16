@@ -35,11 +35,11 @@ def get_antibody_persistence_directory(ab_id: str, filename: str) -> str:
     return f'{ANTIBODY_PERSISTENCE}/{ab_id}/{filename}'
 
 def get_catalog_number_digits(catalog_number: str) -> List[str]:
-    return [c for c in re.split(r'(\d+)',re.sub(r'[^\w]', '', catalog_number)) if c]
+    return [c.lower() for c in re.split(r'(\d+)',re.sub(r'[^\w]', '', catalog_number)) if c]
 
 
 def get_catalog_non_alphanumeric(catalog_number: str) -> List[str]:
-    split_by_non_alphanumeric_array = [c for c in re.split(r'\W+', catalog_number) if c]
+    split_by_non_alphanumeric_array = [c.lower() for c in re.split(r'\W+', catalog_number) if c]
     alphanumeric_catalogs = []
     for c in split_by_non_alphanumeric_array:
         alphanumeric_catalogs.extend(get_catalog_number_digits(c))
