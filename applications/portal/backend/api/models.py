@@ -277,8 +277,10 @@ class Antibody(models.Model):
         if first_save:
             super().save()
             self._handle_duplicates()
+        
         if self.catalog_num:
-            self.catalog_num_search = catalog_number_chunked(self.catalog_num)
+            self.catalog_num_search = catalog_number_chunked(self.catalog_num, self.cat_alt)
+
         if not self.accession or not self.ab_id:
             self._generate_automatic_attributes()
         super().save()
@@ -296,7 +298,7 @@ class Antibody(models.Model):
         super(Antibody, self).save(*args, **kwargs)
 
         if self.catalog_num:
-            self.catalog_num_search = catalog_number_chunked(self.catalog_num)
+            self.catalog_num_search = catalog_number_chunked(self.catalog_num, self.cat_alt)
         self._handle_duplicates(*args, **kwargs)
         self._generate_related_fields(*args, **kwargs)
         self._synchronize_target_species(old_species)

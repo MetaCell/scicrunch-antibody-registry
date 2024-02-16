@@ -14,6 +14,7 @@ from openapi.models import (
 
 from .admin import VendorAdmin
 from .models import Vendor, Antibody, VendorDomain, VendorSynonym, Specie
+from api.utilities.functions import catalog_number_chunked
 
 example_ab = {
     "clonality": "cocktail",
@@ -246,6 +247,66 @@ class AntibodiesTestCase(TestCase):
         dao.save()
         assert dao.species.count() == 3
 
+
+    def test_sql_command_rechunk_catalog_number(self):
+        # rechunk_catalog_number(Antibody)
+        pass
+
+    def test_fts_by_catalog_number(self):
+        # unit test for fts_by_catalog_number
+        # does this function give us the same value as the one we expect - fts_by_catalog_number
+        pass
+
+
+    def test_catalog_number_chunked(self):
+        # FOUND
+        SEARCH_CATALOG_TERM_1 = 'N1002'
+        SEARCH_CATALOG_TERM_2 = 'N0304-AB635P-L'
+        SEARCH_CATALOG_TERM_3 = 'N0304-AB635'
+
+        # NOT FOUND
+        SEARCH_CATALOG_TERM_4 = 'K0202'
+        SEARCH_CATALOG_TERM_5 = 'N0304-AB635P-S'
+        SEARCH_CATALOG_TERM_6 = 'N0304-AB635P-'
+        SEARCH_CATALOG_TERM_7 = 'N1002-AbRED-S'
+        SEARCH_CATALOG_TERM_8 = 'N0304-AB6'
+        SEARCH_CATALOG_TERM_9 = 'N1002-AbRED'
+
+        # Create antibodies
+        chunk_term_1 = catalog_number_chunked(SEARCH_CATALOG_TERM_1)
+        assert set(chunk_term_1.split(' ')) == set('n 1002'.split(' '))
+
+        chunk_term_2 = catalog_number_chunked(SEARCH_CATALOG_TERM_2)
+        assert set(chunk_term_2.split(' ')) == set('n 0304 ab 635 p l pl'.split(' '))
+
+        chunk_term_3 = catalog_number_chunked(SEARCH_CATALOG_TERM_3)
+        assert set(chunk_term_3.split(' ')) == set('n 0304 ab 635'.split(' '))
+
+        chunk_term_4 = catalog_number_chunked(SEARCH_CATALOG_TERM_4)
+        assert set(chunk_term_4.split(' ')) == set('k 0202'.split(' '))
+
+        chunk_term_5 = catalog_number_chunked(SEARCH_CATALOG_TERM_5)
+        assert set(chunk_term_5.split(' ')) == set('n 0304 ab 635 p s ps'.split(' '))
+
+        chunk_term_6 = catalog_number_chunked(SEARCH_CATALOG_TERM_6)
+        assert set(chunk_term_6.split(' ')) == set('n 0304 ab 635 p'.split(' '))
+
+        chunk_term_7 = catalog_number_chunked(SEARCH_CATALOG_TERM_7)
+        assert set(chunk_term_7.split(' ')) == set('n 1002 abred s abreds'.split(' '))
+
+        chunk_term_8 = catalog_number_chunked(SEARCH_CATALOG_TERM_8)
+        assert set(chunk_term_8.split(' ')) == set('n 0304 ab 6'.split(' '))
+
+        chunk_term_9 = catalog_number_chunked(SEARCH_CATALOG_TERM_9)
+        assert set(chunk_term_9.split(' ')) == set('n 1002 abred'.split(' '))
+        
+        SEARCH_CATALOG_TERM_10 = 'N0304-AB635P-L'
+        SEARCH_CATALOG_ALT_TERM_10 = 'N0304-AB635P-S'
+        chunk_term_10 = catalog_number_chunked(SEARCH_CATALOG_TERM_10, SEARCH_CATALOG_ALT_TERM_10)
+        assert set(chunk_term_10.split(' ')) == set('n 0304 ab 635 p l s pl ps n0304ab635pl'.split(' '))
+
+
+
 class VendorAdminTests(TestCase):
     def setUp(self):
         self.site = AdminSite()
@@ -309,3 +370,5 @@ class VendorAdminTests(TestCase):
     #     self.assertEquals(len(Antibody.objects.all()), 2)
     #     self.assertEquals(len(Vendor.objects.all()), 2)
     #     self.assertEquals(len(VendorDomain.objects.all()), 1)
+
+
