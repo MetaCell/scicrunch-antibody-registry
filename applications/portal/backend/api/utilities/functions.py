@@ -5,7 +5,7 @@ from urllib.parse import urlsplit
 from django.db.models import AutoField
 from django.forms import URLField
 
-from portal.settings import ANTIBODY_PERSISTENCE
+from portal.constants import ANTIBODY_PERSISTENCE
 
 magic = 64544
 prefix = "AB_"

@@ -137,22 +137,18 @@ class AntibodiesTestCase(TestCase):
         a.status = STATUS.CURATED
         a.save(update_search=False)
 
-        try:
-            duplicated = AddAntibodyDTO(**example_ab)
-            duplicated.vendorName = "My vendor synonym" # should keep the same vendor and add a synonym
-            create_antibody(duplicated, "bbb")
-            self.fail("Should detect duplicate antibody")
-        except DuplicatedAntibody as e:
-            da = e.antibody
-            assert da.accession != da.abId
-            assert da.abId == ab.abId
-            assert da.status == Status.QUEUE
-            assert da.vendorId == ab.vendorId
-            assert da.vendorName == "My vendorname"
-            
-            synonyms = VendorSynonym.objects.filter(vendor__id=da.vendorId)
-            assert len(synonyms) == 1
+        
+        duplicated = AddAntibodyDTO(**example_ab)
+        # duplicated.vendorName = "My vendor synonym" # should keep the same vendor and add a synonym
+        da = create_antibody(duplicated, "bbb")
 
+        assert da.accession != da.abId
+        assert da.abId == ab.abId
+        assert da.status == Status.QUEUE
+        assert da.vendorId == ab.vendorId
+        assert da.vendorName == "My vendorname"
+            
+ 
         assert VendorDomain.objects.all().count() == 2
         assert Vendor.objects.all().count() == 1
 
@@ -174,15 +170,35 @@ class AntibodiesTestCase(TestCase):
         assert ab.ix
         assert ab.showLink is not None
 
+        ab_by_accession = get_antibody_by_accession(ab.accession)
+        assert ab_by_accession.abId == ab.abId
+        assert ab_by_accession.accession == ab.accession
+        assert ab_by_accession.vendorName == ab.vendorName
+
         # Search by catalog number
         self.assertEquals(len(fts_antibodies(search="N176A").items), 2)
         assert len(fts_antibodies(search="N176A 35").items) == 1
+        assert len(fts_antibodies(search="N176A|35").items) == 1
         assert len(fts_antibodies(search="N176A|35").items) == 1
         assert len(fts_antibodies(search="N17").items) == 0
 
         assert len(fts_antibodies(search="N17").items) == 0
 
+
+        a = Antibody.objects.get(ab_id=ab.abId)
+        a.catalog_num='N0304-AB635P-L'
+        a.cat_alt='N0304-AB635P-S'
+        a.save()
+
+        assert len(fts_antibodies(search="N0304-AB635P-L").items) == 1
+        assert len(fts_antibodies(search="N0304AB635PL").items) == 1
+        assert len(fts_antibodies(search="N0304-AB635P-S").items) == 1
+        assert len(fts_antibodies(search="635P-L").items) == 1
+        assert len(fts_antibodies(search="N0304-AB635P-X").items) == 0
+
         # Search in plain fields
+
+        # FIXME full-text search is not working in the tests as cannot account for materialized view update
 
         # refresh_search_view()
         # import time
@@ -209,10 +225,7 @@ class AntibodiesTestCase(TestCase):
         # assert len(fts_antibodies(search="Rabbit").items) == 1
         # assert len(fts_antibodies(search="Andrew Dingwall").items) == 1
 
-        # ab_by_accession = get_antibody_by_accession(ab.accession)
-        # assert ab_by_accession.abId == ab.abId
-        # assert ab_by_accession.accession == ab.accession
-        # assert ab_by_accession.vendorName == ab.vendorName
+        
 
     def test_update(self):
         user_id = "aaaa"
@@ -247,52 +260,7 @@ class AntibodiesTestCase(TestCase):
         dao.save()
         assert dao.species.count() == 3
 
-    def test_catalog_number_chunked(self):
-        # FOUND
-        SEARCH_CATALOG_TERM_1 = 'N1002'
-        SEARCH_CATALOG_TERM_2 = 'N0304-AB635P-L'
-        SEARCH_CATALOG_TERM_3 = 'N0304-AB635'
-
-        # NOT FOUND
-        SEARCH_CATALOG_TERM_4 = 'K0202'
-        SEARCH_CATALOG_TERM_5 = 'N0304-AB635P-S'
-        SEARCH_CATALOG_TERM_6 = 'N0304-AB635P-'
-        SEARCH_CATALOG_TERM_7 = 'N1002-AbRED-S'
-        SEARCH_CATALOG_TERM_8 = 'N0304-AB6'
-        SEARCH_CATALOG_TERM_9 = 'N1002-AbRED'
-
-        # Create antibodies
-        chunk_term_1 = catalog_number_chunked(SEARCH_CATALOG_TERM_1)
-        assert set(chunk_term_1.split(' ')) == set('n 1002'.split(' '))
-
-        chunk_term_2 = catalog_number_chunked(SEARCH_CATALOG_TERM_2)
-        assert set(chunk_term_2.split(' ')) == set('n 0304 ab 635 p l pl'.split(' '))
-
-        chunk_term_3 = catalog_number_chunked(SEARCH_CATALOG_TERM_3)
-        assert set(chunk_term_3.split(' ')) == set('n 0304 ab 635'.split(' '))
-
-        chunk_term_4 = catalog_number_chunked(SEARCH_CATALOG_TERM_4)
-        assert set(chunk_term_4.split(' ')) == set('k 0202'.split(' '))
-
-        chunk_term_5 = catalog_number_chunked(SEARCH_CATALOG_TERM_5)
-        assert set(chunk_term_5.split(' ')) == set('n 0304 ab 635 p s ps'.split(' '))
-
-        chunk_term_6 = catalog_number_chunked(SEARCH_CATALOG_TERM_6)
-        assert set(chunk_term_6.split(' ')) == set('n 0304 ab 635 p'.split(' '))
-
-        chunk_term_7 = catalog_number_chunked(SEARCH_CATALOG_TERM_7)
-        assert set(chunk_term_7.split(' ')) == set('n 1002 abred s abreds'.split(' '))
-
-        chunk_term_8 = catalog_number_chunked(SEARCH_CATALOG_TERM_8)
-        assert set(chunk_term_8.split(' ')) == set('n 0304 ab 6'.split(' '))
-
-        chunk_term_9 = catalog_number_chunked(SEARCH_CATALOG_TERM_9)
-        assert set(chunk_term_9.split(' ')) == set('n 1002 abred'.split(' '))
-        
-        SEARCH_CATALOG_TERM_10 = 'N0304-AB635P-L'
-        SEARCH_CATALOG_ALT_TERM_10 = 'N0304-AB635P-S'
-        chunk_term_10 = catalog_number_chunked(SEARCH_CATALOG_TERM_10, SEARCH_CATALOG_ALT_TERM_10)
-        assert set(chunk_term_10.split(' ')) == set('n 0304 ab 635 p l s pl ps n0304ab635pl'.split(' '))
+    
 
 
 

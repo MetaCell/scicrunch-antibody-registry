@@ -20,4 +20,3 @@ def rechunk_catalog_number(apps, schema_editor):
             new_catalog_number_chunked = catalog_number_chunked(antibody['catalog_num'], antibody['cat_alt'])
             if new_catalog_number_chunked != antibody['catalog_num_search']:
                 cursor.execute(f"UPDATE api_antibody SET catalog_num_search = {new_catalog_number_chunked} WHERE ix={antibody['ix']};") 
-    connection.commit()
