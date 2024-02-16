@@ -4,12 +4,15 @@ from django.db import migrations, connection
 from cloudharness import log
 from api.repositories.maintainance import rechunk_catalog_number
 
+def chunk_catalog_number(apps, schema_editor):
+    Antibody = apps.get_model('api', 'Antibody')
+    rechunk_catalog_number(Antibody)
+
 
 class Migration(migrations.Migration):
     dependencies = [
         ("api", "0007_alter_antibody_comments"),
     ]
-
     operations = [
-        migrations.RunPython(rechunk_catalog_number)
+        migrations.RunPython(chunk_catalog_number)
     ]

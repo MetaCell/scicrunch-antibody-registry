@@ -13,10 +13,9 @@ def refresh_search_view():
     threading.Thread(target=refresh_search_view_thread).start()
 
 
-def rechunk_catalog_number(apps, schema_editor):
-    Antibody = apps.get_model('api', 'Antibody')
+def rechunk_catalog_number(Antibody_model):
     with connection.cursor() as cursor:
-        for antibody in Antibody.objects.all().values('ix', 'catalog_num_search', 'catalog_num', 'cat_alt'):
+        for antibody in Antibody_model.objects.all().values('ix', 'catalog_num_search', 'catalog_num', 'cat_alt'):
             new_catalog_number_chunked = catalog_number_chunked(antibody['catalog_num'], antibody['cat_alt'])
             if new_catalog_number_chunked != antibody['catalog_num_search']:
                 cursor.execute(f"UPDATE api_antibody SET catalog_num_search = {new_catalog_number_chunked} WHERE ix={antibody['ix']};") 
