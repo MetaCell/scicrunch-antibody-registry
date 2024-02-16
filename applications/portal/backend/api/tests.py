@@ -247,6 +247,17 @@ class AntibodiesTestCase(TestCase):
         dao.save()
         assert dao.species.count() == 3
 
+
+    def test_sql_command_rechunk_catalog_number(self):
+        # rechunk_catalog_number(Antibody)
+        pass
+
+    def test_fts_by_catalog_number(self):
+        # unit test for fts_by_catalog_number
+        # does this function give us the same value as the one we expect - fts_by_catalog_number
+        pass
+
+
     def test_catalog_number_chunked(self):
         # FOUND
         SEARCH_CATALOG_TERM_1 = 'N1002'
