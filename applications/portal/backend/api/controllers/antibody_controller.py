@@ -84,6 +84,10 @@ def get_by_accession(accession_number: int) -> AntibodyDTO:
 def get_antibodies_export():
     from api.services.export_service import generate_antibodies_csv_file
     fname = "static/www/antibodies_export.csv"
-    generate_antibodies_csv_file(fname)
+
+    # check if file exists and it is created within 24 hours
+    # if not, generate a new file
+    if not os.path.exists(fname) or (datetime.now() - datetime.fromtimestamp(os.path.getmtime(fname))).days > 1:
+        generate_antibodies_csv_file(fname)
     return RedirectResponse("/" + fname)
     # return FileResponse(fname, filename="antibodies_export.csv")
