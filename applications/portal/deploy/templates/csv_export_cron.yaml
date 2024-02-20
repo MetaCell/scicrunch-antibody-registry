@@ -1,0 +1,50 @@
+{{- if .Values.apps.portal.export_query -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: "{{ .Values.apps.portal.harness.database.name }}-export-csv"
+spec:
+  schedule: {{ .Values.apps.portal.export_csv_cron | quote }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            name: "{{ .Values.apps.portal.harness.database.name }}-export-csv"
+            usesvolume: {{ .Values.apps.portal.harness.deployment.volume.name }}
+        spec:
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: usesvolume
+                        operator: In
+                        values:
+                          - {{ .Values.apps.portal.harness.deployment.volume.name }}
+                  topologyKey: kubernetes.io/hostname
+          containers:
+            - name: "{{ .Values.apps.portal.harness.database.name }}-export-csv"
+              imagePullPolicy: IfNotPresent
+              image: {{ .Values.apps.portal.harness.database.postgres.image }}
+              command: 
+              - psql 
+              - -h
+              - "{{ .Values.apps.portal.harness.database.name }}.{{ .Values.namespace }}"
+              - -U 
+              - {{ .Values.apps.portal.harness.database.user }} 
+              - -d 
+              - {{ .Values.apps.portal.harness.database.name }}
+              args: 
+              - "-c" 
+              - "\\copy ({{ .Values.apps.portal.export_query }}) TO '/mnt/export/antibodies.csv' DELIMITER ',' CSV HEADER;"
+              volumeMounts:
+                - name: "db-export"
+                  mountPath: /mnt/export
+                  readOnly: false
+          restartPolicy: OnFailure
+          volumes:
+            - name: "db-export"
+              persistentVolumeClaim:
+                claimName: {{ .Values.apps.portal.harness.deployment.volume.name }}
+{{- end -}}
