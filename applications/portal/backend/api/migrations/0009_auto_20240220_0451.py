@@ -49,6 +49,9 @@ class Migration(migrations.Migration):
             FROM api_antibody 
             LEFT JOIN api_vendor ON api_vendor.id = api_antibody.vendor_id
             LEFT JOIN api_specie ON api_specie.id = api_antibody.source_organism_id
+            """,
+            reverse_sql = '''
+            DROP MATERIALIZED VIEW antibody_search;
             '''
         ),
         migrations.RunSQL(
