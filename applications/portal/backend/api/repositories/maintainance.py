@@ -18,4 +18,4 @@ def rechunk_catalog_number(Antibody_model):
         for antibody in Antibody_model.objects.all().values('ix', 'catalog_num_search', 'catalog_num', 'cat_alt'):
             new_catalog_number_chunked = catalog_number_chunked(antibody['catalog_num'], antibody['cat_alt'])
             if new_catalog_number_chunked != antibody['catalog_num_search']:
-                cursor.execute(f"UPDATE api_antibody SET catalog_num_search = {new_catalog_number_chunked} WHERE ix={antibody['ix']};") 
+                cursor.execute(f"UPDATE api_antibody SET catalog_num_search = '{new_catalog_number_chunked}' WHERE ix={antibody['ix']};") 
