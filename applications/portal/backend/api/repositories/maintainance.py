@@ -21,7 +21,6 @@ def rechunk_catalog_number(Antibody_model):
             i = i + 1
             if i % 10000 == 0:
                print("Migrated", i)
-               connection.commit()
             new_catalog_number_chunked = catalog_number_chunked(antibody['catalog_num'], antibody['cat_alt'])
             if new_catalog_number_chunked != antibody['catalog_num_search']:
                 
