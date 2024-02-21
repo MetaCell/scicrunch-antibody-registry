@@ -31,7 +31,7 @@ See [here](backend/README.md#Develop)
 
 ### Frontend
 
-Backend code is inside the *frontend* directory.
+Frontend code is inside the *frontend* directory.
 
 Frontend is by default generated as a React web application, but no constraint about this specific technology.
 
@@ -111,7 +111,7 @@ The `KUBERNETES_SERVICE_HOST` switch will activate the creation of the keycloak 
 
 The base command to run tests is `python manage.py test`.
 
-To run tests locally eed to add configure environmental variables to get the 
+To run tests locally you need to add configure environmental variables to get the 
 correct configuration and a working configure instance of the postgres database running.
 
 If you already have a deployment with the database, first forward it:

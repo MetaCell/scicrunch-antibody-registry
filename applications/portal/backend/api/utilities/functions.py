@@ -5,7 +5,7 @@ from urllib.parse import urlsplit
 from django.db.models import AutoField
 from django.forms import URLField
 
-from portal.settings import ANTIBODY_PERSISTENCE
+from portal.constants import ANTIBODY_PERSISTENCE
 
 magic = 64544
 prefix = "AB_"
@@ -34,10 +34,34 @@ def extract_base_url(url: Union[str, URLField]) -> str:
 def get_antibody_persistence_directory(ab_id: str, filename: str) -> str:
     return f'{ANTIBODY_PERSISTENCE}/{ab_id}/{filename}'
 
-def catalog_number_chunked(catalog_number: str, fill=' ') -> List[str]:
-    if not catalog_number:
+def get_catalog_number_digits(catalog_number: str) -> List[str]:
+    return [c.lower() for c in re.split(r'(\d+)',re.sub(r'[^\w]', '', catalog_number)) if c]
+
+
+def get_catalog_non_alphanumeric(catalog_number: str) -> List[str]:
+    split_by_non_alphanumeric_array = [c.lower() for c in re.split(r'\W+', catalog_number) if c]
+    alphanumeric_catalogs = []
+    for c in split_by_non_alphanumeric_array:
+        alphanumeric_catalogs.extend(get_catalog_number_digits(c))
+    return alphanumeric_catalogs
+
+def catalog_number_chunked(catalog_number: str, catalog_alt_number: str=None, fill=' ') -> List[str]:
+    if not catalog_number and not catalog_alt_number:
         return ""
     try:
-        return fill.join(c for c in re.split(r'(\d+)',re.sub(r'[^\w]', '', catalog_number)) if c).strip().lower()
+        cat_split_by_digits = get_catalog_number_digits(catalog_number)
+        cat_split_by_non_alphanumeric = get_catalog_non_alphanumeric(catalog_number)
+
+        cat_alt_split_by_digits = get_catalog_number_digits(catalog_alt_number) if catalog_alt_number else []
+        cat_alt_split_by_non_alphanumeric = get_catalog_non_alphanumeric(catalog_alt_number) if catalog_alt_number else []
+
+
+        joined_catalog_chunk = fill.join(set(cat_split_by_digits + cat_split_by_non_alphanumeric + cat_alt_split_by_digits + cat_alt_split_by_non_alphanumeric))
+        
+        return joined_catalog_chunk.strip().lower()
     except Exception as e:
         return ""
+
+def check_if_status_exists_or_curated(status: str) -> bool:
+    from api.models import STATUS
+    return status.upper() if (status and (status.upper() in STATUS.__members__)) else STATUS.CURATED 

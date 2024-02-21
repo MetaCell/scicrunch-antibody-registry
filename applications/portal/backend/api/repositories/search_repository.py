@@ -64,7 +64,8 @@ def fts_antibodies(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, search
     # search only allows alphanumeric characters and spaces
 
     if might_be_catalog_number(search):
-        cat_search = fts_by_catalog_number(re.sub(r'[^\w\s]', '', search), page, size)
+        cat_search = fts_by_catalog_number(search, page, size)
+
 
         if cat_search:
             return cat_search

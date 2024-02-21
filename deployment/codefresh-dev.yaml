@@ -72,27 +72,6 @@ steps:
                 == true
               forceNoCache: includes('${{CLOUDHARNESS_BASE_TAG_FORCE_BUILD}}', '{{CLOUDHARNESS_BASE_TAG_FORCE_BUILD}}')
                 == false
-      cloudharness-frontend-build:
-        type: build
-        stage: build
-        dockerfile: infrastructure/base-images/cloudharness-frontend-build/Dockerfile
-        registry: '${{CODEFRESH_REGISTRY}}'
-        buildkit: true
-        build_arguments:
-        - DOMAIN=${{DOMAIN}}
-        - NOCACHE=${{CF_BUILD_ID}}
-        - REGISTRY=${{REGISTRY}}/areg/
-        image_name: areg/cloudharness-frontend-build
-        title: Cloudharness frontend build
-        working_directory: ./cloud-harness
-        tag: '${{CLOUDHARNESS_FRONTEND_BUILD_TAG}}'
-        when:
-          condition:
-            any:
-              buildDoesNotExist: includes('${{CLOUDHARNESS_FRONTEND_BUILD_TAG_EXISTS}}',
-                '{{CLOUDHARNESS_FRONTEND_BUILD_TAG_EXISTS}}') == true
-              forceNoCache: includes('${{CLOUDHARNESS_FRONTEND_BUILD_TAG_FORCE_BUILD}}',
-                '{{CLOUDHARNESS_FRONTEND_BUILD_TAG_FORCE_BUILD}}') == false
       cloudharness-base-debian:
         type: build
         stage: build
@@ -201,7 +180,7 @@ steps:
         - CLOUDHARNESS_FLASK=${{REGISTRY}}/areg/cloudharness-flask:${{CLOUDHARNESS_FLASK_TAG}}
         image_name: areg/common
         title: Common
-        working_directory: ./cloud-harness/applications/common/server
+        working_directory: ./.overrides/applications/common/server
         tag: '${{COMMON_TAG}}'
         when:
           condition:
@@ -242,7 +221,6 @@ steps:
         - DOMAIN=${{DOMAIN}}
         - NOCACHE=${{CF_BUILD_ID}}
         - REGISTRY=${{REGISTRY}}/areg/
-        - CLOUDHARNESS_FRONTEND_BUILD=${{REGISTRY}}/areg/cloudharness-frontend-build:${{CLOUDHARNESS_FRONTEND_BUILD_TAG}}
         - CLOUDHARNESS_DJANGO=${{REGISTRY}}/areg/cloudharness-django:${{CLOUDHARNESS_DJANGO_TAG}}
         image_name: areg/portal
         title: Portal
@@ -354,7 +332,7 @@ steps:
       common_api_test:
         title: common api test
         volumes:
-        - '${{CF_REPO_NAME}}/cloud-harness/applications/common:/home/test'
+        - '${{CF_REPO_NAME}}/.overrides/applications/common:/home/test'
         - '${{CF_REPO_NAME}}/deployment/helm/values.yaml:/opt/cloudharness/resources/allvalues.yaml'
         environment:
         - APP_URL=https://common.${{DOMAIN}}/api
@@ -401,14 +379,6 @@ steps:
         type: push
         title: Cloudharness base
         candidate: '${{REGISTRY}}/areg/cloudharness-base:${{CLOUDHARNESS_BASE_TAG}}'
-        tags:
-        - '${{DEPLOYMENT_PUBLISH_TAG}}'
-        registry: '${{REGISTRY_PUBLISH_URL}}'
-      publish_cloudharness-frontend-build:
-        stage: publish
-        type: push
-        title: Cloudharness frontend build
-        candidate: '${{REGISTRY}}/areg/cloudharness-frontend-build:${{CLOUDHARNESS_FRONTEND_BUILD_TAG}}'
         tags:
         - '${{DEPLOYMENT_PUBLISH_TAG}}'
         registry: '${{REGISTRY_PUBLISH_URL}}'

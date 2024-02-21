@@ -8,7 +8,7 @@ from api.services.user_service import UnrecognizedUser, get_current_user_id
 
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from api.services import antibody_service
 from api.utilities.exceptions import AntibodyDataException
@@ -17,8 +17,7 @@ from openapi.models import AddAntibody as AddAntibodyDTO, PaginatedAntibodies
 from openapi.models import UpdateAntibody as UpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO
 
-
-def get_antibodies(page: int, size: int, updated_from: datetime, updated_to: datetime) -> PaginatedAntibodies:
+def get_antibodies(page: int, size: int, updated_from: datetime, updated_to: datetime, status=str) -> PaginatedAntibodies:
     if page is None:
         page = 1
     if size is None:
@@ -28,7 +27,7 @@ def get_antibodies(page: int, size: int, updated_from: datetime, updated_to: dat
     if size < 1:
         raise HTTPException(status_code=400, detail="Size must be greater than 0")
     try:
-        return antibody_service.get_antibodies(int(page), int(size), updated_from, updated_to)
+        return antibody_service.get_antibodies(int(page), int(size), updated_from, updated_to, status)
     except ValueError:
         raise HTTPException(status_code=400, detail="Page and size must be integers")
 
@@ -80,3 +79,15 @@ def get_by_accession(accession_number: int) -> AntibodyDTO:
         return antibody_service.get_antibody_by_accession(accession_number)
     except Antibody.DoesNotExist as e:
         raise HTTPException(status_code=404, detail=e.message)
+
+
+def get_antibodies_export():
+    from api.services.export_service import generate_antibodies_csv_file
+    fname = "static/www/antibodies_export.csv"
+
+    # check if file exists and it is created within 24 hours
+    # if not, generate a new file
+    if not os.path.exists(fname) or (datetime.now() - datetime.fromtimestamp(os.path.getmtime(fname))).days > 1:
+        generate_antibodies_csv_file(fname)
+    return RedirectResponse("/" + fname)
+    # return FileResponse(fname, filename="antibodies_export.csv")

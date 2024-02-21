@@ -51,50 +51,7 @@ module.exports = function webpacking(envVariables) {
             },
           }
         ]
-      },
-      {
-        test: /\.(css)$/,
-        use: [
-          {
-            loader: "style-loader",
-          },
-          {
-            loader: "css-loader",
-          },
-        ],
-      },
-      {
-        test: /\.less$/,
-        use: [
-          {
-            loader: "style-loader",
-          },
-          {
-            loader: "css-loader",
-          },
-          {
-            loader: "less-loader",
-            options: {
-              lessOptions: {
-                strictMath: true,
-              },
-            },
-          },
-        ],
-      },
-      {
-        test: /\.(png|jpg|gif|eot|woff|woff2|svg|ttf)$/,
-        use: [
-          "file-loader",
-          {
-            loader: "image-webpack-loader",
-            options: {
-              bypassOnDebug: true, // webpack@1.x
-              disable: true, // webpack@2.x and newer
-            },
-          },
-        ],
-      },
+      }
     ],
   };
 
