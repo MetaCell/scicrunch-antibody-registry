@@ -15,7 +15,7 @@ const searchApi = new SearchApi()
 
 export async function getAntibodies(
   page = 1,
-  size = 100
+  size = 10
 ): Promise<PaginatedAntibodies> {
   const abs = (await api.getAntibodies(page, size)).data;
   abs.items = abs.items.map(mapAntibody);
@@ -80,7 +80,7 @@ function mapAntibodyFromForm(antibody): AddAntibody {
 
 export async function getUserAntibodies(
   page = 1,
-  size = 100
+  size = 10
 ): Promise<PaginatedAntibodies> {
   return (
     await new AntibodyApi(
@@ -91,7 +91,7 @@ export async function getUserAntibodies(
 
 export async function getSearchAntibodies(
   page = 1,
-  size = 100,
+  size = 10,
   query:string
 ):Promise<PaginatedAntibodies>{
   const abs = await (

@@ -43,9 +43,8 @@ import { ALLRESULTS } from "../../constants/constants";
 import SearchContext from "../../context/search/SearchContext";
 import NotFoundMessage from "./NotFoundMessage";
 import Error500 from "../UI/Error500";
-
-
-
+import { PAGE_SIZE } from "../../constants/constants";
+import { TablePaginatedFooter } from "./TablePaginatedFooter";
 
 
 
@@ -365,7 +364,7 @@ const AntibodiesTable = (props) => {
 
   const fetchUserAntibodies = () => {
     setAntibodiesList(null);
-    getUserAntibodies()
+    getUserAntibodies(searchedAntibodies.currentPage, PAGE_SIZE)
       .then((res) => {
         return setAntibodiesList(res.items);
       })
@@ -601,8 +600,10 @@ const AntibodiesTable = (props) => {
             rows={antibodiesList ?? []}
             getRowId={getRowId}
             columns={columns}
-            pageSize={10}
+              pageSize={PAGE_SIZE}
             rowsPerPageOptions={[20]}
+              pagination={true}
+              paginationMode="server"
             checkboxSelection
             disableSelectionOnClick
             getRowHeight={() => "auto"}
@@ -619,7 +620,7 @@ const AntibodiesTable = (props) => {
               ColumnMenuIcon: MoreVertIcon,
               ColumnSelectorIcon: SettingsIcon,
               NoRowsOverlay: NoRowsOverlay,
-    
+              Footer: TablePaginatedFooter,    
             }}
             componentsProps={compProps}
             localeText={{
