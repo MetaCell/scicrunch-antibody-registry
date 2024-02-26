@@ -82,7 +82,6 @@ export default function Searchbar() {
       <Typography component="ul" sx={{ fontSize: "0.8rem", textAlign: "left" }}>
         <li>Catalog number is searched first if you type numbers</li>
         <li>Anything else is searched if no catalog number matches</li>
-        <li>Search results are currently limited to a maximum of 100 elements; refine your search if you don&apos;t find what you&apos;re looking for (table filters <b>do not</b> refine the search)</li>
         <li>If you are having trouble, please check <a href="//rrid.site">rrid.site</a></li>
         
       </Typography>
