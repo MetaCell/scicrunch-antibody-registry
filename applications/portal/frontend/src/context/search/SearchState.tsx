@@ -40,48 +40,16 @@ const SearchState = (props) => {
 
     // THREE Kinds of search: 
     if (query || antibodyType === GET_ANTIBODY_TYPES.SEARCHED_ANTIBODIES) {
-      getFilteredAntibodies(pageNumber, query);
+      fetchFilteredAntibodies(pageNumber, query);
     } else if (antibodyType === GET_ANTIBODY_TYPES.MY_ANTIBODIES) {
       fetchUserAntibodies(pageNumber);
     } else {
-      setSearch((prev) => ({
-        ...prev,
-        loader: true
-      }))
-      getAntibodies(pageNumber, PAGE_SIZE)
-        .then((res) => {
-          setSearch({
-            ...searchState,
-            currentPage: pageNumber ? pageNumber : searchState.currentPage,
-            loader: false,
-            activeSearch: "",
-            antibodyRequestType: antibodyType,
-            totalElements: res.totalElements,
-            searchedAntibodies: res.items,
-          });
-        })
-        .catch((err) => {
-          setSearch({
-            ...searchState,
-            loader: false,
-            totalElements: 0,
-            activeSearch: err,
-            searchedAntibodies: []
-          });
-          console.error(err)
-        });
+      fetchAllAntibodies(pageNumber);
     }
   }
 
-  const setTotalElements = (total) => {
-    setSearch({
-      ...searchState,
-      totalElements: total
-    })
-  }
 
-
-  const getFilteredAntibodies = async (pageNumber = 1, query: string) => {
+  const fetchFilteredAntibodies = async (pageNumber = 1, query: string) => {
     setSearch((prev) => ({
       ...prev,
       loader:true
@@ -139,6 +107,35 @@ const SearchState = (props) => {
       });
   };
 
+  const fetchAllAntibodies = (pageNumber) => {
+    setSearch((prev) => ({
+      ...prev,
+      loader: true
+    }))
+    getAntibodies(pageNumber, PAGE_SIZE)
+      .then((res) => {
+        setSearch({
+          ...searchState,
+          currentPage: pageNumber ? pageNumber : searchState.currentPage,
+          loader: false,
+          activeSearch: "",
+          antibodyRequestType: GET_ANTIBODY_TYPES.ALL_ANTIBODIES,
+          totalElements: res.totalElements,
+          searchedAntibodies: res.items,
+        });
+      })
+      .catch((err) => {
+        setSearch({
+          ...searchState,
+          loader: false,
+          totalElements: 0,
+          activeSearch: err,
+          searchedAntibodies: []
+        });
+        console.error(err)
+      });
+  }
+
   const clearSearch =() => {
     setSearch({
       ...searchState,
@@ -171,7 +168,6 @@ const SearchState = (props) => {
       clearSearch,
       currentPage: searchState.currentPage,
       setCurrentPage,
-      setTotalElements,
     }}>
       {props.children}
     </SearchContext.Provider>
