@@ -153,19 +153,20 @@ describe("E2E Flow for AntiBody Registry", () => {
     expect(targAntigens[0]).toBe("Target antigen");
     expect(targAntigens[1]).not.toBeNull;
 
-    const inputValue = getValue(s.SEARCH_INPUT);
+    const inputValue = await getValue(s.SEARCH_INPUT);
+    console.log("inputValue", inputValue);
 
     await page.click(s.SEARCH_INPUT)
 
-    for (let i = 0; i < inputValue.length; i++) {
-      await page.keyboard.press("Backspace");
-    }
+    await page.click(s.SEARCH_DELETE_BUTTON)
   
     await page.keyboard.press('Enter')
+    console.log("targAntigens", targAntigens);
     
-    await page.type(s.SEARCH_INPUT, targAntigens.find(ta => ta.length > 10));
+    await page.type(s.SEARCH_INPUT, targAntigens[1]);
 
     await page.keyboard.press('Enter')
+    await page.waitForTimeout(5000);
 
     await waitLoaderToDisappear();
 
