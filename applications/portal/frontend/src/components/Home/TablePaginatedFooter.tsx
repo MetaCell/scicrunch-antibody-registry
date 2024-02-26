@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from "react";
+import React, { useContext } from "react";
 import { IconButton } from "@mui/material";
 import { ChevronLeft, ChevronRight } from '@mui/icons-material'
 import { PAGE_SIZE } from "../../constants/constants";
@@ -16,11 +16,13 @@ export const TablePaginatedFooter = () => {
     setCurrentPage(currentPage - 1)
   }, 800)
 
+  const startPageCount = totalElements ? (currentPage - 1) * PAGE_SIZE + 1 : 0;
+  const endPageCount = totalElements ? (currentPage * PAGE_SIZE > totalElements ? totalElements : currentPage * PAGE_SIZE) : 0;
   return (
     <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginTop: '1rem' }}>
       <div>
-        {(currentPage - 1) * PAGE_SIZE + 1}-
-        {currentPage * PAGE_SIZE > totalElements ? totalElements : currentPage * PAGE_SIZE} {' '}
+        {startPageCount}-
+        {endPageCount} {' '}
         of {totalElements} results
       </div>
       <div>

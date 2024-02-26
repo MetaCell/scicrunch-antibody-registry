@@ -4,6 +4,7 @@ import { SearchIcon, SlashIcon } from "../icons";
 import { Box, Autocomplete, InputAdornment, Stack, Tooltip, Typography, Paper } from "@mui/material";
 import SearchContext from "../../context/search/SearchContext";
 import { useHistory } from 'react-router-dom'; 
+import { GET_ANTIBODY_TYPES } from "../../constants/constants";
 
 
 const styles={
@@ -41,7 +42,7 @@ const styles={
 
 export default function Searchbar() {
 
-  const { getFilteredAntibodies, clearSearch, loader, activeSearch } = useContext(SearchContext)
+  const { getAntibodyList, clearSearch, loader, activeSearch } = useContext(SearchContext)
 
   const history = useHistory();
 
@@ -55,9 +56,9 @@ export default function Searchbar() {
       clearSearch()
     } else {
       history.push('/');
-      getFilteredAntibodies(e.target.value)
+      getAntibodyList(GET_ANTIBODY_TYPES.SEARCHED_ANTIBODIES, e.target.value)
     }
-  }, [getFilteredAntibodies, clearSearch, history]);
+  }, [getAntibodyList, clearSearch, history]);
 
   const handleKeyPress = useCallback((event) => {
     if(event.key==='/'){
