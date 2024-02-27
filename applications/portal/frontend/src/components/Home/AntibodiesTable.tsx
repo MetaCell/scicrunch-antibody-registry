@@ -21,9 +21,6 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 
 //project imports
 import {
-  getUserAntibodies,
-} from "../../services/AntibodiesService";
-import {
   AscSortedIcon,
   DescSortedIcon,
   FilteredColumnIcon,
@@ -39,13 +36,12 @@ import { Antibody } from "../../rest";
 import { getProperCitation } from "../../utils/antibody";
 import { UserContext } from "../../services/UserService";
 import ConnectAccount from "./ConnectAccount";
-import { ALLRESULTS } from "../../constants/constants";
+import { ALLRESULTS, GET_ANTIBODY_TYPES, MYSUBMISSIONS } from "../../constants/constants";
 import SearchContext from "../../context/search/SearchContext";
 import NotFoundMessage from "./NotFoundMessage";
 import Error500 from "../UI/Error500";
-
-
-
+import { PAGE_SIZE } from "../../constants/constants";
+import { TablePaginatedFooter } from "./TablePaginatedFooter";
 
 
 
@@ -61,7 +57,7 @@ const StyledCheckBox = (props) => {
 
 const getRowId = (ab: Antibody) => `${ab.abId}${Math.random()}`;
 
-const CustomToolbar = ({ activeTab, antibodiesList }) => {
+const CustomToolbar = ({ activeTab, searchedAntibodies }) => {
   const [activeSelection, setActiveSelection] = useState(true);
   
   const apiRef = useGridApiContext();
@@ -84,7 +80,7 @@ const CustomToolbar = ({ activeTab, antibodiesList }) => {
       handleExport={handleExport}
       showFilterMenu={showFilterMenu}
       activeTab={activeTab}
-      shownResultsNum={antibodiesList?.length}
+      shownResultsNum={searchedAntibodies?.length}
     />
     
     </>
@@ -356,21 +352,13 @@ const dataGridStyles = {
 
 const AntibodiesTable = (props) => {
   const user = useContext(UserContext)[0];
+  const searchParams = new URLSearchParams(window.location.search);
+  const searchQuery = searchParams.get('q');
 
-  const [antibodiesList, setAntibodiesList] = useState<Antibody[]>();
   const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
-  const { activeSearch, searchedAntibodies, loader } =
+  const { activeSearch, searchedAntibodies, loader, getAntibodyList } =
     useContext(SearchContext);
 
-
-  const fetchUserAntibodies = () => {
-    setAntibodiesList(null);
-    getUserAntibodies()
-      .then((res) => {
-        return setAntibodiesList(res.items);
-      })
-      .catch((err) => console.error(err));
-  };
 
   const handleSetFilterModel = (model: GridFilterModel) => {
     setFilterModel(model);
@@ -379,11 +367,17 @@ const AntibodiesTable = (props) => {
   useEffect(() => {
     setFilterModel({ items: [] }); // reset filters on new search
   }, [activeSearch]);
-  
 
   useEffect(() => {
-    props.activeTab === ALLRESULTS ? setAntibodiesList(searchedAntibodies) : user && fetchUserAntibodies();
-  }, [searchedAntibodies, props.activeTab, user]);
+    if (searchQuery) {
+      getAntibodyList(GET_ANTIBODY_TYPES.SEARCHED_ANTIBODIES, searchQuery);
+    } else if (props.activeTab === MYSUBMISSIONS) {
+      getAntibodyList(GET_ANTIBODY_TYPES.MY_ANTIBODIES);
+    } else {
+      getAntibodyList(GET_ANTIBODY_TYPES.ALL_ANTIBODIES);
+    }
+  }, [props.activeTab, user, searchQuery]);
+
 
   const columns: GridColDef[] = [
     {
@@ -516,7 +510,7 @@ const AntibodiesTable = (props) => {
   const compProps = {
     toolbar: {
       activeTab: props.activeTab,
-      antibodiesList
+      searchedAntibodies
     },
     noRowsOverlay: {
       activeSearch: activeSearch,
@@ -598,15 +592,17 @@ const AntibodiesTable = (props) => {
           <DataGrid
             className="antibodies-table"
             sx={dataGridStyles}
-            rows={antibodiesList ?? []}
+            rows={searchedAntibodies ?? []}
             getRowId={getRowId}
             columns={columns}
-            pageSize={10}
+            pageSize={PAGE_SIZE}
             rowsPerPageOptions={[20]}
+            pagination={true}
+            paginationMode="server"
             checkboxSelection
             disableSelectionOnClick
             getRowHeight={() => "auto"}
-            loading={!antibodiesList || loader}
+            loading={!searchedAntibodies || loader}
             filterModel={filterModel}
             onFilterModelChange={handleSetFilterModel}
             components={{
@@ -619,7 +615,7 @@ const AntibodiesTable = (props) => {
               ColumnMenuIcon: MoreVertIcon,
               ColumnSelectorIcon: SettingsIcon,
               NoRowsOverlay: NoRowsOverlay,
-    
+              Footer: TablePaginatedFooter,    
             }}
             componentsProps={compProps}
             localeText={{
