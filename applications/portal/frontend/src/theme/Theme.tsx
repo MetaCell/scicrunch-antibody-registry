@@ -103,6 +103,11 @@ const theme = createTheme({
           text-align: center;
           background-color: "#eeeeee";
         }
+        #root {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
         
 
         ::-webkit-scrollbar-thumb {

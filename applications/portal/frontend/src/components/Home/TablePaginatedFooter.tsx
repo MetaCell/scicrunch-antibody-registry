@@ -19,7 +19,7 @@ export const TablePaginatedFooter = () => {
   const startPageCount = totalElements ? (currentPage - 1) * PAGE_SIZE + 1 : 0;
   const endPageCount = totalElements ? (currentPage * PAGE_SIZE > totalElements ? totalElements : currentPage * PAGE_SIZE) : 0;
   return (
-    <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginTop: '1rem' }}>
+    <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", padding: '0.75rem 1.5rem 1rem 1.5rem' }}>
       <div>
         {startPageCount}-
         {endPageCount} {' '}

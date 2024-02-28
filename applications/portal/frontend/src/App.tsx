@@ -17,6 +17,7 @@ import { ALLRESULTS, MYSUBMISSIONS } from "./constants/constants";
 import SearchState from "./context/search/SearchState";
 import * as UserService from "./services/UserService";
 import UpdateForm from "./components/Update/UpdateForm";
+import Footer from "./components/Footer/Footer";
 
 function SearchRedirect() {
   const searchParams = new URLSearchParams(window.location.search);
@@ -76,10 +77,12 @@ const App = () => {
               <Route exact path="/">
                 <Navbar />
                 <Home activeTab={ALLRESULTS} />
+                <Footer/>
               </Route>
               <Route exact path="/about">
                 <Navbar />
                 <About />
+                <Footer/>
               </Route>
               <Route exact path="/add" component={Submit} />
               <Route path="/login">
@@ -91,32 +94,39 @@ const App = () => {
               <Route path="/:antibody_id(AB_.*|RRID:AB_.*)">
                 <Navbar />
                 <AntibodyDetail />
+                <Footer/>
               </Route>
               <Route path="/search" render={SearchRedirect} />
               <Route path="/search.php" render={SearchRedirect} />
               <Route path="/user">
                 <Navbar />
                 <AccountDetails />
+                <Footer/>
               </Route>
               <Route path="/faq">
                 <Navbar />
                 <FAQs />
+                <Footer/>
               </Route>
               <Route path="/contact-us">
                 <Navbar />
                 <ContactUs />
+                <Footer/>
               </Route>
               <Route path="/membership">
                 <Navbar />
                 <InquirePage />
+                <Footer/>
               </Route>
               <Route path="/terms-and-conditions">
                 <Navbar />
                 <TermsAndConditions />
+                <Footer/>
               </Route>
               <Route path="/submissions">
                 <Navbar />
                 <Home activeTab={MYSUBMISSIONS} />
+                <Footer/>
               </Route>
               <Route path="/update/:ab_accession_number">
                 <Navbar />
