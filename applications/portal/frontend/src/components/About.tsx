@@ -133,8 +133,7 @@ const styles = {
     },
 
     '& img': {
-      marginTop: '8.75rem',
-
+      marginTop: 0,
     }
   },
 
@@ -327,7 +326,7 @@ const About = () => {
             </Typography>
             <Button className="go-home-button" variant="contained" color='secondary' onClick={navigate}>Search for antibodies</Button>
           </Box>
-          <img src="./assets/ipad.webp" width="100%" alt="" />
+          <img src="./assets/ipad.png" width="100%" alt="" />
         </Container>
       </Box>
     </>
