@@ -329,6 +329,14 @@ const About = () => {
           <img src="./assets/ipad.png" width="100%" alt="" />
         </Container>
       </Box>
+      <Box sx={styles.footer} className="about-footer">
+        <Typography variant="body1">
+          Powered by
+          <a href="https://www.metacell.us/" target="_blank" rel="noreferrer">
+            <img src='./assets/matacell.svg' alt="metacell" />
+          </a>
+        </Typography>
+      </Box>
     </>
   )
 }
