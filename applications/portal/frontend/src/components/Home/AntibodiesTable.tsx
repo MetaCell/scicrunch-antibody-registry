@@ -403,6 +403,7 @@ const AntibodiesTable = (props) => {
       field: "nameAndId",
       headerName: "Name & ID",
       flex: 3,
+      type: "actions",
       renderCell: RenderNameAndId,
       valueGetter: getNameAndId,
       headerAlign: "left",
