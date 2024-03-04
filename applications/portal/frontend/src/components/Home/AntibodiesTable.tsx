@@ -584,7 +584,7 @@ const AntibodiesTable = (props) => {
   return (
     <Box>
       
-      <Box sx={{ flexGrow: 1, height: "90vh" }}>
+      <Box sx={{ flexGrow: 1, height: "83.5vh" }}>
         
         {currentPath === "/submissions" && !user ? (
           <ConnectAccount />

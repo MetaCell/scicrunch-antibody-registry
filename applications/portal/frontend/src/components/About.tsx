@@ -133,7 +133,7 @@ const styles = {
     },
 
     '& img': {
-      marginTop: '8.75rem'
+      marginTop: 0,
     }
   },
 
@@ -237,7 +237,7 @@ const About = () => {
                         component="img" src={partner.img || `./assets/partners/${partner.name}.svg`}
                         alt={partner.name}
                         title={partner.name}
-                        sx={{  filter: "grayscale(1)", width: '100%', '&:hover': { opacity: 0.9 } }} />
+                        sx={{ filter: "grayscale(1)", width: '100%', '&:hover': { opacity: 0.9 } }} />
                     </Box>
                   </a>
                 </Box>
@@ -319,12 +319,14 @@ const About = () => {
         </Container>
       </Box>
       <Box sx={{ ...styles.banner, ...styles.bannerWithBg }} className="about-call">
-        <Container maxWidth="xl">
-          <Typography>
-            Ready to get started?
-          </Typography>
-          <Button className="go-home-button" variant="contained" color='secondary' onClick={navigate}>Search for antibodies</Button>
-          <img src="./assets/ipad.webp" width="100%" alt="" />
+        <Container maxWidth="xl" sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box>
+            <Typography>
+              Ready to get started?
+            </Typography>
+            <Button className="go-home-button" variant="contained" color='secondary' onClick={navigate}>Search for antibodies</Button>
+          </Box>
+          <img src="./assets/ipad.png" width="100%" alt="" />
         </Container>
       </Box>
       <Box sx={styles.footer} className="about-footer">
