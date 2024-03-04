@@ -129,7 +129,6 @@ def fts_others_search(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, sea
             ranking += 1000
         return ranking
 
-    filtered_antibody = Antibody.objects.filter(
     filtered_antibody = Antibody.objects.select_related('vendor').filter(
         convert_filters_to_q(filters)
     )
