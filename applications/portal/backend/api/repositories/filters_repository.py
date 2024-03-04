@@ -1,8 +1,10 @@
 
 from django.db.models import Q
 
-def convert_filters_to_q(filters):	
+def convert_filters_to_q(filters):
 	query = {}
+	if not filters:
+		return Q()
 	for filter_type, filter_values in dict(filters).items():
 		if filter_type == "contains":
 			for filter_value in filter_values:

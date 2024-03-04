@@ -130,6 +130,7 @@ def fts_others_search(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, sea
         return ranking
 
     filtered_antibody = Antibody.objects.filter(
+    filtered_antibody = Antibody.objects.select_related('vendor').filter(
         convert_filters_to_q(filters)
     )
     if subfields_search_count > 0:
@@ -138,9 +139,9 @@ def fts_others_search(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, sea
         filtered_antibody = filtered_antibody.filter(ix__in=ids)
 
         # the second sorting is needed because the query doesn't keep the ids order. 
-        p = Paginator(sorted(filtered_antibody.select_related('vendor'), key=lambda x:id_map[x.ix]), size)
+        p = Paginator(sorted(filtered_antibody, key=lambda x:id_map[x.ix]), size)
     else:
-        p = Paginator(filtered_antibody.select_related('vendor'), size)
+        p = Paginator(filtered_antibody, size)
     items = pageitems_if_page_in_bound(page, p)
     return items, filtered_antibody.count()
 
