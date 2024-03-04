@@ -1,3 +1,4 @@
+import { PAGE_SIZE } from "../constants/constants";
 import { Configuration } from "../rest";
 import {
   Antibody,
@@ -5,7 +6,8 @@ import {
   AntibodyApi,
   AddAntibody,
   AntibodyCommercialTypeEnum,
-  SearchApi
+  SearchApi,
+  FilterRequest
 } from "../rest/api";
 
 import { getToken } from "./UserService";
@@ -101,6 +103,16 @@ export async function getSearchAntibodies(
   return abs;
 }
 
+export async function getFilteredAndSearchedAntibodies(
+  filters: FilterRequest = {},
+): Promise<PaginatedAntibodies> {
+  filters.size = PAGE_SIZE;
+  const abs = (
+    await searchApi.filterAntibodies(filters)
+  ).data;
+  abs.items = abs.items.map(mapAntibody);
+  return abs;
+}
 
 export async function getAntibodyByAccessionNumber(accesionNumber:number){
   return mapAntibody(await (await api.getByAccession(accesionNumber)).data);

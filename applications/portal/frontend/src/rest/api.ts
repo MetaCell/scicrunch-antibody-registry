@@ -830,7 +830,21 @@ export interface FilterRequest {
      * @memberof FilterRequest
      */
     'isAnyOf'?: Array<KeyValueArrayPair>;
+    /**
+     * Which operation to perform in the Backend - AND or OR.
+     * @type {string}
+     * @memberof FilterRequest
+     */
+    'operation'?: FilterRequestOperationEnum;
 }
+
+export const FilterRequestOperationEnum = {
+    And: 'and',
+    Or: 'or'
+} as const;
+
+export type FilterRequestOperationEnum = typeof FilterRequestOperationEnum[keyof typeof FilterRequestOperationEnum];
+
 /**
  * 
  * @export
