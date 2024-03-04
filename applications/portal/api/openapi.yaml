@@ -756,6 +756,12 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/KeyValueArrayPair'
+                operation:
+                    description: Which operation to perform in the Backend - AND or OR.
+                    enum:
+                        - and
+                        - or
+                    type: string
         KeyValueArrayPair:
             description: >-
                 Utility type to represent a key-value object, where value is an array. This is helpful when
