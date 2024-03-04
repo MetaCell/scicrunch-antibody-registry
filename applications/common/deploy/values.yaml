@@ -1,0 +1,4 @@
+harness:
+  env:
+    - name: SENTRY_DSN
+      value: https://57b1ca8a70634782bd6c90dd119eeab5@o4506739169951744.ingest.sentry.io/4506758817382404

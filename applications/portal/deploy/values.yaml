@@ -1,6 +1,7 @@
 harness:
   subdomain: www
   secured: open
+  sentry: true
   service:
     port: 8080
     auto: true
@@ -69,3 +70,11 @@ harness:
       enabled: true
 
 export_query: "SELECT 'AB_' || ab_id as rrid, ab_name, catalog_num, cat_alt, api_vendor.vendor as vendor_name, api_vendor.vendor || ' Cat# ' || catalog_num || ', RRID:AB_' || ab_id AS proper_citation from api_antibody LEFT JOIN api_vendor on api_vendor.id = vendor_id WHERE true"
+
+sentry:
+  sample_rate: 1.0
+  traces_sample_rate: 0.05
+  traces_sample_rate_resources: 0.001
+  traces_sample_rate_patterns:
+    "/api/": 0.05
+    "/admin/": 0.002

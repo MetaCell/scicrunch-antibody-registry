@@ -15,7 +15,8 @@ VERSION = "1.0.0"
 # http://pypi.python.org/pypi/setuptools
 
 REQUIRES = [
-    "django-import-export>=3.0.1"
+    "django-import-export>=3.0.1",
+    "sentry-sdk[django]"
 ]
 
 setup(
