@@ -18,7 +18,7 @@ def init_sentry():
 
             for pattern in sentry_cfg.get("traces_sample_rate_patterns", {}):
                 if pattern in url or re.match(pattern, url):
-                    return sentry_cfg[pattern]
+                    return sentry_cfg.traces_sample_rate_patterns[pattern]
 
             extension = "." in url and url.split(".")[-1]
             if extension in resources_extensions:
