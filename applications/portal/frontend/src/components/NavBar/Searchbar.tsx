@@ -4,7 +4,7 @@ import { SearchIcon, SlashIcon } from "../icons";
 import { Box, Autocomplete, InputAdornment, Stack, Tooltip, Typography, Paper } from "@mui/material";
 import SearchContext from "../../context/search/SearchContext";
 import { useHistory } from 'react-router-dom'; 
-import { GET_ANTIBODY_TYPES } from "../../constants/constants";
+import { SEARCH_MODES } from "../../constants/constants";
 
 
 const styles={
@@ -42,7 +42,13 @@ const styles={
 
 export default function Searchbar() {
 
-  const { getAntibodyList, clearSearch, loader, activeSearch } = useContext(SearchContext)
+  const {
+    getAntibodyList,
+    clearSearch,
+    loader,
+    activeSearch,
+    filterModel,
+  } = useContext(SearchContext)
 
   const history = useHistory();
 
@@ -56,7 +62,20 @@ export default function Searchbar() {
       clearSearch()
     } else {
       history.push('/');
-      getAntibodyList(GET_ANTIBODY_TYPES.SEARCHED_ANTIBODIES, e.target.value)
+
+      // TODO: the following needs to change, i.e. if 
+      //  the filters are empty then run the following else run for SEARCH_MODES.FILTERED_AND_SEARCHED_ANTIBODIES
+      if (filterModel.items.length === 0) {
+        getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, e.target.value)
+      } else {
+        getAntibodyList(
+          SEARCH_MODES.FILTERED_AND_SEARCHED_ANTIBODIES,
+          e.target.value || activeSearch,
+          1,
+          filterModel
+        )
+      }
+      // getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, e.target.value)
     }
   }, [getAntibodyList, clearSearch, history]);
 
