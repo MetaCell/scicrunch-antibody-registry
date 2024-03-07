@@ -155,7 +155,7 @@ def antibodies_fts_and_filtering_above_limit(subfields_search, page, size, filte
         convert_filters_to_q(filters)
     ).select_related("vendor")
 
-    filtered_antibodies = sort_by_sortmodel_if_below_limit(filtered_antibodies, filters)
+    filtered_antibodies = sort_by_sortmodel_if_antibodies_count_below_limit(filtered_antibodies, filters)
 
     p = Paginator(filtered_antibodies, size)
     items = pageitems_if_page_in_bound(page, p)
@@ -170,14 +170,14 @@ def antibodies_fts_and_filtering_below_limit(subfields_search, page, size, filte
         key=lambda x:id_map[x.ix]
     ).filter(convert_filters_to_q(filters))
 
-    filtered_antibodies = sort_by_sortmodel_if_below_limit(filtered_antibodies, filters)
+    filtered_antibodies = sort_by_sortmodel_if_antibodies_count_below_limit(filtered_antibodies, filters)
 
     p = Paginator(filtered_antibodies,  size)
     items = pageitems_if_page_in_bound(page, p)
     return items, filtered_antibodies.count()
 
 
-def sort_by_sortmodel_if_below_limit(filtered_antibodies, filters):
+def sort_by_sortmodel_if_antibodies_count_below_limit(filtered_antibodies, filters):
     if filtered_antibodies.count() < settings.LIMIT_NUM_RESULTS:
         filtered_antibodies = filtered_antibodies.order_by(*order_by_string(filters))
     return filtered_antibodies

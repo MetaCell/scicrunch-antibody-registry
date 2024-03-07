@@ -113,12 +113,12 @@ const CustomFilterRowPanel = (props) => {
   const classes = useStyles();
 
 
-  // ----- Multi input file -----
+  // ----- Multi input file logic below -----
   const [values, setValues] = useState(filterSet.value || []);
   const [currValue, setCurrValue] = useState("");
 
   const handleKeyUp = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && e.target.value) {
       values.push(e.target.value)
       handleFilterSet({ ...filterSet, value: values });
       setValues(values);
@@ -134,7 +134,7 @@ const CustomFilterRowPanel = (props) => {
   const handleChange = (e) => {
     setCurrValue(e.target.value);
   };
-  // ----- Multi input file -----
+  // ----- Multi input file logic above -----
 
   return (
     <Box>

@@ -11,7 +11,6 @@ def check_filters_are_valid(filters):
 		if filter_type not in ["contains", "equals", "startsWith", "endsWith", "isEmpty", "isNotEmpty", "isAnyOf", "page", "search", "size", "sortOn", "operation", "isUserScope"]:
 			return False
 
-		# check wehre to put isUserScope
 		if filter_type in ["page", "size"]:
 			if not isinstance(filter_values, int):
 				return False
@@ -52,7 +51,8 @@ def convert_filters_to_q(filters):
 	if (not check_filters_are_valid(filters)):
 		raise HTTPException(status_code=400, detail="Invalid filters")
 	
-	# First for loop is limited to filters operation types size = 7
+	# First for loop is limited to filters operation types size = 7. T.C. O(7n) = O(n), 
+	# where n is the number of columns in a particular filter type. 
 	for filter_type, filter_values in dict(filters).items():
 		if filter_type == "contains":
 			for filter_value in filter_values:
@@ -89,7 +89,6 @@ def order_by_string(filters):
 	if filters.sortOn is None or len(filters.sortOn) == 0:
 		return []
 	order_by_string = []
-	# EDGE CASE - what if when the filters are not one of the fields in the model?
 	for column in filters.sortOn:
 		order_by_string.append(f"{'-' if column.sortorder == Sortorder.desc else ''}{column.key}")
 	return order_by_string
