@@ -10,9 +10,16 @@ from . import antibody_service
 
 
 
-def fts_antibodies(page: int = 1, size: int = 50, search: str = '', filters=None) -> List[AntibodyDTO]:
+def fts_antibodies(page: int = 1, size: int = 10, search: str = '', filters=None) -> List[AntibodyDTO]:
     page = page or 0  # required at the moment, issue with default values in main.py-L134
     size = size or 10  # required at the moment, issue with default values in main.py-L134
+    return fts_and_filter_antibodies(page=page, size=size, search=search, filters=filters)
+    
+def filter_antibodies(body: FilterRequest) -> List[AntibodyDTO]:
+    return fts_and_filter_antibodies(page=body.page, size=body.size, search=body.search, filters=body)
+
+
+def fts_and_filter_antibodies(page: int = 1, size: int = 10, search: str = '', filters=None) -> List[AntibodyDTO]:
     if "AB_" in search:
         if search.startswith("RRID:"):
             search = search.replace("RRID:", "").strip()
@@ -20,9 +27,6 @@ def fts_antibodies(page: int = 1, size: int = 50, search: str = '', filters=None
         if antibodies:
             return PaginatedAntibodies(page=int(page), totalElements=len(antibodies), items=antibodies)
         
-    antibodies, count = search_repository.fts_antibodies(page=page, size=size, search=search, filters=filters)
+    antibodies, count = search_repository.fts_and_filter_antibodies(page=page, size=size, search=search, filters=filters)
     return PaginatedAntibodies(page=int(page), totalElements=count, items=antibodies)
 
-
-def filter_antibodies(body: FilterRequest) -> List[AntibodyDTO]:
-    return fts_antibodies(page=body.page, size=body.size, search=body.search, filters=body)

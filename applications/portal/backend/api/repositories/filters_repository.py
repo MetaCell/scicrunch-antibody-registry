@@ -47,10 +47,10 @@ def lookup_spanning_relationships_string(fieldname):
 
 def convert_filters_to_q(filters):
 	query = {}
-	if (not check_filters_are_valid(filters)):
-		raise HTTPException(status_code=400, detail="Invalid filters")
 	if not filters:
 		return Q()
+	if (not check_filters_are_valid(filters)):
+		raise HTTPException(status_code=400, detail="Invalid filters")
 	
 	# First for loop is limited to filters operation types size = 7
 	for filter_type, filter_values in dict(filters).items():
@@ -76,7 +76,7 @@ def convert_filters_to_q(filters):
 			for filter_value in filter_values:
 				query[f"{lookup_spanning_relationships_string(filter_value.key)}__in"] = filter_value.value
 		# if isUserScope is true, then we filter by userid
-		elif filter_type == "isUserScope":
+		elif filter_type == "isUserScope" and filter_values == True:
 			user_id = get_current_user_id()
 			query["uid"] = user_id
 		else:
