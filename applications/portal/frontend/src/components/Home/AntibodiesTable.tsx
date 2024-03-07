@@ -61,7 +61,9 @@ const getRowId = (ab: Antibody) => `${ab.abId}${Math.random()}`;
 
 const CustomToolbar = ({ activeTab, searchedAntibodies }) => {
   const [activeSelection, setActiveSelection] = useState(true);
-  
+  const {
+    warningMessage
+  } = useContext(SearchContext);
   const apiRef = useGridApiContext();
   const selectedRows = apiRef.current.getSelectedRows();
 
@@ -82,6 +84,7 @@ const CustomToolbar = ({ activeTab, searchedAntibodies }) => {
       handleExport={handleExport}
       showFilterMenu={showFilterMenu}
       activeTab={activeTab}
+      warningMessage={warningMessage}
       shownResultsNum={searchedAntibodies?.length}
     />
     
