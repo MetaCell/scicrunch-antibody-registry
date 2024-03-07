@@ -363,13 +363,16 @@ const AntibodiesTable = (props) => {
     loader,
     getAntibodyList,
     filterModel,
-    setFilterModel
+    setFilterModel,
+    setSortModel,
   } =
     useContext(SearchContext);
 
   const handleSetFilterAPI = (filtermodel) => {
+    const searchmode = (props.activeTab === MYSUBMISSIONS) ? SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES :
+      SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES
     getAntibodyList(
-      SEARCH_MODES.FILTERED_AND_SEARCHED_ANTIBODIES,
+      searchmode,
       searchQuery || activeSearch,
       1,
       filtermodel
@@ -377,12 +380,18 @@ const AntibodiesTable = (props) => {
     filtermodel !== filterModel ? setFilterModel(filtermodel) : null;
   }
 
-  useEffect(() => {
-    if (activeSearch && filterModel.items.length > 0) {
-      handleSetFilterAPI(filterModel);
-    }
-  }, [activeSearch]);
-
+  const addSortingColumn = (sortmodel) => {
+    const searchmode = (props.activeTab === MYSUBMISSIONS) ? SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES :
+      SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES
+    getAntibodyList(
+      searchmode,
+      searchQuery || activeSearch,
+      1,
+      filterModel,
+      sortmodel
+    )
+    setSortModel(sortmodel)
+  }
 
   const setNewFilterColumn = (model) => {
     let newblankFilter = { ...BLANK_FILTER_MODEL, columnField: model.items[0].columnField, id: getRandomId() }
@@ -396,6 +405,9 @@ const AntibodiesTable = (props) => {
   }
 
   useEffect(() => {
+    if (filterModel.items.length > 0) {
+      return;
+    }
     if (searchQuery) {
       getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, searchQuery);
     } else if (props.activeTab === MYSUBMISSIONS) {
@@ -404,6 +416,18 @@ const AntibodiesTable = (props) => {
       getAntibodyList(SEARCH_MODES.ALL_ANTIBODIES);
     }
   }, [props.activeTab, user, searchQuery]);
+
+  useEffect(() => {
+    if (activeSearch && filterModel.items.length > 0) {
+      handleSetFilterAPI(filterModel);
+    }
+  }, [activeSearch]);
+
+  useEffect(() => {
+    if (filterModel.items.length > 0) {
+      handleSetFilterAPI(filterModel);
+    }
+  }, [props.activeTab]);
 
   const columns: GridColDef[] = [
     {
@@ -443,7 +467,7 @@ const AntibodiesTable = (props) => {
     // },
     {
       ...columnsDefaultProps,
-      field: "target_species_raw",
+      field: "species",
       headerName: "Target species",
       valueGetter: getList,
       hide: true,
@@ -484,6 +508,8 @@ const AntibodiesTable = (props) => {
       headerName: "Reference",
       flex: 1.5,
       hide: true,
+      filterable: false,
+      sortable: false,
     },
     {
       ...columnsDefaultProps,
@@ -531,6 +557,8 @@ const AntibodiesTable = (props) => {
       hide: props.activeTab === ALLRESULTS,
       renderCell: RenderStatus,
       flex: 1.3,
+      filterable: false,
+      sortable: false,
     },
   ];
 
@@ -591,6 +619,8 @@ const AntibodiesTable = (props) => {
             rowsPerPageOptions={[20]}
             pagination={true}
             paginationMode="server"
+              sortingMode="server"
+              onSortModelChange={(model) => addSortingColumn(model)}
             checkboxSelection
             disableSelectionOnClick
             getRowHeight={() => "auto"}

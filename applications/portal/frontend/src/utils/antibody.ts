@@ -5,8 +5,8 @@ export function getProperCitation(a: Antibody) {
   return a.catalogNum && a.vendorName ? `(${a.vendorName} Cat# ${a?.catalogNum?.split(" (")[0]}, RRID:AB_${a.abId})`: "ERROR";
 }
 
-export function getFilterRequestMap() {
-  const filterRequestMap = {
+export function getFilterRequestAttributeMap() {
+  const filterRequestAttributeMap = {
     'contains': 'contains',
     'equals': 'equals',
     'endsWith': 'ends with',
@@ -16,7 +16,7 @@ export function getFilterRequestMap() {
     'isAnyOf': 'is any of',
   }
 
-  return filterRequestMap;
+  return filterRequestAttributeMap;
 }
 
 export function getRandomId() {

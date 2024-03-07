@@ -61,21 +61,17 @@ export default function Searchbar() {
     if(!e.target.value){
       clearSearch()
     } else {
-      history.push('/');
-
-      // TODO: the following needs to change, i.e. if 
-      //  the filters are empty then run the following else run for SEARCH_MODES.FILTERED_AND_SEARCHED_ANTIBODIES
+      // if the filters are empty then run the following else run for SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES
       if (filterModel.items.length === 0) {
         getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, e.target.value)
       } else {
         getAntibodyList(
-          SEARCH_MODES.FILTERED_AND_SEARCHED_ANTIBODIES,
+          SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES,
           e.target.value || activeSearch,
           1,
           filterModel
         )
       }
-      // getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, e.target.value)
     }
   }, [getAntibodyList, clearSearch, history]);
 

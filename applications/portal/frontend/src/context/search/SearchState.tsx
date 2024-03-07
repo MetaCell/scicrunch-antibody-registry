@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { getSearchAntibodies, getAntibodies, getUserAntibodies, getFilteredAndSearchedAntibodies } from '../../services/AntibodiesService'
 import SearchContext from './SearchContext'
 import { getDataInfo } from "../../services/InfoService";
-import { SEARCH_MODES, PAGE_SIZE } from '../../constants/constants';
-import { FilterRequest, KeyValueArrayPair, KeyValuePair } from '../../rest';
+import { SEARCH_MODES, PAGE_SIZE, LIMIT_NUM_RESULTS } from '../../constants/constants';
 
 // MUI
 import {
-  GridFilterModel,
+  GridFilterModel, GridSortModel
 } from "@mui/x-data-grid";
+import { structureFiltersAndSorting } from '../../helpers/antibody';
 
 
 const SearchState = (props) => {
@@ -17,7 +17,9 @@ const SearchState = (props) => {
     lastupdate: new Date()
   });
   const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
+  const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const [filterRequestBody, setFilterRequestBody] = useState(null)
+  const [warningMessage, setWarningMessage] = useState('')
 
   const [searchState, setSearch] = useState({
     loader:true,
@@ -37,80 +39,36 @@ const SearchState = (props) => {
   }, [])
 
   const setCurrentPage = (pageNumber) => {
-    getAntibodyList(searchState.antibodyRequestType, searchState.activeSearch, pageNumber)
+    getAntibodyList(searchState.antibodyRequestType, searchState.activeSearch, pageNumber, filterModel, sortModel)
   }
 
-  const structureFiltersAndSorting = (antibodyFilters, pagenumber, size) => {
-    let body: FilterRequest = {
-      search: searchState.activeSearch,
-      contains: [],
-      equals: [],
-      startsWith: [],
-      endsWith: [],
-      isEmpty: [],
-      isNotEmpty: [],
-      isAnyOf: [],
-      page: pagenumber,
-      size: size
-    };
 
-    if (antibodyFilters.items && antibodyFilters.items.length > 0) {
-      antibodyFilters.items.map((filter) => {
-
-        // I don't like this check below... maybe more standardized
-        if (filter.operatorValue === "contains"
-          || filter.operatorValue === "equals"
-          || filter.operatorValue === "startsWith"
-          || filter.operatorValue === "endsWith"
-        ) {
-          const keyval: KeyValuePair = {
-            key: filter.columnField,
-            value: filter.value
-          }
-          if (filter?.value) {
-            filter.operatorValue === "contains" ?
-              body.contains.push(keyval) :
-              filter.operatorValue === "equals" ?
-                body.equals.push(keyval) :
-                filter.operatorValue === "startsWith" ?
-                  body.startsWith.push(keyval) :
-                  body.endsWith.push(keyval)
-          }
-
-        } else if (filter.operatorValue === "isEmpty"
-          || filter.operatorValue === "isNotEmpty"
-        ) {
-          filter.operatorValue === "isEmpty" ?
-            body.isEmpty.push(filter.columnField) :
-            body.isNotEmpty.push(filter.columnField)
-        } else if (filter.operatorValue === "isAnyOf") {
-          const keyval: KeyValueArrayPair = {
-            key: filter.columnField,
-            value: filter.value
-          }
-          if (filter?.value) {
-            body.isAnyOf.push(keyval)
-          }
-        }
-      })
-    }
-    return body;
-  }
-
-  const getAntibodyList = (searchMode = SEARCH_MODES.ALL_ANTIBODIES, query = '', pageNumber = 1, antibodyFilters = {}) => {
+  const getAntibodyList = (
+    searchMode = SEARCH_MODES.ALL_ANTIBODIES,
+    query = '',
+    pageNumber = 1,
+    antibodyFilters: GridFilterModel = { items: [] },
+    sortmodel = sortModel
+  ) => {
     if (searchState.antibodyRequestType !== searchMode) {
       pageNumber = 1;   // start with the first page if search type is changed
     }
-    // FOUR Kinds of search: 
-    if (query || (searchMode === SEARCH_MODES.SEARCHED_ANTIBODIES)) {
+    // FIVE Kinds of search: 
+    if ((antibodyFilters.items.length === 0) && (query || (searchMode === SEARCH_MODES.SEARCHED_ANTIBODIES))) {
       fetchSearchedAntibodies(pageNumber, query);
-    } else if (searchMode === SEARCH_MODES.MY_ANTIBODIES) {
+    } else if ((antibodyFilters.items.length === 0) && (searchMode === SEARCH_MODES.MY_ANTIBODIES)) {
       fetchUserAntibodies(pageNumber);
-    } else if (searchMode === SEARCH_MODES.FILTERED_AND_SEARCHED_ANTIBODIES) {
-      const requestBody = structureFiltersAndSorting(antibodyFilters, pageNumber, PAGE_SIZE);
+    } else if ((antibodyFilters.items.length > 0) || (searchMode === SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES)
+      || (searchMode === SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES)
+    ) {
+      const isUserScope = (searchMode === SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES);
+      const requestBody = structureFiltersAndSorting(
+        searchState, antibodyFilters, pageNumber, PAGE_SIZE,
+        sortmodel || sortModel, query, isUserScope
+      );
 
       if (!checkIfRequestBodyIsSame(requestBody, filterRequestBody)) {
-        fetchFilteredAndSearchedAntibodies(requestBody, pageNumber, query);
+        fetchFilteredAndSearchedAntibodies(requestBody, pageNumber, query, sortmodel || sortModel);
       }
       setFilterRequestBody(requestBody);
     } else {
@@ -119,20 +77,12 @@ const SearchState = (props) => {
   }
 
   const checkIfRequestBodyIsSame = (requestBody, filterRequestBody) => {
-    // Check if a structure like above is same as the previous one
     if (filterRequestBody === null) { return false }
-    console.log("requestBody: ", requestBody, "filterRequestBody: ", filterRequestBody)
-    let isSame = true;
-    Object.keys(requestBody).forEach((key, index) => {
-      if (requestBody[key] !== filterRequestBody[key]) {
-        isSame = false;
-      }
-    })
-    console.log("isSame: ", isSame)
-    return isSame;
+    return JSON.stringify(requestBody) === JSON.stringify(filterRequestBody)
+
   }
 
-  const fetchFilteredAndSearchedAntibodies = async (antibodyFilters, pageNumber = 1, query: string) => {
+  const fetchFilteredAndSearchedAntibodies = async (antibodyFilters, pageNumber = 1, query: string, sortmodel) => {
     setSearch((prev) => ({
       ...prev,
       loader: true
@@ -144,15 +94,24 @@ const SearchState = (props) => {
         loader: false,
         currentPage: pageNumber ? pageNumber : searchState.currentPage,
         activeSearch: query,
-        antibodyRequestType: SEARCH_MODES.FILTERED_AND_SEARCHED_ANTIBODIES,
+        antibodyRequestType: SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES,
         totalElements: filteredAntibodies.totalElements,
         searchedAntibodies: filteredAntibodies.items
       })
+
+      // if the totalElement is more than the limit, then sorting is not applied in the Backend. 
+      // Hence we show the warning message - saying to narrow down the search to apply sorting. 
+      // Show warning only if the user has applied sorting.
+      if (filteredAntibodies.totalElements > LIMIT_NUM_RESULTS && sortmodel.length > 0) {
+        setWarningMessage("Please narrow down the search or filter to apply sorting.")
+      } else {
+        setWarningMessage('')
+      }
     } catch (error) {
       setSearch({
         ...searchState,
         loader: false,
-        activeSearch: error,
+        activeSearch: '',
         totalElements: 0,
         searchedAntibodies: []
       })
@@ -182,7 +141,7 @@ const SearchState = (props) => {
       setSearch({
         ...searchState,
         loader:false,
-        activeSearch:error,
+        activeSearch: '',
         totalElements: 0,
         searchedAntibodies: []
       })
@@ -213,7 +172,7 @@ const SearchState = (props) => {
           ...searchState,
           loader: false,
           totalElements: 0,
-          activeSearch: err,
+          activeSearch: '',
           searchedAntibodies: []
         });
         console.error(err)
@@ -242,7 +201,7 @@ const SearchState = (props) => {
           ...searchState,
           loader: false,
           totalElements: 0,
-          activeSearch: err,
+          activeSearch: '',
           searchedAntibodies: []
         });
         console.error(err)
@@ -282,7 +241,10 @@ const SearchState = (props) => {
       currentPage: searchState.currentPage,
       setCurrentPage,
       filterModel,
-      setFilterModel
+      setFilterModel,
+      setSortModel,
+      warningMessage,
+      setWarningMessage
     }}>
       {props.children}
     </SearchContext.Provider>

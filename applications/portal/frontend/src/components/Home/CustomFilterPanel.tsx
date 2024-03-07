@@ -3,7 +3,7 @@ import { Box, Button, FormControl, Input, Chip } from "@mui/material";
 import {
   GridCloseIcon,
 } from "@mui/x-data-grid";
-import { getFilterRequestMap, getRandomId } from "../../utils/antibody";
+import { getFilterRequestAttributeMap, getRandomId } from "../../utils/antibody";
 import { BLANK_FILTER_MODEL } from "../../constants/constants";
 import { makeStyles } from "@mui/styles";
 
@@ -43,7 +43,10 @@ export const CustomFilterPanel = (props) => {
     handleSetFilterAPI,
   } = props;
 
-  const filterableColumns = columns.filter((column) => column.field !== "nameAndId");
+  const filterableColumns = columns.filter((column) =>
+    column.field !== "nameAndId" && column.field !== "defining_citation"
+    && column.field !== "reference" && column.field !== "url" && column.field !== "status"
+  );
 
   const handleFilterSet = (filterSet) => {
     let isFilterSetPresent = false;
@@ -157,7 +160,7 @@ const CustomFilterRowPanel = (props) => {
         value={filterSet.operatorValue}
         onChange={(e) => handleFilterSet({ ...filterSet, operatorValue: e.target.value })}
       >
-        {Object.keys(getFilterRequestMap()).map((operator) => (
+        {Object.keys(getFilterRequestAttributeMap()).map((operator) => (
           <option key={operator} value={operator}>
             {operator}
           </option>
