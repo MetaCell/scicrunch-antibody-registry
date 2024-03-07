@@ -762,6 +762,9 @@ components:
                         - and
                         - or
                     type: string
+                isUserScope:
+                    description: Whether to get users antibodies or not.
+                    type: boolean
         KeyValueArrayPair:
             description: >-
                 Utility type to represent a key-value object, where value is an array. This is helpful when

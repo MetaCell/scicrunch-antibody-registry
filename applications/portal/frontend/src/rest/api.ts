@@ -836,6 +836,12 @@ export interface FilterRequest {
      * @memberof FilterRequest
      */
     'operation'?: FilterRequestOperationEnum;
+    /**
+     * Whether to get users antibodies or not.
+     * @type {boolean}
+     * @memberof FilterRequest
+     */
+    'isUserScope'?: boolean;
 }
 
 export const FilterRequestOperationEnum = {
