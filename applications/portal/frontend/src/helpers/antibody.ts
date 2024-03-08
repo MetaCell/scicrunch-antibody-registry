@@ -77,12 +77,14 @@ export const structureFiltersAndSorting = (searchState, antibodyFilters, pagenum
         key: filter.columnField,
         value: filter?.value
       }
-      // If filter value is empty, then it is - IsEmpty or IsNotEmpty
-      if (filter?.value) {
-        const keyvalpair = (filter.operatorValue === SearchCriteriaOptions.IsAnyOf) ? keyvalarr : keyval
-        body[filterMapper[filter.operatorValue]].push(keyvalpair)
-      } else {
+
+      if (filter.operatorValue === SearchCriteriaOptions.IsEmpty || filter.operatorValue === SearchCriteriaOptions.IsNotEmpty) {
         body[filterMapper[filter.operatorValue]].push(filter.columnField)
+      } else {
+        if (filter?.value) {
+          const keyvalpair = (filter.operatorValue === SearchCriteriaOptions.IsAnyOf) ? keyvalarr : keyval
+          body[filterMapper[filter.operatorValue]].push(keyvalpair)
+        }
       }
     })
   }

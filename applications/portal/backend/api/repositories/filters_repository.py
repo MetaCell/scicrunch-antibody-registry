@@ -6,7 +6,7 @@ from portal.constants import FILTERABLE_FIELDS
 from openapi.models import Operation, SearchCriteriaOptions
 from api.services.user_service import get_current_user_id
 
-FILTER_TYPES = [filter_type.value for filter_type in SearchCriteriaOptions]
+FILTER_TYPES = {filter_type.value for filter_type in SearchCriteriaOptions}
 
 def check_filters_are_valid(filters):
 	for filter_type, filter_values in dict(filters).items():

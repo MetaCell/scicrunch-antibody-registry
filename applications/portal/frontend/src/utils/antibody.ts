@@ -42,3 +42,14 @@ export function checkIfFilterSetExists(model, filterModel) {
   });
   return isFilterSetPresent;
 }
+
+export function shouldEmptyFilterValue(filterSet, operation) {
+  // if previous operator was isAnyOf and new operator is not isAnyOf then clear the value
+  // similarly if previous operator was not isAnyOf and new operator is isAnyOf then clear the value
+  const changedFromIsAnyOf = (filterSet.operatorValue === SearchCriteriaOptions.IsAnyOf && operation !== SearchCriteriaOptions.IsAnyOf)
+    || (filterSet.operatorValue !== SearchCriteriaOptions.IsAnyOf && operation === SearchCriteriaOptions.IsAnyOf)
+
+  // if newly selected operator is IsEmpty or IsNotEmpty then clear the value
+  const changedFromNoInputOperators = (operation === SearchCriteriaOptions.IsEmpty || operation === SearchCriteriaOptions.IsNotEmpty)
+  return changedFromIsAnyOf || changedFromNoInputOperators;
+}

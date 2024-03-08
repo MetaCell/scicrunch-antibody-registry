@@ -69,8 +69,8 @@ const SearchState = (props) => {
 
       if (!checkIfRequestBodyIsSame(requestBody, filterRequestBody)) {
         fetchFilteredAndSearchedAntibodies(requestBody, pageNumber, query, sortmodel || sortModel);
+        setFilterRequestBody(requestBody);
       }
-      setFilterRequestBody(requestBody);
     } else {
       fetchAllAntibodies(pageNumber);
     }

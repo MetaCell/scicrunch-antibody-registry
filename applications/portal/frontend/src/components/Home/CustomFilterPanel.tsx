@@ -3,7 +3,7 @@ import { Box, Button, FormControl, Input, Chip } from "@mui/material";
 import {
   GridCloseIcon,
 } from "@mui/x-data-grid";
-import { getFilterOperators, getRandomId } from "../../utils/antibody";
+import { getFilterOperators, getRandomId, shouldEmptyFilterValue } from "../../utils/antibody";
 import { BLANK_FILTER_MODEL } from "../../constants/constants";
 import { makeStyles } from "@mui/styles";
 import { SearchCriteriaOptions } from "../../rest";
@@ -113,10 +113,7 @@ const CustomFilterRow = (props) => {
   const classes = useStyles();
 
   const changeOperator = (operation) => {
-    // if previous operator was isAnyOf and new operator is not isAnyOf then clear the value
-    // similarly if previous operator was not isAnyOf and new operator is isAnyOf then clear the value
-    if ((filterSet.operatorValue === SearchCriteriaOptions.IsAnyOf && operation !== SearchCriteriaOptions.IsAnyOf)
-      || (filterSet.operatorValue !== SearchCriteriaOptions.IsAnyOf && operation === SearchCriteriaOptions.IsAnyOf)) {
+    if (shouldEmptyFilterValue(filterSet, operation)) {
       handleFilterSet({ ...filterSet, operatorValue: operation, value: "" });
     } else {
       handleFilterSet({ ...filterSet, operatorValue: operation });
@@ -200,9 +197,10 @@ const CustomMultiInputWithChip = (props) => {
 
   const handleKeyUp = (e) => {
     if (e.key === "Enter" && e.target.value) {
-      values.push(e.target.value)
-      handleFilterSet({ ...filterSet, value: values });
-      setValues(values);
+      let arr = [...values]
+      arr.push(e.target.value)
+      handleFilterSet({ ...filterSet, value: arr });
+      setValues(arr);
       setCurrValue("");
     }
   };
