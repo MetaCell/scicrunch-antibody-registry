@@ -121,6 +121,15 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
 };
 
 const RenderCellContent = (props: GridRenderCellParams<String>) => {
+  const cellMapper = {
+    ab_target: (row) => `${row.abTarget} ${row.targetSpecies.join(", ")}`,
+    ab_name: (row) => row.abName,
+    ab_id: (row) => row.abId,
+    species: (row) => `${row.targetSpecies.join(", ")}`,
+    clone_id: (row) => row.cloneId,
+    source_organism: (row) => row.sourceOrganism,
+    catalog_num: (row) => row.catalogNum,
+  };
   return (
     <Typography
       variant="caption"
@@ -129,16 +138,7 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
       component="div"
       className="col-content"
     >
-      {
-        props.field === "ab_target" ? `${props.row.abTarget} ${props.row.targetSpecies.join(", ")}` :
-          props.field === "ab_name" ? props.row.abName :
-            props.field === "ab_id" ? props.row.abId :
-              props.field === "species" ? `${props.row.targetSpecies.join(", ")}` :
-                props.field === "clone_id" ? props.row.cloneId :
-                  props.field === "source_organism" ? props.row.sourceOrganism :
-                    props.field === "catalog_num" ? props.row.catalogNum :
-                      props.value
-      }
+      {cellMapper[props.field](props.row)}
     </Typography>
   );
 };

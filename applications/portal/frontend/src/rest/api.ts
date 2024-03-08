@@ -961,6 +961,31 @@ export interface PaginatedAntibodies {
     'items': Array<Antibody>;
 }
 /**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const SearchCriteriaOptions = {
+    Contains: 'contains',
+    Equals: 'equals',
+    EndsWith: 'endsWith',
+    StartsWith: 'startsWith',
+    SortOn: 'sortOn',
+    IsEmpty: 'isEmpty',
+    IsNotEmpty: 'isNotEmpty',
+    IsAnyOf: 'isAnyOf',
+    Operation: 'operation',
+    IsUserScope: 'isUserScope',
+    Page: 'page',
+    Size: 'size',
+    Search: 'search'
+} as const;
+
+export type SearchCriteriaOptions = typeof SearchCriteriaOptions[keyof typeof SearchCriteriaOptions];
+
+
+/**
  * The data type associated with the POST and PUT methods of the antibody resource
  * @export
  * @interface UpdateAntibody

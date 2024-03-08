@@ -3,9 +3,10 @@ import { Box, Button, FormControl, Input, Chip } from "@mui/material";
 import {
   GridCloseIcon,
 } from "@mui/x-data-grid";
-import { getFilterRequestAttributeMap, getRandomId } from "../../utils/antibody";
+import { getFilterOperators, getRandomId } from "../../utils/antibody";
 import { BLANK_FILTER_MODEL } from "../../constants/constants";
 import { makeStyles } from "@mui/styles";
+import { SearchCriteriaOptions } from "../../rest";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -43,10 +44,9 @@ export const CustomFilterPanel = (props) => {
     handleSetFilterAPI,
   } = props;
 
-  const filterableColumns = columns.filter((column) =>
-    column.field !== "nameAndId" && column.field !== "defining_citation"
-    && column.field !== "reference" && column.field !== "url" && column.field !== "status"
-  );
+  const filterableColumns = columns.filter((column) => {
+    return !["nameAndId", "defining_citation", "reference", "url", "status"].includes(column.field);
+  });
 
   const handleFilterSet = (filterSet) => {
     let isFilterSetPresent = false;
@@ -112,30 +112,23 @@ const CustomFilterRow = (props) => {
   const [inputvalue, setInputValue] = useState(filterSet.value);
   const classes = useStyles();
 
-
-  // ----- Multi input file logic below -----
-  const [values, setValues] = useState(filterSet.value || []);
-  const [currValue, setCurrValue] = useState("");
-
-  const handleKeyUp = (e) => {
-    if (e.key === "Enter" && e.target.value) {
-      values.push(e.target.value)
-      handleFilterSet({ ...filterSet, value: values });
-      setValues(values);
-      setCurrValue("");
+  const changeOperator = (operation) => {
+    // if previous operator was isAnyOf and new operator is not isAnyOf then clear the value
+    // similarly if previous operator was not isAnyOf and new operator is isAnyOf then clear the value
+    if ((filterSet.operatorValue === SearchCriteriaOptions.IsAnyOf && operation !== SearchCriteriaOptions.IsAnyOf)
+      || (filterSet.operatorValue !== SearchCriteriaOptions.IsAnyOf && operation === SearchCriteriaOptions.IsAnyOf)) {
+      handleFilterSet({ ...filterSet, operatorValue: operation, value: "" });
+    } else {
+      handleFilterSet({ ...filterSet, operatorValue: operation });
     }
-  };
-  const handleDelete = (item, index) => {
-    let arr = [...values]
-    arr.splice(index, 1)
-    setValues(arr)
-    handleFilterSet({ ...filterSet, value: arr });
   }
-  const handleChange = (e) => {
-    setCurrValue(e.target.value);
-  };
-  // ----- Multi input file logic above -----
-
+  const operatorsWithSingleInput = [
+    SearchCriteriaOptions.Contains,
+    SearchCriteriaOptions.Equals,
+    SearchCriteriaOptions.EndsWith,
+    SearchCriteriaOptions.StartsWith,
+  ];
+  const operators = getFilterOperators();
   return (
     <Box>
       {/* 3 parts of a filter */}
@@ -158,11 +151,11 @@ const CustomFilterRow = (props) => {
       {/* operators */}
       <select
         value={filterSet.operatorValue}
-        onChange={(e) => handleFilterSet({ ...filterSet, operatorValue: e.target.value })}
+        onChange={(e) => changeOperator(e.target.value)}
       >
-        {Object.keys(getFilterRequestAttributeMap()).map((operator) => (
-          <option key={operator} value={operator}>
-            {operator}
+        {Object.keys(operators).map((op) => (
+          <option key={op} value={op}>
+            {operators[op]}
           </option>
         ))}
       </select>
@@ -170,28 +163,18 @@ const CustomFilterRow = (props) => {
 
       {/* multi-input: conditional */}
       {
-        // if the operator is isAnyOf then we show a multi-select input field
-        filterSet.operatorValue === "isAnyOf" && (
-          <FormControl classes={{ root: classes.formControlRoot }}>
-            <div className={"container"}>
-              {filterSet.value && filterSet.value.map((item, index) => (
-                <Chip key={index} size="small" onDelete={() => handleDelete(item, index)} label={item} />
-              ))}
-            </div>
-            <Input
-              value={currValue}
-              onChange={handleChange}
-              onKeyDown={handleKeyUp}
-              onBlur={handleKeyUp}
-            />
-          </FormControl>
-
+        filterSet.operatorValue === SearchCriteriaOptions.IsAnyOf && (
+          <CustomMultiInputWithChip
+            filterSet={filterSet}
+            handleFilterSet={handleFilterSet}
+            classes={classes}
+          />
         )
       }
 
       {/* input: conditional */}
       {
-        ["contains", "equals", "endsWith", "startsWith"].includes(filterSet.operatorValue) && (
+        operatorsWithSingleInput.includes(filterSet.operatorValue) && (
           <Input
             value={inputvalue}
             onChange={(e) => setInputValue(e.target.value)}
@@ -210,3 +193,42 @@ const CustomFilterRow = (props) => {
   )
 }
 
+const CustomMultiInputWithChip = (props) => {
+  const { filterSet, handleFilterSet, classes } = props;
+  const [values, setValues] = useState(filterSet.value || []);
+  const [currValue, setCurrValue] = useState("");
+
+  const handleKeyUp = (e) => {
+    if (e.key === "Enter" && e.target.value) {
+      values.push(e.target.value)
+      handleFilterSet({ ...filterSet, value: values });
+      setValues(values);
+      setCurrValue("");
+    }
+  };
+  const handleDelete = (item, index) => {
+    let arr = [...values]
+    arr.splice(index, 1)
+    setValues(arr)
+    handleFilterSet({ ...filterSet, value: arr });
+  }
+  const handleChange = (e) => {
+    setCurrValue(e.target.value);
+  };
+  return (
+    <FormControl classes={{ root: classes.formControlRoot }}>
+      <div className={"container"}>
+        {filterSet.value && filterSet.value?.map((item, index) => (
+          <Chip key={index} size="small" onDelete={() => handleDelete(item, index)} label={item} />
+        ))}
+      </div>
+      <Input
+        value={currValue}
+        onChange={handleChange}
+        onKeyDown={handleKeyUp}
+        onBlur={handleKeyUp}
+      />
+    </FormControl>
+
+  )
+}

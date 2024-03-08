@@ -1,6 +1,6 @@
 import { Antibody } from "../rest";
 import { addAntibody } from "../services/AntibodiesService";
-import { FilterRequest, FilterRequestOperationEnum, KeyValueArrayPair, KeyValuePair } from '../rest';
+import { FilterRequest, FilterRequestOperationEnum, KeyValueArrayPair, KeyValuePair, SearchCriteriaOptions } from '../rest';
 
 export function postNewAntibody(
   a: Antibody,
@@ -58,40 +58,31 @@ export const structureFiltersAndSorting = (searchState, antibodyFilters, pagenum
   }
 
   if (antibodyFilters.items && antibodyFilters.items.length > 0) {
-    antibodyFilters.items.map((filter) => {
-      if (filter.operatorValue === "contains"
-        || filter.operatorValue === "equals"
-        || filter.operatorValue === "startsWith"
-        || filter.operatorValue === "endsWith"
-      ) {
-        const keyval: KeyValuePair = {
-          key: filter.columnField,
-          value: filter.value
-        }
-        if (filter?.value) {
-          filter.operatorValue === "contains" ?
-            body.contains.push(keyval) :
-            filter.operatorValue === "equals" ?
-              body.equals.push(keyval) :
-              filter.operatorValue === "startsWith" ?
-                body.startsWith.push(keyval) :
-                body.endsWith.push(keyval)
-        }
+    const filterMapper = {
+      [SearchCriteriaOptions.Contains]: 'contains',
+      [SearchCriteriaOptions.Equals]: 'equals',
+      [SearchCriteriaOptions.StartsWith]: 'startsWith',
+      [SearchCriteriaOptions.EndsWith]: 'endsWith',
+      [SearchCriteriaOptions.IsEmpty]: 'isEmpty',
+      [SearchCriteriaOptions.IsNotEmpty]: 'isNotEmpty',
+      [SearchCriteriaOptions.IsAnyOf]: 'isAnyOf'
+    }
 
-      } else if (filter.operatorValue === "isEmpty"
-        || filter.operatorValue === "isNotEmpty"
-      ) {
-        filter.operatorValue === "isEmpty" ?
-          body.isEmpty.push(filter.columnField) :
-          body.isNotEmpty.push(filter.columnField)
-      } else if (filter.operatorValue === "isAnyOf") {
-        const keyval: KeyValueArrayPair = {
-          key: filter.columnField,
-          value: filter.value
-        }
-        if (filter?.value) {
-          body.isAnyOf.push(keyval)
-        }
+    antibodyFilters.items.map((filter) => {
+      const keyval: KeyValuePair = {
+        key: filter.columnField,
+        value: filter?.value
+      }
+      const keyvalarr: KeyValueArrayPair = {
+        key: filter.columnField,
+        value: filter?.value
+      }
+      // If filter value is empty, then it is - IsEmpty or IsNotEmpty
+      if (filter?.value) {
+        const keyvalpair = (filter.operatorValue === SearchCriteriaOptions.IsAnyOf) ? keyvalarr : keyval
+        body[filterMapper[filter.operatorValue]].push(keyvalpair)
+      } else {
+        body[filterMapper[filter.operatorValue]].push(filter.columnField)
       }
     })
   }

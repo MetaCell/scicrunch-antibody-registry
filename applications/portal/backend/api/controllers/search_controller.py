@@ -15,5 +15,5 @@ def fts_antibodies(page: int = 1, size: int = 50, search: str = '') -> Paginated
     return search_service.fts_antibodies(page, size, search)
 
 
-def filter_antibodies(body: FilterRequest) -> PaginatedAntibodies:
-    return search_service.filter_antibodies(body)
+def filter_antibodies(filter_request: FilterRequest) -> PaginatedAntibodies:
+    return search_service.filter_antibodies(filter_request)

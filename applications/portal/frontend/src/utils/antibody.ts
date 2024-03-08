@@ -1,22 +1,30 @@
-import { Antibody } from "../rest";
+import { Antibody, SearchCriteriaOptions } from "../rest";
 
 export function getProperCitation(a: Antibody) {
   if(!a) {return "ERROR";}
   return a.catalogNum && a.vendorName ? `(${a.vendorName} Cat# ${a?.catalogNum?.split(" (")[0]}, RRID:AB_${a.abId})`: "ERROR";
 }
 
-export function getFilterRequestAttributeMap() {
-  const filterRequestAttributeMap = {
-    'contains': 'contains',
-    'equals': 'equals',
-    'endsWith': 'ends with',
-    'startsWith': 'starts with',
-    'isEmpty': 'is empty',
-    'isNotEmpty': 'is not empty',
-    'isAnyOf': 'is any of',
-  }
+function convertCamelCaseToSpaces(str) {
+  return str.replace(/([A-Z])/g, ' $1').toLowerCase();
+}
 
-  return filterRequestAttributeMap;
+export function getFilterOperators() {
+  const operators = [
+    SearchCriteriaOptions.Contains,
+    SearchCriteriaOptions.Equals,
+    SearchCriteriaOptions.EndsWith,
+    SearchCriteriaOptions.StartsWith,
+    SearchCriteriaOptions.IsEmpty,
+    SearchCriteriaOptions.IsNotEmpty,
+    SearchCriteriaOptions.IsAnyOf
+  ];
+  const operatorsMap = {};
+  operators.forEach((operator) => {
+    operatorsMap[operator] = convertCamelCaseToSpaces(operator);
+  });
+
+  return operatorsMap;
 }
 
 export function getRandomId() {

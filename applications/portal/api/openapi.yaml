@@ -800,6 +800,22 @@ components:
                         - asc
                         - desc
                     type: string
+        SearchCriteriaOptions:
+            enum:
+                - contains
+                - equals
+                - endsWith
+                - startsWith
+                - sortOn
+                - isEmpty
+                - isNotEmpty
+                - isAnyOf
+                - operation
+                - isUserScope
+                - page
+                - size
+                - search
+            type: string
     responses:
         PaginatedAntibodies:
             content:

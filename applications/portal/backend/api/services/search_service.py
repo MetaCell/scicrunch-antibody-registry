@@ -15,8 +15,8 @@ def fts_antibodies(page: int = 1, size: int = 10, search: str = '', filters=None
     size = size or 10  # required at the moment, issue with default values in main.py-L134
     return fts_and_filter_antibodies(page=page, size=size, search=search, filters=filters)
     
-def filter_antibodies(body: FilterRequest) -> List[AntibodyDTO]:
-    return fts_and_filter_antibodies(page=body.page, size=body.size, search=body.search, filters=body)
+def filter_antibodies(filter_request: FilterRequest) -> List[AntibodyDTO]:
+    return fts_and_filter_antibodies(page=filter_request.page, size=filter_request.size, search=filter_request.search, filters=filter_request)
 
 
 def fts_and_filter_antibodies(page: int = 1, size: int = 10, search: str = '', filters=None) -> List[AntibodyDTO]:

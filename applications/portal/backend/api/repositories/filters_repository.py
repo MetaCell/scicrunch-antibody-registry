@@ -3,26 +3,35 @@ from django.db.models import Q
 from openapi.models import Sortorder
 from fastapi import HTTPException
 from portal.constants import FILTERABLE_FIELDS
-from openapi.models import Operation
+from openapi.models import Operation, SearchCriteriaOptions
 from api.services.user_service import get_current_user_id
+
+FILTER_TYPES = [filter_type.value for filter_type in SearchCriteriaOptions]
 
 def check_filters_are_valid(filters):
 	for filter_type, filter_values in dict(filters).items():
-		if filter_type not in ["contains", "equals", "startsWith", "endsWith", "isEmpty", "isNotEmpty", "isAnyOf", "page", "search", "size", "sortOn", "operation", "isUserScope"]:
+		if filter_type not in FILTER_TYPES:
 			return False
 
-		if filter_type in ["page", "size"]:
+		if filter_type == SearchCriteriaOptions.page.value or filter_type == SearchCriteriaOptions.size.value:
 			if not isinstance(filter_values, int):
 				return False
-		elif filter_type in ["search"]:
+		elif filter_type == SearchCriteriaOptions.search.value:
 			if not isinstance(filter_values, str):
 				return False
-		elif filter_type in ["isUserScope"]:
+		elif filter_type == SearchCriteriaOptions.isUserScope.value:
 			if not isinstance(filter_values, bool):
 				return False
-		elif filter_type in ["operation"]:
+		elif filter_type == SearchCriteriaOptions.operation.value:
 			if filter_values not in [Operation.and_, Operation.or_]:
 				return False
+		elif filter_type == SearchCriteriaOptions.isEmpty.value or filter_type == SearchCriteriaOptions.isNotEmpty.value:
+			if not isinstance(filter_values, list):
+				return False
+			
+			for filter_value in filter_values:
+				if filter_value not in FILTERABLE_FIELDS:
+					return False
 		else:
 			if not isinstance(filter_values, list):
 				return False
@@ -54,29 +63,30 @@ def convert_filters_to_q(filters):
 	# First for loop is limited to filters operation types size = 7. T.C. O(7n) = O(n), 
 	# where n is the number of columns in a particular filter type. 
 	for filter_type, filter_values in dict(filters).items():
-		if filter_type == "contains":
+		# if filter_type == "contains":
+		if filter_type == SearchCriteriaOptions.contains.value:
 			for filter_value in filter_values:
 				query[f"{lookup_spanning_relationships_string(filter_value.key)}__icontains"] = filter_value.value
-		elif filter_type == "equals":
+		elif filter_type == SearchCriteriaOptions.equals.value:
 			for filter_value in filter_values:
 				query[f"{lookup_spanning_relationships_string(filter_value.key)}__iexact"] = filter_value.value
-		elif filter_type == "startsWith":
+		elif filter_type == SearchCriteriaOptions.startsWith.value:
 			for filter_value in filter_values:
 				query[f"{lookup_spanning_relationships_string(filter_value.key)}__istartswith"] = filter_value.value
-		elif filter_type == "endsWith":
+		elif filter_type == SearchCriteriaOptions.endsWith.value:
 			for filter_value in filter_values:
 				query[f"{lookup_spanning_relationships_string(filter_value.key)}__iendswith"] = filter_value.value
-		elif filter_type == "isEmpty":
+		elif filter_type == SearchCriteriaOptions.isEmpty.value:
 			for filter_value in filter_values:
 				query[f"{lookup_spanning_relationships_string(filter_value)}__isnull"] = True
-		elif filter_type == "isNotEmpty":
+		elif filter_type == SearchCriteriaOptions.isNotEmpty.value:
 			for filter_value in filter_values:
 				query[f"{lookup_spanning_relationships_string(filter_value)}__isnull"] = False
-		elif filter_type == "isAnyOf":
+		elif filter_type == SearchCriteriaOptions.isAnyOf.value:
 			for filter_value in filter_values:
 				query[f"{lookup_spanning_relationships_string(filter_value.key)}__in"] = filter_value.value
 		# if isUserScope is true, then we filter by userid
-		elif filter_type == "isUserScope" and filter_values == True:
+		elif filter_type == SearchCriteriaOptions.isUserScope.value and filter_values == True:
 			user_id = get_current_user_id()
 			query["uid"] = user_id
 		else:
