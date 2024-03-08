@@ -83,7 +83,7 @@ export const CustomFilterPanel = (props) => {
       {
         filterModel && filterModel.items.map((filterSet, index) => (
           <div key={index}>
-            <CustomFilterRowPanel
+            <CustomFilterRow
               columns={filterableColumns}
               filterSet={filterSet}
               handleFilterSet={handleFilterSet}
@@ -107,7 +107,7 @@ export const CustomFilterPanel = (props) => {
   )
 }
 
-const CustomFilterRowPanel = (props) => {
+const CustomFilterRow = (props) => {
   const { columns, filterSet, handleFilterSet, removeFilterSet } = props;
   const [inputvalue, setInputValue] = useState(filterSet.value);
   const classes = useStyles();
