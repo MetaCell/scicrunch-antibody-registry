@@ -45,7 +45,7 @@ const HomeHeader = (props: HomeHeaderProps) => {
   const { activeSelection, handleExport, showFilterMenu, activeTab, warningMessage } = props;
   const theme = useTheme();
  
-  const { activeSearch, totalElements, lastUpdate } = useContext(searchContext)
+  const { activeSearch, totalElements, lastUpdate, error } = useContext(searchContext)
   const showAlert = warningMessage.length > 0;
   return (
     <Box className="container-home-header">
@@ -134,6 +134,11 @@ const HomeHeader = (props: HomeHeaderProps) => {
             {warningMessage && (
               <Alert className="limit-alert" severity="warning" sx={{ mt: 1, mb: 1 }}>
                 {warningMessage}
+              </Alert>)
+            }
+            {error && (
+              <Alert className="error-alert" severity="error" sx={{ mt: 1, mb: 1 }}>
+                An error occurred while fetching data. Please try again later. If the problem persists, please contact us.
               </Alert>)
             }
             <TableToolbar
