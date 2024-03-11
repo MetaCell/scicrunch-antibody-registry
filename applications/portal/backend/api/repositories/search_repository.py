@@ -165,16 +165,22 @@ def antibodies_fts_and_filtering_above_limit(subfields_search, page, size, filte
 def antibodies_fts_and_filtering_below_limit(subfields_search, page, size, filters):
     ids = [a.ix for a in sorted((a for a  in subfields_search),key=sort_fn)]
     id_map = {ids[i]:i for i in range(len(ids))}
-    filtered_antibodies = sorted(
-        Antibody.objects.filter(ix__in=ids).select_related('vendor'), 
-        key=lambda x:id_map[x.ix]
-    ).filter(convert_filters_to_q(filters))
+    filtered_antibodies = Antibody.objects.filter(ix__in=ids).select_related('vendor').filter(
+        convert_filters_to_q(filters)
+    )
 
     filtered_antibodies = sort_by_sortmodel_if_antibodies_count_below_limit(filtered_antibodies, filters)
 
-    p = Paginator(filtered_antibodies,  size)
+    count = filtered_antibodies.count()
+    # if sorting is not specified, we sort by the order of the ids
+    if not order_by_string(filters):
+        filtered_antibodies = sorted(
+            filtered_antibodies, 
+            key=lambda x:id_map[x.ix]
+        )
+    p = Paginator(filtered_antibodies, size)
     items = pageitems_if_page_in_bound(page, p)
-    return items, filtered_antibodies.count()
+    return items, count
 
 
 def sort_by_sortmodel_if_antibodies_count_below_limit(filtered_antibodies, filters):

@@ -558,7 +558,7 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "catalog_num",
       headerName: "Cat Num",
-      renderCell: RenderVendor,
+      renderCell: RenderCellContent,
     },
     {
       ...columnsDefaultProps,

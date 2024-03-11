@@ -54,11 +54,11 @@ const SearchState = (props) => {
       pageNumber = 1;   // start with the first page if search type is changed
     }
     // FIVE Kinds of search: 
-    if ((antibodyFilters.items.length === 0) && (query || (searchMode === SEARCH_MODES.SEARCHED_ANTIBODIES))) {
+    if (isFilterAndSortModelEmpty(antibodyFilters, sortmodel) && (query || (searchMode === SEARCH_MODES.SEARCHED_ANTIBODIES))) {
       fetchSearchedAntibodies(pageNumber, query);
-    } else if ((antibodyFilters.items.length === 0) && (searchMode === SEARCH_MODES.MY_ANTIBODIES)) {
+    } else if (isFilterAndSortModelEmpty(antibodyFilters, sortmodel) && (searchMode === SEARCH_MODES.MY_ANTIBODIES)) {
       fetchUserAntibodies(pageNumber);
-    } else if ((antibodyFilters.items.length > 0) || (searchMode === SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES)
+    } else if (!isFilterAndSortModelEmpty(antibodyFilters, sortmodel) || (searchMode === SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES)
       || (searchMode === SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES)
     ) {
       const isUserScope = (searchMode === SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES);
@@ -74,6 +74,10 @@ const SearchState = (props) => {
     } else {
       fetchAllAntibodies(pageNumber);
     }
+  }
+
+  const isFilterAndSortModelEmpty = (antibodyFilters, sortmodel) => {
+    return antibodyFilters.items.length === 0 && sortmodel.length === 0
   }
 
   const checkIfRequestBodyIsSame = (requestBody, filterRequestBody) => {
@@ -111,7 +115,6 @@ const SearchState = (props) => {
       setSearch({
         ...searchState,
         loader: false,
-        activeSearch: '',
         totalElements: 0,
         searchedAntibodies: []
       })
@@ -140,8 +143,7 @@ const SearchState = (props) => {
     } catch (error) {
       setSearch({
         ...searchState,
-        loader:false,
-        activeSearch: '',
+        loader: false,
         totalElements: 0,
         searchedAntibodies: []
       })
@@ -162,7 +164,6 @@ const SearchState = (props) => {
           currentPage: pageNumber ? pageNumber : searchState.currentPage,
           loader: false,
           antibodyRequestType: SEARCH_MODES.MY_ANTIBODIES,
-          activeSearch: "",
           totalElements: res.totalElements,
           searchedAntibodies: res.items,
         });
@@ -172,7 +173,6 @@ const SearchState = (props) => {
           ...searchState,
           loader: false,
           totalElements: 0,
-          activeSearch: '',
           searchedAntibodies: []
         });
         console.error(err)
@@ -190,7 +190,6 @@ const SearchState = (props) => {
           ...searchState,
           currentPage: pageNumber ? pageNumber : searchState.currentPage,
           loader: false,
-          activeSearch: "",
           antibodyRequestType: SEARCH_MODES.ALL_ANTIBODIES,
           totalElements: res.totalElements,
           searchedAntibodies: res.items,
@@ -201,7 +200,6 @@ const SearchState = (props) => {
           ...searchState,
           loader: false,
           totalElements: 0,
-          activeSearch: '',
           searchedAntibodies: []
         });
         console.error(err)

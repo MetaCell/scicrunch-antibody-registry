@@ -63,7 +63,6 @@ def convert_filters_to_q(filters):
 	# First for loop is limited to filters operation types size = 7. T.C. O(7n) = O(n), 
 	# where n is the number of columns in a particular filter type. 
 	for filter_type, filter_values in dict(filters).items():
-		# if filter_type == "contains":
 		if filter_type == SearchCriteriaOptions.contains.value:
 			for filter_value in filter_values:
 				query[f"{lookup_spanning_relationships_string(filter_value.key)}__icontains"] = filter_value.value
@@ -96,9 +95,9 @@ def convert_filters_to_q(filters):
 
 
 def order_by_string(filters):
-	if filters.sortOn is None or len(filters.sortOn) == 0:
+	if (not filters) or (not filters.sortOn):
 		return []
-	order_by_string = []
+	order_by = []
 	for column in filters.sortOn:
-		order_by_string.append(f"{'-' if column.sortorder == Sortorder.desc else ''}{column.key}")
-	return order_by_string
+		order_by.append(f"{'-' if column.sortorder == Sortorder.desc else ''}{column.key}")
+	return order_by
