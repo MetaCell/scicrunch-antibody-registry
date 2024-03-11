@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useCallback, useRef } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 //MUI
 import {
   DataGrid,
@@ -6,8 +6,7 @@ import {
   GridColDef,
   GridRenderCellParams,
   GridCsvExportOptions,
-  GridNoRowsOverlay,
-  GridFilterModel,
+  GridNoRowsOverlay
 } from "@mui/x-data-grid";
 import {
   Typography,
@@ -15,8 +14,7 @@ import {
   Link,
   Checkbox,
   Popover,
-  Button,
-  Input,
+  Button
 } from "@mui/material";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
@@ -43,7 +41,6 @@ import NotFoundMessage from "./NotFoundMessage";
 import Error500 from "../UI/Error500";
 import { PAGE_SIZE } from "../../constants/constants";
 import { TablePaginatedFooter } from "./TablePaginatedFooter";
-import { getFilteredAndSearchedAntibodies } from "../../services/AntibodiesService";
 import { CustomFilterPanel } from "./CustomFilterPanel";
 
 
@@ -635,14 +632,14 @@ const AntibodiesTable = (props) => {
             rowsPerPageOptions={[20]}
             pagination={true}
             paginationMode="server"
-              sortingMode="server"
-              onSortModelChange={(model) => addSortingColumn(model)}
+            sortingMode="server"
+            onSortModelChange={(model) => addSortingColumn(model)}
             checkboxSelection
             disableSelectionOnClick
             getRowHeight={() => "auto"}
             loading={!searchedAntibodies || loader}
-              onFilterModelChange={(model) => addNewFilterColumn(model)}
-              filterMode="server"
+            onFilterModelChange={(model) => addNewFilterColumn(model)}
+            filterMode="server"
             components={{
               BaseCheckbox: StyledCheckBox,
               ColumnFilteredIcon: FilteredColumnIcon,

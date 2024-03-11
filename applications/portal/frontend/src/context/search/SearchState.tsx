@@ -9,31 +9,46 @@ import {
   GridFilterModel, GridSortModel
 } from "@mui/x-data-grid";
 import { structureFiltersAndSorting } from '../../helpers/antibody';
+import { Antibody } from '../../rest';
 
+export interface SearchResult {
+  loader: boolean;
+  activeSearch: string;
+  searchedAntibodies: Antibody[];
+  totalElements: number;
+  lastUpdate: Date;
+  error: boolean;
+  antibodyRequestType: string;
+  currentPage: number;
+}
 
 const SearchState = (props) => {
   const [baseData, setBaseData] = useState({
     total: 0,
-    lastupdate: new Date()
+    lastupdate: new Date(),
+    error: false
   });
   const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const [filterRequestBody, setFilterRequestBody] = useState(null)
   const [warningMessage, setWarningMessage] = useState('')
 
-  const [searchState, setSearch] = useState({
-    loader:true,
-    activeSearch:'',
+  const [searchState, setSearch] = useState<SearchResult>({
+    loader: true,
+    activeSearch: '',
     antibodyRequestType: SEARCH_MODES.ALL_ANTIBODIES,
     currentPage: 1,
-    totalElements:0,
-    searchedAntibodies: []
+    totalElements: 0,
+    searchedAntibodies: [],
+    error: false,
+    lastUpdate: null
   })
 
   useEffect(() => {
-    getDataInfo().then((res) => 
-      setBaseData({ total: res.total, lastupdate: new Date(res.lastupdate) })
+    getDataInfo().then((res) =>
+      setBaseData({ total: res.total, lastupdate: new Date(res.lastupdate), error: false })
     ).catch((err) => {
+      setBaseData({ total: 0, lastupdate: new Date(), error: true })
       console.error("Error: ", err)
     })
   }, [])
@@ -116,6 +131,7 @@ const SearchState = (props) => {
         ...searchState,
         loader: false,
         totalElements: 0,
+        error: true,
         searchedAntibodies: []
       })
       console.error(error)
@@ -127,35 +143,39 @@ const SearchState = (props) => {
   const fetchSearchedAntibodies = async (pageNumber = 1, query: string) => {
     setSearch((prev) => ({
       ...prev,
-      loader:true
+      loader: true
     }))
     try {
       const filteredAntibodies = await getSearchAntibodies(pageNumber, PAGE_SIZE, query)
       setSearch({
         ...searchState,
-        loader:false,
+        loader: false,
         currentPage: pageNumber ? pageNumber : searchState.currentPage,
-        activeSearch:query,
+        activeSearch: query,
         antibodyRequestType: SEARCH_MODES.SEARCHED_ANTIBODIES,
         totalElements: filteredAntibodies.totalElements,
-        searchedAntibodies: filteredAntibodies.items
+        searchedAntibodies: filteredAntibodies.items,
+        error: false
       })
     } catch (error) {
       setSearch({
         ...searchState,
         loader: false,
+        activeSearch: '',
         totalElements: 0,
-        searchedAntibodies: []
+        searchedAntibodies: [],
+        error: true
       })
       console.error(error)
     }
-  
+
   }
 
   const fetchUserAntibodies = async (pageNumber = 1) => {
     setSearch((prev) => ({
       ...prev,
-      loader: true
+      loader: true,
+      error: false
     }))
     getUserAntibodies(pageNumber, PAGE_SIZE)
       .then((res) => {
@@ -166,6 +186,7 @@ const SearchState = (props) => {
           antibodyRequestType: SEARCH_MODES.MY_ANTIBODIES,
           totalElements: res.totalElements,
           searchedAntibodies: res.items,
+          error: false
         });
       })
       .catch((err) => {
@@ -173,7 +194,8 @@ const SearchState = (props) => {
           ...searchState,
           loader: false,
           totalElements: 0,
-          searchedAntibodies: []
+          searchedAntibodies: [],
+          error: true
         });
         console.error(err)
       });
@@ -182,7 +204,8 @@ const SearchState = (props) => {
   const fetchAllAntibodies = (pageNumber) => {
     setSearch((prev) => ({
       ...prev,
-      loader: true
+      loader: true,
+      error: false
     }))
     getAntibodies(pageNumber, PAGE_SIZE)
       .then((res) => {
@@ -193,6 +216,7 @@ const SearchState = (props) => {
           antibodyRequestType: SEARCH_MODES.ALL_ANTIBODIES,
           totalElements: res.totalElements,
           searchedAntibodies: res.items,
+          error: false
         });
       })
       .catch((err) => {
@@ -200,31 +224,44 @@ const SearchState = (props) => {
           ...searchState,
           loader: false,
           totalElements: 0,
-          searchedAntibodies: []
+          searchedAntibodies: [],
+          error: true
         });
         console.error(err)
       });
   }
 
-  const clearSearch =() => {
+  const clearSearch = () => {
     setSearch({
       ...searchState,
-      loader:true,
-      activeSearch:'',
-      totalElements:0,
-      searchedAntibodies:[]
+      loader: true,
+      activeSearch: '',
+      totalElements: 0,
+      searchedAntibodies: [],
+      error: false
     })
     getAntibodies()
       .then((res) => {
         setSearch({
           ...searchState,
-          loader:false,
+          loader: false,
           activeSearch: "",
           totalElements: res.totalElements,
-          searchedAntibodies: res.items
+          searchedAntibodies: res.items,
+          error: true
         })
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        setSearch({
+          ...searchState,
+          loader: false,
+          totalElements: 0,
+          activeSearch: '',
+          searchedAntibodies: [],
+          error: true
+        })
+        console.error(err)
+      })
   }
 
   return (
@@ -234,6 +271,7 @@ const SearchState = (props) => {
       searchedAntibodies: searchState.searchedAntibodies,
       totalElements: searchState.totalElements,
       lastUpdate: baseData.lastupdate,
+      error: searchState.error,
       getAntibodyList,
       clearSearch,
       currentPage: searchState.currentPage,
