@@ -248,7 +248,7 @@ const SearchState = (props) => {
           activeSearch: "",
           totalElements: res.totalElements,
           searchedAntibodies: res.items,
-          error: true
+          error: false
         })
       })
       .catch((err) => {
