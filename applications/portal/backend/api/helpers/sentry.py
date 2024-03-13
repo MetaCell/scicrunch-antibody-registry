@@ -2,6 +2,7 @@ import cloudharness.sentry as sentry
 from cloudharness.applications import get_current_configuration
 from sentry_sdk.integrations.django import DjangoIntegration
 import re
+from cloudharness import log
 
 def init_sentry():
     try:
