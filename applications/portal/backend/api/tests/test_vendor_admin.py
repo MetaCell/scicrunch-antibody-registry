@@ -8,10 +8,13 @@ from ..models import Vendor, Antibody, VendorDomain
 
 
 class VendorAdminTests(TestCase):
+
     def setUp(self):
         self.site = AdminSite()
 
+
     def test_force_delete_vendor(self):
+        
         # Create data
         vendor = Vendor.objects.create()
 
@@ -31,7 +34,7 @@ class VendorAdminTests(TestCase):
         self.assertEquals(len(Vendor.objects.all()), 1)
         self.assertEquals(len(VendorDomain.objects.all()), 2)
 
-        # Instanciante and tests
+        # # Instanciante and tests
         va = VendorAdmin(Vendor, self.site)
         va._force_delete(vendor)
         self.assertEquals(len(Antibody.objects.all()), 0)
@@ -57,16 +60,16 @@ class VendorAdminTests(TestCase):
         self.assertEquals(len(Vendor.objects.all()), 2)
         self.assertEquals(len(VendorDomain.objects.all()), 2)
 
-    #     # Instanciante and tests
-    #     va = VendorAdmin(Vendor, self.site)
-    #     va._swap_ownership(v1, v2)
+        # Instanciante and tests
+        va = VendorAdmin(Vendor, AdminSite())
+        va._swap_ownership(v1, v2)
 
-    #     self.assertIn(ab1, v2.antibody_set.all())
-    #     self.assertIn(ab2, v2.antibody_set.all())
-    #     self.assertNotIn(ab1, v1.antibody_set.all())
-    #     self.assertNotIn(ab2, v1.antibody_set.all())
-    #     self.assertIn(domain, v2.vendordomain_set.all())
-    #     self.assertNotIn(domain, v1.vendordomain_set.all())
-    #     self.assertEquals(len(Antibody.objects.all()), 2)
-    #     self.assertEquals(len(Vendor.objects.all()), 2)
-    #     self.assertEquals(len(VendorDomain.objects.all()), 1)
+        self.assertIn(ab1, v2.antibody_set.all())
+        self.assertIn(ab2, v2.antibody_set.all())
+        self.assertNotIn(ab1, v1.antibody_set.all())
+        self.assertNotIn(ab2, v1.antibody_set.all())
+        self.assertIn(domain, v2.vendordomain_set.all())
+        self.assertNotIn(domain, v1.vendordomain_set.all())
+        self.assertEquals(len(Antibody.objects.all()), 2)
+        self.assertEquals(len(Vendor.objects.all()), 2)
+        # FIXME self.assertEquals(len(VendorDomain.objects.all()), 1)

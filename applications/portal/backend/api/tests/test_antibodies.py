@@ -3,6 +3,7 @@ from api.services.antibody_service import *
 from api.services.search_service import fts_antibodies
 from api.models import Vendor, VendorDomain
 from api.repositories.maintainance import refresh_search_view
+
 from openapi.models import (
     AddAntibody as AddAntibodyDTO,
     Status,
@@ -25,6 +26,7 @@ class AntibodiesTestCase(TestCase):
         if token:
             set_authentication_token(token)
             user = get_current_user_id()
+            
 
     def test_create(self):
         ab = create_antibody(AddAntibodyDTO(**example_ab), "aaaa")
@@ -75,7 +77,7 @@ class AntibodiesTestCase(TestCase):
 
         a: Antibody = Antibody.objects.get(ab_id=ab.abId)
         a.status = STATUS.CURATED
-        a.save(update_search=False)
+        a.save()
         assert a.curate_time
 
         abs = get_antibodies()
@@ -88,7 +90,7 @@ class AntibodiesTestCase(TestCase):
         assert len(search) == 1
         a: Antibody = Antibody.objects.get(ab_id=ab2.abId)
         a.status = STATUS.CURATED
-        a.save(update_search=False)
+        a.save()
 
         duplicated = AddAntibodyDTO(**example_ab)
         # duplicated.vendorName = "My vendor synonym" # should keep the same vendor and add a synonym
@@ -111,7 +113,7 @@ class AntibodiesTestCase(TestCase):
         a.entrez_id = "entrez"
         a.uniprot_id = "uniprot"
         a.show_link = True
-        a.save(update_search=False)
+        a.save()
 
         ab = get_antibody(ab.abId)[0]
         assert ab.abTargetEntrezId == "entrez"
@@ -153,24 +155,24 @@ class AntibodiesTestCase(TestCase):
         # time.sleep(60) # give time to the materialized view to be updated
 
         # # Search in name
-        # assert len(fts_antibodies(search="FastImmune").items) == 1
-        # assert len(fts_antibodies(search="fastImmune").items) == 1, "Search must be case insensitive"
-        # assert len(fts_antibodies(search="FastImmune PE Mouse").items) == 1
-        # assert len(fts_antibodies(search="BD FastImmune™ PE Mouse Anti-Human IL-8").items) == 1
-        # assert len(fts_antibodies(search="BD FastImmune™ PE Mouse (Anti-Human) IL-8").items) == 1, "Must ignore special characters"
+        assert len(fts_antibodies(search="FastImmune").items) == 1
+        assert len(fts_antibodies(search="fastImmune").items) == 1, "Search must be case insensitive"
+        assert len(fts_antibodies(search="FastImmune PE Mouse").items) == 1
+        assert len(fts_antibodies(search="BD FastImmune™ PE Mouse Anti-Human IL-8").items) == 1
+        assert len(fts_antibodies(search="BD FastImmune™ PE Mouse (Anti-Human) IL-8").items) == 1, "Must ignore special characters"
 
-        # assert len(fts_antibodies(search="Sheep polyclonal anti-FSH antibody labeled with acridinium ester").items) == 2, "Search in kit contents"
+        assert len(fts_antibodies(search="Sheep polyclonal anti-FSH antibody labeled with acridinium ester").items) == 2, "Search in kit contents"
 
         # assert len(fts_antibodies(search="defining").items) == 2, "Search in defining citation"
         # assert len(fts_antibodies(search="citation").items) == 1, "Search in defining citation specificity"
 
-        # assert len(fts_antibodies(search="External validation DATA SET is released testing").items) == 1, "Search in comments"
-        # assert len(fts_antibodies(search="vendorname").items) == 2
-        # assert len(fts_antibodies(search="Andrew Dingwall").items) == 1
+        assert len(fts_antibodies(search="External validation DATA SET is released testing").items) == 1, "Search in comments"
+        assert len(fts_antibodies(search="vendorname").items) == 2
+        assert len(fts_antibodies(search="Andrew Dingwall").items) == 1
 
-        # assert len(fts_antibodies(search="rabbit").items) == 1, "Search in source organism"
-        # assert len(fts_antibodies(search="Rabbit").items) == 1
-        # assert len(fts_antibodies(search="Andrew Dingwall").items) == 1
+        assert len(fts_antibodies(search="rabbit").items) == 1, "Search in source organism"
+        assert len(fts_antibodies(search="Rabbit").items) == 1, "case insensitive search"
+        assert len(fts_antibodies(search="Andrew Dingwall").items) == 1
 
     def test_update(self):
         user_id = "aaaa"
