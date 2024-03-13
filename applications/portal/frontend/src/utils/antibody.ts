@@ -11,13 +11,13 @@ function convertCamelCaseToSpaces(str) {
 
 export function getFilterOperators() {
   const operators = [
-    SearchCriteriaOptions.Contains,
     SearchCriteriaOptions.Equals,
+    SearchCriteriaOptions.Contains,
     SearchCriteriaOptions.EndsWith,
     SearchCriteriaOptions.StartsWith,
     SearchCriteriaOptions.IsEmpty,
     SearchCriteriaOptions.IsNotEmpty,
-    SearchCriteriaOptions.IsAnyOf
+    // SearchCriteriaOptions.IsAnyOf,
   ];
   const operatorsMap = {};
   operators.forEach((operator) => {

@@ -381,7 +381,7 @@ const AntibodiesTable = (props) => {
   } =
     useContext(SearchContext);
 
-  const handleSetFilterAPI = (filtermodel) => {
+  const applyFilters = (filtermodel) => {
     const searchmode = (props.activeTab === MYSUBMISSIONS) ? SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES :
       SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES
     getAntibodyList(
@@ -432,13 +432,13 @@ const AntibodiesTable = (props) => {
 
   useEffect(() => {
     if (activeSearch && filterModel.items.length > 0) {
-      handleSetFilterAPI(filterModel);
+      applyFilters(filterModel);
     }
   }, [activeSearch]);
 
   useEffect(() => {
     if (filterModel.items.length > 0) {
-      handleSetFilterAPI(filterModel);
+      applyFilters(filterModel);
     }
   }, [props.activeTab]);
 
@@ -620,7 +620,7 @@ const AntibodiesTable = (props) => {
         <GridNoRowsOverlay />
       );
 
-  const SortIcon = ({ sortingOrder, ...other }) => <SortingIcon {...other} />;
+  const SortIcon = ({ ...other }) => <SortingIcon {...other} />;
   const currentPath = window.location.pathname;
   return (
     <Box>
@@ -632,6 +632,7 @@ const AntibodiesTable = (props) => {
         ) : (
           <DataGrid
             className="antibodies-table"
+            filterModel={filterModel}
             sx={dataGridStyles}
             rows={searchedAntibodies ?? []}
             getRowId={getRowId}
@@ -662,7 +663,7 @@ const AntibodiesTable = (props) => {
               FilterPanel: () => CustomFilterPanel({
                 columns,
                 filterModel,
-                handleSetFilterAPI,
+                applyFilters,
                 setFilterModel,
               }),
             }}

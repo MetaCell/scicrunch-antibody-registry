@@ -1,48 +1,23 @@
 import React, { useState } from "react";
-import { Box, Button, FormControl, Input, Chip } from "@mui/material";
+import { Box, Button, FormControl, Chip, MenuItem, TextField, IconButton, Stack } from "@mui/material";
 import {
   GridCloseIcon,
 } from "@mui/x-data-grid";
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { getFilterOperators, getRandomId, shouldEmptyFilterValue } from "../../utils/antibody";
 import { BLANK_FILTER_MODEL } from "../../constants/constants";
-import { makeStyles } from "@mui/styles";
 import { SearchCriteriaOptions } from "../../rest";
 
 
-const useStyles = makeStyles((theme) => ({
-  formControlRoot: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    width: "300px",
-    flexWrap: "wrap",
-    flexDirection: "row",
-    border: '2px solid lightgray',
-    padding: 4,
-    borderRadius: '4px',
-    "&> div.container": {
-      gap: "6px",
-      display: "flex",
-      flexDirection: "row",
-      flexWrap: "wrap"
-    },
-    "& > div.container > span": {
-      backgroundColor: "gray",
-      padding: "1px 3px",
-      borderRadius: "4px"
-    }
-  }
-}));
 
-
-
-export const CustomFilterPanel = (props) => {
-  const {
+export const CustomFilterPanel = (
+  {
     columns,
     filterModel,
     setFilterModel,
-    handleSetFilterAPI,
-  } = props;
+    applyFilters,
+  }) => {
+
 
   const filterableColumns = columns.filter((column) => {
     return !["nameAndId", "defining_citation", "reference", "url", "status"].includes(column.field);
@@ -59,15 +34,17 @@ export const CustomFilterPanel = (props) => {
     if (!isFilterSetPresent) {
       filterModel.items.push(filterSet);
     }
+    setFilterModel({ ...filterModel });
 
-    handleSetFilterAPI({ ...filterModel, items: filterModel.items });
+    // handleSetFilterAPI({ ...filterModel, items: filterModel.items });
   }
 
   const removeFilterSet = (filterSet) => {
     const newFilterModelItems = filterModel.items.filter((item) => {
       return item.id !== filterSet.id;
     });
-    handleSetFilterAPI({ ...filterModel, items: newFilterModelItems });
+    setFilterModel({ ...filterModel, items: newFilterModelItems });
+    // handleSetFilterAPI({ ...filterModel, items: newFilterModelItems });
   }
 
   const setEmptyFilterSet = () => {
@@ -79,38 +56,49 @@ export const CustomFilterPanel = (props) => {
   }
 
   return (
-    <Box>
+    <Box width="100%">
       {
         filterModel && filterModel.items.map((filterSet, index) => (
-          <div key={index}>
+          <Box key={index}>
             <CustomFilterRow
               columns={filterableColumns}
               filterSet={filterSet}
               handleFilterSet={handleFilterSet}
               removeFilterSet={removeFilterSet}
             />
-          </div>
+          </Box>
         ))
       }
-      <Box>
+      <Box display="flex" justifyContent="space-between" width="100%">
         <Button
-          variant="outlined"
+          variant="text"
           onClick={() => {
             setEmptyFilterSet();
           }}
-          sx={{ m: 1, float: "left" }}
+          sx={{ m: 1 }}
         >
-          New Filter
+          Add Filter
+        </Button>
+
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={() => {
+            applyFilters(filterModel);
+          }}
+          sx={{ m: 1 }}
+        >
+          Apply
         </Button>
       </Box>
     </Box>
   )
 }
 
-const CustomFilterRow = (props) => {
-  const { columns, filterSet, handleFilterSet, removeFilterSet } = props;
+const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet } ) => {
+
   const [inputvalue, setInputValue] = useState(filterSet.value);
-  const classes = useStyles();
+
 
   const changeOperator = (operation) => {
     if (shouldEmptyFilterValue(filterSet, operation)) {
@@ -127,35 +115,40 @@ const CustomFilterRow = (props) => {
   ];
   const operators = getFilterOperators();
   return (
-    <Box>
+    <Stack direction="row" display="flex" alignItems="center" m={1} spacing={1}>
       {/* 3 parts of a filter */}
-      <GridCloseIcon
-        onClick={() => removeFilterSet(filterSet)}
-        sx={{ cursor: "pointer" }}
-      />
+      
       {/* columns */}
-      <select
+      <IconButton onClick={() => removeFilterSet(filterSet)}>
+        <GridCloseIcon fontSize="small"/>
+      </IconButton>
+      <Select
         value={filterSet.columnField}
-        onChange={(e) => handleFilterSet({ ...filterSet, columnField: e.target.value })}
+        onChange={(e: SelectChangeEvent) => handleFilterSet({ ...filterSet, columnField: e.target.value })}
+        
+        size="small"
+        sx={{ width: "12em" }}
       >
         {columns.map((column) => (
-          <option key={column.field} value={column.field}>
+          <MenuItem key={column.field} value={column.field}>
             {column.headerName}
-          </option>
+          </MenuItem>
         ))}
-      </select>
+      </Select>
 
       {/* operators */}
-      <select
+      <Select
         value={filterSet.operatorValue}
-        onChange={(e) => changeOperator(e.target.value)}
+        onChange={(e: SelectChangeEvent) => changeOperator(e.target.value)}
+        size="small"
+        sx={{ width: "8em" }}
       >
         {Object.keys(operators).map((op) => (
-          <option key={op} value={op}>
+          <MenuItem key={op} value={op}>
             {operators[op]}
-          </option>
+          </MenuItem>
         ))}
-      </select>
+      </Select>
 
 
       {/* multi-input: conditional */}
@@ -164,7 +157,6 @@ const CustomFilterRow = (props) => {
           <CustomMultiInputWithChip
             filterSet={filterSet}
             handleFilterSet={handleFilterSet}
-            classes={classes}
           />
         )
       }
@@ -172,26 +164,29 @@ const CustomFilterRow = (props) => {
       {/* input: conditional */}
       {
         operatorsWithSingleInput.includes(filterSet.operatorValue) && (
-          <Input
+          <TextField
             value={inputvalue}
+            size="small"
+            variant="outlined"
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 handleFilterSet({ ...filterSet, value: inputvalue });
               }
             }}
-            onBlur={() => handleFilterSet({ ...filterSet, value: inputvalue })}
+            onMouseLeave={() => handleFilterSet({ ...filterSet, value: inputvalue })}
+            sx={{ width: "12em" }}
           />
         )
 
       }
-
-    </Box>
+      
+    </Stack>
   )
 }
 
-const CustomMultiInputWithChip = (props) => {
-  const { filterSet, handleFilterSet, classes } = props;
+const CustomMultiInputWithChip = ({ filterSet, handleFilterSet }) => {
+
   const [values, setValues] = useState(filterSet.value || []);
   const [currValue, setCurrValue] = useState("");
 
@@ -214,14 +209,15 @@ const CustomMultiInputWithChip = (props) => {
     setCurrValue(e.target.value);
   };
   return (
-    <FormControl classes={{ root: classes.formControlRoot }}>
-      <div className={"container"}>
+    <FormControl>
+      <Box className={"container"}>
         {filterSet.value && filterSet.value?.map((item, index) => (
           <Chip key={index} size="small" onDelete={() => handleDelete(item, index)} label={item} />
         ))}
-      </div>
-      <Input
+      </Box>
+      <TextField
         value={currValue}
+        variant="outlined"
         onChange={handleChange}
         onKeyDown={handleKeyUp}
         onBlur={handleKeyUp}
