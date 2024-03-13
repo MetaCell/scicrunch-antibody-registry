@@ -13,10 +13,12 @@ from openapi.models import AddAntibody as AddAntibodyDTO
 from openapi.models import UpdateAntibody as UpdateAntibodyDTO, Status
 from openapi.models import Antibody as AntibodyDTO, PaginatedAntibodies
 from api.utilities.functions import check_if_status_exists_or_curated
+from api.repositories.filters_repository import convert_filters_to_q
+
 antibody_mapper = AntibodyMapper()
 
 
-def search_antibodies_by_catalog(search: str, page: int = 1, size: int = 50,
+def search_antibodies_by_catalog(search: str, page: int = 1, size: int = 10,
                                  status=STATUS.CURATED) -> PaginatedAntibodies:
     p = Paginator(Antibody.objects.select_related("vendor", "source_organism").prefetch_related(
         "species").all().filter(
@@ -25,7 +27,7 @@ def search_antibodies_by_catalog(search: str, page: int = 1, size: int = 50,
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
 
 
-def get_antibodies(page: int = 1, size: int = 50, date_from: datetime = None, date_to: datetime = None, status:str=None) -> PaginatedAntibodies:
+def get_antibodies(page: int = 1, size: int = 10, date_from: datetime = None, date_to: datetime = None, status:str=None) -> PaginatedAntibodies:
     try:
         query = Antibody.objects.filter(status=check_if_status_exists_or_curated(status))
         if date_from:
@@ -41,7 +43,7 @@ def get_antibodies(page: int = 1, size: int = 50, date_from: datetime = None, da
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
 
 
-def get_user_antibodies(userid: str, page: int = 1, size: int = 50) -> PaginatedAntibodies:
+def get_user_antibodies(userid: str, page: int = 1, size: int = 10) -> PaginatedAntibodies:
     p = Paginator(Antibody.objects.filter(
         uid=userid).order_by("-ix"), size)
     items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
@@ -56,9 +58,12 @@ def create_antibody(body: AddAntibodyDTO, userid: str) -> AntibodyDTO:
     return antibody_mapper.to_dto(antibody)
 
 
-def get_antibody(antibody_id: int, status=STATUS.CURATED) -> List[AntibodyDTO]:
+def get_antibody(antibody_id: int, status=STATUS.CURATED, filters=None) -> List[AntibodyDTO]:
     try:
-        return [antibody_mapper.to_dto(a) for a in Antibody.objects.filter(ab_id=antibody_id, status=status)]
+        antibody = Antibody.objects.filter(ab_id=antibody_id, status=status).filter(
+            convert_filters_to_q(filters)
+        )
+        return [antibody_mapper.to_dto(a) for a in antibody]
     except Antibody.DoesNotExist:
         return None
 

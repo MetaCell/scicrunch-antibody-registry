@@ -1,3 +1,4 @@
+import os
 from django.db import connection
 from cloudharness import log
 from api.utilities.functions import catalog_number_chunked
@@ -5,12 +6,17 @@ from api.utilities.functions import catalog_number_chunked
 
 def refresh_search_view():
     import threading
+    sync_execution = os.getenv('TEST', False)
     def refresh_search_view_thread():
         log.info("Refreshing search view")
         with connection.cursor() as cursor:
-            cursor.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY antibody_search;")
-        connection.commit()
-    threading.Thread(target=refresh_search_view_thread).start()
+            cursor.execute(f"REFRESH MATERIALIZED VIEW {'CONCURRENTLY' if not sync_execution else ''} antibody_search;")
+        if not sync_execution:
+            connection.commit()
+    if not sync_execution:
+        threading.Thread(target=refresh_search_view_thread).start()
+    else:
+        refresh_search_view_thread()
 
 
 def rechunk_catalog_number(Antibody_model):
