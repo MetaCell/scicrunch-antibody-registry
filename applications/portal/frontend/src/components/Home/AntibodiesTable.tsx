@@ -56,7 +56,7 @@ const StyledCheckBox = (props) => {
 
 const getRowId = (ab: Antibody) => `${ab.abId}${Math.random()}`;
 
-const CustomToolbar = ({ activeTab, searchedAntibodies }) => {
+const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
   const [activeSelection, setActiveSelection] = useState(true);
   const {
     warningMessage
@@ -81,6 +81,7 @@ const CustomToolbar = ({ activeTab, searchedAntibodies }) => {
       handleExport={handleExport}
       showFilterMenu={showFilterMenu}
       activeTab={activeTab}
+      filterModel={filterModel}
       warningMessage={warningMessage}
       shownResultsNum={searchedAntibodies?.length}
     />
@@ -586,7 +587,8 @@ const AntibodiesTable = (props) => {
   const compProps = {
     toolbar: {
       activeTab: props.activeTab,
-      searchedAntibodies
+      searchedAntibodies,
+      filterModel
     },
     noRowsOverlay: {
       activeSearch: activeSearch,

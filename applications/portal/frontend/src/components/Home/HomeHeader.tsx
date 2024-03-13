@@ -15,6 +15,7 @@ import { useTheme } from "@mui/material/styles";
 import { AddAntibodyIcon, DownloadIcon } from "../icons";
 import TableToolbar from "./TableToolbar";
 import searchContext from "../../context/search/SearchContext";
+import { GridFilterModel } from "@mui/x-data-grid";
 
 interface Props {
   /**
@@ -39,10 +40,11 @@ type HomeHeaderProps = {
   activeTab: string;
   shownResultsNum: number;
   warningMessage?: string;
+  filterModel: GridFilterModel
 };
 
 const HomeHeader = (props: HomeHeaderProps) => {
-  const { activeSelection, handleExport, showFilterMenu, activeTab, warningMessage } = props;
+  const { activeSelection, handleExport, showFilterMenu, activeTab, warningMessage, filterModel } = props;
   const theme = useTheme();
  
   const { activeSearch, totalElements, lastUpdate, error } = useContext(searchContext)
@@ -144,6 +146,7 @@ const HomeHeader = (props: HomeHeaderProps) => {
             <TableToolbar
               showFilterMenu={showFilterMenu}
               activeTab={activeTab}
+              filterModel={filterModel}
             />
             
           </Stack>
