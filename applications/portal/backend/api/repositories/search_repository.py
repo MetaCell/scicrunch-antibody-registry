@@ -142,7 +142,7 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
 def antibodies_with_pure_filtering_without_fts(filters, page, size):
     filtered_antibody = Antibody.objects.filter(
         status=STATUS.CURATED
-    ).filter(convert_filters_to_q(filters))
+    ).filter(convert_filters_to_q(filters)).select_related("vendor").prefetch_related("species")
     filtered_and_sorted_antibody = filtered_antibody.order_by(*order_by_string(filters))
     p = Paginator(filtered_and_sorted_antibody, size)
     items = pageitems_if_page_in_bound(page, p)
@@ -153,7 +153,7 @@ def antibodies_fts_and_filtering_above_limit(subfields_search, page, size, filte
     ids = [a.ix for a in subfields_search.filter(disc_date__isnull=True)]
     filtered_antibodies = Antibody.objects.filter(ix__in=ids, disc_date__isnull=True).filter(
         convert_filters_to_q(filters)
-    ).select_related("vendor")
+    ).select_related("vendor").prefetch_related("species")
 
     filtered_antibodies = sort_by_sortmodel_if_antibodies_count_below_limit(filtered_antibodies, filters)
 
@@ -165,9 +165,10 @@ def antibodies_fts_and_filtering_above_limit(subfields_search, page, size, filte
 def antibodies_fts_and_filtering_below_limit(subfields_search, page, size, filters):
     ids = [a.ix for a in sorted((a for a  in subfields_search),key=sort_fn)]
     id_map = {ids[i]:i for i in range(len(ids))}
-    filtered_antibodies = Antibody.objects.filter(ix__in=ids).select_related('vendor').filter(
-        convert_filters_to_q(filters)
-    )
+    filtered_antibodies = sorted(
+        Antibody.objects.filter(ix__in=ids).select_related('vendor').prefetch_related('species'), 
+        key=lambda x:id_map[x.ix]
+    ).filter(convert_filters_to_q(filters))
 
     filtered_antibodies = sort_by_sortmodel_if_antibodies_count_below_limit(filtered_antibodies, filters)
 
