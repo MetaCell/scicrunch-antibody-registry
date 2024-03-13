@@ -125,7 +125,11 @@ class AntibodiesTestCase(TestCase):
         assert ab_by_accession.abId == ab.abId
         assert ab_by_accession.accession == ab.accession
         assert ab_by_accession.vendorName == ab.vendorName
+        return ab
 
+
+    def test_fts(self):
+        ab = self.test_create()
         # Search by catalog number
         self.assertEquals(len(fts_antibodies(search="N176A").items), 2)
         assert len(fts_antibodies(search="N176A 35").items) == 1
@@ -146,14 +150,6 @@ class AntibodiesTestCase(TestCase):
         assert len(fts_antibodies(search="635P-L").items) == 1
         assert len(fts_antibodies(search="N0304-AB635P-X").items) == 0
 
-        # Search in plain fields
-
-        # FIXME full-text search is not working in the tests as cannot account for materialized view update
-
-        # refresh_search_view()
-        # import time
-        # time.sleep(60) # give time to the materialized view to be updated
-
         # # Search in name
         assert len(fts_antibodies(search="FastImmune").items) == 1
         assert len(fts_antibodies(search="fastImmune").items) == 1, "Search must be case insensitive"
@@ -173,6 +169,8 @@ class AntibodiesTestCase(TestCase):
         assert len(fts_antibodies(search="rabbit").items) == 1, "Search in source organism"
         assert len(fts_antibodies(search="Rabbit").items) == 1, "case insensitive search"
         assert len(fts_antibodies(search="Andrew Dingwall").items) == 1
+
+        
 
     def test_update(self):
         user_id = "aaaa"
