@@ -75,7 +75,7 @@ def fts_by_catalog_number(search: str, page, size, filters=None):
                 *order_by_string(filters)
             ).order_by('-ranking'), size)
         items = pageitems_if_page_in_bound(page, p)
-        return items, catalog_num_match_filtered.count()
+        return items, count
     return None
 
 

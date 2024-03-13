@@ -1,57 +1,60 @@
-
 from django.db.models import Q
 from openapi.models import Sortorder
 from fastapi import HTTPException
-from portal.constants import FILTERABLE_FIELDS
-from openapi.models import Operation, SearchCriteriaOptions
+from portal.constants import FILTERABLE_FIELDS, FOREIGN_OR_M2M_FIELDS
+from openapi.models import Operation, SearchCriteriaOptions, FilterRequest
 from api.services.user_service import get_current_user_id
 
 FILTER_TYPES = {filter_type.value for filter_type in SearchCriteriaOptions}
 
 def check_filters_are_valid(filters):
-	for filter_type, filter_values in dict(filters).items():
-		if filter_type not in FILTER_TYPES:
-			return False
+    if not isinstance(filters, FilterRequest):
+        return False
+    for filter_type, filter_values in dict(filters).items():
+        if filter_type not in FILTER_TYPES:
+            return False
+        if filter_values is None:
+            return False
 
-		if filter_type == SearchCriteriaOptions.page.value or filter_type == SearchCriteriaOptions.size.value:
-			if not isinstance(filter_values, int):
-				return False
-		elif filter_type == SearchCriteriaOptions.search.value:
-			if not isinstance(filter_values, str):
-				return False
-		elif filter_type == SearchCriteriaOptions.isUserScope.value:
-			if not isinstance(filter_values, bool):
-				return False
-		elif filter_type == SearchCriteriaOptions.operation.value:
-			if filter_values not in [Operation.and_, Operation.or_]:
-				return False
-		elif filter_type == SearchCriteriaOptions.isEmpty.value or filter_type == SearchCriteriaOptions.isNotEmpty.value:
-			if not isinstance(filter_values, list):
-				return False
-			
-			for filter_value in filter_values:
-				if filter_value not in FILTERABLE_FIELDS:
-					return False
-		else:
-			if not isinstance(filter_values, list):
-				return False
-			
-			for filter_value in filter_values:
-				if filter_value.key not in FILTERABLE_FIELDS:
-					return False
+        if filter_type == SearchCriteriaOptions.page.value or filter_type == SearchCriteriaOptions.size.value:
+            if not isinstance(filter_values, int):
+                return False
+        elif filter_type == SearchCriteriaOptions.search.value:
+            if not isinstance(filter_values, str):
+                return False
+        elif filter_type == SearchCriteriaOptions.isUserScope.value:
+            if not isinstance(filter_values, bool):
+                return False
+        elif filter_type == SearchCriteriaOptions.operation.value:
+            if filter_values not in [Operation.and_, Operation.or_]:
+                return False
+        elif filter_type == SearchCriteriaOptions.isEmpty.value or filter_type == SearchCriteriaOptions.isNotEmpty.value:
+            if not isinstance(filter_values, list):
+                return False
 
-	return True
+            for filter_value in filter_values:
+                if filter_value not in FILTERABLE_FIELDS:
+                    return False
+        else:
+            if not isinstance(filter_values, list):
+                return False
+
+            for filter_value in filter_values:
+                if filter_value.key not in FILTERABLE_FIELDS:
+                    return False
+
+    return True
 
 def lookup_spanning_relationships_string(fieldname):
-	"""
+    """
 		Search allows:
 		Foreign key fields - vendors
 		ManyToMany fields - applications, species
 	"""
-	if fieldname in ["vendor", "application", "species"]:
-		return f"{fieldname}__name"
-	else:
-		return fieldname
+    if fieldname in FOREIGN_OR_M2M_FIELDS:
+        return f"{fieldname}__name"
+    else:
+        return fieldname
 
 def convert_filters_to_q(filters):
 	query = {}

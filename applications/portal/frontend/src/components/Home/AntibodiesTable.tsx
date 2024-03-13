@@ -119,14 +119,23 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
 
 const RenderCellContent = (props: GridRenderCellParams<String>) => {
   const cellMapper = {
-    ab_target: (row) => `${row.abTarget} ${row.targetSpecies.join(", ")}`,
+    ab_target: (row) => row.abTarget && row.targetSpecies ? `${row.abTarget} ${row.targetSpecies.join(", ")}` : row.abTarget,
     ab_name: (row) => row.abName,
     ab_id: (row) => row.abId,
     species: (row) => `${row.targetSpecies.join(", ")}`,
     clone_id: (row) => row.cloneId,
     source_organism: (row) => row.sourceOrganism,
     catalog_num: (row) => row.catalogNum,
+    accession: (row) => row.accession,
+    reference: (row) => row.reference,
   };
+  const mapField = () => {
+    if (cellMapper[props.field]) {
+      return cellMapper[props.field](props.row)
+    }
+    return props.value ?? '';
+  }
+
   return (
     <Typography
       variant="caption"
@@ -135,7 +144,7 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
       component="div"
       className="col-content"
     >
-      {cellMapper[props.field](props.row)}
+      {mapField()}
     </Typography>
   );
 };
@@ -289,9 +298,6 @@ interface ValueProps {
   field: string;
 }
 
-const getValueOrEmpty = (props: ValueProps) => {
-  return props.row[props.field] ?? "";
-};
 
 const getList = (props: ValueProps) => {
   return props.row[props.field]?.join(", ") ?? "";
@@ -480,6 +486,7 @@ const AntibodiesTable = (props) => {
       headerName: "Target species",
       valueGetter: getList,
       hide: true,
+      sortable: false,
       renderCell: RenderCellContent,
     },
     {
@@ -487,6 +494,7 @@ const AntibodiesTable = (props) => {
       field: "applications",
       headerName: "Applications",
       valueGetter: getList,
+      sortable: false,
       hide: true,
     },
     {
@@ -494,7 +502,7 @@ const AntibodiesTable = (props) => {
       field: "ab_target",
       headerName: "Target antigen",
       flex: 1.5,
-      valueGetter: getValueOrEmpty,
+      valueGetter: RenderCellContent,
     },
     {
       ...columnsDefaultProps,
