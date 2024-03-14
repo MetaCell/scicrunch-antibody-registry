@@ -30,7 +30,7 @@ import {
   CopyIcon,
 } from "../icons";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import HomeHeader from "./HomeHeader";
+import TableHeader from "./HomeHeader";
 import { Antibody } from "../../rest";
 import { checkIfFilterSetExists, getProperCitation, getRandomId } from "../../utils/antibody";
 import { UserContext } from "../../services/UserService";
@@ -76,7 +76,7 @@ const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
   }, [selectedRows]);
 
   return (
-    <><HomeHeader
+    <><TableHeader
       activeSelection={activeSelection}
       handleExport={handleExport}
       showFilterMenu={showFilterMenu}

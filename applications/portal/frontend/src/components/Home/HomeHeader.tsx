@@ -33,7 +33,7 @@ const HideOnScroll = (props: Props) => {
   return <Box display={trigger ? "none" : "block"}>{children}</Box>;
 };
 
-type HomeHeaderProps = {
+type TableHeaderProps = {
   activeSelection: boolean;
   handleExport: (data: any) => void;
   showFilterMenu: () => void;
@@ -43,7 +43,7 @@ type HomeHeaderProps = {
   filterModel: GridFilterModel
 };
 
-const HomeHeader = (props: HomeHeaderProps) => {
+const TableHeader = (props: TableHeaderProps) => {
   const { activeSelection, handleExport, showFilterMenu, activeTab, warningMessage, filterModel } = props;
   const theme = useTheme();
  
@@ -157,4 +157,4 @@ const HomeHeader = (props: HomeHeaderProps) => {
   );
 };
 
-export default HomeHeader;
+export default TableHeader;

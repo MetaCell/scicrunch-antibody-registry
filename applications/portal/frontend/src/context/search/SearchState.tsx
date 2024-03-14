@@ -34,7 +34,7 @@ const SearchState = (props) => {
   const [warningMessage, setWarningMessage] = useState('')
 
   const [searchState, setSearch] = useState<SearchResult>({
-    loader: true,
+    loader: false,
     activeSearch: '',
     antibodyRequestType: SEARCH_MODES.ALL_ANTIBODIES,
     currentPage: 1,
