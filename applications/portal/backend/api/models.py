@@ -616,7 +616,7 @@ class AntibodyApplications(models.Model):
 
 
 class AntibodySearch(models.Model):
-    ix = models.BigIntegerField(primary_key=True)
+    ix = models.OneToOneField(Antibody, on_delete=models.DO_NOTHING, db_column='ix', primary_key=True)
     search_vector = SearchVectorField(null=True)
     defining_citation = models.CharField(
         null=True, max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN)

@@ -1,5 +1,5 @@
 from django.test import TestCase
-from api.repositories.filters_repository import (
+from api.repositories.filtering_utils import (
     check_filters_are_valid,
     convert_filters_to_q,
 )

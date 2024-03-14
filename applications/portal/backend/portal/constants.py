@@ -100,7 +100,7 @@ EMAIL_INDEX = USERS_RELEVANT_HEADER.index('email')
 DEFAULT_UID = '43'
 
 # Search limit for Antibodies for returning without ranking
-LIMIT_NUM_RESULTS = 250
+LIMIT_NUM_RESULTS = 10000
 
 FILTERABLE_FIELDS = [
     'ab_id', 'ab_name', 'accession', 

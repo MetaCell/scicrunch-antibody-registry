@@ -13,7 +13,7 @@ from openapi.models import AddAntibody as AddAntibodyDTO
 from openapi.models import UpdateAntibody as UpdateAntibodyDTO, Status
 from openapi.models import Antibody as AntibodyDTO, PaginatedAntibodies
 from api.utilities.functions import check_if_status_exists_or_curated
-from api.repositories.filters_repository import convert_filters_to_q
+from api.repositories.filtering_utils import convert_filters_to_q
 
 antibody_mapper = AntibodyMapper()
 
