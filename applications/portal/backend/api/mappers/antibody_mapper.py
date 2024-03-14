@@ -80,7 +80,6 @@ class AntibodyMapper(IDAOMapper):
 
         return ab
 
-
     def to_dto(self, dao: Antibody) -> AntibodyDTO:
         dao_dict = dao.__dict__
 
@@ -116,6 +115,8 @@ class AntibodyMapper(IDAOMapper):
             ab = AntibodyDTO(abId=dao.ab_id, abName=dao.ab_name)
         if dao.ab_target:
             ab.abTarget = dao.ab_target
+        if dao.applications:
+            ab.applications = [a.name for a in dao.applications.all()]
         if dao.entrez_id:
             ab.abTargetEntrezId = dao.entrez_id
         if dao.uniprot_id:
