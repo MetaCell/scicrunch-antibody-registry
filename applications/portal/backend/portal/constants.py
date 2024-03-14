@@ -109,9 +109,7 @@ FILTERABLE_FIELDS = [
     'vendor', 'source_organism', 'catalog_num'
 ]
 
-FOREIGN_OR_M2M_FIELDS = [
-    "vendor", "application", "species"
-]
+FOREIGN_OR_M2M_FIELDS = ["vendor", "applications", "species", "source_organism"]
 
 FOR_NEW_KEY = 'for_new'
 FOR_EXTANT_KEY = 'for_extant'
