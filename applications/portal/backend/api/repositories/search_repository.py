@@ -100,9 +100,8 @@ def fts_and_filter_antibodies(page: int = 0, size: int = 10, search: str = '', f
         cat_search = fts_by_catalog_number(search, page, size, filters)
         if cat_search:
             return cat_search
-    
+
     return fts_and_filter_search(page, size, search, filters)
-    
 
 
 def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filters=None):
@@ -115,7 +114,7 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
 
     if not search:
         return antibodies_with_pure_filtering_without_fts(filters, page, size)
-        
+
     search_query = SearchQuery(search)
     # According to https://github.com/MetaCell/scicrunch-antibody-registry/issues/52
     # If the catalog number is not matched, then return records if the query matches any visible or invisible field.
@@ -130,13 +129,11 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
     subfields_search_count = subfields_search.count()
     if subfields_search_count == 0:
         return [], 0
-    
+
     if subfields_search_count > settings.LIMIT_NUM_RESULTS:
         return antibodies_fts_and_filtering_above_limit(subfields_search, page, size, filters)
 
     return antibodies_fts_and_filtering_below_limit(subfields_search, page, size, filters)
-    
-
 
 
 def antibodies_with_pure_filtering_without_fts(filters, page, size):
@@ -165,10 +162,12 @@ def antibodies_fts_and_filtering_above_limit(subfields_search, page, size, filte
 def antibodies_fts_and_filtering_below_limit(subfields_search, page, size, filters):
     ids = [a.ix for a in sorted((a for a  in subfields_search),key=sort_fn)]
     id_map = {ids[i]:i for i in range(len(ids))}
-    filtered_antibodies = sorted(
-        Antibody.objects.filter(ix__in=ids).select_related('vendor').prefetch_related('species'), 
-        key=lambda x:id_map[x.ix]
-    ).filter(convert_filters_to_q(filters))
+    filtered_antibodies = (
+        Antibody.objects.filter(ix__in=ids)
+        .select_related("vendor")
+        .prefetch_related("species")
+        .filter(convert_filters_to_q(filters))
+    )
 
     filtered_antibodies = sort_by_sortmodel_if_antibodies_count_below_limit(filtered_antibodies, filters)
 
