@@ -15,6 +15,7 @@ import { useTheme } from "@mui/material/styles";
 import { AddAntibodyIcon, DownloadIcon } from "../icons";
 import TableToolbar from "./TableToolbar";
 import searchContext from "../../context/search/SearchContext";
+import { GridFilterModel } from "@mui/x-data-grid";
 
 interface Props {
   /**
@@ -32,11 +33,22 @@ const HideOnScroll = (props: Props) => {
   return <Box display={trigger ? "none" : "block"}>{children}</Box>;
 };
 
-const HomeHeader = ({ activeSelection, handleExport, showFilterMenu, activeTab, shownResultsNum }) => {
+type HomeHeaderProps = {
+  activeSelection: boolean;
+  handleExport: (data: any) => void;
+  showFilterMenu: () => void;
+  activeTab: string;
+  shownResultsNum: number;
+  warningMessage?: string;
+  filterModel: GridFilterModel
+};
+
+const HomeHeader = (props: HomeHeaderProps) => {
+  const { activeSelection, handleExport, showFilterMenu, activeTab, warningMessage, filterModel } = props;
   const theme = useTheme();
  
-  const { activeSearch, totalElements, lastUpdate } = useContext(searchContext)
-  const showAlert = shownResultsNum < totalElements && activeSearch;
+  const { activeSearch, totalElements, lastUpdate, error } = useContext(searchContext)
+  const showAlert = warningMessage.length > 0;
   return (
     <Box className="container-home-header">
       <AppBar elevation={0} sx={{ top: "4.5rem" }}>
@@ -121,10 +133,20 @@ const HomeHeader = ({ activeSelection, handleExport, showFilterMenu, activeTab, 
                 </Box>
               </Box>
             </HideOnScroll>
-
+            {warningMessage && (
+              <Alert className="limit-alert" severity="warning" sx={{ mt: 1, mb: 1 }}>
+                {warningMessage}
+              </Alert>)
+            }
+            {error && (
+              <Alert className="error-alert" severity="error" sx={{ mt: 1, mb: 1 }}>
+                An error occurred while fetching data. Please try again later. If the problem persists, please contact us.
+              </Alert>)
+            }
             <TableToolbar
               showFilterMenu={showFilterMenu}
               activeTab={activeTab}
+              filterModel={filterModel}
             />
             
           </Stack>

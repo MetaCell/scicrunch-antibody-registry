@@ -51,7 +51,7 @@ class AntibodyResource(ModelResource):
     )
     catalog_num = Field(attribute='catalog_num', column_name='catalog_num')
     url = Field(attribute='url', column_name='url')
-    link = Field(column_name='link')
+    link = Field(column_name="link", attribute="show_link")
     target = Field(
         column_name='ab_target',
         attribute='ab_target'
@@ -123,7 +123,6 @@ class AntibodyResource(ModelResource):
         self.request = request
 
         self.instances = []
-
 
     class Meta:
         model = Antibody
@@ -280,8 +279,7 @@ class AntibodyResource(ModelResource):
 
         if row.get('link', None):
             row['link'] = 'y' in row['link'].lower()
-        else:
-            row['link'] = True
+
         if row.get('clonality', None):
             clonality = row['clonality'].lower()
 
@@ -309,3 +307,9 @@ class AntibodyResource(ModelResource):
                     data[field.column_name] = None
             # Otherwise we save the field
             field.save(obj, data, is_m2m, **kwargs)
+
+    # Change the link (boolean) to yes or no for the export
+    def dehydrate_link(self, obj):
+        if obj.show_link is None:
+            return ""
+        return "yes" if obj.show_link else "no"

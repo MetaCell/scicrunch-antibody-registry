@@ -1,13 +1,13 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
-import { Box, Button, Stack, Tab, Tabs } from "@mui/material";
+import { Badge, Box, Button, Stack, Tab, Tabs } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { GridToolbarColumnsButton } from "@mui/x-data-grid";
 import { HouseIcon, SendIcon, FilteringIcon } from "../icons";
 import { UserContext } from "../../services/UserService";
 import { ALLRESULTS } from "../../constants/constants";
 
-const TableToolbar = ({ showFilterMenu, activeTab }) => {
+const TableToolbar = ({ showFilterMenu, activeTab, filterModel }) => {
   const user = React.useContext(UserContext)[0];
   const theme = useTheme();
   const history = useHistory();
@@ -70,9 +70,10 @@ const TableToolbar = ({ showFilterMenu, activeTab }) => {
       </Tabs>
       <Box display="flex" flexDirection="row">
         <Stack direction="row" spacing={3}>
+          
           <Button
             variant="text"
-            startIcon={<FilteringIcon />}
+            startIcon={<Badge variant="dot" badgeContent={filterModel?.items?.length} color="primary"><FilteringIcon fontSize="small" /></Badge>}
             sx={{
               color: "grey.500",
               fontWeight: 600,
@@ -81,9 +82,12 @@ const TableToolbar = ({ showFilterMenu, activeTab }) => {
             }}
             onClick={showFilterMenu}
           >
-            Filter
+              Filter
           </Button>
+          
+          
           <GridToolbarColumnsButton size="medium" color="info" />
+          
         </Stack>
       </Box>
     </Box>

@@ -112,59 +112,6 @@ paths:
             operationId: createAntibody
             summary: Create a Antibody
             description: Creates a new instance of a `Antibody`.
-    /antibodies/search:
-        summary: Path used to search on antibodies.
-        description: >-
-            The REST endpoint/path used to search and filter on `Antibody` entities.  This path contains a
-            `GET` and `POST` operation to perform the search and filter tasks, respectively.
-        get:
-            tags:
-                - search
-            parameters:
-                -
-                    name: page
-                    description: 'Represents the page requested, considering the size parameter'
-                    schema:
-                        type: integer
-                    in: query
-                -
-                    name: size
-                    description: Corresponds to the cardinality of antibodies requested
-                    schema:
-                        type: integer
-                    in: query
-                -
-                    name: search
-                    description: The string to use for full text search on Antibodies
-                    schema:
-                        type: string
-                    in: query
-            responses:
-                '200':
-                    $ref: '#/components/responses/PaginatedAntibodies'
-            operationId: ftsAntibodies
-            summary: Full text search on Antibodies
-            description: Gets a list of `Antibody` entities related with the search query
-        post:
-            requestBody:
-                description: A new `FilterRequest` to be used on the antibodies search.
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/FilterRequest'
-                required: true
-            tags:
-                - search
-            responses:
-                '200':
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/PaginatedAntibodies'
-                    description: Successful response - returns an array of `Antibody` entities.
-            operationId: filterAntibodies
-            summary: Search on Antibodies with custom filters
-            description: Gets a list of `Antibody` entities related with the body parameters
     /ready:
         summary: Path used to test readiness of the application.
         description: The REST endpoint/path used to test the readiness of the application.
@@ -389,60 +336,61 @@ paths:
                     content:
                         text/csv: {}
                     description: All antibodies in csv format
+    /antibodies/search:
+        summary: Path used to search on antibodies.
+        description: >-
+            The REST endpoint/path used to search and filter on `Antibody` entities.  This path contains a
+            `GET` and `POST` operation to perform the search and filter tasks, respectively.
+        get:
+            tags:
+                - search
+            parameters:
+                -
+                    name: page
+                    description: 'Represents the page requested, considering the size parameter'
+                    schema:
+                        type: integer
+                    in: query
+                -
+                    name: size
+                    description: Corresponds to the cardinality of antibodies requested
+                    schema:
+                        type: integer
+                    in: query
+                -
+                    name: search
+                    description: The string to use for full text search on Antibodies
+                    schema:
+                        type: string
+                    in: query
+            responses:
+                '200':
+                    $ref: '#/components/responses/PaginatedAntibodies'
+            operationId: ftsAntibodies
+            summary: Full text search on Antibodies
+            description: Gets a list of `Antibody` entities related with the search query
+        post:
+            requestBody:
+                description: A new `FilterRequest` to be used on the antibodies search.
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/FilterRequest'
+                required: true
+            tags:
+                - search
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PaginatedAntibodies'
+                    description: Successful response - returns an array of `Antibody` entities.
+            operationId: filterAntibodies
+            summary: Search on Antibodies with custom filters
+            description: Gets a list of `Antibody` entities related with the body parameters
 components:
     schemas:
-        FilterRequest:
-            description: The search request body that allows filtering combinations over multiple columns
-            type: object
-            properties:
-                contains:
-                    description: >-
-                        Array of key-value pairs, where key represents the column and value the string that
-                        should be contained
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/KeyValuePair'
-                equals:
-                    description: >-
-                        Array of key-value pairs, where key represents the column and value the string that
-                        should be equalled to
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/KeyValuePair'
-                page:
-                    description: 'Represents the page requested, considering the size parameter'
-                    type: integer
-                size:
-                    description: Corresponds to the cardinality of antibodies requested
-                    type: integer
-                search:
-                    description: The string to use to search for Antibodies
-                    type: string
-                endsWith:
-                    description: >-
-                        Array of key-value pairs, where key represents the column and value the string that
-                        should be ending with
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/KeyValuePair'
-                sortOn:
-                    description: >-
-                        Array of key-value pairs, where key represents the column and value the string
-                        ascending or descending
-
-
-                        Order in the array, matches with the order of sorting filters, index 0 will be used to
-                        sort first
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/KeyValuePair'
-                startsWith:
-                    description: >-
-                        Array of key-value pairs, where key represents the column and value the string that
-                        should be starting with
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/KeyValuePair'
         KeyValuePair:
             description: Utility type to represent a key-value object
             required:
@@ -741,6 +689,133 @@ components:
                     description: Whether to add directly to the current data without reset
                     type: boolean
                     example: 'false'
+        FilterRequest:
+            description: The search request body that allows filtering combinations over multiple columns
+            type: object
+            properties:
+                contains:
+                    description: >-
+                        Array of key-value pairs, where key represents the column and value the string that
+                        should be contained
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/KeyValuePair'
+                equals:
+                    description: >-
+                        Array of key-value pairs, where key represents the column and value the string that
+                        should be equalled to
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/KeyValuePair'
+                page:
+                    description: 'Represents the page requested, considering the size parameter'
+                    type: integer
+                size:
+                    description: Corresponds to the cardinality of antibodies requested
+                    type: integer
+                search:
+                    description: The string to use to search for Antibodies
+                    type: string
+                endsWith:
+                    description: >-
+                        Array of key-value pairs, where key represents the column and value the string that
+                        should be ending with
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/KeyValuePair'
+                sortOn:
+                    description: >-
+                        Array of key-value pairs, where key represents the column and value the string
+                        ascending or descending
+
+
+                        Order in the array, matches with the order of sorting filters, index 0 will be used to
+                        sort first
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/KeyValueSortOrderPair'
+                startsWith:
+                    description: >-
+                        Array of key-value pairs, where key represents the column and value the string that
+                        should be starting with
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/KeyValuePair'
+                isEmpty:
+                    description: 'Array of strings, where string represents the column which should be empty.'
+                    type: array
+                    items:
+                        type: string
+                isNotEmpty:
+                    description: 'Array of strings, where string represents the column which should not be empty.'
+                    type: array
+                    items:
+                        type: string
+                isAnyOf:
+                    description: 'Array of strings, where string represents the column which should not be empty.'
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/KeyValueArrayPair'
+                operation:
+                    description: Which operation to perform in the Backend - AND or OR.
+                    enum:
+                        - and
+                        - or
+                    type: string
+                isUserScope:
+                    description: Whether to get users antibodies or not.
+                    type: boolean
+        KeyValueArrayPair:
+            description: >-
+                Utility type to represent a key-value object, where value is an array. This is helpful when
+                the filter is - isAnyOf, where filter column needs to be matched with multiple strings.
+            required:
+                - key
+                - value
+            type: object
+            properties:
+                key:
+                    description: String representation of the key
+                    type: string
+                value:
+                    description: String representation of the value
+                    type: array
+                    items:
+                        type: string
+        KeyValueSortOrderPair:
+            description: >-
+                Utility type to represent a key-value object, where value is enum - "asc" or "desc" to
+                describe if the sorting order is ascending or descending. 
+            required:
+                - key
+                - value
+            type: object
+            properties:
+                key:
+                    description: String representation of the key
+                    type: string
+                sortorder:
+                    description: String representation of the value
+                    enum:
+                        - asc
+                        - desc
+                    type: string
+        SearchCriteriaOptions:
+            enum:
+                - contains
+                - equals
+                - endsWith
+                - startsWith
+                - sortOn
+                - isEmpty
+                - isNotEmpty
+                - isAnyOf
+                - operation
+                - isUserScope
+                - page
+                - size
+                - search
+            type: string
     responses:
         PaginatedAntibodies:
             content:

@@ -802,17 +802,55 @@ export interface FilterRequest {
     'endsWith'?: Array<KeyValuePair>;
     /**
      * Array of key-value pairs, where key represents the column and value the string ascending or descending  Order in the array, matches with the order of sorting filters, index 0 will be used to sort first
-     * @type {Array<KeyValuePair>}
+     * @type {Array<KeyValueSortOrderPair>}
      * @memberof FilterRequest
      */
-    'sortOn'?: Array<KeyValuePair>;
+    'sortOn'?: Array<KeyValueSortOrderPair>;
     /**
      * Array of key-value pairs, where key represents the column and value the string that should be starting with
      * @type {Array<KeyValuePair>}
      * @memberof FilterRequest
      */
     'startsWith'?: Array<KeyValuePair>;
+    /**
+     * Array of strings, where string represents the column which should be empty.
+     * @type {Array<string>}
+     * @memberof FilterRequest
+     */
+    'isEmpty'?: Array<string>;
+    /**
+     * Array of strings, where string represents the column which should not be empty.
+     * @type {Array<string>}
+     * @memberof FilterRequest
+     */
+    'isNotEmpty'?: Array<string>;
+    /**
+     * Array of strings, where string represents the column which should not be empty.
+     * @type {Array<KeyValueArrayPair>}
+     * @memberof FilterRequest
+     */
+    'isAnyOf'?: Array<KeyValueArrayPair>;
+    /**
+     * Which operation to perform in the Backend - AND or OR.
+     * @type {string}
+     * @memberof FilterRequest
+     */
+    'operation'?: FilterRequestOperationEnum;
+    /**
+     * Whether to get users antibodies or not.
+     * @type {boolean}
+     * @memberof FilterRequest
+     */
+    'isUserScope'?: boolean;
 }
+
+export const FilterRequestOperationEnum = {
+    And: 'and',
+    Or: 'or'
+} as const;
+
+export type FilterRequestOperationEnum = typeof FilterRequestOperationEnum[keyof typeof FilterRequestOperationEnum];
+
 /**
  * 
  * @export
@@ -833,6 +871,25 @@ export interface IngestRequest {
     'hot'?: boolean;
 }
 /**
+ * Utility type to represent a key-value object, where value is an array. This is helpful when the filter is - isAnyOf, where filter column needs to be matched with multiple strings.
+ * @export
+ * @interface KeyValueArrayPair
+ */
+export interface KeyValueArrayPair {
+    /**
+     * String representation of the key
+     * @type {string}
+     * @memberof KeyValueArrayPair
+     */
+    'key': string;
+    /**
+     * String representation of the value
+     * @type {Array<string>}
+     * @memberof KeyValueArrayPair
+     */
+    'value': Array<string>;
+}
+/**
  * Utility type to represent a key-value object
  * @export
  * @interface KeyValuePair
@@ -851,6 +908,33 @@ export interface KeyValuePair {
      */
     'value': string;
 }
+/**
+ * Utility type to represent a key-value object, where value is enum - \"asc\" or \"desc\" to describe if the sorting order is ascending or descending. 
+ * @export
+ * @interface KeyValueSortOrderPair
+ */
+export interface KeyValueSortOrderPair {
+    /**
+     * String representation of the key
+     * @type {string}
+     * @memberof KeyValueSortOrderPair
+     */
+    'key': string;
+    /**
+     * String representation of the value
+     * @type {string}
+     * @memberof KeyValueSortOrderPair
+     */
+    'sortorder'?: KeyValueSortOrderPairSortorderEnum;
+}
+
+export const KeyValueSortOrderPairSortorderEnum = {
+    Asc: 'asc',
+    Desc: 'desc'
+} as const;
+
+export type KeyValueSortOrderPairSortorderEnum = typeof KeyValueSortOrderPairSortorderEnum[keyof typeof KeyValueSortOrderPairSortorderEnum];
+
 /**
  * 
  * @export
@@ -876,6 +960,31 @@ export interface PaginatedAntibodies {
      */
     'items': Array<Antibody>;
 }
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const SearchCriteriaOptions = {
+    Contains: 'contains',
+    Equals: 'equals',
+    EndsWith: 'endsWith',
+    StartsWith: 'startsWith',
+    SortOn: 'sortOn',
+    IsEmpty: 'isEmpty',
+    IsNotEmpty: 'isNotEmpty',
+    IsAnyOf: 'isAnyOf',
+    Operation: 'operation',
+    IsUserScope: 'isUserScope',
+    Page: 'page',
+    Size: 'size',
+    Search: 'search'
+} as const;
+
+export type SearchCriteriaOptions = typeof SearchCriteriaOptions[keyof typeof SearchCriteriaOptions];
+
+
 /**
  * The data type associated with the POST and PUT methods of the antibody resource
  * @export
