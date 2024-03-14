@@ -26,7 +26,6 @@ class AntibodiesTestCase(TestCase):
         if token:
             set_authentication_token(token)
             user = get_current_user_id()
-            
 
     def test_create(self):
         ab = create_antibody(AddAntibodyDTO(**example_ab), "aaaa")
@@ -86,8 +85,6 @@ class AntibodiesTestCase(TestCase):
         assert count() == 1
         print(last_update())
 
-        search = search_antibodies_by_catalog("N176A/35").items
-        assert len(search) == 1
         a: Antibody = Antibody.objects.get(ab_id=ab2.abId)
         a.status = STATUS.CURATED
         a.save()
@@ -126,7 +123,6 @@ class AntibodiesTestCase(TestCase):
         assert ab_by_accession.accession == ab.accession
         assert ab_by_accession.vendorName == ab.vendorName
         return ab
-
 
     def test_fts(self):
         ab = self.test_create()
@@ -169,8 +165,6 @@ class AntibodiesTestCase(TestCase):
         assert len(fts_antibodies(search="rabbit").items) == 1, "Search in source organism"
         assert len(fts_antibodies(search="Rabbit").items) == 1, "case insensitive search"
         assert len(fts_antibodies(search="Andrew Dingwall").items) == 1
-
-        
 
     def test_update(self):
         user_id = "aaaa"

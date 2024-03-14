@@ -18,15 +18,6 @@ from api.repositories.filters_repository import convert_filters_to_q
 antibody_mapper = AntibodyMapper()
 
 
-def search_antibodies_by_catalog(search: str, page: int = 1, size: int = 10,
-                                 status=STATUS.CURATED) -> PaginatedAntibodies:
-    p = Paginator(Antibody.objects.select_related("vendor", "source_organism").prefetch_related(
-        "species").all().filter(
-        status=status, catalog_num__iregex=".*" + re.sub('[^0-9a-zA-Z]+', '.*', search) + ".*").order_by("-ix"), size)
-    items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
-    return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
-
-
 def get_antibodies(page: int = 1, size: int = 10, date_from: datetime = None, date_to: datetime = None, status:str=None) -> PaginatedAntibodies:
     try:
         query = Antibody.objects.filter(status=check_if_status_exists_or_curated(status))
