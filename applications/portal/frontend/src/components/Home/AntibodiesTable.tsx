@@ -118,17 +118,15 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
   );
 };
 
+
+const getValueOrEmpty = (props: ValueProps) => {
+  return props.row[props.field] ?? "";
+};
+
 const RenderCellContent = (props: GridRenderCellParams<String>) => {
   const cellMapper = {
-    ab_target: (row) => row.abTarget && row.targetSpecies ? `${row.abTarget} ${row.targetSpecies.join(", ")}` : row.abTarget,
-    ab_name: (row) => row.abName,
-    ab_id: (row) => row.abId,
+    abTarget: (row) => (row.abTarget && row.targetSpecies) ? `${row.abTarget} ${row.targetSpecies.join(", ")}` : row.abTarget,
     species: (row) => `${row.targetSpecies.join(", ")}`,
-    clone_id: (row) => row.cloneId,
-    source_organism: (row) => row.sourceOrganism,
-    catalog_num: (row) => row.catalogNum,
-    accession: (row) => row.accession,
-    reference: (row) => row.reference,
   };
   const mapField = () => {
     if (cellMapper[props.field]) {
@@ -446,14 +444,14 @@ const AntibodiesTable = (props) => {
   const columns: GridColDef[] = [
     {
       ...columnsDefaultProps,
-      field: "ab_name",
+      field: "abName",
       headerName: "Name",
       hide: true,
       renderCell: RenderCellContent,
     },
     {
       ...columnsDefaultProps,
-      field: "ab_id",
+      field: "abId",
       headerName: "ID",
       hide: true,
       renderCell: RenderCellContent,
@@ -500,14 +498,14 @@ const AntibodiesTable = (props) => {
     },
     {
       ...columnsDefaultProps,
-      field: "ab_target",
+      field: "abTarget",
       headerName: "Target antigen",
       flex: 1.5,
-      valueGetter: RenderCellContent,
+      valueGetter: getValueOrEmpty,
     },
     {
       ...columnsDefaultProps,
-      field: "defining_citation",
+      field: "properCitation",
       headerName: "Proper citation",
       flex: 2,
       valueGetter: getValueForCitation,
@@ -540,14 +538,14 @@ const AntibodiesTable = (props) => {
     },
     {
       ...columnsDefaultProps,
-      field: "clone_id",
+      field: "cloneId",
       headerName: "Clone ID",
       hide: true,
       renderCell: RenderCellContent,
     },
     {
       ...columnsDefaultProps,
-      field: "source_organism",
+      field: "sourceOrganism",
       headerName: "Host organism",
       flex: 1.5,
       renderCell: RenderCellContent,
@@ -562,7 +560,7 @@ const AntibodiesTable = (props) => {
     },
     {
       ...columnsDefaultProps,
-      field: "catalog_num",
+      field: "catalogNum",
       headerName: "Cat Num",
       renderCell: RenderCellContent,
     },

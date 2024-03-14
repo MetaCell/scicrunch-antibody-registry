@@ -20,7 +20,7 @@ export const CustomFilterPanel = (
 
 
   const filterableColumns = columns.filter((column) => {
-    return !["nameAndId", "defining_citation", "reference", "url", "status"].includes(column.field);
+    return !["nameAndId", "properCitation", "reference", "url", "status"].includes(column.field);
   });
 
   const handleFilterSet = (filterSet) => {
@@ -125,7 +125,6 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
       <Select
         value={filterSet.columnField}
         onChange={(e: SelectChangeEvent) => handleFilterSet({ ...filterSet, columnField: e.target.value })}
-        
         size="small"
         sx={{ width: "12em" }}
       >

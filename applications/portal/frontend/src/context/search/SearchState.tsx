@@ -10,6 +10,7 @@ import {
 } from "@mui/x-data-grid";
 import { structureFiltersAndSorting } from '../../helpers/antibody';
 import { Antibody } from '../../rest';
+import { mapColumnToBackendModel } from '../../utils/antibody';
 
 export interface SearchResult {
   loader: boolean;
@@ -68,6 +69,9 @@ const SearchState = (props) => {
     if (searchState.antibodyRequestType !== searchMode) {
       pageNumber = 1;   // start with the first page if search type is changed
     }
+
+    antibodyFilters = mapColumnToBackendModel(antibodyFilters);
+
     // FIVE Kinds of search: 
     if (isFilterAndSortModelEmpty(antibodyFilters, sortmodel) && (query || (searchMode === SEARCH_MODES.SEARCHED_ANTIBODIES))) {
       fetchSearchedAntibodies(pageNumber, query);
@@ -115,7 +119,8 @@ const SearchState = (props) => {
         activeSearch: query,
         antibodyRequestType: SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES,
         totalElements: filteredAntibodies.totalElements,
-        searchedAntibodies: filteredAntibodies.items
+        searchedAntibodies: filteredAntibodies.items,
+        error: false
       })
 
       // if the totalElement is more than the limit, then sorting is not applied in the Backend. 
@@ -131,6 +136,7 @@ const SearchState = (props) => {
         ...searchState,
         loader: false,
         totalElements: 0,
+        activeSearch: query,
         error: true,
         searchedAntibodies: []
       })
@@ -161,7 +167,7 @@ const SearchState = (props) => {
       setSearch({
         ...searchState,
         loader: false,
-        activeSearch: '',
+        activeSearch: query,
         totalElements: 0,
         searchedAntibodies: [],
         error: true
@@ -263,7 +269,6 @@ const SearchState = (props) => {
         console.error(err)
       })
   }
-
   return (
     <SearchContext.Provider value={{
       loader: searchState.loader,
