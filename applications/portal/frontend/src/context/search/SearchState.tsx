@@ -131,6 +131,7 @@ const SearchState = (props) => {
         ...searchState,
         loader: false,
         totalElements: 0,
+        activeSearch: query,
         error: true,
         searchedAntibodies: []
       })
@@ -161,7 +162,7 @@ const SearchState = (props) => {
       setSearch({
         ...searchState,
         loader: false,
-        activeSearch: '',
+        activeSearch: query,
         totalElements: 0,
         searchedAntibodies: [],
         error: true
@@ -263,7 +264,6 @@ const SearchState = (props) => {
         console.error(err)
       })
   }
-
   return (
     <SearchContext.Provider value={{
       loader: searchState.loader,
