@@ -124,10 +124,8 @@ const getValueOrEmpty = (props: ValueProps) => {
 };
 
 const RenderCellContent = (props: GridRenderCellParams<String>) => {
-  // TODO: try by cleaning up this mapper!!! or some new approach
   const cellMapper = {
     abTarget: (row) => (row.abTarget && row.targetSpecies) ? `${row.abTarget} ${row.targetSpecies.join(", ")}` : row.abTarget,
-
     species: (row) => `${row.targetSpecies.join(", ")}`,
   };
   const mapField = () => {

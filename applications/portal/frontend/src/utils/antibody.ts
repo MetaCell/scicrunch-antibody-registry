@@ -76,7 +76,7 @@ export function mapColumnToBackendModel(filters: GridFilterModel) {
   const newFilters = filters.items.map((filter) => {
     return {
       ...filter,
-      columnField: columnMap[filter.columnField]
+      columnField: columnMap[filter.columnField] || filter.columnField
     }
   });
   return { ...filters, items: newFilters };
