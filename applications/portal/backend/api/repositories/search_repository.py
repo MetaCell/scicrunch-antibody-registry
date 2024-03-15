@@ -143,7 +143,7 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
         if not order_by_string(filters):
             if search:
                 # /*/ 100 + F("disc_date") + 1000
-                filtered_antibodies = filtered_antibodies.annotate(sorting=F("ranking") + F("citations") / 1000000 - F("disc") * 100 ).order_by('-sorting')
+                filtered_antibodies = filtered_antibodies.annotate(sorting=F("ranking") + F("citations") / 1000 - F("disc") * 100 ).order_by('-sorting')
             else:
                 filtered_antibodies = filtered_antibodies.order_by('-ix')
         else:
