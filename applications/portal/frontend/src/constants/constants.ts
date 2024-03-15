@@ -16,3 +16,8 @@ export const PAGE_SIZE = 10;
 export const LIMIT_NUM_RESULTS = 10000
 
 export const BLANK_FILTER_MODEL = { columnField: "abName", operatorValue: "equals", value: "", id: "" };
+
+export const modelType = {
+  filter: "filter",
+  sort: "sort"
+}

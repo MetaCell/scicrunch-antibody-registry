@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { getSearchAntibodies, getAntibodies, getUserAntibodies, getFilteredAndSearchedAntibodies } from '../../services/AntibodiesService'
 import SearchContext from './SearchContext'
 import { getDataInfo } from "../../services/InfoService";
-import { SEARCH_MODES, PAGE_SIZE, LIMIT_NUM_RESULTS } from '../../constants/constants';
+import { SEARCH_MODES, PAGE_SIZE, LIMIT_NUM_RESULTS, modelType } from '../../constants/constants';
 
 // MUI
 import {
@@ -70,8 +70,9 @@ const SearchState = (props) => {
       pageNumber = 1;   // start with the first page if search type is changed
     }
 
-    antibodyFilters = mapColumnToBackendModel(antibodyFilters);
-
+    const filterItems = mapColumnToBackendModel(antibodyFilters.items, modelType.filter);
+    antibodyFilters = { ...antibodyFilters, items: filterItems }
+    sortmodel = mapColumnToBackendModel(sortmodel, modelType.sort);
     // FIVE Kinds of search: 
     if (isFilterAndSortModelEmpty(antibodyFilters, sortmodel) && (query || (searchMode === SEARCH_MODES.SEARCHED_ANTIBODIES))) {
       fetchSearchedAntibodies(pageNumber, query);

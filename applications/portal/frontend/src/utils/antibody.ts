@@ -1,5 +1,6 @@
 import { GridFilterModel } from "@mui/x-data-grid";
 import { Antibody, SearchCriteriaOptions } from "../rest";
+import { modelType } from "../constants/constants";
 
 export function getProperCitation(a: Antibody) {
   if(!a) {return "ERROR";}
@@ -55,8 +56,9 @@ export function shouldEmptyFilterValue(filterSet, operation) {
   return changedFromIsAnyOf || changedFromNoInputOperators;
 }
 
+
 // a mapper that converts the frontend CamelCase columns to the backend snake_case columns - in the filters - right before API call
-export function mapColumnToBackendModel(filters: GridFilterModel) {
+export function mapColumnToBackendModel(columnItems, modeltype) {
   const columnMap = {
     "abName": "ab_name",
     "abTarget": "ab_target",
@@ -72,12 +74,18 @@ export function mapColumnToBackendModel(filters: GridFilterModel) {
     "vendor": "vendor",
 
   }
-
-  const newFilters = filters.items.map((filter) => {
-    return {
-      ...filter,
-      columnField: columnMap[filter.columnField] || filter.columnField
+  const newFilters = columnItems.map((filter) => {
+    if (modeltype == modelType.filter) {
+      return {
+        ...filter,
+        columnField: columnMap[filter.columnField]
+      }
+    } else {
+      return {
+        ...filter,
+        field: columnMap[filter.field]
+      }
     }
   });
-  return { ...filters, items: newFilters };
+  return newFilters;
 }
