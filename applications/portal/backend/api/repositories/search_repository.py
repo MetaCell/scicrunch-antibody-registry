@@ -29,20 +29,6 @@ def pageitems_if_page_in_bound(page, p):
     return [antibody_mapper.to_dto(ab) for ab in p.get_page(page)] if page <= p.num_pages else []
 
 
-def sort_fn(x: AntibodySearch):
-    ranking = -x.ranking
-    if x.defining_citation:
-        try:
-            ranking -= float(x.defining_citation.replace(",", "")) / 100
-        except ValueError:
-            log.warning("Invalid citation value: %s", x.defining_citation)
-            ranking -= 1
-
-    if x.disc_date:
-        ranking += 1000
-    return ranking
-
-
 def might_be_catalog_number(search: str):
     return any(c for c in search if c.isdigit())
 
@@ -71,17 +57,13 @@ def fts_by_catalog_number(search: str, page, size, filters=None):
         convert_filters_to_q(filters))
     count = catalog_num_match_filtered.count()
 
-    if count > settings.LIMIT_NUM_RESULTS:
-        p = Paginator(catalog_num_match_filtered, size)
-        items = pageitems_if_page_in_bound(page, p)
-        return items, count
-    elif count:
-        p = Paginator(catalog_num_match_filtered.order_by(
-            *order_by_string(filters)
-        ).order_by('-ranking'), size)
-        items = pageitems_if_page_in_bound(page, p)
-        return items, count
-    return None
+    if count < settings.LIMIT_NUM_RESULTS:
+        catalog_num_match_filtered = apply_fts_sorting(
+            catalog_num_match_filtered, filters)
+
+    p = Paginator(catalog_num_match_filtered, size)
+    items = pageitems_if_page_in_bound(page, p)
+    return items, count
 
 
 def fts_and_filter_antibodies(page: int = 0, size: int = 10, search: str = '', filters=None) -> List[Antibody]:
@@ -103,10 +85,23 @@ def fts_and_filter_antibodies(page: int = 0, size: int = 10, search: str = '', f
 
     if might_be_catalog_number(search):
         cat_search = fts_by_catalog_number(search, page, size, filters)
-        if cat_search:
+        if cat_search[0]:
             return cat_search
 
     return fts_and_filter_search(page, size, search, filters)
+
+
+def apply_fts_sorting(filtered_antibodies: QuerySet, filters):
+    """
+    Search ranking
+    1. ranking
+    2. defining_citation: oldest citations go first
+    3. disc: if the record contains string in the "disc_date" field, then downgrade the result (put on bottom of result set)
+    """
+    explicit_order_by = order_by_string(filters)
+    if explicit_order_by:
+        return filtered_antibodies.order_by(*explicit_order_by)
+    return filtered_antibodies.annotate(sorting=F("ranking") - F("antibodysearch__defining_citation") / 1000 - F("antibodysearch__disc") * 100).order_by('-sorting')
 
 
 def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filters=None):
@@ -125,9 +120,9 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
     else:
         search_query = SearchQuery(search)
         ranking = SearchRank(F("antibodysearch__search_vector"), search_query)
-        base_query = Antibody.objects.annotate(ranking=ranking, citations=F("antibodysearch__citations"), disc=F("antibodysearch__disc"))\
+        base_query = Antibody.objects.annotate(ranking=ranking)\
             .filter(antibodysearch__search_vector=search_query, status=STATUS.CURATED)
-    
+
     filtered_antibodies = (
         base_query
         .filter(convert_filters_to_q(filters))
@@ -140,18 +135,13 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
 
     if antibodies_count < MAX_SORTED:
         # if sorting is not specified, we sort by the order of the ids
-        if not order_by_string(filters):
-            if search:
-                # /*/ 100 + F("disc_date") + 1000
-                filtered_antibodies = filtered_antibodies.annotate(sorting=F("ranking") + F("citations") / 1000 - F("disc") * 100 ).order_by('-sorting')
-            else:
-                filtered_antibodies = filtered_antibodies.order_by('-ix')
+        if search:
+            # /*/ 100 + F("disc_date") + 1000
+            filtered_antibodies = apply_fts_sorting(
+                filtered_antibodies, filters)
         else:
-            filtered_antibodies = filtered_antibodies.order_by(*order_by_string(filters))
+            filtered_antibodies = filtered_antibodies.order_by('-ix')
 
     p = Paginator(filtered_antibodies, size)
     items = pageitems_if_page_in_bound(page, p)
     return items, antibodies_count
-
-
-
