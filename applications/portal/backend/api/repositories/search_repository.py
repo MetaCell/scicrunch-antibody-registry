@@ -4,7 +4,8 @@ import re
 from api.utilities.functions import catalog_number_chunked
 
 from django.conf import settings
-from django.db.models import F, Value, QuerySet
+from django.db.models import F, Value, QuerySet, FloatField
+from django.db.models.functions import Cast, Replace
 from django.db import connection
 from django.contrib.postgres.search import SearchVectorField, SearchRank, SearchQuery, SearchVector, SearchHeadline, SearchRank
 from django.core.paginator import Paginator
@@ -124,7 +125,7 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
     else:
         search_query = SearchQuery(search)
         ranking = SearchRank(F("antibodysearch__search_vector"), search_query)
-        base_query = Antibody.objects.annotate(ranking=ranking)\
+        base_query = Antibody.objects.annotate(ranking=ranking, citations=F("antibodysearch__citations"), disc=F("antibodysearch__disc"))\
             .filter(antibodysearch__search_vector=search_query, status=STATUS.CURATED)
     
     filtered_antibodies = (
@@ -141,7 +142,8 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
         # if sorting is not specified, we sort by the order of the ids
         if not order_by_string(filters):
             if search:
-                filtered_antibodies = filtered_antibodies.order_by('-ranking')
+                # /*/ 100 + F("disc_date") + 1000
+                filtered_antibodies = filtered_antibodies.annotate(sorting=F("ranking") + F("citations") / 1000000 - F("disc") * 100 ).order_by('-sorting')
             else:
                 filtered_antibodies = filtered_antibodies.order_by('-ix')
         else:

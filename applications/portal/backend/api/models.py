@@ -618,10 +618,8 @@ class AntibodyApplications(models.Model):
 class AntibodySearch(models.Model):
     ix = models.OneToOneField(Antibody, on_delete=models.DO_NOTHING, db_column='ix', primary_key=True)
     search_vector = SearchVectorField(null=True)
-    defining_citation = models.CharField(
-        null=True, max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN)
-    disc_date = models.CharField(
-        null=True, max_length=ANTIBODY_DISC_DATE_MAX_LEN)
+    citations = models.FloatField(null=True)
+    data = models.IntegerField(null=True)
     status = models.CharField(
         max_length=STATUS_MAX_LEN,
         db_index=True,
