@@ -51,6 +51,10 @@ class Migration(migrations.Migration):
                 ELSE 0
             END as citations,
             CASE 
+                WHEN api_antibody.catalog_num_search ~ '^([0-9]+[.])?[0-9]+$' THEN CAST(api_antibody.catalog_num_search AS FLOAT)
+                ELSE 0
+            END as catalog_number_search,
+            CASE 
                 WHEN disc_date IS NOT NULL THEN 1
                 ELSE 0
             END AS disc,
@@ -59,9 +63,9 @@ class Migration(migrations.Migration):
             LEFT JOIN api_vendor ON api_vendor.id = api_antibody.vendor_id
             LEFT JOIN api_specie ON api_specie.id = api_antibody.source_organism_id
             """,
-            reverse_sql = '''
+            reverse_sql="""
             DROP MATERIALIZED VIEW antibody_search;
-            '''
+            """,
         ),
         migrations.RunSQL(
             sql="""CREATE UNIQUE INDEX IF NOT EXISTS antibody_search_idx
@@ -74,5 +78,5 @@ class Migration(migrations.Migration):
             index=django.contrib.postgres.indexes.GinIndex(
                 fields=["search_vector"], name="antibody_search_fts_idx"
             ),
-        )
+        ),
     ]

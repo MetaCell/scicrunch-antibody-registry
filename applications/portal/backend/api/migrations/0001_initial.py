@@ -286,6 +286,7 @@ class Migration(migrations.Migration):
                     django.contrib.postgres.search.SearchVectorField(null=True),
                 ),
                 ("citations", models.FloatField(null=False)),
+                ("catalog_number_search", models.FloatField(null=False)),
                 ("disc", models.IntegerField(null=False)),
                 ("status", models.CharField(db_index=True, max_length=8, null=True)),
             ],
@@ -520,7 +521,6 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE, to="api.specie"
             ),
         ),
-
         migrations.AddField(
             model_name="antibodyfiles",
             name="antibody",
@@ -661,9 +661,9 @@ class Migration(migrations.Migration):
             LEFT JOIN api_vendor ON api_vendor.id = api_antibody.vendor_id
             LEFT JOIN api_specie ON api_specie.id = api_antibody.source_organism_id
             """,
-            reverse_sql = '''
+            reverse_sql="""
             DROP MATERIALIZED VIEW antibody_search;
-            '''
+            """,
         ),
         migrations.RunSQL(
             sql="""CREATE UNIQUE INDEX IF NOT EXISTS antibody_search_idx
@@ -676,5 +676,5 @@ class Migration(migrations.Migration):
             index=django.contrib.postgres.indexes.GinIndex(
                 fields=["search_vector"], name="antibody_search_fts_idx"
             ),
-        )
+        ),
     ]

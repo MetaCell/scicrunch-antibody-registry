@@ -125,9 +125,13 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
     else:
         search_query = SearchQuery(search)
         ranking = SearchRank(F("antibodysearch__search_vector"), search_query)
-        base_query = Antibody.objects.annotate(ranking=ranking, citations=F("antibodysearch__citations"), disc=F("antibodysearch__disc"))\
-            .filter(antibodysearch__search_vector=search_query, status=STATUS.CURATED)
-    
+        base_query = Antibody.objects.annotate(
+            ranking=ranking,
+            citations=F("antibodysearch__citations"),
+            disc=F("antibodysearch__disc"),
+            catalog_number_search=F("antibodysearch__catalog_number_search"),
+        ).filter(antibodysearch__search_vector=search_query, status=STATUS.CURATED)
+
     filtered_antibodies = (
         base_query
         .filter(convert_filters_to_q(filters))
@@ -143,7 +147,14 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
         if not order_by_string(filters):
             if search:
                 # /*/ 100 + F("disc_date") + 1000
-                filtered_antibodies = filtered_antibodies.annotate(sorting=F("ranking") + F("citations") / 1000 - F("disc") * 100 ).order_by('-sorting')
+                filtered_antibodies = filtered_antibodies.annotate(
+                    sorting=(
+                        F("ranking")
+                        + F("citations") / 1000
+                        + F("catalog_number_search") / 100
+                        - F("disc") * 100
+                    )
+                ).order_by("-sorting")
             else:
                 filtered_antibodies = filtered_antibodies.order_by('-ix')
         else:
@@ -152,6 +163,3 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
     p = Paginator(filtered_antibodies, size)
     items = pageitems_if_page_in_bound(page, p)
     return items, antibodies_count
-
-
-

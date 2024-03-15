@@ -620,6 +620,7 @@ class AntibodySearch(models.Model):
     ix = models.OneToOneField(Antibody, on_delete=models.DO_NOTHING, db_column='ix', primary_key=True)
     search_vector = SearchVectorField(null=True)
     citations = models.FloatField(null=True)
+    catalog_number_search = models.FloatField(null=True)
     disc = models.IntegerField(null=True)
     status = models.CharField(
         max_length=STATUS_MAX_LEN,
