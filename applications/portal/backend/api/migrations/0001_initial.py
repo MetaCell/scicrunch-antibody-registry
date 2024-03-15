@@ -285,8 +285,8 @@ class Migration(migrations.Migration):
                     "search_vector",
                     django.contrib.postgres.search.SearchVectorField(null=True),
                 ),
-                ("defining_citation", models.CharField(max_length=16384, null=True)),
-                ("disc_date", models.CharField(max_length=128, null=True)),
+                ("citations", models.FloatField(null=False)),
+                ("disc", models.IntegerField(null=False)),
                 ("status", models.CharField(db_index=True, max_length=8, null=True)),
             ],
             options={

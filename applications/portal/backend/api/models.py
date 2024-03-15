@@ -616,10 +616,11 @@ class AntibodyApplications(models.Model):
 
 
 class AntibodySearch(models.Model):
+    # This model is a materialized view: have to remove all migrations related to it when generated
     ix = models.OneToOneField(Antibody, on_delete=models.DO_NOTHING, db_column='ix', primary_key=True)
     search_vector = SearchVectorField(null=True)
     citations = models.FloatField(null=True)
-    data = models.IntegerField(null=True)
+    disc = models.IntegerField(null=True)
     status = models.CharField(
         max_length=STATUS_MAX_LEN,
         db_index=True,
