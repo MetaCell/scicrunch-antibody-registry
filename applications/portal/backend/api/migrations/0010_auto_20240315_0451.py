@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
             ) AS search_vector,
             CASE 
                 WHEN api_antibody.defining_citation ~ '^([0-9]+[.])?[0-9]+$' THEN CAST(api_antibody.defining_citation AS FLOAT)
-                ELSE NULL
+                ELSE 0
             END as citations,
             CASE 
                 WHEN disc_date IS NOT NULL THEN 1
