@@ -642,8 +642,8 @@ const AntibodiesTable = (props) => {
             onSortModelChange={(model) => addSortingColumn(model)}
             checkboxSelection
             disableSelectionOnClick
-              columnVisibilityModel={showColumns || {}}
-              onColumnVisibilityModelChange={(model) => setShowColumns(model)}
+            columnVisibilityModel={showColumns || {}}
+            onColumnVisibilityModelChange={(model) => setShowColumns(model)}
             getRowHeight={() => "auto"}
             loading={!searchedAntibodies || loader}
             onFilterModelChange={(model) => addNewFilterColumn(model)}
