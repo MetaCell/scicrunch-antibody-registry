@@ -27,6 +27,8 @@ def get_antibodies(page: int, size: int, updated_from: datetime, updated_to: dat
         raise HTTPException(status_code=400, detail="Pages start at 1")
     if size < 1:
         raise HTTPException(status_code=400, detail="Size must be greater than 0")
+    if size > 100:
+        raise HTTPException(status_code=400, detail="Size must be less than 100")
     try:
         return antibody_service.get_antibodies(int(page), int(size), updated_from, updated_to, status)
     except ValueError:
