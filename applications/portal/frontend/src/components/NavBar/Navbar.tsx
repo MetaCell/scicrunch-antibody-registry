@@ -45,7 +45,7 @@ const Navbar = () => {
                 >
                   <Stack direction="row" spacing={2}>
                     <Link className="logo" href="/">
-                      <img src={"/assets/logo.svg"} title="Antibody Registry" />
+                      <img src={"/assets/logo.svg"} title="Antibody Registry" alt="Antibody Registry Logo" />
                     </Link>
 
                     <Divider

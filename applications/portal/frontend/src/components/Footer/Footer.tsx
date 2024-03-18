@@ -29,7 +29,7 @@ const Footer = () => {
     >
       <Stack direction="row" spacing={2} alignItems="center">
         <Link className="logo" href="/">
-          <img src={"/assets/footer-logo.svg"} title="Antibody Registry" />
+          <img src={"/assets/footer-logo.svg"} title="Antibody Registry" alt="Antibody Registry Logo" />
         </Link>
         <Typography variant="body2" align="center">
           Have any questions? Contact us at {" "}

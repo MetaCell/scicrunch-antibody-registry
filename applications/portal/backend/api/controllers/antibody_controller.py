@@ -43,6 +43,12 @@ def get_user_id() -> str:
 
 
 def get_user_antibodies(page: int = 1, size: int = 50) -> PaginatedAntibodies:
+    if page < 1:
+        raise HTTPException(status_code=400, detail="Pages start at 1")
+    if size < 1:
+        raise HTTPException(status_code=400, detail="Size must be greater than 0")
+    if size > 100:
+        raise HTTPException(status_code=400, detail="Size must be less than 100")
     return antibody_service.get_user_antibodies(get_current_user_id(), page, size)
 
 
