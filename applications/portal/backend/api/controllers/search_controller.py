@@ -18,4 +18,6 @@ def fts_antibodies(page: int = 1, size: int = 50, search: str = '') -> Paginated
 
 
 def filter_antibodies(filter_request: FilterRequest) -> PaginatedAntibodies:
+    if filter_request.size > 100:
+        raise HTTPException(status_code=400, detail="Size must be less than 100")
     return search_service.filter_antibodies(filter_request)
