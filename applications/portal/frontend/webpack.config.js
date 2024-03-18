@@ -6,6 +6,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 const copyPaths = [
   { from: path.resolve(__dirname, "src/assets"), to: "assets" },
+  { from: path.resolve(__dirname, "sitemap.xml"), to: "sitemap.xml" }
 ];
 
 module.exports = function webpacking(envVariables) {
