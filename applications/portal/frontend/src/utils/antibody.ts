@@ -1,6 +1,7 @@
-import { GridFilterModel } from "@mui/x-data-grid";
+import { GridFilterModel, GridColumnVisibilityModel } from "@mui/x-data-grid";
 import { Antibody, SearchCriteriaOptions } from "../rest";
 import { modelType } from "../constants/constants";
+
 
 export function getProperCitation(a: Antibody) {
   if(!a) {return "ERROR";}
@@ -89,3 +90,13 @@ export function mapColumnToBackendModel(columnItems, modeltype) {
   });
   return newFilters;
 }
+
+
+export const getColumnsToDisplay = (columns) => {
+  let showcolList: GridColumnVisibilityModel = {};
+  columns.filter((column) => column?.hide === true).map((column) => {
+    showcolList[column.field] = false;
+  });
+  return showcolList;
+}
+
