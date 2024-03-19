@@ -6,7 +6,8 @@ import {
   GridColDef,
   GridRenderCellParams,
   GridCsvExportOptions,
-  GridNoRowsOverlay
+  GridNoRowsOverlay,
+  GridColumnVisibilityModel
 } from "@mui/x-data-grid";
 import {
   Typography,
@@ -32,7 +33,7 @@ import {
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import TableHeader from "./HomeHeader";
 import { Antibody } from "../../rest";
-import { checkIfFilterSetExists, getProperCitation, getRandomId } from "../../utils/antibody";
+import { checkIfFilterSetExists, getColumnsToDisplay, getProperCitation, getRandomId } from "../../utils/antibody";
 import { UserContext } from "../../services/UserService";
 import ConnectAccount from "./ConnectAccount";
 import { ALLRESULTS, SEARCH_MODES, MYSUBMISSIONS, BLANK_FILTER_MODEL } from "../../constants/constants";
@@ -158,8 +159,8 @@ const RenderVendor = (props) => (
     className="col-vendor"
   >
     {props.row.url ? <Link className="link-vendor" bgcolor="primary.light" px={0.5} py={0.25} display="block" underline="none" target="_blank" href={props.row.url}>
-      {props.row.vendorName}
-    </Link> : props.row.vendorName}
+      {props.value}
+    </Link> : props.value}
   </Typography>
 )
 
@@ -447,14 +448,12 @@ const AntibodiesTable = (props) => {
       field: "abName",
       headerName: "Name",
       hide: true,
-      renderCell: RenderCellContent,
     },
     {
       ...columnsDefaultProps,
       field: "abId",
       headerName: "ID",
       hide: true,
-      renderCell: RenderCellContent,
     },
     {
       ...columnsDefaultProps,
@@ -481,12 +480,11 @@ const AntibodiesTable = (props) => {
     // },
     {
       ...columnsDefaultProps,
-      field: "species",
+      field: "targetSpecies",
       headerName: "Target species",
       valueGetter: getList,
       hide: true,
       sortable: false,
-      renderCell: RenderCellContent,
     },
     {
       ...columnsDefaultProps,
@@ -541,18 +539,16 @@ const AntibodiesTable = (props) => {
       field: "cloneId",
       headerName: "Clone ID",
       hide: true,
-      renderCell: RenderCellContent,
     },
     {
       ...columnsDefaultProps,
       field: "sourceOrganism",
       headerName: "Host organism",
       flex: 1.5,
-      renderCell: RenderCellContent,
     },
     {
       ...columnsDefaultProps,
-      field: "vendor",
+      field: "vendorName",
       headerName: "Vendor",
       flex: 1.5,
       renderCell: RenderVendor,
@@ -562,7 +558,6 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "catalogNum",
       headerName: "Cat Num",
-      renderCell: RenderCellContent,
     },
     {
       ...columnsDefaultProps,
@@ -609,6 +604,8 @@ const AntibodiesTable = (props) => {
     },
   };
 
+  const [showColumns, setShowColumns] = useState<GridColumnVisibilityModel>(getColumnsToDisplay(columns));
+
   const NoRowsOverlay = () =>
     typeof activeSearch === "string" &&
     activeSearch !== "" &&
@@ -645,6 +642,8 @@ const AntibodiesTable = (props) => {
             onSortModelChange={(model) => addSortingColumn(model)}
             checkboxSelection
             disableSelectionOnClick
+            columnVisibilityModel={showColumns || {}}
+            onColumnVisibilityModelChange={(model) => setShowColumns(model)}
             getRowHeight={() => "auto"}
             loading={!searchedAntibodies || loader}
             onFilterModelChange={(model) => addNewFilterColumn(model)}
