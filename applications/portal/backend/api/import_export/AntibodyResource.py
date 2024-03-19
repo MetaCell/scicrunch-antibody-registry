@@ -43,12 +43,6 @@ class AntibodyInstanceLoaderClass(ModelInstanceLoader):
 
 class AntibodyResource(ModelResource):
     name = Field(attribute='ab_name', column_name='ab_name')
-    vendor = Field(
-        column_name='vendor',
-        attribute='vendor',
-        widget=ForeignKeyWidgetWithCreation(model=Vendor, field='name',
-                                            get_or_create=lambda **kwargs: get_or_create_vendor(**kwargs)[0])
-    )
     catalog_num = Field(attribute='catalog_num', column_name='catalog_num')
     url = Field(attribute='url', column_name='url')
     link = Field(column_name="link", attribute="show_link")
@@ -84,6 +78,14 @@ class AntibodyResource(ModelResource):
     disc_date = Field(attribute='disc_date', column_name='disc_date')
     commercial_type = Field(attribute='commercial_type',
                             column_name='commercial_type')
+    vendor = Field(
+        column_name='vendor',
+        attribute='vendor',
+        widget=ForeignKeyWidgetWithCreation(
+            model=Vendor, field='name', other_cols_map={'commercial_type': 'commercial_type'},
+            get_or_create=lambda **kwargs: get_or_create_vendor(**kwargs)[0]
+        )
+    )
     uniprot = Field(attribute='uniprot_id', column_name='uniprot_id')
     epitope = Field(attribute='epitope', column_name='epitope')
     cat_alt = Field(attribute='cat_alt', column_name='cat_alt')
