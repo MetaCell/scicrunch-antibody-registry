@@ -24,7 +24,7 @@ from api.models import (
     Vendor,
     Specie,
     VendorDomain,
-    VendorSynonym, AntibodyFiles,
+    VendorSynonym, AntibodyFiles, CommercialType
 )
 from api.import_export import AntibodyResource
 from api.services.keycloak_service import KeycloakService
@@ -309,6 +309,24 @@ class VendorDomainInline(admin.TabularInline):
     extra = 0
 
 
+class CommercialTypeFilter(admin.SimpleListFilter):
+    title = "Commercial Type"
+    parameter_name = "commercial_type"
+
+    def lookups(self, request, model_admin):
+        return [
+            (CommercialType.COMMERCIAL, ("Commercial vendors")),
+            (CommercialType.PERSONAL, ("Personal vendors")),
+            (CommercialType.NON_PROFIT, ("Non-profit vendors")),
+            (CommercialType.OTHER, ("Other vendors")),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(vendor__commercial_type=self.value())
+        return queryset
+        
+
 @admin.register(VendorDomain)
 class VendorDomainAdmin(admin.ModelAdmin):
     list_display = (
@@ -318,7 +336,7 @@ class VendorDomainAdmin(admin.ModelAdmin):
         "is_domain_visible",
     )
     list_editable = ("is_domain_visible",)
-
+    list_filter = [CommercialTypeFilter]
 
 @admin.register(Vendor)
 class VendorAdmin(admin.ModelAdmin):
