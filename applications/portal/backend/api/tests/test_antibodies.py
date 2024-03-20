@@ -35,7 +35,27 @@ class AntibodiesTestCase(TestCase):
         self.assertEquals(ab.vendorName, "My vendorname")
         self.assertTrue("www.bdbiosciences.com" in ab.vendorUrl)
         self.assertEquals(ab.status, Status.QUEUE)
-        self.assertEquals(ab.url, example_ab["url"])
+
+        # current token user is different than the user that created the antibody
+        # so the url should not be shown
+        self.assertIsNone(ab.url)
+
+        # if show_link is set to True, the url should be shown
+        antibody1 = Antibody.objects.get(ix=ab.ix)
+        antibody1.show_link = True
+        antibody1.save()
+        ab1_with_url = antibody_mapper.to_dto(antibody1)
+        example_ab_url = example_ab['url']
+        self.assertEquals(ab1_with_url.url, example_ab_url)
+
+        # if userid is the creator of the antibody, the url should be shown - test with a new example
+        userid = get_current_user_id()
+        example_ab3 = example_ab.copy()
+        example_ab3['catalogNum'] = "N176A/786"
+        ab_with_token_user = create_antibody(AddAntibodyDTO(**example_ab3), userid)
+        self.assertEquals(ab_with_token_user.url, example_ab_url)
+
+
 
         self.assertIsNotNone(ab.insertTime)
 
@@ -72,7 +92,7 @@ class AntibodiesTestCase(TestCase):
         assert len(abget.targetSpecies) == 2
 
         ab3 = get_antibody(ab.abId, status=STATUS.QUEUE)[0]
-        assert ab.url == ab3.url
+        assert ab1_with_url.url == ab3.url
 
         a: Antibody = Antibody.objects.get(ab_id=ab.abId)
         a.status = STATUS.CURATED

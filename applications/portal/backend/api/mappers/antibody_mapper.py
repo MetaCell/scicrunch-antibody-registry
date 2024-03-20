@@ -12,7 +12,7 @@ from api.utilities.exceptions import AntibodyDataException
 from cloudharness import log
 from openapi.models import Antibody as AntibodyDTO
 from openapi.models import AbstractAntibody as AbstractAntibodyDTO
-from .mapping_utils import dict_to_snake, dict_to_camel, to_snake
+from .mapping_utils import dict_to_snake, dict_to_camel, to_snake, get_url_if_permitted
 from ..services.gene_service import get_or_create_gene
 from ..services.specie_service import get_or_create_specie
 
@@ -128,6 +128,9 @@ class AntibodyMapper(IDAOMapper):
             ab.sourceOrganism = dao.source_organism.name
         if dao.species and not ab.targetSpecies:
             ab.targetSpecies = [s.name for s in dao.species.all()]
+        
+            
+        ab.url = get_url_if_permitted(dao)
 
         ab.showLink = dao.show_link if dao.show_link is not None else (dao.vendor and dao.vendor.show_link)
 
