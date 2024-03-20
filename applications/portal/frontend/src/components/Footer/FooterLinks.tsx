@@ -1,4 +1,4 @@
-import { Link } from "@mui/material";
+import { Button, Link } from "@mui/material";
 import React from "react";
 import { useHistory, useLocation } from "react-router-dom";
 
@@ -11,12 +11,11 @@ interface LinkButtonProps {
 
 const LinkButton = (props: LinkButtonProps) => {
   return (
-    <Link
-      component="button"
+    <Button
+      component={Link}
       className="link-button"
       underline="none"
-      variant="body2"
-      href="#"
+      href={props.href}
       sx={(theme) => ({
         fontWeight: 600,
         color: theme.palette.grey[500],
@@ -27,7 +26,7 @@ const LinkButton = (props: LinkButtonProps) => {
       {...props}
     >
       {props.label}
-    </Link>
+    </Button>
   );
 };
 
@@ -43,7 +42,8 @@ const FooterLinks = () => {
         <LinkButton key={link.label}
           className={link.href.includes(location.pathname) ? "selected" : ""}
           label={link.label}
-          onClick={() => history.push(link.href[0])}
+          href={link.href[0]}
+          onClick={(e) => { e.preventDefault(); history.push(link.href[0])}}
         />
       ))} 
     </>
