@@ -125,17 +125,6 @@ const getValueOrEmpty = (props: ValueProps) => {
 };
 
 const RenderCellContent = (props: GridRenderCellParams<String>) => {
-  const cellMapper = {
-    abTarget: (row) => (row.abTarget && row.targetSpecies) ? `${row.abTarget} ${row.targetSpecies.join(", ")}` : row.abTarget,
-    species: (row) => `${row.targetSpecies.join(", ")}`,
-  };
-  const mapField = () => {
-    if (cellMapper[props.field]) {
-      return cellMapper[props.field](props.row)
-    }
-    return props.value ?? '';
-  }
-
   return (
     <Typography
       variant="caption"
@@ -144,7 +133,9 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
       component="div"
       className="col-content"
     >
-      {mapField()}
+      {props.field === "targetAntigen"
+        ? `${props.row.abTarget} ${props.row.targetSpecies.join(", ")}`
+        : props.value}
     </Typography>
   );
 };
@@ -564,6 +555,8 @@ const AntibodiesTable = (props) => {
       field: "url",
       headerName: "Product URL",
       hide: true,
+      sortable: false,
+      filterable: false,
     },
     {
       ...columnsDefaultProps,
