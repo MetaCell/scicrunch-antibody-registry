@@ -342,7 +342,8 @@ class VendorDomainAdmin(admin.ModelAdmin):
 class VendorAdmin(admin.ModelAdmin):
     delete_confirmation_template = "admin/vendor/delete_confirmation.html"
     search_fields = ("name",)
-    list_display = ("name", "commercial_type", "nif_id", "eu_id")
+    list_display = ("id", "name", "commercial_type", "nif_id", "eu_id")
+    ordering = ("-id",)
     list_filter = (NonCuratedDomains, "commercial_type",)
     fields = (
         "nb_antibodies",
