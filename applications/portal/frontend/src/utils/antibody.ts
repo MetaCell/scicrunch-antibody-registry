@@ -69,10 +69,10 @@ export function mapColumnToBackendModel(columnItems, modeltype) {
     "catalogNum": "catalog_num",
     "comments": "comments",
     "accession": "accession",
-    "species": "species",
+    "targetSpecies": "species",
     "applications": "applications",
     "clonality": "clonality",
-    "vendor": "vendor",
+    "vendorName": "vendor",
 
   }
   const newFilters = columnItems.map((filter) => {
