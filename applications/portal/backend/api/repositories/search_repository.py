@@ -127,7 +127,7 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
         base_query
         .filter(convert_filters_to_q(filters))
         .select_related("vendor").prefetch_related("species")
-    )
+    ).distinct()
 
     antibodies_count = filtered_antibodies.count()
     if antibodies_count == 0:
