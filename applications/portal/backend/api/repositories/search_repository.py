@@ -4,48 +4,69 @@ import re
 from api.utilities.functions import catalog_number_chunked
 
 from django.conf import settings
-from django.db.models import F, Value
+from django.db.models import F, Value, QuerySet, FloatField
+from django.db.models.functions import Cast, Replace
 from django.db import connection
 from django.contrib.postgres.search import SearchVectorField, SearchRank, SearchQuery, SearchVector, SearchHeadline, SearchRank
+from django.core.paginator import Paginator
 
 from ..models import STATUS, Antibody, AntibodySearch
+from .filtering_utils import convert_filters_to_q, order_by_string
 from cloudharness import log
+from ..mappers.antibody_mapper import AntibodyMapper
 
 MIN_CATALOG_RANKING = 0.0  # TODO validate the proper ranking value
-MAX_SEARCH_RESULTS = settings.LIMIT_NUM_RESULTS
+MAX_SORTED = settings.LIMIT_NUM_RESULTS
+
+antibody_mapper = AntibodyMapper()
+
 
 def flat(l):
     return [item for sublist in l for item in sublist]
 
 
-def fts_by_catalog_number(search: str, page, size):
+def pageitems_if_page_in_bound(page, p):
+    return [antibody_mapper.to_dto(ab) for ab in p.get_page(page)] if page <= p.num_pages else []
+
+
+def might_be_catalog_number(search: str):
+    return any(c for c in search if c.isdigit())
+
+
+def fts_by_catalog_number(search: str, page, size, filters=None):
+    """
+        Catalog is part of search and it exists, hence it will definitely do fts. 
+        We do filtering if filters are present.
+        We do sorting only when the count is under the limit.
+    """
     search = catalog_number_chunked(search, fill=" & ")
-
     search_query = SearchQuery(search, search_type='raw')
-
     vector = SearchVector('catalog_num_search', config='simple')
+
     catalog_num_match = (
         Antibody.objects.annotate(
             search=vector,
             ranking=SearchRank(vector, search_query, normalization=Value(1)))
         .filter(search=search_query, status=STATUS.CURATED, ranking__gte=MIN_CATALOG_RANKING)
     )
+
     # if we match catalog_num or cat_alt, we return those results without looking for other fields
     # as the match is a perfect match or a prefix match depending on the search word,
     # sorting the normalized catalog_num by length and returning the smallest
-    count = catalog_num_match.count()
-    offset = (page - 1) * size
-    if count > settings.LIMIT_NUM_RESULTS:
-        
-        return catalog_num_match[offset: size + offset], count
-    elif count:
-        return catalog_num_match.order_by('-ranking')[offset: size + offset], count
-    return None
+    catalog_num_match_filtered = catalog_num_match.filter(
+        convert_filters_to_q(filters))
+    count = catalog_num_match_filtered.count()
 
-def might_be_catalog_number(search: str):
-    return any(c for c in search if c.isdigit())
+    if count < settings.LIMIT_NUM_RESULTS:
+        catalog_num_match_filtered = apply_fts_sorting(
+            catalog_num_match_filtered, filters)
 
-def fts_antibodies(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, search: str = '') -> List[Antibody]:
+    p = Paginator(catalog_num_match_filtered, size)
+    items = pageitems_if_page_in_bound(page, p)
+    return items, count
+
+
+def fts_and_filter_antibodies(page: int = 0, size: int = 10, search: str = '', filters=None) -> List[Antibody]:
     # According to https://github.com/MetaCell/scicrunch-antibody-registry/issues/52
     # Match the calalog number (make sure to treat the cat_alt field the same way)
     # If the catalog number is not matched, then return records if the query matches any visible or invisible field.
@@ -60,61 +81,67 @@ def fts_antibodies(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, search
     #   the result (put on bottom of result set)
 
     # preparing two search terms, one for catalog_num, the other for normal search.
-
     # search only allows alphanumeric characters and spaces
 
     if might_be_catalog_number(search):
-        cat_search = fts_by_catalog_number(search, page, size)
-
-
-        if cat_search:
+        cat_search = fts_by_catalog_number(search, page, size, filters)
+        if cat_search[0]:
             return cat_search
-    
-    return fts_others_search(page, size, search)
-    
-    
+
+    return fts_and_filter_search(page, size, search, filters)
 
 
-def fts_others_search(page: int = 0, size: int = settings.LIMIT_NUM_RESULTS, search: str = ''):
-    search_query = SearchQuery(search)
+def apply_fts_sorting(filtered_antibodies: QuerySet, filters):
+    """
+    Search ranking
+    1. ranking
+    2. defining_citation: oldest citations go first
+    3. disc: if the record contains string in the "disc_date" field, then downgrade the result (put on bottom of result set)
+    """
+    explicit_order_by = order_by_string(filters)
+    if explicit_order_by:
+        return filtered_antibodies.order_by(*explicit_order_by)
+    return filtered_antibodies.annotate(sorting=F("ranking") - F("antibodysearch__defining_citation") / 1000 - F("antibodysearch__disc") * 100).order_by('-sorting')
+
+
+def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filters=None):
+    """
+    if search doesn't exist, then we do: filtering + sorting
+    If search exists, then we do:
+        if under the limit: fts + filtering + sorting (sort by rank and then by sort model in FE)
+        if over the limit: fts + filtering 
+    """
     # According to https://github.com/MetaCell/scicrunch-antibody-registry/issues/52
     # If the catalog number is not matched, then return records if the query matches any visible or invisible field.
-
-    ranking = SearchRank(F("search_vector"), search_query)
-
     # highlight_cols = flat((F(f), Value(' ')) for f in search_col_names)[:-1]
 
-    offset = (page - 1) * size
-    subfields_search = AntibodySearch.objects.annotate(
-        ranking=ranking,
-    ).filter(search_vector=search_query, status=STATUS.CURATED)
+    if not search:
+        base_query = Antibody.objects.filter(status=STATUS.CURATED)
+    else:
+        search_query = SearchQuery(search)
+        ranking = SearchRank(F("antibodysearch__search_vector"), search_query)
+        base_query = Antibody.objects.annotate(ranking=ranking)\
+            .filter(antibodysearch__search_vector=search_query, status=STATUS.CURATED)
 
-    count = subfields_search.count()
+    filtered_antibodies = (
+        base_query
+        .filter(convert_filters_to_q(filters))
+        .select_related("vendor").prefetch_related("species")
+    ).distinct()
 
-    if count == 0:
+    antibodies_count = filtered_antibodies.count()
+    if antibodies_count == 0:
         return [], 0
 
-    if count > settings.LIMIT_NUM_RESULTS:
-        ids = [a.ix for a  in subfields_search.filter(disc_date__isnull=True)[offset: size + offset]]
-        return Antibody.objects.filter(ix__in=ids, disc_date__isnull=True).select_related('vendor'), count
-    
-    def sort_fn(x: AntibodySearch):
-        ranking = -x.ranking
-        if x.defining_citation:
-            try:
-                ranking -= float(x.defining_citation.replace(",", "")) / 100
-            except ValueError:
-                log.warning("Invalid citation value: %s", x.defining_citation)
-                ranking -= 1
-        
-        if x.disc_date:
-            ranking += 1000
-        return ranking
-    
-    ids = [a.ix for a in sorted((a for a  in subfields_search),key=sort_fn)][offset: size + offset]
-    id_map = {ids[i]:i for i in range(len(ids))}
-    # the second sorting is needed because the query doesn't keep the ids order. 
-    return sorted(Antibody.objects.filter(ix__in=ids).select_related('vendor'),key=lambda x:id_map[x.ix]), count
+    if antibodies_count < MAX_SORTED:
+        # if sorting is not specified, we sort by the order of the ids
+        if search:
+            # /*/ 100 + F("disc_date") + 1000
+            filtered_antibodies = apply_fts_sorting(
+                filtered_antibodies, filters)
+        else:
+            filtered_antibodies = filtered_antibodies.order_by('-ix')
 
-
-
+    p = Paginator(filtered_antibodies, size)
+    items = pageitems_if_page_in_bound(page, p)
+    return items, antibodies_count

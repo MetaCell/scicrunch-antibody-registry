@@ -616,12 +616,11 @@ class AntibodyApplications(models.Model):
 
 
 class AntibodySearch(models.Model):
-    ix = models.BigIntegerField(primary_key=True)
+    # This model is a materialized view: have to remove all migrations related to it when generated
+    ix = models.OneToOneField(Antibody, on_delete=models.DO_NOTHING, db_column='ix', primary_key=True)
     search_vector = SearchVectorField(null=True)
-    defining_citation = models.CharField(
-        null=True, max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN)
-    disc_date = models.CharField(
-        null=True, max_length=ANTIBODY_DISC_DATE_MAX_LEN)
+    defining_citation = models.IntegerField(null=False)
+    disc = models.IntegerField(null=False)
     status = models.CharField(
         max_length=STATUS_MAX_LEN,
         db_index=True,

@@ -43,15 +43,9 @@ class AntibodyInstanceLoaderClass(ModelInstanceLoader):
 
 class AntibodyResource(ModelResource):
     name = Field(attribute='ab_name', column_name='ab_name')
-    vendor = Field(
-        column_name='vendor',
-        attribute='vendor',
-        widget=ForeignKeyWidgetWithCreation(model=Vendor, field='name',
-                                            get_or_create=lambda **kwargs: get_or_create_vendor(**kwargs)[0])
-    )
     catalog_num = Field(attribute='catalog_num', column_name='catalog_num')
     url = Field(attribute='url', column_name='url')
-    link = Field(column_name='link')
+    link = Field(column_name="link", attribute="show_link")
     target = Field(
         column_name='ab_target',
         attribute='ab_target'
@@ -84,6 +78,14 @@ class AntibodyResource(ModelResource):
     disc_date = Field(attribute='disc_date', column_name='disc_date')
     commercial_type = Field(attribute='commercial_type',
                             column_name='commercial_type')
+    vendor = Field(
+        column_name='vendor',
+        attribute='vendor',
+        widget=ForeignKeyWidgetWithCreation(
+            model=Vendor, field='name', other_cols_map={'commercial_type': 'commercial_type'},
+            get_or_create=lambda **kwargs: get_or_create_vendor(**kwargs)[0]
+        )
+    )
     uniprot = Field(attribute='uniprot_id', column_name='uniprot_id')
     epitope = Field(attribute='epitope', column_name='epitope')
     cat_alt = Field(attribute='cat_alt', column_name='cat_alt')
@@ -123,7 +125,6 @@ class AntibodyResource(ModelResource):
         self.request = request
 
         self.instances = []
-
 
     class Meta:
         model = Antibody
@@ -280,8 +281,7 @@ class AntibodyResource(ModelResource):
 
         if row.get('link', None):
             row['link'] = 'y' in row['link'].lower()
-        else:
-            row['link'] = True
+
         if row.get('clonality', None):
             clonality = row['clonality'].lower()
 
@@ -309,3 +309,9 @@ class AntibodyResource(ModelResource):
                     data[field.column_name] = None
             # Otherwise we save the field
             field.save(obj, data, is_m2m, **kwargs)
+
+    # Change the link (boolean) to yes or no for the export
+    def dehydrate_link(self, obj):
+        if obj.show_link is None:
+            return ""
+        return "yes" if obj.show_link else "no"

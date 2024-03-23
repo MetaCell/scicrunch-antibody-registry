@@ -15,17 +15,12 @@ const LinkButton = (props: LinkButtonProps) => {
       component={Link}
       className="link-button"
       underline="none"
-
       href={props.href}
       sx={(theme) => ({
-        fontWeight: 500,
-        color: theme.palette.grey[700],
-        px: theme.spacing(1.5),
-        py: theme.spacing(1),
-        "&.selected": {
-          bgcolor: theme.palette.grey[100],
-          borderRadius: theme.shape.borderRadius,
-          color: theme.palette.grey[900],
+        fontWeight: 600,
+        color: theme.palette.grey[500],
+        "&:hover": {
+          color: theme.palette.grey[600],
         },
       })}
       {...props}
@@ -35,9 +30,9 @@ const LinkButton = (props: LinkButtonProps) => {
   );
 };
 
-const LINKS = [{ label: "Home", href: ["/", "/submissions"] }, { label: "About", href: ["/about"] }, { label: "FAQ", href:  ["/faq"] }];
+const LINKS = [{ label: "Contact Us", href: ["/contact-us"] }, { label: "Become a member", href: ["/membership"] }, { label: "Terms & Conditions", href:  ["/terms-and-conditions"] }];
 
-const NavLinks = () => {
+const FooterLinks = () => {
   const history = useHistory();
   const location = useLocation();
 
@@ -48,11 +43,11 @@ const NavLinks = () => {
           className={link.href.includes(location.pathname) ? "selected" : ""}
           label={link.label}
           href={link.href[0]}
-          onClick={(e) => {e.preventDefault(); history.push(link.href[0])}}
+          onClick={(e) => { e.preventDefault(); history.push(link.href[0])}}
         />
       ))} 
     </>
   );
 };
 
-export default NavLinks;
+export default FooterLinks;

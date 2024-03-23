@@ -4,6 +4,7 @@ import { SearchIcon, SlashIcon } from "../icons";
 import { Box, Autocomplete, InputAdornment, Stack, Tooltip, Typography, Paper } from "@mui/material";
 import SearchContext from "../../context/search/SearchContext";
 import { useHistory } from 'react-router-dom'; 
+import { SEARCH_MODES } from "../../constants/constants";
 
 
 const styles={
@@ -41,7 +42,13 @@ const styles={
 
 export default function Searchbar() {
 
-  const { getFilteredAntibodies, clearSearch, loader, activeSearch } = useContext(SearchContext)
+  const {
+    getAntibodyList,
+    clearSearch,
+    loader,
+    activeSearch,
+    filterModel,
+  } = useContext(SearchContext)
 
   const history = useHistory();
 
@@ -54,10 +61,19 @@ export default function Searchbar() {
     if(!e.target.value){
       clearSearch()
     } else {
-      history.push('/');
-      getFilteredAntibodies(e.target.value)
+      // if the filters are empty then run the following else run for SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES
+      if (filterModel.items.length === 0) {
+        getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, e.target.value)
+      } else {
+        getAntibodyList(
+          SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES,
+          e.target.value || activeSearch,
+          1,
+          filterModel
+        )
+      }
     }
-  }, [getFilteredAntibodies, clearSearch, history]);
+  }, [getAntibodyList, clearSearch, history]);
 
   const handleKeyPress = useCallback((event) => {
     if(event.key==='/'){
@@ -82,7 +98,6 @@ export default function Searchbar() {
       <Typography component="ul" sx={{ fontSize: "0.8rem", textAlign: "left" }}>
         <li>Catalog number is searched first if you type numbers</li>
         <li>Anything else is searched if no catalog number matches</li>
-        <li>Search results are currently limited to a maximum of 100 elements; refine your search if you don&apos;t find what you&apos;re looking for (table filters <b>do not</b> refine the search)</li>
         <li>If you are having trouble, please check <a href="//rrid.site">rrid.site</a></li>
         
       </Typography>

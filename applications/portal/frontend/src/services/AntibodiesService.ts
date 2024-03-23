@@ -1,3 +1,4 @@
+import { PAGE_SIZE } from "../constants/constants";
 import { Configuration } from "../rest";
 import {
   Antibody,
@@ -5,7 +6,8 @@ import {
   AntibodyApi,
   AddAntibody,
   AntibodyCommercialTypeEnum,
-  SearchApi
+  SearchApi,
+  FilterRequest
 } from "../rest/api";
 
 import { getToken } from "./UserService";
@@ -15,7 +17,7 @@ const searchApi = new SearchApi()
 
 export async function getAntibodies(
   page = 1,
-  size = 100
+  size = 10
 ): Promise<PaginatedAntibodies> {
   const abs = (await api.getAntibodies(page, size)).data;
   abs.items = abs.items.map(mapAntibody);
@@ -23,7 +25,7 @@ export async function getAntibodies(
 }
 
 function mapAntibody(antibody: Antibody): Antibody {
-  if((!antibody.showLink || !antibody.url) && antibody.vendorUrl) {
+  if ((!antibody.url) && antibody.vendorUrl) {
     antibody.url = antibody.vendorUrl[0];
   }
   if (antibody.url && !antibody.url.includes("//")) {
@@ -80,7 +82,7 @@ function mapAntibodyFromForm(antibody): AddAntibody {
 
 export async function getUserAntibodies(
   page = 1,
-  size = 100
+  size = 10
 ): Promise<PaginatedAntibodies> {
   return (
     await new AntibodyApi(
@@ -91,7 +93,7 @@ export async function getUserAntibodies(
 
 export async function getSearchAntibodies(
   page = 1,
-  size = 100,
+  size = 10,
   query:string
 ):Promise<PaginatedAntibodies>{
   const abs = await (
@@ -101,6 +103,16 @@ export async function getSearchAntibodies(
   return abs;
 }
 
+export async function getFilteredAndSearchedAntibodies(
+  filters: FilterRequest = {},
+): Promise<PaginatedAntibodies> {
+  filters.size = PAGE_SIZE;
+  const abs = (
+    await searchApi.filterAntibodies(filters)
+  ).data;
+  abs.items = abs.items.map(mapAntibody);
+  return abs;
+}
 
 export async function getAntibodyByAccessionNumber(accesionNumber:number){
   return mapAntibody(await (await api.getByAccession(accesionNumber)).data);

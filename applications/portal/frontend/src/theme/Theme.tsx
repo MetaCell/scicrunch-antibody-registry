@@ -103,6 +103,11 @@ const theme = createTheme({
           text-align: center;
           background-color: "#eeeeee";
         }
+        #root {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
         
 
         ::-webkit-scrollbar-thumb {
@@ -232,7 +237,7 @@ const theme = createTheme({
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          background: "white",
+          background: "transparent",
           color: "#98A2B3",
           maxWidth: "30rem",
         }
