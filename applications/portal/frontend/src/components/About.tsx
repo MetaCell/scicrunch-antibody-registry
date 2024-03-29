@@ -196,7 +196,10 @@ const About = () => {
     { name: 'Institute for Protein Innovation', url: 'https://proteininnovation.org/', img: './assets/partners/Institute_for_Protein_Innovation.png' },
     { name: 'Fujirebio', url: 'https://www.fujirebio.com/en', img: './assets/partners/Fujirebio.jpeg' },
     { name: 'Boster Biological Technology', url: 'https://www.bosterbio.com/', img: './assets/partners/Boster_Biological-logo.png' },
-    { name: 'Fujifilm Wako USA', url: 'https://wakousa.com/', img: './assets/partners/fujifilm-wako-chemicals-usa-corporation-logo-vector.png' }
+    { name: 'Fujifilm Wako USA', url: 'https://wakousa.com/', img: './assets/partners/fujifilm-wako-chemicals-usa-corporation-logo-vector.png' },
+    { name: 'Active Motif', url: 'https://www.activemotif.com/', img: './assets/partners/Active-Motif.jpg' },
+    { name: 'Life Canvas Technologies', url: 'https://lifecanvastech.com/', img: './assets/partners/LifeCanvas.jpeg' },
+    { name: 'AdipoGen Life Sciences', url: 'https://adipogen.com/', img: './assets/partners/AdipoGen_Logo_LIFE_SCIENCES_CMYK_2015_NEW_13cm_lowres.jpg' }
   ]
   const history = useHistory();
   const navigate = () => history.push('/');
@@ -230,7 +233,7 @@ const About = () => {
                       display: 'flex !important',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      height: '85px',
+                      height: '150px',
                       width: '150px',
                     }}>
                       <Box
