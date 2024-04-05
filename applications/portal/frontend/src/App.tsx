@@ -18,6 +18,7 @@ import SearchState from "./context/search/SearchState";
 import * as UserService from "./services/UserService";
 import UpdateForm from "./components/Update/UpdateForm";
 import Footer from "./components/Footer/Footer";
+import DownloadPage from "./components/DownloadPage";
 
 function SearchRedirect() {
   const searchParams = new URLSearchParams(window.location.search);
@@ -106,6 +107,11 @@ const App = () => {
               <Route path="/faq">
                 <Navbar />
                 <FAQs />
+                <Footer/>
+              </Route>
+              <Route path="/download">
+                <Navbar />
+                <DownloadPage />
                 <Footer/>
               </Route>
               <Route path="/contact-us">
