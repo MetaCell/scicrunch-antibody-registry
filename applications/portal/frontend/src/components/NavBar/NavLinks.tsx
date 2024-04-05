@@ -56,7 +56,7 @@ const NavLinks = () => {
       {
         user && 
         <LinkButton
-          className={"download" ==  location.pathname ? "selected" : ""}
+          className={"/download" ==  location.pathname ? "selected" : ""}
           label={"Download"}
           href={"/download"}
           onClick={(e) => {e.preventDefault(); history.push("/download")}}
