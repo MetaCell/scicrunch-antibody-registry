@@ -53,7 +53,7 @@ def get_antibody(antibody_id: int, status=STATUS.CURATED, filters=None) -> List[
     try:
         antibody = Antibody.objects.filter(ab_id=antibody_id, status=status).filter(
             convert_filters_to_q(filters)
-        )
+        ).select_related("vendor", "source_organism").prefetch_related("species").prefetch_related("applications")
         return [antibody_mapper.to_dto(a) for a in antibody]
     except Antibody.DoesNotExist:
         return None
@@ -61,7 +61,7 @@ def get_antibody(antibody_id: int, status=STATUS.CURATED, filters=None) -> List[
 
 def get_antibody_by_accession(accession: int) -> List[AntibodyDTO]:
     try:
-        return antibody_mapper.to_dto(Antibody.objects.get(accession=accession))
+        return antibody_mapper.to_dto(Antibody.objects.get(accession=accession).select_related("vendor", "source_organism").prefetch_related("species").prefetch_related("applications"))
     except Antibody.DoesNotExist:
         raise
     except Antibody.MultipleObjectsReturned:
