@@ -249,6 +249,7 @@ class Antibody(models.Model):
         max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, null=True, db_index=True, blank=True)
     defining_citation = models.CharField(
         max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True, blank=True, db_index=False)
+    citation = models.IntegerField(null=True, blank=True, db_index=True)
     product_form = models.CharField(
         max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True, db_index=True, blank=True)
     comments = models.TextField(null=True, blank=True, db_index=False)
@@ -277,7 +278,7 @@ class Antibody(models.Model):
         if first_save:
             super().save()
             self._handle_duplicates()
-        
+
         if self.catalog_num:
             self.catalog_num_search = catalog_number_chunked(self.catalog_num, self.cat_alt)
 
@@ -312,12 +313,10 @@ class Antibody(models.Model):
         if update_search and self.status == STATUS.CURATED:
             refresh_search_view()
 
-
     def _has_target_species_raw_changed(self, old_instance):
         if old_instance:
             return self.target_species_raw != old_instance.target_species_raw
         return self.target_species_raw is not None
-
 
     def delete(self, *args, **kwargs):
         super(Antibody, self).delete(*args, **kwargs)
@@ -399,10 +398,6 @@ class Antibody(models.Model):
                     self.species.add(specie)
 
         self._fill_target_species_raw_from_species()
-
-
-
-
 
     def _target_species_from_raw(self):
         species = []
@@ -494,7 +489,6 @@ class Antibody(models.Model):
                     if base_url:
                         self.add_vendor_domain(base_url, vendor)
                     return
-
 
             # Vendor domain matched one way or the other, so associate to existing vendor
             if len(vds) > 1:
