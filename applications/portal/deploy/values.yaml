@@ -70,6 +70,8 @@ harness:
   test:
     e2e:
       enabled: true
+  secrets:
+    scicrunch-api-key: 
 
 export_query: "SELECT 'AB_' || ab_id as rrid, ab_name, catalog_num, cat_alt, api_vendor.vendor as vendor_name, api_vendor.vendor || ' Cat# ' || catalog_num || ', RRID:AB_' || ab_id AS proper_citation from api_antibody LEFT JOIN api_vendor on api_vendor.id = vendor_id WHERE true"
 
@@ -82,5 +84,4 @@ sentry:
     "/admin/": 0.002
 scicrunch:
   cronjob:
-    # every 2 weeks
-    schedule: "0 0 1 */2 *"
+    schedule: "0 0 1,15 * *"
