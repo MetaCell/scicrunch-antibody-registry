@@ -1,0 +1,379 @@
+# Source: cloudharness/templates/auto-compose.yaml
+version: '3.7'
+
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    networks:
+    - ch
+    command:
+    - --log.level=INFO
+    - --api.insecure=true
+    - --providers.docker=true
+    - --providers.docker.exposedbydefault=false
+    - --entrypoints.web.address=:80
+    - --entrypoints.websecure.address=:443
+    - --providers.file.directory=/etc/traefik/dynamic_conf
+    ports:
+    - 80:80
+    - 443:443
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - ./certs/:/certs/:ro
+    - ./traefik.yaml:/etc/traefik/dynamic_conf/conf.yml:ro
+  accounts:
+    networks:
+    - ch
+    image: cloudharness/accounts:latest
+
+    expose:
+    - 8080
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: 500m
+          memory: 1024M
+        reservations:
+          cpus: 10m
+          memory: 512M
+    healthcheck:
+      test: [CMD, curl, -f, http://127.0.0.1:8080/auth/realms/areg/account]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+    environment:
+    - CH_CURRENT_APP_NAME=accounts
+    - CH_VERSION=0.0.1
+    - CH_CHART_VERSION=0.0.1
+    - CH_ACCOUNTS_SUBDOMAIN=accounts
+    - CH_ACCOUNTS_NAME=accounts
+    - CH_ARGO_SUBDOMAIN=argo
+    - CH_ARGO_NAME=argo
+    - CH_COMMON_SUBDOMAIN=common
+    - CH_COMMON_NAME=common
+    - CH_EVENTS_SUBDOMAIN=events
+    - CH_EVENTS_NAME=events
+    - CH_ACCOUNTS_API_SUBDOMAIN=api.accounts
+    - CH_ACCOUNTS_API_NAME=accounts-api
+    - CH_PORTAL_SUBDOMAIN=www
+    - CH_PORTAL_NAME=portal
+    - CH_PGADMIN_SUBDOMAIN=pg
+    - CH_PGADMIN_NAME=pgadmin
+    - CH_DOMAIN=areg
+    - CH_IMAGE_REGISTRY=
+    - CH_IMAGE_TAG=latest
+    - CH_ACCOUNTS_CLIENT_SECRET=5678eb6e-9e2c-4ee5-bd54-34e7411339e8
+    - CH_ACCOUNTS_REALM=areg
+    - CH_ACCOUNTS_AUTH_DOMAIN=accounts.areg
+    - CH_ACCOUNTS_CLIENT_ID=rest-client
+    - DOMAIN=areg
+    - KEYCLOAK_IMPORT=/tmp/realm.json
+    - KEYCLOAK_USER=admin
+    - KEYCLOAK_PASSWORD=metacell
+    - PROXY_ADDRESS_FORWARDING=true
+    - DB_VENDOR=POSTGRES
+    - DB_ADDR=keycloak-postgres
+    - DB_DATABASE=auth_db
+    - DB_USER=user
+    - DB_PASSWORD=password
+    - JAVA_OPTS=-server -Xms64m -Xmx896m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m
+      -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman
+      -Djava.awt.headless=true  --add-exports=java.base/sun.nio.ch=ALL-UNNAMED --add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED
+      --add-exports=jdk.unsupported/sun.reflect=ALL-UNNAMED
+
+
+    volumes:
+    - ./compose/allvalues.yaml:/opt/cloudharness/resources/allvalues.yaml:ro
+    - ./compose/resources/generated/auth/api_user_password:/opt/cloudharness/resources/auth/api_user_password
+    - type: bind
+      source: ./compose/resources/generated/accounts/realm.json
+      target: /tmp/realm.json
+
+    labels:
+    - traefik.enable=true
+    - traefik.http.services.accounts.loadbalancer.server.port=8080
+      # - "traefik.http.middlewares.redirect-middleware.redirectscheme.scheme=https"
+      # - "traefik.http.routers..middlewares=redirect-middleware"
+    - traefik.http.routers.accounts.rule=Host(`accounts.areg`)
+    - traefik.http.routers.accounts.entrypoints=web
+  # Database type postgres named keycloak-postgres
+  keycloak-postgres:
+    networks:
+      ch:
+    image: postgres:10.4
+    expose:
+    - '5432'
+    deploy:
+      resources:
+        limits:
+          cpus: 1000m
+          memory: 2G
+        reservations:
+          cpus: 100m
+          memory: 512M
+    volumes:
+    - type: volume
+      source: keycloak-postgres
+      target: /data/db
+    - type: volume
+      source: dshm-keycloak-postgres
+      target: /dev/shm
+    environment:
+    - POSTGRES_DB=auth_db
+    - POSTGRES_USER=user
+    - POSTGRES_PASSWORD=password
+    - PGDATA=/data/db/pgdata
+  accounts_api:
+    networks:
+      ch:
+        aliases:
+        - accounts-api
+    image: cloudharness/accounts-api:latest
+
+    expose:
+    - 8080
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: 500m
+          memory: 500M
+        reservations:
+          cpus: 10m
+          memory: 32M
+    # entrypoint: python /usr/src/app/accounts_api/__main__.py
+    environment:
+    - CH_CURRENT_APP_NAME=accounts_api
+    - CH_VERSION=0.0.1
+    - CH_CHART_VERSION=0.0.1
+    - CH_ACCOUNTS_SUBDOMAIN=accounts
+    - CH_ACCOUNTS_NAME=accounts
+    - CH_ARGO_SUBDOMAIN=argo
+    - CH_ARGO_NAME=argo
+    - CH_COMMON_SUBDOMAIN=common
+    - CH_COMMON_NAME=common
+    - CH_EVENTS_SUBDOMAIN=events
+    - CH_EVENTS_NAME=events
+    - CH_ACCOUNTS_API_SUBDOMAIN=api.accounts
+    - CH_ACCOUNTS_API_NAME=accounts-api
+    - CH_PORTAL_SUBDOMAIN=www
+    - CH_PORTAL_NAME=portal
+    - CH_PGADMIN_SUBDOMAIN=pg
+    - CH_PGADMIN_NAME=pgadmin
+    - CH_DOMAIN=areg
+    - CH_IMAGE_REGISTRY=
+    - CH_IMAGE_TAG=latest
+    - CH_ACCOUNTS_CLIENT_SECRET=5678eb6e-9e2c-4ee5-bd54-34e7411339e8
+    - CH_ACCOUNTS_REALM=areg
+    - CH_ACCOUNTS_AUTH_DOMAIN=accounts.areg
+    - CH_ACCOUNTS_CLIENT_ID=rest-client
+    - DOMAIN=areg
+    links:
+    - accounts:accounts.areg
+
+
+    depends_on:
+    - accounts
+    volumes:
+    - ./compose/allvalues.yaml:/opt/cloudharness/resources/allvalues.yaml:ro
+
+    labels:
+    - traefik.enable=true
+    - traefik.http.services.accounts_api.loadbalancer.server.port=8080
+      # - "traefik.http.middlewares.redirect-middleware.redirectscheme.scheme=https"
+      # - "traefik.http.routers..middlewares=redirect-middleware"
+    - traefik.http.routers.accounts_api.rule=Host(`api.accounts.areg`)
+    - traefik.http.routers.accounts_api.entrypoints=web
+  common:
+    networks:
+    - ch
+    image: cloudharness/common:latest
+
+    expose:
+    - 8080
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: 200m
+          memory: 256M
+        reservations:
+          cpus: 50m
+          memory: 128M
+    # entrypoint: python /usr/src/app/common/__main__.py
+    environment:
+    - CH_CURRENT_APP_NAME=common
+    - CH_VERSION=0.0.1
+    - CH_CHART_VERSION=0.0.1
+    - CH_ACCOUNTS_SUBDOMAIN=accounts
+    - CH_ACCOUNTS_NAME=accounts
+    - CH_ARGO_SUBDOMAIN=argo
+    - CH_ARGO_NAME=argo
+    - CH_COMMON_SUBDOMAIN=common
+    - CH_COMMON_NAME=common
+    - CH_EVENTS_SUBDOMAIN=events
+    - CH_EVENTS_NAME=events
+    - CH_ACCOUNTS_API_SUBDOMAIN=api.accounts
+    - CH_ACCOUNTS_API_NAME=accounts-api
+    - CH_PORTAL_SUBDOMAIN=www
+    - CH_PORTAL_NAME=portal
+    - CH_PGADMIN_SUBDOMAIN=pg
+    - CH_PGADMIN_NAME=pgadmin
+    - CH_DOMAIN=areg
+    - CH_IMAGE_REGISTRY=
+    - CH_IMAGE_TAG=latest
+    - CH_ACCOUNTS_CLIENT_SECRET=5678eb6e-9e2c-4ee5-bd54-34e7411339e8
+    - CH_ACCOUNTS_REALM=areg
+    - CH_ACCOUNTS_AUTH_DOMAIN=accounts.areg
+    - CH_ACCOUNTS_CLIENT_ID=rest-client
+    - DOMAIN=areg
+    - SENTRY_DSN=https://57b1ca8a70634782bd6c90dd119eeab5@o4506739169951744.ingest.sentry.io/4506758817382404
+
+
+    volumes:
+    - ./compose/allvalues.yaml:/opt/cloudharness/resources/allvalues.yaml:ro
+
+    labels:
+    - traefik.enable=true
+    - traefik.http.services.common.loadbalancer.server.port=8080
+      # - "traefik.http.middlewares.redirect-middleware.redirectscheme.scheme=https"
+      # - "traefik.http.routers..middlewares=redirect-middleware"
+    - traefik.http.routers.common.rule=Host(`common.areg`)
+    - traefik.http.routers.common.entrypoints=web
+
+  # Gatekeeper for portal-gk  
+  portal-gk:
+    networks:
+    - ch
+    restart: always
+    image: quay.io/gogatekeeper/gatekeeper:1.3.8
+    expose:
+    - '8080'
+    - '8443'
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: 100m
+          memory: 64M
+        reservations:
+          cpus: 50m
+          memory: 32M
+    environment:
+    - PROXY_CONFIG_FILE=/opt/proxy.yml
+    volumes:
+    - ./compose/resources/generated/portal-gk/proxy.yml:/opt/proxy.yml
+    - ./compose/resources/generated/portal-gk/cacert.crt:/etc/pki/ca-trust/source/anchors/cacert.crt
+    - ./compose/resources/generated/portal-gk/access-denied.html.tmpl:/templates/access-denied.html.tmpl
+    labels:
+    - traefik.enable=true
+    - traefik.http.services.portal-gk.loadbalancer.server.port=8080
+    - traefik.http.routers.gatekeeper.middlewares=redirect-middleware
+    - traefik.http.routers.portal-gk.rule=Host(`www.areg`)
+    - traefik.http.routers.portal-gk.entrypoints=web
+    depends_on:
+      accounts:
+        condition: service_healthy
+    links:
+    - traefik:accounts.areg
+    - portal:portal.default
+  portal:
+    networks:
+    - ch
+    image: cloudharness/portal:latest
+
+    expose:
+    - 8080
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: 500m
+          memory: 500M
+        reservations:
+          cpus: 10m
+          memory: 32M
+    environment:
+    - CH_CURRENT_APP_NAME=portal
+    - CH_VERSION=0.0.1
+    - CH_CHART_VERSION=0.0.1
+    - CH_ACCOUNTS_SUBDOMAIN=accounts
+    - CH_ACCOUNTS_NAME=accounts
+    - CH_ARGO_SUBDOMAIN=argo
+    - CH_ARGO_NAME=argo
+    - CH_COMMON_SUBDOMAIN=common
+    - CH_COMMON_NAME=common
+    - CH_EVENTS_SUBDOMAIN=events
+    - CH_EVENTS_NAME=events
+    - CH_ACCOUNTS_API_SUBDOMAIN=api.accounts
+    - CH_ACCOUNTS_API_NAME=accounts-api
+    - CH_PORTAL_SUBDOMAIN=www
+    - CH_PORTAL_NAME=portal
+    - CH_PGADMIN_SUBDOMAIN=pg
+    - CH_PGADMIN_NAME=pgadmin
+    - CH_DOMAIN=areg
+    - CH_IMAGE_REGISTRY=
+    - CH_IMAGE_TAG=latest
+    - CH_ACCOUNTS_CLIENT_SECRET=5678eb6e-9e2c-4ee5-bd54-34e7411339e8
+    - CH_ACCOUNTS_REALM=areg
+    - CH_ACCOUNTS_AUTH_DOMAIN=accounts.areg
+    - CH_ACCOUNTS_CLIENT_ID=rest-client
+    - DOMAIN=areg
+    links:
+    - common:common.areg
+#     - events:events.areg
+    - accounts:accounts.areg
+    - accounts_api:accounts-api.areg
+
+
+    depends_on:
+    - common
+#     - events
+    - accounts
+    volumes:
+    - ./compose/allvalues.yaml:/opt/cloudharness/resources/allvalues.yaml:ro
+
+  # Database type postgres named portal-db
+  portal-db:
+    networks:
+      ch:
+    image: postgres:13
+    expose:
+    - '5432'
+    deploy:
+      resources:
+        limits:
+          cpus: 1000m
+          memory: 4G
+        reservations:
+          cpus: 200m
+          memory: 1G
+    volumes:
+    - type: volume
+      source: portal-db
+      target: /data/db
+    - type: volume
+      source: dshm-portal-db
+      target: /dev/shm
+    environment:
+    - POSTGRES_DB=antibody_registry
+    - POSTGRES_USER=mnp
+    - POSTGRES_PASSWORD=metacell
+    - PGDATA=/data/db/pgdata
+
+# Network definition
+networks:
+  ch:
+    name: ch_network
+volumes:
+  keycloak-postgres:
+  dshm-keycloak-postgres:
+  portal-db:
+  dshm-portal-db:
