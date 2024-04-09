@@ -4,7 +4,7 @@ argo-workflows==5.0.0
 asgiref==3.7.2
 attrs==23.2.0
 beautifulsoup4==4.12.3
-black==24.1.1
+black==24.3.0
 blinker==1.7.0
 Brotli @ file:///home/conda/feedstock_root/build_artifacts/brotli-split_1648883617327/work
 CacheControl @ file:///home/conda/feedstock_root/build_artifacts/cachecontrol-split_1706895135817/work
@@ -18,17 +18,17 @@ cloudharness @ file:///home/user/ucsd-antibody-registry/cloud-harness/libraries/
 -e git+https://github.com/MetaCell/cloud-harness.git@c958a9e17dd094c1b4990c177ed68536baabda0a#egg=cloudharness_django&subdirectory=infrastructure/common-images/cloudharness-django/libraries/cloudharness-django
 -e git+https://github.com/MetaCell/cloud-harness.git@c958a9e17dd094c1b4990c177ed68536baabda0a#egg=cloudharness_model&subdirectory=libraries/models
 colorama==0.4.6
-cryptography==42.0.2
+cryptography==42.0.4
 cyclonedx-python-lib @ file:///home/conda/feedstock_root/build_artifacts/cyclonedx-python-lib_1659363848869/work/dist
 datamodel-code-generator==0.11.19
 defusedxml==0.7.1
 deprecation==2.1.0
 diff-match-patch==20230430
-Django==4.2.10
+Django==4.2.11
 django-admin-extra-buttons==1.5.7
 django-import-export==3.0.1
 dnspython==2.5.0
-ecdsa==0.18.0
+ecdsa==0.19.0
 email-validator==2.1.0.post1
 et-xmlfile==1.1.0
 exceptiongroup==1.2.0
@@ -36,7 +36,7 @@ fastapi==0.109.2
 fastapi-code-generator==0.3.5
 filelock==3.13.1
 Flask==3.0.2
-fonttools==4.38.0
+fonttools==4.43.0
 gdown==5.1.0
 genson==1.2.2
 google-auth==2.27.0
@@ -72,7 +72,7 @@ packageurl-python @ file:///home/conda/feedstock_root/build_artifacts/packageurl
 packaging @ file:///home/conda/feedstock_root/build_artifacts/packaging_1696202382185/work
 pandas==1.4.4
 pathspec==0.12.1
-pillow==10.2.0
+pillow==10.3.0
 pip-api @ file:///home/conda/feedstock_root/build_artifacts/pip-api_1658274893957/work
 pip-requirements-parser @ file:///home/conda/feedstock_root/build_artifacts/pip-requirements-parser_1672265598496/work
 pip_audit @ file:///home/conda/feedstock_root/build_artifacts/pip-audit_1683232118275/work
@@ -130,7 +130,7 @@ urllib3 @ file:///home/conda/feedstock_root/build_artifacts/urllib3_170663804711
 uvicorn==0.17.6
 webencodings @ file:///home/conda/feedstock_root/build_artifacts/webencodings_1694681268211/work
 websocket-client==1.7.0
-Werkzeug==3.0.1
+Werkzeug==3.0.2
 xlrd==2.0.1
 xlwt==1.3.0
 zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1695255097490/work
