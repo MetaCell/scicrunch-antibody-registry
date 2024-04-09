@@ -1,6 +1,6 @@
 """
 This File is to get the citation metric from the 
-scricrunch API - https://api.scicrunch.io/elastic/v1/RIN_Tool_pr/_search?q=AB_90755&key={API_KEY}
+scricrunch API - https://api.scicrunch.io/elastic/v1/RIN_Tool_pr/_search?q=AB_90755&key={SCICRUNCH_API_KEY}
 
 """
 
@@ -9,7 +9,7 @@ from api.models import Antibody, STATUS
 from django.core.management.base import BaseCommand
 from cloudharness.utils.secrets import get_secret
 
-scicrunch_api_key = get_secret("API_KEY")
+scicrunch_api_key = get_secret("SCICRUNCH_API_KEY")
 
 def get_json_body(ab_id):
     return {
