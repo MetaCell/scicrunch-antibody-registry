@@ -36,7 +36,10 @@ jobs:
 
       - name: Build an image from Dockerfile
         run: |
+          ls
+          ls cloud-harness/infrastructure/base-images
           DOCKER_BUILDKIT=1 docker build -t cloudharness-base-debian:${{ github.sha }} cloud-harness -f ./cloud-harness/infrastructure/base-images/cloudharness-base-debian/Dockerfile
+          ls cloud-harness/infrastructure/common-images
           DOCKER_BUILDKIT=1 docker build -t cloudharness-django:${{ github.sha }} --build-arg CLOUDHARNESS_BASE_DEBIAN=cloudharness-base-debian:${{ github.sha }} ./cloud-harness/infrastructure/common-images/cloudharness-django/Dockerfile
           DOCKER_BUILDKIT=1 docker build -t portal:${{ github.sha }}  --build-arg CLOUDHARNESS_DJANGO=cloudharness-django:${{ github.sha }} ./applications/portal/Dockerfile
 
