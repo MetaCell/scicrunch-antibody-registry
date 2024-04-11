@@ -36,20 +36,21 @@ jobs:
 
       - name: Build an image from Dockerfile
         run: |
+          ls
+          ls cloud-harness/infrastructure/base-images
           DOCKER_BUILDKIT=1 docker build -t cloudharness-base-debian:${{ github.sha }} cloud-harness -f ./cloud-harness/infrastructure/base-images/cloudharness-base-debian/Dockerfile
-          DOCKER_BUILDKIT=1 docker build -t cloudharness-django:${{ github.sha }} --build-arg CLOUDHARNESS_BASE_DEBIAN=cloudharness-base-debian:${{ github.sha }} ./cloud-harness/infrastructure/common-images/cloudharness-django/Dockerfile
-          DOCKER_BUILDKIT=1 docker build -t portal:${{ github.sha }}  --build-arg CLOUDHARNESS_DJANGO=cloudharness-django:${{ github.sha }} ./applications/portal/Dockerfile
+          ls ./cloud-harness/infrastructure/common-images/cloudharness-django/Dockerfile
+          DOCKER_BUILDKIT=1 docker build -t cloudharness-django:${{ github.sha }} --build-arg CLOUDHARNESS_BASE_DEBIAN=cloudharness-base-debian:${{ github.sha }} ./cloud-harness/infrastructure/common-images/cloudharness-django
+          DOCKER_BUILDKIT=1 docker build -t portal:${{ github.sha }}  --build-arg CLOUDHARNESS_DJANGO=cloudharness-django:${{ github.sha }} ./applications/portal
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@2a2157eb22c08c9a1fac99263430307b8d1bc7a2
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'portal:${{ github.sha }}'
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
+          format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
-
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'trivy-results.sarif'
