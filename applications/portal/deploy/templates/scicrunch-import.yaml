@@ -10,7 +10,7 @@ spec:
         spec:
           containers:
           - name: hello
-            image: {{ .Values.apps.portal.deployment.image }}
+            image: {{ .Values.apps.portal.harness.deployment.image }}
             imagePullPolicy: IfNotPresent
             command:
             - python 

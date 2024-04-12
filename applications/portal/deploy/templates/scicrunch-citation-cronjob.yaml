@@ -28,8 +28,18 @@ spec:
             - name: cloudharness-allvalues
               mountPath: /opt/cloudharness/resources
               readOnly: true
+            {{- if .Values.apps.portal.harness.secrets }}
+            - name: secrets
+              mountPath: "/opt/cloudharness/resources/secrets"
+              readOnly: true
+            {{- end }}
           restartPolicy: OnFailure
           volumes:
           - name: cloudharness-allvalues
             configMap:
               name: cloudharness-allvalues
+          {{- if .Values.apps.portal.harness.secrets }}
+          - name: secrets
+            secret:
+              secretName: {{ .Values.apps.portal.harness.deployment.name }}
+          {{- end }}
