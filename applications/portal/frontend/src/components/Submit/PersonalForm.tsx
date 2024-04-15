@@ -226,7 +226,7 @@ const PersonalForm = (props) => {
                 <Box>
                   <Input
                     name="vendor"
-                    label="Principal Investigator - Institution or Vendor"
+                    label="Principal Investigator/Institution"
                     required={true}
                     formik={formik}
                     placeholder="(e.g. J. Doe - Harvard)"
@@ -239,7 +239,7 @@ const PersonalForm = (props) => {
                 <Box>
                   <Input
                     name="url"
-                    label="Principal Investigator's/Institution's Website or Vendor Website"
+                    label="Principal Investigator's/Institution's Website"
                     required={true}
                     formik={formik}
                     placeholder="http:// or https://"
@@ -248,7 +248,7 @@ const PersonalForm = (props) => {
                 <Box>
                   <Input
                     name="name"
-                    label="Principal Investigator's/Institution's Website"
+                    label="Antibody name"
                     required={true}
                     formik={formik}
                     placeholder="Anti-phospho-Glo1(Y136) Antibody"

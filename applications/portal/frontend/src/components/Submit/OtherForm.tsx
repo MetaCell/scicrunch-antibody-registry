@@ -228,7 +228,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
                 <Box>
                   <Input
                     name="vendor"
-                    label="Vendor"
+                    label="Principal Investigator/Institution"
                     required={true}
                     formik={formik}
                     placeholder="(e.g. J. Doe - Harvard)"
@@ -241,7 +241,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
                 <Box>
                   <Input
                     name="url"
-                    label="Vendor Link"
+                    label="Principal Investigator's/Institution's Website"
                     required={true}
                     formik={formik}
                     placeholder="http:// or https://"
@@ -250,7 +250,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
                 <Box>
                   <Input
                     name="name"
-                    label="Principal Investigator's/Institution's Website"
+                    label="Antibody name"
                     required={true}
                     formik={formik}
                     placeholder="Anti-phospho-Glo1(Y136) Antibody"
