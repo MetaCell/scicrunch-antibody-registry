@@ -109,10 +109,10 @@ class AntibodiesTestCase(TestCase):
         a.save()
 
         duplicated = AddAntibodyDTO(**example_ab)
-        with self.assertRaises(DuplicatedAntibody) as cm:
+        with self.assertRaises(DuplicatedAntibody) as exc:
             create_antibody(duplicated, "bbb")
 
-        da = cm.exception.antibody
+        da = exc.exception.antibody
         self.assertEqual(da.abId, ab.abId)
         self.assertEqual(da.status, Status.QUEUE)
         self.assertEqual(da.vendorId, ab.vendorId)
