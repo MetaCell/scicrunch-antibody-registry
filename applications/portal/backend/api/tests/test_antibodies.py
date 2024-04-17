@@ -1,8 +1,9 @@
 from django.test import TestCase
 from api.services.antibody_service import *
 from api.services.search_service import fts_antibodies
-from api.models import Vendor, VendorDomain
+from api.models import Vendor, VendorDomain, VendorSynonym
 from api.repositories.maintainance import refresh_search_view
+from api.utilities.exceptions import DuplicatedAntibody
 
 from openapi.models import (
     AddAntibody as AddAntibodyDTO,
@@ -54,8 +55,6 @@ class AntibodiesTestCase(TestCase):
         example_ab3['catalogNum'] = "N176A/786"
         ab_with_token_user = create_antibody(AddAntibodyDTO(**example_ab3), userid)
         self.assertEquals(ab_with_token_user.url, example_ab_url)
-
-
 
         self.assertIsNotNone(ab.insertTime)
 
@@ -110,14 +109,17 @@ class AntibodiesTestCase(TestCase):
         a.save()
 
         duplicated = AddAntibodyDTO(**example_ab)
-        # duplicated.vendorName = "My vendor synonym" # should keep the same vendor and add a synonym
-        da = create_antibody(duplicated, "bbb")
+        with self.assertRaises(DuplicatedAntibody) as cm:
+            create_antibody(duplicated, "bbb")
 
-        assert da.accession != da.abId
-        assert da.abId == ab.abId
-        assert da.status == Status.QUEUE
-        assert da.vendorId == ab.vendorId
-        assert da.vendorName == "My vendorname"
+        da = cm.exception.antibody
+        self.assertEqual(da.abId, ab.abId)
+        self.assertEqual(da.status, Status.QUEUE)
+        self.assertEqual(da.vendorId, ab.vendorId)
+        self.assertEqual(da.vendorName, "My vendorname")
+
+        # synonyms = VendorSynonym.objects.filter(vendor__id=da.vendorId)
+        # self.assertEqual(len(synonyms), 1)
 
         assert VendorDomain.objects.all().count() == 2
         assert Vendor.objects.all().count() == 1
