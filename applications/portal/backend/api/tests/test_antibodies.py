@@ -118,9 +118,6 @@ class AntibodiesTestCase(TestCase):
         self.assertEqual(da.vendorId, ab.vendorId)
         self.assertEqual(da.vendorName, "My vendorname")
 
-        # synonyms = VendorSynonym.objects.filter(vendor__id=da.vendorId)
-        # self.assertEqual(len(synonyms), 1)
-
         assert VendorDomain.objects.all().count() == 2
         assert Vendor.objects.all().count() == 1
 
