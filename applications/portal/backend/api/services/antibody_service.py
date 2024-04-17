@@ -46,7 +46,7 @@ def create_antibody(body: AddAntibodyDTO, userid: str) -> AntibodyDTO:
     antibody.uid = userid
     antibody.save()
 
-    if antibody.get_duplicate():
+    if antibody.accession != antibody.ab_id:
         raise DuplicatedAntibody(antibody_mapper.to_dto(antibody))
 
     return antibody_mapper.to_dto(antibody)
