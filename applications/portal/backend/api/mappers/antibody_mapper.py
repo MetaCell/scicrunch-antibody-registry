@@ -22,10 +22,11 @@ dto_fields = {to_snake(f) for f in AntibodyDTO.__fields__}
 def extract_base_url(url):
     return urlsplit(url).hostname
 
-@cache
-def get_vendor_domains(vendor_id):
-    return [vd.base_url for vd in VendorDomain.objects.filter(
-                        vendor_id=vendor_id)]
+
+def get_vendor_domains(vendor):
+    return list(vendor.vendordomain_set.values_list("base_url", flat=True))
+
+
 class AntibodyMapper(IDAOMapper):
 
     def from_dto(self, dto: AntibodyDTO) -> Antibody:
@@ -123,13 +124,12 @@ class AntibodyMapper(IDAOMapper):
             ab.abTargetUniprotId = dao.uniprot_id
         if dao.vendor:
             ab.vendorName = dao.vendor.name
-            ab.vendorUrl = get_vendor_domains(dao.vendor.id)
+            ab.vendorUrl = get_vendor_domains(dao.vendor)
         if dao.source_organism:
             ab.sourceOrganism = dao.source_organism.name
         if dao.species and not ab.targetSpecies:
             ab.targetSpecies = [s.name for s in dao.species.all()]
-        
-            
+
         ab.url = get_url_if_permitted(dao)
 
         ab.showLink = dao.show_link if dao.show_link is not None else (dao.vendor and dao.vendor.show_link)

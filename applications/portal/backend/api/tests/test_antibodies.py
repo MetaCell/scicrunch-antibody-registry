@@ -224,3 +224,138 @@ class AntibodiesTestCase(TestCase):
         dao.target_species_raw = "mouse,human,rat,human,mouse"
         dao.save()
         assert dao.species.count() == 3
+
+    @staticmethod
+    def curate_test_antibody_data(ab):
+        a: Antibody = Antibody.objects.get(ab_id=ab.abId)
+        a.status = STATUS.CURATED
+        a.save()
+
+    @staticmethod
+    def curate_vendor_domains_for_antibody(ab):
+        a: Antibody = Antibody.objects.get(ab_id=ab.abId)
+        for domain in a.vendor.vendordomain_set.all():
+            domain.status = STATUS.CURATED
+            domain.save()
+
+    def test_antibody_create__vendors(self):
+        """
+        If a new antibody is submitted with some vendor name and URL
+        should be treated with following rules:
+        - If both domain and vendor name are not recognized,
+            a new vendor is created and the new domain is attached to the vendor.
+        - If both domain and vendor name are recognized,
+            the domain is prioritized. And vendor name is added as a synonym.
+        - If the domain is not recognized but vendor name is recognized,
+            the new domain is attached to the vendor recognized.
+        - If domain is recognized and vendor name is not recognized,
+            we add a vendor synonym
+        """
+        # Vendor recognition priority is domain > vendor name
+
+        ### first antibody ###
+        ab = create_antibody(AddAntibodyDTO(**example_ab), "aaaa")
+        self.assertEquals(ab.vendorName, "My vendorname")
+        self.assertIn(
+            "www.bdbiosciences.com",
+            ab.vendorUrl,
+        )
+        self.curate_test_antibody_data(ab)
+        ab = get_antibody(ab.abId)[0]  ## returns a list - get the first one
+
+        self.curate_vendor_domains_for_antibody(ab)
+
+        # Number of vendors 1 and vendor domain 1
+        self.assertEquals(VendorDomain.objects.count(), 1)
+        self.assertEquals(Vendor.objects.count(), 1)
+
+        ### both domain and vendor name are not recognized  ###
+        # will create a new vendor since both vendor name and url are different
+        modified_example_ab = example_ab.copy()
+        modified_example_ab["vendorName"] = "My vendorname23"
+        modified_example_ab["url"] = "https://www.areg.dev.metacell.us"
+        modified_example_ab["catalogNum"] = "N176AB_23/35_SD_WEER"
+        ab2 = create_antibody(AddAntibodyDTO(**modified_example_ab), "aaaa")
+        self.curate_test_antibody_data(ab2)
+        self.curate_vendor_domains_for_antibody(ab2)
+        ab2 = get_antibody(ab2.abId)[0]
+
+        self.assertNotEquals(ab2.vendorName, ab.vendorName)
+        self.assertNotEqual(ab2.vendorId, ab.vendorId)
+        self.assertNotEqual(ab2.vendorUrl, ab.vendorUrl)
+
+        # Number of vendors 2, vendor domain 2
+        self.assertEquals(VendorDomain.objects.count(), 2)
+        self.assertEquals(Vendor.objects.count(), 2)
+
+        # Before the vendor synonym is saved in the operation below, check should be empty
+        self.assertEquals(VendorSynonym.objects.count(), 0)
+
+        # Both domain and vendor name are recognized ->
+        # domain is prioritized and vendor name is added as synonym
+        modified_example_ab = example_ab.copy()
+        modified_example_ab["url"] = "https://www.bdbiosciences.com/"
+        modified_example_ab["vendorName"] = "My vendorname23"
+        modified_example_ab["catalogNum"] = "N176AB_23/35_SD"
+        ab3 = create_antibody(AddAntibodyDTO(**modified_example_ab), "aaaa")
+        self.curate_test_antibody_data(ab3)
+        ab3 = get_antibody(ab3.abId)[0]
+        self.assertEquals(ab3.vendorName, ab.vendorName)
+        self.assertEqual(ab3.vendorId, ab.vendorId)
+        self.assertEqual(ab3.vendorUrl, ab.vendorUrl)
+
+        # Number of vendors 2, vendor domain 2
+        self.assertEquals(VendorDomain.objects.count(), 2)
+        self.assertEquals(Vendor.objects.count(), 2)
+
+        # the above should add a new vendor synonym
+        self.assertEquals(VendorSynonym.objects.count(), 1)
+
+        ### the domain is not recognized but vendor name is recognized. ###
+        modified_example_ab = example_ab.copy()
+        modified_example_ab["url"] = "https://www.googol.com/"
+        modified_example_ab["vendorName"] = "My vendorname23"
+        modified_example_ab["catalogNum"] = "N176AB_23/35_SD"
+        ab4 = create_antibody(AddAntibodyDTO(**modified_example_ab), "aaaa")
+        self.curate_test_antibody_data(ab4)
+        self.curate_vendor_domains_for_antibody(ab4)
+        ab4 = get_antibody(ab4.abId)[0]
+
+        self.assertEquals(ab4.vendorName, ab2.vendorName)
+        self.assertEqual(ab4.vendorId, ab2.vendorId)
+
+        # Number of vendors 2, vendor domain 3 - the new url is attached to the vendor recognized
+        self.assertEqual(ab4.vendorUrl, ab2.vendorUrl + ["www.googol.com"])
+        self.assertEquals(VendorDomain.objects.count(), 3)
+        self.assertEquals(Vendor.objects.count(), 2)
+
+        ### Both domain and vendor name are not recognized ###
+        modified_example_ab = example_ab.copy()
+        modified_example_ab["url"] = "https://www.anitbody.com/"
+        modified_example_ab["vendorName"] = "John Doe vendorname"
+        modified_example_ab["catalogNum"] = "N176AB_23/35_SD_456"
+        ab5 = create_antibody(AddAntibodyDTO(**modified_example_ab), "aaaa")
+        self.curate_test_antibody_data(ab5)
+        ab5 = get_antibody(ab5.abId)[0]
+
+        # this creates a new vendor domain and vendor
+        # Number of vendors 3, vendor domain 4
+        self.assertEqual(VendorDomain.objects.count(), 4)
+        self.assertEqual(Vendor.objects.count(), 3)
+
+        ### domain is recognized but vendor name is not recognized ###
+        # should also create a new vendor synonym
+        modified_example_ab = example_ab.copy()
+        modified_example_ab["url"] = "https://www.bdbiosciences.com/"
+        modified_example_ab["vendorName"] = "Stephen Hawking"
+        modified_example_ab["catalogNum"] = "N176AB_23/35_IPL"
+        ab6 = create_antibody(AddAntibodyDTO(**modified_example_ab), "aaaa")
+        self.curate_test_antibody_data(ab6)
+        ab6 = get_antibody(ab6.abId)[0]
+
+        self.assertEquals(ab6.vendorName, ab.vendorName)
+        self.assertEqual(ab6.vendorId, ab.vendorId)
+        self.assertEqual(ab6.vendorUrl, ab.vendorUrl)
+
+        # A new vendor synonym is added, since vendor name is not recognized
+        self.assertEquals(VendorSynonym.objects.count(), 2)
