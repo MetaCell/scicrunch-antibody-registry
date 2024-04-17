@@ -24,7 +24,7 @@ def extract_base_url(url):
 
 
 def get_vendor_domains(vendor):
-    return list(vendor.vendordomain_set.values_list("base_url", flat=True))
+    return [vd.base_url for vd in VendorDomain.objects.filter(vendor_id=vendor.id, status=STATUS.CURATED)]
 
 
 class AntibodyMapper(IDAOMapper):
