@@ -23,8 +23,8 @@ def extract_base_url(url):
     return urlsplit(url).hostname
 
 
-def get_vendor_domains(vendor):
-    return [vd.base_url for vd in VendorDomain.objects.filter(vendor_id=vendor.id, status=STATUS.CURATED)]
+def get_vendor_domains(vendor_id):
+    return [vd.base_url for vd in VendorDomain.objects.filter(vendor_id=vendor_id, status=STATUS.CURATED)]
 
 
 class AntibodyMapper(IDAOMapper):
@@ -124,7 +124,7 @@ class AntibodyMapper(IDAOMapper):
             ab.abTargetUniprotId = dao.uniprot_id
         if dao.vendor:
             ab.vendorName = dao.vendor.name
-            ab.vendorUrl = get_vendor_domains(dao.vendor)
+            ab.vendorUrl = get_vendor_domains(dao.vendor.id)
         if dao.source_organism:
             ab.sourceOrganism = dao.source_organism.name
         if dao.species and not ab.targetSpecies:
