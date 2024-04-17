@@ -262,8 +262,8 @@ class AntibodiesTestCase(TestCase):
         self.curate_vendor_domains_for_antibody(ab)
 
         # Number of vendors 1 and vendor domain 1
-        self.assertEquals(len(VendorDomain.objects.all()), 1)
-        self.assertEquals(len(Vendor.objects.all()), 1)
+        self.assertEquals(VendorDomain.objects.count(), 1)
+        self.assertEquals(Vendor.objects.count(), 1)
 
         ### both domain and vendor name are not recognized  ###
         # will create a new vendor since both vendor name and url are different
@@ -281,8 +281,8 @@ class AntibodiesTestCase(TestCase):
         self.assertNotEqual(ab2.vendorUrl, ab.vendorUrl)
 
         # Number of vendors 2, vendor domain 2
-        self.assertEquals(len(VendorDomain.objects.all()), 2)
-        self.assertEquals(len(Vendor.objects.all()), 2)
+        self.assertEquals(VendorDomain.objects.count(), 2)
+        self.assertEquals(Vendor.objects.count(), 2)
 
         # Before the vendor synonym is saved in the operation below, check should be empty
         self.assertEquals(VendorSynonym.objects.count(), 0)
@@ -301,8 +301,8 @@ class AntibodiesTestCase(TestCase):
         self.assertEqual(ab3.vendorUrl, ab.vendorUrl)
 
         # Number of vendors 2, vendor domain 2
-        self.assertEquals(len(VendorDomain.objects.all()), 2)
-        self.assertEquals(len(Vendor.objects.all()), 2)
+        self.assertEquals(VendorDomain.objects.count(), 2)
+        self.assertEquals(Vendor.objects.count(), 2)
 
         # the above should add a new vendor synonym
         self.assertEquals(VendorSynonym.objects.count(), 1)
@@ -322,8 +322,8 @@ class AntibodiesTestCase(TestCase):
 
         # Number of vendors 2, vendor domain 3 - the new url is attached to the vendor recognized
         self.assertEqual(ab4.vendorUrl, ab2.vendorUrl + ["www.googol.com"])
-        self.assertEquals(len(VendorDomain.objects.all()), 3)
-        self.assertEquals(len(Vendor.objects.all()), 2)
+        self.assertEquals(VendorDomain.objects.count(), 3)
+        self.assertEquals(Vendor.objects.count(), 2)
 
         ### Both domain and vendor name are not recognized ###
         modified_example_ab = example_ab.copy()
@@ -336,8 +336,8 @@ class AntibodiesTestCase(TestCase):
 
         # this creates a new vendor domain and vendor
         # Number of vendors 3, vendor domain 4
-        self.assertEqual(len(VendorDomain.objects.all()), 4)
-        self.assertEqual(len(Vendor.objects.all()), 3)
+        self.assertEqual(VendorDomain.objects.count(), 4)
+        self.assertEqual(Vendor.objects.count(), 3)
 
         ### domain is recognized but vendor name is not recognized ###
         # should also create a new vendor synonym
