@@ -3,6 +3,7 @@ from api.services.antibody_service import *
 from api.services.search_service import fts_antibodies
 from api.models import Vendor, VendorDomain, VendorSynonym
 from api.repositories.maintainance import refresh_search_view
+from api.utilities.exceptions import DuplicatedAntibody
 
 from openapi.models import (
     AddAntibody as AddAntibodyDTO,
@@ -108,14 +109,14 @@ class AntibodiesTestCase(TestCase):
         a.save()
 
         duplicated = AddAntibodyDTO(**example_ab)
-        # duplicated.vendorName = "My vendor synonym" # should keep the same vendor and add a synonym
-        da = create_antibody(duplicated, "bbb")
+        with self.assertRaises(DuplicatedAntibody) as exc:
+            create_antibody(duplicated, "bbb")
 
-        assert da.accession != da.abId
-        assert da.abId == ab.abId
-        assert da.status == Status.QUEUE
-        assert da.vendorId == ab.vendorId
-        assert da.vendorName == "My vendorname"
+        da = exc.exception.antibody
+        self.assertEqual(da.abId, ab.abId)
+        self.assertEqual(da.status, Status.QUEUE)
+        self.assertEqual(da.vendorId, ab.vendorId)
+        self.assertEqual(da.vendorName, "My vendorname")
 
         assert VendorDomain.objects.all().count() == 2
         assert Vendor.objects.all().count() == 1
