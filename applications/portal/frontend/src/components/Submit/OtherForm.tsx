@@ -53,9 +53,11 @@ const styles ={
 };
 
 const requiredFieldValidation = yup.string().required("The field is mandatory");
+const validateCatalogNumber = yup.string().matches(/^[^#]+$/, 'The # character is not allowed in the catalog number').required('Catalog number is required')
+
 
 const validationSchema = yup.object().shape({
-  catalogNumber: requiredFieldValidation,
+  catalogNumber: validateCatalogNumber,
   vendor: requiredFieldValidation,
   name: requiredFieldValidation,
   host: requiredFieldValidation,
@@ -226,7 +228,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
                 <Box>
                   <Input
                     name="vendor"
-                    label="Vendor"
+                    label="Principal Investigator/Institution"
                     required={true}
                     formik={formik}
                     placeholder="(e.g. J. Doe - Harvard)"
@@ -239,7 +241,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
                 <Box>
                   <Input
                     name="url"
-                    label="Vendor Link"
+                    label="Principal Investigator's/Institution's Website"
                     required={true}
                     formik={formik}
                     placeholder="http:// or https://"
