@@ -111,7 +111,7 @@ class AntibodyAdmin(ImportExportModelAdmin):
 
     # list display settings
     list_filter = ("status",)
-    list_display = (id_with_ab, "ab_name", "submitter_name", "status", "vendor", "catalog_num", "accession", "insert_time")
+    list_display = (id_with_ab, "accession", "ab_name", "submitter_name", "status", "vendor", "catalog_num", "insert_time")
     search_fields = ("ab_id", "ab_name", "catalog_num")
 
     # Edit form settings
