@@ -99,6 +99,17 @@ class AntibodyFilesAdmin(admin.TabularInline):
     exclude = ("uploader_uid", 'filehash', 'timestamp', 'display_name')
     extra = 1
 
+
+antibody_fields_shown = (
+    "ab_name", "ab_id", "accession", "commercial_type", "catalog_num", "cat_alt", "vendor", 
+    "url","ab_target", "entrez_id", "uniprot_id", "target_species_raw", "subregion", 
+    "modifications", "epitope", "source_organism", "clonality", "clone_id", "product_isotype",
+    "product_conjugate", "defining_citation", "product_form", "comments", "applications", 
+    "kit_contents", "feedback", "curator_comment", "disc_date", "status", "show_link",
+    # also in the read-only fields
+    "uid", "uid_legacy", "insert_time", "lastedit_time", "curate_time",
+)
+
 @admin.register(Antibody)
 class AntibodyAdmin(ImportExportModelAdmin):
     
@@ -114,8 +125,9 @@ class AntibodyAdmin(ImportExportModelAdmin):
     list_display = (id_with_ab, "accession", "ab_name", "submitter_name", "status", "vendor", "catalog_num", "insert_time")
     search_fields = ("ab_id", "ab_name", "catalog_num")
 
-    # Edit form settings
-    exclude= ("catalog_num_search",)
+    # not in fields - catalog_num_search 
+    # the following - maintains the order of the fields
+    fields = antibody_fields_shown
 
     inlines = [TargetSpeciesInlineAdmin, AntibodyFilesAdmin]
     
