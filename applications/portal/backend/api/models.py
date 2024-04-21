@@ -441,7 +441,7 @@ class Antibody(models.Model):
             alt_url = "www." + url
         return alt_url
 
-    def check_vendor_name_or_create(self, name, base_url):
+    def check_vendor_name_or_create(self, name, base_url, commercial_type=None):
         try:
             vendor = Vendor.objects.get(name__iexact=name or base_url)
         except Vendor.MultipleObjectsReturned:
@@ -453,7 +453,9 @@ class Antibody(models.Model):
                 log.info(
                     "Creating new Vendor `%s` on domain  to `%s`", vendor_name, base_url
                 )
-                vendor = Vendor(name=vendor_name, commercial_type=self.commercial_type)
+
+                # if dto.commercialType is None then set COMMERCIAL as default
+                vendor = Vendor(name=vendor_name, commercial_type=commercial_type or CommercialType.COMMERCIAL)
                 vendor.save()
                 self.vendor = vendor
                 self.add_vendor_domain(base_url, vendor)
@@ -463,7 +465,7 @@ class Antibody(models.Model):
             self.vendor = vendor
             self.add_vendor_domain(base_url, vendor)
 
-    def set_vendor_from_name_url(self, url, name=None):
+    def set_vendor_from_name_url(self, url, name=None, commercial_type=None):
         """
         If a new antibody is submitted with some vendor name and URL
         should be treated with following rules:
@@ -489,7 +491,7 @@ class Antibody(models.Model):
 
         self.vendor = vds_total[0].vendor if len(vds_total) > 0 else None
 
-        self.check_vendor_name_or_create(name, base_url)
+        self.check_vendor_name_or_create(name, base_url, commercial_type)
         if len(vds_total) > 1:
             log.error("Unexpectedly found multiple vendor domains for %s", base_url)
 
