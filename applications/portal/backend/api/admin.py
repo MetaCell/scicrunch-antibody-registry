@@ -105,7 +105,7 @@ antibody_fields_shown = (
     "ab_name", "ab_id", "accession", "commercial_type", "catalog_num", "cat_alt", "vendor", 
     "url","ab_target", "entrez_id", "uniprot_id", "target_species_raw", "subregion", 
     "modifications", "epitope", "source_organism", "clonality", "clone_id", "product_isotype",
-    "product_conjugate", "defining_citation", "product_form", "comments", "applications", 
+    "product_conjugate", "defining_citation", "product_form", "comments",
     "kit_contents", "feedback", "curator_comment", "disc_date", "status", "show_link",
     # also in the read-only fields
     "uid", "uid_legacy", "insert_time", "lastedit_time", "curate_time",
@@ -129,7 +129,7 @@ class AntibodyAdmin(ImportExportModelAdmin):
     # the following - maintains the order of the fields
     fields = antibody_fields_shown
 
-    inlines = [TargetSpeciesInlineAdmin, AntibodyFilesAdmin]
+    inlines = [TargetSpeciesInlineAdmin, AntibodyFilesAdmin, ApplicationsInlineAdmin]
     
     readonly_fields = (
         "submitter_name",
