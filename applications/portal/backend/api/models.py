@@ -94,7 +94,7 @@ class Vendor(models.Model):
     commercial_type = models.CharField(
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
         choices=CommercialType.choices,
-        default=CommercialType.OTHER,
+        default=CommercialType.COMMERCIAL,
         null=True,
         db_index=True,
     )
