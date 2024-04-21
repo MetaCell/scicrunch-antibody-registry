@@ -58,7 +58,7 @@ const DuplicatedMsg = (props) => {
           </Typography>
         </Divider>
         <Typography variant="subtitle1" component="p" align="center" sx={styles.message} className="english-message">
-          The Antibody you Entered is a Duplicate, which will be Rejected. We
+          The Antibody you Entered is a Duplicate, and will be merged. We
           have found that the antibody you entered already exists in our system.
           The ID associated with the antibody is 
           
@@ -73,6 +73,7 @@ const DuplicatedMsg = (props) => {
         </Divider>
         <Typography variant="subtitle1" component="p" align="center" sx={styles.message} className="chinese-message">
           此次申请将会被拒绝，因为我们发现您所提交的抗体已经存在于我们的系统中，它的ID是
+          此次申请将会合并，因为我们发现您所提交的抗体已经存在于我们的系统中，它的ID是
         </Typography>
         <Typography variant="subtitle1" align="center" sx={{ ...styles.message, fontWeight: 700, fontSize: "1em" }}>
           RRID:AB_{props.antibodyId}.
