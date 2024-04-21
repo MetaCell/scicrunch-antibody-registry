@@ -36,6 +36,7 @@ class AntibodyMapper(IDAOMapper):
             ab = Antibody()
             ab.ab_id = 0
 
+
         if dto.abTarget:
             # antigen_symbol = dto.abTarget
             # del dto.abTarget
@@ -51,7 +52,10 @@ class AntibodyMapper(IDAOMapper):
                 log.info("Adding specie: %s", specie_name)
 
         if dto.url or dto.vendorName:
-            ab.set_vendor_from_name_url(url=dto.url, name=dto.vendorName)
+            ab.set_vendor_from_name_url(
+                url=dto.url, name=dto.vendorName, 
+                commercial_type=dto.commercialType.value if dto.commercialType else None
+            )
         else:
             raise AntibodyDataException(
                 "Either vendor url or name is mandatory", 'url/name', None)
