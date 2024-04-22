@@ -26,7 +26,7 @@ export interface SearchResult {
 const SearchState = (props) => {
   const [baseData, setBaseData] = useState({
     total: 0,
-    lastupdate: new Date(),
+    lastupdate: '-',
     error: false
   });
   const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
@@ -46,10 +46,11 @@ const SearchState = (props) => {
   })
 
   useEffect(() => {
-    getDataInfo().then((res) =>
-      setBaseData({ total: res.total, lastupdate: new Date(res.lastupdate), error: false })
-    ).catch((err) => {
-      setBaseData({ total: 0, lastupdate: new Date(), error: true })
+    getDataInfo().then((res) => {
+      const lastUpdate = new Date(res.lastupdate)
+      setBaseData({ total: res.total, lastupdate: lastUpdate.toDateString(), error: false })
+    }).catch((err) => {
+      setBaseData({ total: 0, lastupdate: '-', error: true })
       console.error("Error: ", err)
     })
   }, [])
