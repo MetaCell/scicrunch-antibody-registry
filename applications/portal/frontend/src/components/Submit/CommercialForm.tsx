@@ -21,6 +21,7 @@ import StepNavigation from "./StepNavigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { postNewAntibody } from "../../helpers/antibody";
+import { validateCatalogNumber } from "../../utils/antibody";
 
 const {
   bannerHeadingColor,
@@ -98,8 +99,9 @@ const styles = {
   }),
 };
 
+
 const validationSchema = yup.object().shape({
-  catalogNumber: yup.string().required("The field is mandatory"),
+  catalogNumber: validateCatalogNumber,
   url: yup
     .string()
     .url("Please enter a valid URL that starts with http or https")
