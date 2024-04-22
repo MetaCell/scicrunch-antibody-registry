@@ -357,7 +357,7 @@ export interface Antibody {
      */
     'accession'?: string;
     /**
-     * Can include: curated, rejected, queue 
+     * Can include: curated, rejected, queue, under_review 
      * @type {string}
      * @memberof Antibody
      */
@@ -577,7 +577,8 @@ export interface Antibody {
 export const AntibodyStatusEnum = {
     Curated: 'CURATED',
     Rejected: 'REJECTED',
-    Queue: 'QUEUE'
+    Queue: 'QUEUE',
+    UnderReview: 'UNDER_REVIEW'
 } as const;
 
 export type AntibodyStatusEnum = typeof AntibodyStatusEnum[keyof typeof AntibodyStatusEnum];
@@ -621,7 +622,7 @@ export interface AntibodyAllOf {
      */
     'accession'?: string;
     /**
-     * Can include: curated, rejected, queue 
+     * Can include: curated, rejected, queue, under_review 
      * @type {string}
      * @memberof AntibodyAllOf
      */
@@ -715,7 +716,8 @@ export interface AntibodyAllOf {
 export const AntibodyAllOfStatusEnum = {
     Curated: 'CURATED',
     Rejected: 'REJECTED',
-    Queue: 'QUEUE'
+    Queue: 'QUEUE',
+    UnderReview: 'UNDER_REVIEW'
 } as const;
 
 export type AntibodyAllOfStatusEnum = typeof AntibodyAllOfStatusEnum[keyof typeof AntibodyAllOfStatusEnum];
@@ -1219,7 +1221,7 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
          * @param {number} [size] Corresponds to the cardinality of antibodies requested
          * @param {string} [updatedFrom] start date to include. ISO format
          * @param {string} [updatedTo] end update date to include. ISO format
-         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE. 
+         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE, UNDER_REVIEW. 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1468,7 +1470,7 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
          * @param {number} [size] Corresponds to the cardinality of antibodies requested
          * @param {string} [updatedFrom] start date to include. ISO format
          * @param {string} [updatedTo] end update date to include. ISO format
-         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE. 
+         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE, UNDER_REVIEW. 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1557,7 +1559,7 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
          * @param {number} [size] Corresponds to the cardinality of antibodies requested
          * @param {string} [updatedFrom] start date to include. ISO format
          * @param {string} [updatedTo] end update date to include. ISO format
-         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE. 
+         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE, UNDER_REVIEW. 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1645,7 +1647,7 @@ export class AntibodyApi extends BaseAPI {
      * @param {number} [size] Corresponds to the cardinality of antibodies requested
      * @param {string} [updatedFrom] start date to include. ISO format
      * @param {string} [updatedTo] end update date to include. ISO format
-     * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE. 
+     * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE, UNDER_REVIEW. 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AntibodyApi
