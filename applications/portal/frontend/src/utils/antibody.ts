@@ -1,6 +1,7 @@
 import { GridFilterModel, GridColumnVisibilityModel } from "@mui/x-data-grid";
 import { Antibody, SearchCriteriaOptions } from "../rest";
 import { modelType } from "../constants/constants";
+import * as yup from "yup";
 
 
 export function getProperCitation(a: Antibody) {
@@ -100,3 +101,4 @@ export const getColumnsToDisplay = (columns) => {
   return showcolList;
 }
 
+export const validateCatalogNumber = yup.string().matches(/^[^#]+$/, 'The # character is not allowed in the catalog number').required('Catalog number is required')
