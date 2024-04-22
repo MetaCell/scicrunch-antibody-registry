@@ -437,8 +437,7 @@ components:
                                 different if antibody records have been consolidated or are not unique.
                             type: string
                         status:
-                            description: |
-                                Can include: curated, rejected, queue, under_review
+                            description: 'Can include: curated, rejected, queue, under_review'
                             enum:
                                 - CURATED
                                 - REJECTED
