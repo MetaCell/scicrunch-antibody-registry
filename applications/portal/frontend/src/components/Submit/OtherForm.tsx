@@ -18,6 +18,7 @@ import StepNavigation from "./StepNavigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { postNewAntibody } from "../../helpers/antibody";
+import { validateCatalogNumber } from "../../utils/antibody";
 
 const { bannerHeadingColor, primaryTextColor } = vars;
 
@@ -53,8 +54,6 @@ const styles ={
 };
 
 const requiredFieldValidation = yup.string().required("The field is mandatory");
-const validateCatalogNumber = yup.string().matches(/^[^#]+$/, 'The # character is not allowed in the catalog number').required('Catalog number is required')
-
 
 const validationSchema = yup.object().shape({
   catalogNumber: validateCatalogNumber,
