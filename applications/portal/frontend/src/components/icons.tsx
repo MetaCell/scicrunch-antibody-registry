@@ -616,15 +616,6 @@ export const AlertIcon = (props: SvgIconProps) => (
       strokeLinejoin="round"
       fill="none"
     />
-    <path
-      xmlns="http://www.w3.org/2000/svg"
-      d="M10.0003 12.5C11.381 12.5 12.5003 11.3807 12.5003 10C12.5003 8.61929 11.381 7.5 10.0003 7.5C8.61962 7.5 7.50034 8.61929 7.50034 10C7.50034 11.3807 8.61962 12.5 10.0003 12.5Z"
-      stroke="black"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round" 
-      fill="none"
-    />
   </SvgIcon>
 )
 

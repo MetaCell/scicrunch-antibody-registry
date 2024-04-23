@@ -1,6 +1,7 @@
 import { Button, Link } from "@mui/material";
 import React from "react";
 import { useHistory, useLocation } from "react-router-dom";
+import { UserContext } from "../../services/UserService";
 
 interface LinkButtonProps {
   label?: string;
@@ -40,6 +41,7 @@ const LINKS = [{ label: "Home", href: ["/", "/submissions"] }, { label: "About",
 const NavLinks = () => {
   const history = useHistory();
   const location = useLocation();
+  const user = React.useContext(UserContext)[0];
 
   return (
     <>
@@ -51,6 +53,15 @@ const NavLinks = () => {
           onClick={(e) => {e.preventDefault(); history.push(link.href[0])}}
         />
       ))} 
+      {
+        user && 
+        <LinkButton
+          className={"/download" ==  location.pathname ? "selected" : ""}
+          label={"Download"}
+          href={"/download"}
+          onClick={(e) => {e.preventDefault(); history.push("/download")}}
+        />
+      }
     </>
   );
 };

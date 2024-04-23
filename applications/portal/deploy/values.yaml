@@ -31,6 +31,8 @@ harness:
     - uri: /admin/*
       roles:
         - administrator
+    - uri: /api/antibodies/export
+      roles: []
     - uri: /admin
       roles:
         - administrator
@@ -78,3 +80,7 @@ sentry:
   traces_sample_rate_patterns:
     "/api/": 0.05
     "/admin/": 0.002
+scicrunch:
+  cronjob:
+    # every 2 weeks
+    schedule: "0 0 1 */2 *"

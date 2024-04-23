@@ -94,7 +94,7 @@ class Vendor(models.Model):
     commercial_type = models.CharField(
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
         choices=CommercialType.choices,
-        default=CommercialType.OTHER,
+        default=CommercialType.COMMERCIAL,
         null=True,
         db_index=True,
     )
@@ -277,7 +277,7 @@ class Antibody(models.Model):
         if first_save:
             super().save()
             self._handle_duplicates()
-        
+
         if self.catalog_num:
             self.catalog_num_search = catalog_number_chunked(self.catalog_num, self.cat_alt)
 
@@ -312,12 +312,10 @@ class Antibody(models.Model):
         if update_search and self.status == STATUS.CURATED:
             refresh_search_view()
 
-
     def _has_target_species_raw_changed(self, old_instance):
         if old_instance:
             return self.target_species_raw != old_instance.target_species_raw
         return self.target_species_raw is not None
-
 
     def delete(self, *args, **kwargs):
         super(Antibody, self).delete(*args, **kwargs)
@@ -400,10 +398,6 @@ class Antibody(models.Model):
 
         self._fill_target_species_raw_from_species()
 
-
-
-
-
     def _target_species_from_raw(self):
         species = []
         if self.target_species_raw:
@@ -439,70 +433,70 @@ class Antibody(models.Model):
             return duplicate_antibodies[0]
         return None
 
-    def set_vendor_from_name_url(self, url, name=None):
-        """
-        Sets vendor from name and url.
-
-        if the name exists:
-            if the url exists:
-                return existing vendor
-            else:
-                create new vendor domain and associate to existing vendor
+    @staticmethod
+    def get_alt_url_with_and_without_www(url):
+        if "www." in url:
+            alt_url = url.replace("www.", "")
         else:
-            if the url exists:
-                try to guess a vendor just by the url and add a vendor synonym
-            else if the url doesn't exist:
-                create a new vendor with the name from url
-            else:
-                do nothing
+            alt_url = "www." + url
+        return alt_url
+
+    def check_vendor_name_or_create(self, name, base_url, commercial_type=None):
+        try:
+            vendor = Vendor.objects.get(name__iexact=name or base_url)
+        except Vendor.MultipleObjectsReturned:
+            log.exception("Multiple vendors with name %s", name)
+            vendor = Vendor.objects.filter(name__iexact=name)[0]
+        except Vendor.DoesNotExist:
+            if not self.vendor:  ## if vendor is not set by vendor domain
+                vendor_name = name or base_url
+                log.info(
+                    "Creating new Vendor `%s` on domain  to `%s`", vendor_name, base_url
+                )
+
+                # if dto.commercialType is None then set COMMERCIAL as default
+                vendor = Vendor(name=vendor_name, commercial_type=commercial_type or CommercialType.COMMERCIAL)
+                vendor.save()
+                self.vendor = vendor
+                self.add_vendor_domain(base_url, vendor)
+            return
+
+        if not self.vendor:
+            self.vendor = vendor
+            self.add_vendor_domain(base_url, vendor)
+
+    def set_vendor_from_name_url(self, url, name=None, commercial_type=None):
+        """
+        If a new antibody is submitted with some vendor name and URL
+        should be treated with following rules:
+        - If both domain and vendor name are not recognized,
+            a new vendor is created and the new domain is attached to the vendor.
+        - If both domain and vendor name are recognized,
+            the domain is prioritized. And vendor name is added as a synonym.
+        - If the domain is not recognized but vendor name is recognized,
+            the new domain is attached to the vendor recognized.
+        - If domain is recognized and vendor name is not recognized,
+            we add a vendor synonym
         """
 
         base_url = url and extract_base_url(url)
-        try:
-            # First, try to match by exact name
-            vendor = Vendor.objects.get(name__iexact=name or base_url)
-            self.vendor = vendor
-            if base_url:
-                self.add_vendor_domain(base_url, vendor)
-        except Vendor.MultipleObjectsReturned:
-            log.exception("Multiple vendors with name %s", name)
-            vendor = self.vendor = Vendor.objects.filter(name__iexact=name or base_url)[0]
-            if base_url:
-                self.add_vendor_domain(base_url, vendor)
-        except Vendor.DoesNotExist:
-            # Then, try to match by domain
+        vds = VendorDomain.objects.filter(
+            base_url__iexact=base_url, status=STATUS.CURATED
+        )
+        alt_url = self.get_alt_url_with_and_without_www(url=base_url)
+        vds_alt = VendorDomain.objects.filter(
+            base_url__iexact=alt_url, status=STATUS.CURATED
+        )
+        vds_total = vds.union(vds_alt)
 
-            vds = VendorDomain.objects.filter(base_url__iexact=base_url, status=STATUS.CURATED)
-            if len(vds) == 0:
-                # If the domain is not matched, try to match by domain with and without www
+        self.vendor = vds_total[0].vendor if len(vds_total) > 0 else None
 
-                if "www." in base_url:
-                    alt_base_url = base_url.replace("www.", "")
-                else:
-                    alt_base_url = "www." + base_url
-                vds = VendorDomain.objects.filter(base_url__iexact=alt_base_url, status=STATUS.CURATED)
+        self.check_vendor_name_or_create(name, base_url, commercial_type)
+        if len(vds_total) > 1:
+            log.error("Unexpectedly found multiple vendor domains for %s", base_url)
 
-                if len(vds) == 0:
-                    # As it doesn't match, create a new vendor
-                    vendor_name = name or base_url
-                    log.info("Creating new Vendor `%s` on domain  to `%s`",
-                             vendor_name, base_url)
-                    vendor = Vendor(name=vendor_name,
-                                    commercial_type=self.commercial_type)
-                    vendor.save()
-                    self.vendor = vendor
-                    if base_url:
-                        self.add_vendor_domain(base_url, vendor)
-                    return
-
-
-            # Vendor domain matched one way or the other, so associate to existing vendor
-            if len(vds) > 1:
-                log.error("Unexpectedly found multiple vendor domains for %s", base_url)
-
-            self.vendor = vds[0].vendor
-            if name:
-                VendorSynonym.objects.create(vendor=self.vendor, name=name)
+        if len(vds_total) >= 1 and name:
+            VendorSynonym.objects.create(vendor=self.vendor, name=name)
 
     def add_vendor_domain(self, base_url, vendor):
         try:
