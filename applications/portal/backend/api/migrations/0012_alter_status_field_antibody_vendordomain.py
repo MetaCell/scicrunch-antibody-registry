@@ -64,8 +64,14 @@ class Migration(migrations.Migration):
             ), 'D'::"char")
 
             ) AS search_vector,
-            defining_citation,
-            disc_date,
+            CASE 
+                WHEN api_antibody.defining_citation ~ '^[0-9,]+$' THEN CAST(SPLIT_PART(api_antibody.defining_citation, ',', 1) AS INTEGER)
+                ELSE 10000000
+            END as defining_citation,
+            CASE 
+                WHEN disc_date IS NOT NULL THEN 1
+                ELSE 0
+            END AS disc,
             status
             FROM api_antibody 
             LEFT JOIN api_vendor ON api_vendor.id = api_antibody.vendor_id
@@ -87,5 +93,5 @@ class Migration(migrations.Migration):
                 fields=["search_vector"], name="antibody_search_fts_idx"
             ),
         )
-    ]
+]
     
