@@ -53,8 +53,15 @@ def create_antibody(body: AddAntibodyDTO, userid: str) -> AntibodyDTO:
 
 
 def get_antibody(antibody_id: int, status=STATUS.CURATED, filters=None) -> List[AntibodyDTO]:
+    """
+    Look for an antibody by its ab_id and accession number (if ab_id is not found).
+    """
     try:
-        antibody = Antibody.objects.filter(ab_id=antibody_id, status=status).filter(
+        antibody = Antibody.objects.filter(ab_id=antibody_id, status=status)
+        if not antibody:
+            antibody = Antibody.objects.filter(accession=antibody_id, status=status)
+        
+        antibody = antibody.filter(
             convert_filters_to_q(filters)
         ).select_related("vendor", "source_organism").prefetch_related("species").prefetch_related("applications")
         return [antibody_mapper.to_dto(a) for a in antibody]
