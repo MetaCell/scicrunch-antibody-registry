@@ -44,6 +44,9 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/proxy-read-timeout: '99999'
     nginx.ingress.kubernetes.io/proxy-send-timeout: '99999'
+    nginx.ingress.kubernetes.io/limit-connections: "5"
+    nginx.ingress.kubernetes.io/limit-rps: "20"
+
 spec:
   rules:
   {{- range $app := .Values.apps }}
