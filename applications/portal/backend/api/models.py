@@ -82,6 +82,7 @@ class STATUS(models.TextChoices):
     CURATED = 'CURATED', 'Curated'
     REJECTED = 'REJECTED', 'Rejected'
     QUEUE = 'QUEUE', 'Queued'
+    UNDER_REVIEW = 'UNDER_REVIEW', 'Under Review'
 
 
 class Vendor(models.Model):
