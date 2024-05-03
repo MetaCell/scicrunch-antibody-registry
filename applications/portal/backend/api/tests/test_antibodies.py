@@ -185,6 +185,17 @@ class AntibodiesTestCase(TestCase):
         assert len(fts_antibodies(search="Rabbit").items) == 1, "case insensitive search"
         assert len(fts_antibodies(search="Andrew Dingwall").items) == 1
 
+        # Should also search for accession when searching with AB_
+        ab2 = Antibody.objects.create(
+            ab_id="1234567",
+            accession="12345689",
+            ab_name="ab2",
+        )
+        ab2.status = STATUS.CURATED
+        ab2.save()
+        assert len(fts_antibodies(search="AB_1234567").items) == 1
+        assert len(fts_antibodies(search="AB_12345689").items) == 1   ## search into accession
+
     def test_update(self):
         user_id = "aaaa"
         new_name = "My updated abName"
