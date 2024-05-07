@@ -180,7 +180,7 @@ const About = () => {
     { name: 'wagner', url: 'http://gwagner.med.harvard.edu/' },
     { name: 'zebrafish', url: 'https://zebrafish.org/home/guide.php' },
     { name: 'genetex', url: 'https://www.genetex.com/' },
-    { name: 'licor', url: 'https://www.licor.com/' },
+    { name: 'licor', url: 'https://www.licor.com/bio', img: './assets/partners/LICORbio.png' },
     { name: 'hytest', url: 'https://www.hytest.fi/home' },
     { name: 'Ansh Labs', url: 'https://www.anshlabs.com/', img: './assets/partners/anshlabs.png' },
     { name: 'Oasis Biofarm', url: 'https://www.oasisbiofarm.net', img: './assets/partners/oasis.png' },

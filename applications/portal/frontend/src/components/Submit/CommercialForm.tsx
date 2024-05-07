@@ -13,6 +13,7 @@ import {
   CardMedia,
   Select,
   MenuItem,
+  Link
 } from "@mui/material";
 import { AlertIcon } from "../icons";
 
@@ -20,6 +21,7 @@ import StepNavigation from "./StepNavigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { postNewAntibody } from "../../helpers/antibody";
+import { validateCatalogNumber } from "../../utils/antibody";
 
 const {
   bannerHeadingColor,
@@ -36,7 +38,7 @@ const styles = {
     }
   },
   rightContainer: (theme) => ({
-    padding: { 
+    padding: {
       lg: theme.spacing(10, 0, 10, 10),
       xs: 0,
     },
@@ -48,7 +50,7 @@ const styles = {
     },
   }),
   leftContainer: (theme) => ({
-    padding: { 
+    padding: {
       lg: theme.spacing(10, 10, 0, 10),
       xs: 0,
     },
@@ -97,8 +99,9 @@ const styles = {
   }),
 };
 
+
 const validationSchema = yup.object().shape({
-  catalogNumber: yup.string().required("The field is mandatory"),
+  catalogNumber: validateCatalogNumber,
   url: yup
     .string()
     .url("Please enter a valid URL that starts with http or https")
@@ -150,9 +153,13 @@ const Iframe = ({ formik }) => {
           />
           {!touched.catalogNumber && !errors.catalogNumber && (
             <Typography variant="subtitle1" sx={styles.note}>
-              Enter a link to the product's page on the vendor's website
+              Enter a link to the product's page on the vendor's website.
             </Typography>
           )}
+          <Typography variant="subtitle1" sx={styles.note}>
+            If the URL does not link to a product page you may be asked to provide a technical data sheet. If you are registering a kit you may be asked to provide a technical data sheet or brochure that lists the contents of the kit. You can send pdfs {' '}
+            <Link href="/contact-us">here</Link>. Please include the temporary RRID you receive after registering.
+          </Typography>
         </Grid>
         <Divider sx={{ my: 1 }} />
         <Grid item lg={8}>

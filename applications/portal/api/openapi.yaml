@@ -60,7 +60,7 @@ paths:
                         query parameter added as - status=rejected:
                             value: /api/antibodies?page=1&size=100&status=rejected
                     name: status
-                    description: 'Add a status to filter the query - CURATED, REJECTED, QUEUE. '
+                    description: 'Add a status to filter the query - CURATED, REJECTED, QUEUE, UNDER_REVIEW. '
                     schema:
                         type: string
                     in: query
@@ -437,12 +437,12 @@ components:
                                 different if antibody records have been consolidated or are not unique.
                             type: string
                         status:
-                            description: |
-                                Can include: curated, rejected, queue
+                            description: 'Can include: curated, rejected, queue, under_review'
                             enum:
                                 - CURATED
                                 - REJECTED
                                 - QUEUE
+                                - UNDER_REVIEW
                             type: string
                         feedback:
                             description: Feedback to the submitted stored here

@@ -12,9 +12,8 @@ class VendorAdminTests(TestCase):
     def setUp(self):
         self.site = AdminSite()
 
-
     def test_force_delete_vendor(self):
-        
+
         # Create data
         vendor = Vendor.objects.create()
 

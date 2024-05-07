@@ -23,7 +23,7 @@ def fts_and_filter_antibodies(page: int = 1, size: int = 10, search: str = '', f
     if "AB_" in search:
         if search.startswith("RRID:"):
             search = search.replace("RRID:", "").strip()
-        antibodies = antibody_service.get_antibody(strip_ab_from_id(search), filters=filters)
+        antibodies = antibody_service.get_antibody(strip_ab_from_id(search), filters=filters, accession=strip_ab_from_id(search))
         if antibodies:
             return PaginatedAntibodies(page=int(page), totalElements=len(antibodies), items=antibodies)
         

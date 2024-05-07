@@ -26,7 +26,7 @@ export async function getAntibodies(
 
 function mapAntibody(antibody: Antibody): Antibody {
   if ((!antibody.url) && antibody.vendorUrl) {
-    antibody.url = antibody.vendorUrl[0];
+    antibody.url = antibody.vendorUrl[0] ?? "-";
   }
   if (antibody.url && !antibody.url.includes("//")) {
     antibody.url = "https://" + antibody.url;

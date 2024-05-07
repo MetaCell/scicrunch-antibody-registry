@@ -18,6 +18,7 @@ import StepNavigation from "./StepNavigation";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { postNewAntibody } from "../../helpers/antibody";
+import { validateCatalogNumber } from "../../utils/antibody";
 
 const { bannerHeadingColor, primaryTextColor } = vars;
 
@@ -55,7 +56,7 @@ const styles = {
 const requiredFieldValidation = yup.string().required("The field is mandatory");
 
 const validationSchema = yup.object().shape({
-  catalogNumber: requiredFieldValidation,
+  catalogNumber: validateCatalogNumber,
   vendor: requiredFieldValidation,
   name: requiredFieldValidation,
   host: requiredFieldValidation,
@@ -224,7 +225,7 @@ const PersonalForm = (props) => {
                 <Box>
                   <Input
                     name="vendor"
-                    label="Principal Investigator - Institution or Vendor"
+                    label="Principal Investigator/Institution"
                     required={true}
                     formik={formik}
                     placeholder="(e.g. J. Doe - Harvard)"
@@ -237,7 +238,7 @@ const PersonalForm = (props) => {
                 <Box>
                   <Input
                     name="url"
-                    label="Principal Investigator's/Institution's Website or Vendor Website"
+                    label="Principal Investigator's/Institution's Website"
                     required={true}
                     formik={formik}
                     placeholder="http:// or https://"

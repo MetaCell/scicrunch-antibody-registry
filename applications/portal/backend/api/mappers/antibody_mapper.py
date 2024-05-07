@@ -22,10 +22,11 @@ dto_fields = {to_snake(f) for f in AntibodyDTO.__fields__}
 def extract_base_url(url):
     return urlsplit(url).hostname
 
-@cache
+
 def get_vendor_domains(vendor_id):
-    return [vd.base_url for vd in VendorDomain.objects.filter(
-                        vendor_id=vendor_id)]
+    return [vd.base_url for vd in VendorDomain.objects.filter(vendor_id=vendor_id, status=STATUS.CURATED)]
+
+
 class AntibodyMapper(IDAOMapper):
 
     def from_dto(self, dto: AntibodyDTO) -> Antibody:
@@ -34,6 +35,7 @@ class AntibodyMapper(IDAOMapper):
         else:
             ab = Antibody()
             ab.ab_id = 0
+
 
         if dto.abTarget:
             # antigen_symbol = dto.abTarget
@@ -50,7 +52,10 @@ class AntibodyMapper(IDAOMapper):
                 log.info("Adding specie: %s", specie_name)
 
         if dto.url or dto.vendorName:
-            ab.set_vendor_from_name_url(url=dto.url, name=dto.vendorName)
+            ab.set_vendor_from_name_url(
+                url=dto.url, name=dto.vendorName, 
+                commercial_type=dto.commercialType.value if dto.commercialType else None
+            )
         else:
             raise AntibodyDataException(
                 "Either vendor url or name is mandatory", 'url/name', None)
@@ -128,8 +133,7 @@ class AntibodyMapper(IDAOMapper):
             ab.sourceOrganism = dao.source_organism.name
         if dao.species and not ab.targetSpecies:
             ab.targetSpecies = [s.name for s in dao.species.all()]
-        
-            
+
         ab.url = get_url_if_permitted(dao)
 
         ab.showLink = dao.show_link if dao.show_link is not None else (dao.vendor and dao.vendor.show_link)
