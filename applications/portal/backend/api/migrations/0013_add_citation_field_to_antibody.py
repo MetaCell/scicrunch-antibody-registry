@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api", "0010_auto_20240315_0451"),
+        ("api", "0012_alter_status_field_antibody_vendordomain"),
     ]
 
     operations = [
