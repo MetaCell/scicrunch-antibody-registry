@@ -128,3 +128,31 @@ USER_KEY = 'user'
 REMOVE_KEYWORD = 'remove'
 
 ANTIBODY_PERSISTENCE = 'antibodies'
+
+
+CRONJOB_REQUEST_TEMPLATE = {
+    "size": 3,
+    "from": 0,
+    "query": {
+        "bool": {
+            "should": [
+                {
+                    "match_phrase": {
+                        "resourceMentions.rrid.keyword": {"query": "RRID:{ab_id}"}
+                    }
+                },
+                {
+                    "match_phrase": {
+                        "rridMentions.rrid.keyword": {"query": "RRID:{ab_id}"}
+                    }
+                },
+                {
+                    "match_phrase": {
+                        "filteredMentions.rrid.keyword": {"query": "RRID:{ab_id}"}
+                    }
+                },
+            ]
+        }
+    },
+    "sort": [{"dc.publicationYear": {"order": "desc"}}, "_score"],
+}
