@@ -102,7 +102,7 @@ class AntibodyFilesAdmin(admin.TabularInline):
 
 # not in fields - catalog_num_search 
 antibody_fields_shown = (
-    "ab_name", "ab_id", "accession", "commercial_type", "catalog_num", "cat_alt", "vendor", 
+    "ab_name", "ab_id", "accession", "commercial_type", "catalog_num", "cat_alt", "citation", "vendor", 
     "url","ab_target", "entrez_id", "uniprot_id", "target_species_raw", "subregion", 
     "modifications", "epitope", "source_organism", "clonality", "clone_id", "product_isotype",
     "product_conjugate", "defining_citation", "product_form", "comments",
@@ -123,7 +123,7 @@ class AntibodyAdmin(ImportExportModelAdmin):
 
     # list display settings
     list_filter = ("status",)
-    list_display = (id_with_ab, "accession", "ab_name", "submitter_name", "status", "vendor", "catalog_num", "insert_time")
+    list_display = (id_with_ab, "accession", "ab_name", "submitter_name", "citation", "status", "vendor", "catalog_num", "insert_time")
     search_fields = ("ab_id", "ab_name", "catalog_num")
 
     # the following - maintains the order of the fields
