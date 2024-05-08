@@ -30,7 +30,7 @@ kubectl -n areg get secrets accounts -o yaml|grep api_user_password|cut -d " " -
 
 # store the Scicrunch API_KEY on the local disk
 mkdir -p /opt/cloudharness/resources/secrets/
-kubectl -n areg get secrets scicrunch-api-key -o yaml|grep SCICRUNCH_API_KEY|cut -d " " -f 4|base64 -d > /opt/cloudharness/resources/secrets/SCICRUNCH_API_KEY
+kubectl -n areg get secrets scicrunch-api-key -o yaml|grep scicrunch-api-key|cut -d " " -f 4|base64 -d > /opt/cloudharness/resources/secrets/scicrunch-api-key
 
 
 # Make the cloudharness application configuration available on your local machine
