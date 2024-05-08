@@ -250,7 +250,7 @@ class Antibody(models.Model):
         max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN, null=True, db_index=True, blank=True)
     defining_citation = models.CharField(
         max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN, null=True, blank=True, db_index=False)
-    citation = models.IntegerField(null=True, blank=True, db_index=True)
+    citation = models.IntegerField(null=True, blank=True, db_index=True, default=0)
     product_form = models.CharField(
         max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN, null=True, db_index=True, blank=True)
     comments = models.TextField(null=True, blank=True, db_index=False)
