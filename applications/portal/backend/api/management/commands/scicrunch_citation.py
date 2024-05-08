@@ -4,113 +4,72 @@ scricrunch API - https://api.scicrunch.io/elastic/v1/RIN_Tool_pr/_search?q=AB_90
 
 """
 
-import requests
 from api.models import Antibody, STATUS
 from django.core.management.base import BaseCommand
 from cloudharness.utils.secrets import get_secret
+from api.controllers.antibody_controller import get_curated_antibodies
+from api.controllers.ingest_controller import ingest_scicrunch_citation_metric
+from api.services.ingest_service import fetch_scicrunch_citation_metric, RateLimiter
+from api.utilities.exceptions import FetchCitationMetricFailed
+import sys
+import logging
 
 scicrunch_api_key = get_secret("scicrunch-api-key")
-
-REQUEST_TEMPLATE = {
-    "size": 3,
-    "from": 0,
-    "query": {
-        "bool": {
-            "should": [
-                {
-                    "match_phrase": {
-                        "resourceMentions.rrid.keyword": {"query": "RRID:{ab_id}"}
-                    }
-                },
-                {
-                    "match_phrase": {
-                        "rridMentions.rrid.keyword": {"query": "RRID:{ab_id}"}
-                    }
-                },
-                {
-                    "match_phrase": {
-                        "filteredMentions.rrid.keyword": {"query": "RRID:{ab_id}"}
-                    }
-                },
-            ]
-        }
-    },
-    "sort": [{"dc.publicationYear": {"order": "desc"}}, "_score"],
-}
-
-
-def get_json_body(ab_id):
-    return REQUEST_TEMPLATE.format(ab_id=ab_id)
 
 
 class Command(BaseCommand):
     help = "Ingests citation metric from scicrunch"
 
     def add_arguments(self, parser):
-        pass
+        parser.add_argument('--max_requests_per_second', type=int, default=10)
+
+
+    def log_error(self, error):
+        self.stdout.write(self.style.ERROR(error))
 
     def handle(self, *args, **options):
-        antibodies_ids = Antibody.objects.filter(status=STATUS.CURATED).values_list(
-            "ab_id", flat=True
-        )
-
-        for ab_id in antibody_ids:
-            try:
-             # TODO: Add a rate limiter - The 10 requests per second (rps) baseline
-                citation_metric = self.fetch_scicrunch_citation_metric(
-                    antibodies_ids, scicrunch_api_key
-                )
-                if citation_metric:
-                    self.ingest_scicrunch_citation_metric(
-                        ab_id, citation_metric)
-                    self.stdout.write(
-                        self.style.SUCCESS(
-                            f"Successfully fetched citation metric for all Antibodies"
-                        )
-                    )
-            except Exception as e:
-                self.stdout.write(
-                    self.style.ERROR(
-                        f"Failed to fetch citation metrics for {ab_id}")
-                )
-        else:
-            self.stdout.write(self.style.ERROR(
-                f"Failed to ingest citation metrics"))
-
-    def fetch_scicrunch_citation_metric(self, antibody_id, scicrunch_api_key):
-
-        abid = "AB_" + str(ab_id)
-        # Below is the link to get the mentions
-        # link_for_api = f"https://api.scicrunch.io/elastic/v1/RIN_Tool_pr/_search?q={abid}&key={scicrunch_api_key}"
-        link_for_api = f"https://scicrunch.org/api/1/elastic/RIN_Mentions_pr/data/_search?key={scicrunch_api_key}"
-        json_body = get_json_body(abid)
-
-        response = requests.post(
-            link_for_api,
-            json=json_body,
-            headers={"Content-Type": "application/json"},
-        )
-        if response.status_code == 200:
-            res = response.json()
-            # Below is the old code to get the mentions
-            # citation_count = res["hits"]["hits"][0]["_source"]["mentions"][0][
-            #     "totalMentions"
-            # ]["count"]
-            return res["hits"]
-        else:
-            raise Exception(
-                "Failed to fetch citation metrics"
-            )
-
-    def ingest_scicrunch_citation_metric(self, ab_id, citation_metric):
+        requests_in_one_sec = options.get('max_requests_per_second', 10)
         try:
+            antibodies_ids = get_curated_antibodies()
+        except Exception as e:
+            self.log_error(f"{e}. Exiting the script")
+            sys.exit(1)
 
-            antibodies_filtered_by_id = Antibody.objects.filter(
-                ab_id=ab_id)
-            for antibody in antibodies_filtered_by_id:
-                antibody.citation = citation_metric["total"]
-                antibodies.append(antibody)
-        except Antibody.DoesNotExist:
-            raise
+        api_request_rate_limiter = RateLimiter(max_requests_per_second=requests_in_one_sec)
+        total_anticipated_requests = len(antibodies_ids)
+        failed_requests_for_ab_ids = []
+        for i in range(len(antibodies_ids)):
+            ab_id = antibodies_ids[i]
+            try:
+                number_of_citations = fetch_scicrunch_citation_metric(
+                    ab_id, scicrunch_api_key
+                )
+                if number_of_citations:
+                    ingested = ingest_scicrunch_citation_metric(ab_id, number_of_citations)
+            except FetchCitationMetricFailed as e:
+                self.log_error(e)
+                failed_requests_for_ab_ids.append(ab_id)
+            except Exception as e:
+                self.log_error(e)
+                failed_requests_for_ab_ids.append(ab_id)
 
-        Antibody.objects.bulk_update(antibodies, ["citation"])
+            api_request_rate_limiter.add_request()
+
+            # if more than 1% of the total fails then stop the script
+            if len(failed_requests_for_ab_ids) / total_anticipated_requests > 0.01:
+                self.log_error(
+                    "More than 1% of the requests failed. Exiting the script"
+                )
+                break # stop the script if more than 1% of the requests fail
+
+        if failed_requests_for_ab_ids:
+            antibodies_failed = (
+                ", ".join(failed_requests_for_ab_ids)
+                if len(failed_requests_for_ab_ids) < 10
+                else ", ".join(failed_requests_for_ab_ids[:10]) + "..."
+            )
+            self.log_error(
+                f"Failed for Antibodies: {antibodies_failed}. Exiting the script"
+            )
+            self.log_error(f"Total Failed: {len(failed_requests_for_ab_ids)}")
+            sys.exit(1)

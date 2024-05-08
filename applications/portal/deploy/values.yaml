@@ -84,4 +84,4 @@ sentry:
     "/admin/": 0.002
 scicrunch:
   cronjob:
-    schedule: "0 0 1,15 * *"
+    schedule: "0 1 * * 6"  # for weekend
