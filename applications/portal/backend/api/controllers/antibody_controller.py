@@ -3,7 +3,7 @@ from typing import List, Union
 import os
 
 from cloudharness import log
-from api.models import Antibody
+from api.models import Antibody, STATUS
 from api.services.user_service import UnrecognizedUser, get_current_user_id
 
 
@@ -100,3 +100,11 @@ def get_antibodies_export():
         generate_antibodies_csv_file(fname)
     return RedirectResponse("/" + fname)
     # return FileResponse(fname, filename="antibodies_export.csv")
+
+def get_curated_antibodies():
+    antibodies_ids = Antibody.objects.filter(status=STATUS.CURATED).values_list(
+        "ab_id", flat=True
+    )
+    if not antibodies_ids:
+        raise HTTPException(status_code=404, detail="No Antibodies found with status CURATED")
+    return antibodies_ids
