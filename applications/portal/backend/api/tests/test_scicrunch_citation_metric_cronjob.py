@@ -27,6 +27,7 @@ class ScicrunchCitationMetricCronJobTests(TestCase):
         except SystemExit as e:
             self.assertEqual(e.code, 1)
 
+        # add the antibodies found in Scicrunch website to the DB
         for testab in TEST_ANTIBODIES_FOR_SCICRUNCH_CITATION[:4]:
             ab = Antibody.objects.create(
                 ab_id=testab["ab_id"],
@@ -46,6 +47,7 @@ class ScicrunchCitationMetricCronJobTests(TestCase):
                 testab["expected_citation"]
             )
         
+        # Add an antibody not present in the Scicrunch website
         unknown_id_antibody = TEST_ANTIBODIES_FOR_SCICRUNCH_CITATION[4]
         ab2 = Antibody.objects.create(
             ab_id=unknown_id_antibody["ab_id"],  ## unknown Id [100]
@@ -56,8 +58,9 @@ class ScicrunchCitationMetricCronJobTests(TestCase):
 
         command.handle()
         
+        # Antibody with unknown_id should not have any citation - hence it should be 0
         a2 = Antibody.objects.get(ab_id=unknown_id_antibody["ab_id"])
-        self.assertEqual(a2.citation, 0)      ## 0 - since it doesn't find any citation for unknown Id 1 
+        self.assertEqual(a2.citation, 0)
 
 
     def test_rate_limiter(self):

@@ -28,48 +28,67 @@ class Command(BaseCommand):
         self.stdout.write(self.style.ERROR(error))
 
     def handle(self, *args, **options):
-        requests_in_one_sec = options.get('max_requests_per_second', 10)
+        requests_per_second_limit = options.get('max_requests_per_second', 10)
+        antibodies_ids = self.get_curated_antibodies()
+
+        api_request_rate_limiter = RateLimiter(max_requests_per_second=requests_per_second_limit)
+        total_anticipated_requests = len(antibodies_ids)
+        failed_antibody_ids = []
+        for id in range(len(antibodies_ids)):
+            self.process_antibody_ingestion(antibodies_ids, api_request_rate_limiter, failed_antibody_ids, id)
+            if self.has_too_many_failures(failed_antibody_ids, total_anticipated_requests):
+                break
+
+        self.log_failed_antibodies(failed_antibody_ids)
+
+
+
+    def process_antibody_ingestion(self, antibodies_ids, api_request_rate_limiter, failed_antibody_ids, id):
+        ab_id = antibodies_ids[id]
+        try:
+            number_of_citations = fetch_scicrunch_citation_metric(
+                ab_id, scicrunch_api_key
+            )
+            if number_of_citations is not None:
+                ingested = ingest_scicrunch_citation_metric(ab_id, number_of_citations)
+        except FetchCitationMetricFailed as e:
+            self.log_error(e)
+            failed_antibody_ids.append(ab_id)
+        except Exception as e:
+            self.log_error(e)
+            failed_antibody_ids.append(ab_id)
+
+        api_request_rate_limiter.add_request()
+
+
+    def get_curated_antibodies(self):
         try:
             antibodies_ids = get_curated_antibodies()
         except Exception as e:
             self.log_error(f"{e}. Exiting the script")
             sys.exit(1)
+        return antibodies_ids
+    
 
-        api_request_rate_limiter = RateLimiter(max_requests_per_second=requests_in_one_sec)
-        total_anticipated_requests = len(antibodies_ids)
-        failed_requests_for_ab_ids = []
-        for i in range(len(antibodies_ids)):
-            ab_id = antibodies_ids[i]
-            try:
-                number_of_citations = fetch_scicrunch_citation_metric(
-                    ab_id, scicrunch_api_key
-                )
-                if number_of_citations:
-                    ingested = ingest_scicrunch_citation_metric(ab_id, number_of_citations)
-            except FetchCitationMetricFailed as e:
-                self.log_error(e)
-                failed_requests_for_ab_ids.append(ab_id)
-            except Exception as e:
-                self.log_error(e)
-                failed_requests_for_ab_ids.append(ab_id)
-
-            api_request_rate_limiter.add_request()
-
-            # if more than 1% of the total fails then stop the script
-            if len(failed_requests_for_ab_ids) / total_anticipated_requests > 0.01:
-                self.log_error(
-                    "More than 1% of the requests failed. Exiting the script"
-                )
-                break # stop the script if more than 1% of the requests fail
-
-        if failed_requests_for_ab_ids:
+    def log_failed_antibodies(self, failed_antibody_ids):
+        if failed_antibody_ids:
             antibodies_failed = (
-                ", ".join(failed_requests_for_ab_ids)
-                if len(failed_requests_for_ab_ids) < 10
-                else ", ".join(failed_requests_for_ab_ids[:10]) + "..."
+                ", ".join(failed_antibody_ids)
+                if len(failed_antibody_ids) < 10
+                else ", ".join(failed_antibody_ids[:10]) + "..."
             )
             self.log_error(
                 f"Failed for Antibodies: {antibodies_failed}. Exiting the script"
             )
-            self.log_error(f"Total Failed: {len(failed_requests_for_ab_ids)}")
+            self.log_error(f"Total Failed: {len(failed_antibody_ids)}")
             sys.exit(1)
+
+    def has_too_many_failures(self, failed_antibody_ids, total_anticipated_requests):
+        # if more than 1% of the total fails then stop the script
+        if len(failed_antibody_ids) / total_anticipated_requests > 0.01:
+            self.log_error(
+                "More than 1% of the requests failed. Exiting the script"
+            )
+            return True
+        return False
+
