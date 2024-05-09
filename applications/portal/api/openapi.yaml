@@ -617,6 +617,9 @@ components:
                 abTargetUniprotId:
                     description: ''
                     type: string
+                numOfCitation:
+                    description: Number of citation for an Antibody - kept track using cronjob from scicrunch.
+                    type: integer
         DataInfo:
             description: Information about the data in the system
             required:
