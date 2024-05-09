@@ -104,7 +104,6 @@ const SearchState = (props) => {
   const checkIfRequestBodyIsSame = (requestBody, filterRequestBody) => {
     if (filterRequestBody === null) { return false }
     return JSON.stringify(requestBody) === JSON.stringify(filterRequestBody)
-
   }
 
   const fetchFilteredAndSearchedAntibodies = async (antibodyFilters, pageNumber = 1, query: string, sortmodel) => {

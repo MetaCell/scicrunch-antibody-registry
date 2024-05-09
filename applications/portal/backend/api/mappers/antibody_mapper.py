@@ -133,7 +133,8 @@ class AntibodyMapper(IDAOMapper):
             ab.sourceOrganism = dao.source_organism.name
         if dao.species and not ab.targetSpecies:
             ab.targetSpecies = [s.name for s in dao.species.all()]
-
+        
+        ab.numOfCitation = dao.citation
         ab.url = get_url_if_permitted(dao)
 
         ab.showLink = dao.show_link if dao.show_link is not None else (dao.vendor and dao.vendor.show_link)

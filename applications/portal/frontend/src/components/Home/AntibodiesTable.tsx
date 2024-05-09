@@ -553,6 +553,15 @@ const AntibodiesTable = (props) => {
     },
     {
       ...columnsDefaultProps,
+      field: "numOfCitation",
+      headerName: "Number of Citations",
+      flex: 1.6,
+      filterable: false,
+      sortable: true,
+      align: 'right'
+    },
+    {
+      ...columnsDefaultProps,
       field: "url",
       headerName: "Product URL",
       hide: true,

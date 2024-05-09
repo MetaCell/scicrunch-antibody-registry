@@ -141,6 +141,12 @@ export interface AbstractAntibody {
      * @memberof AbstractAntibody
      */
     'abTargetUniprotId'?: string;
+    /**
+     * Number of citation for an Antibody - kept track using cronjob from scicrunch.
+     * @type {number}
+     * @memberof AbstractAntibody
+     */
+    'numOfCitation'?: number;
 }
 
 export const AbstractAntibodyClonalityEnum = {
@@ -291,6 +297,12 @@ export interface AddAntibody {
      */
     'abTargetUniprotId'?: string;
     /**
+     * Number of citation for an Antibody - kept track using cronjob from scicrunch.
+     * @type {number}
+     * @memberof AddAntibody
+     */
+    'numOfCitation'?: number;
+    /**
      * For company antibodies, the catalog number of the antibody. For personal/other antibodies, an identifier unique to the antibody.
      * @type {string}
      * @memberof AddAntibody
@@ -357,7 +369,7 @@ export interface Antibody {
      */
     'accession'?: string;
     /**
-     * Can include: curated, rejected, queue, under_review 
+     * Can include: curated, rejected, queue, under_review
      * @type {string}
      * @memberof Antibody
      */
@@ -561,6 +573,12 @@ export interface Antibody {
      */
     'abTargetUniprotId'?: string;
     /**
+     * Number of citation for an Antibody - kept track using cronjob from scicrunch.
+     * @type {number}
+     * @memberof Antibody
+     */
+    'numOfCitation'?: number;
+    /**
      * For company antibodies, the catalog number of the antibody. For personal/other antibodies, an identifier unique to the antibody.
      * @type {string}
      * @memberof Antibody
@@ -622,7 +640,7 @@ export interface AntibodyAllOf {
      */
     'accession'?: string;
     /**
-     * Can include: curated, rejected, queue, under_review 
+     * Can include: curated, rejected, queue, under_review
      * @type {string}
      * @memberof AntibodyAllOf
      */
@@ -1107,6 +1125,12 @@ export interface UpdateAntibody {
      * @memberof UpdateAntibody
      */
     'abTargetUniprotId'?: string;
+    /**
+     * Number of citation for an Antibody - kept track using cronjob from scicrunch.
+     * @type {number}
+     * @memberof UpdateAntibody
+     */
+    'numOfCitation'?: number;
 }
 
 export const UpdateAntibodyClonalityEnum = {
