@@ -48,7 +48,7 @@ def fts_by_catalog_number(search: str, page, size, filters=None):
             search=vector,
             ranking=SearchRank(vector, search_query, normalization=Value(1)))
         .filter(search=search_query, status=STATUS.CURATED, ranking__gte=MIN_CATALOG_RANKING)
-    )
+    ).select_related("vendor").prefetch_related("species").prefetch_related("applications")
 
     # if we match catalog_num or cat_alt, we return those results without looking for other fields
     # as the match is a perfect match or a prefix match depending on the search word,
