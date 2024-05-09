@@ -103,6 +103,15 @@ def apply_fts_sorting(filtered_antibodies: QuerySet, filters):
         return filtered_antibodies.order_by(*explicit_order_by)
     return filtered_antibodies.annotate(sorting=F("ranking") - F("antibodysearch__defining_citation") / 1000 - F("antibodysearch__disc") * 100).order_by('-sorting')
 
+def apply_plain_sorting(filtered_antibodies: QuerySet, filters):
+    """
+    If sorting is not specified, we sort by the order of the ids
+    """
+    explicit_order_by = order_by_string(filters)
+    if explicit_order_by:
+        return filtered_antibodies.order_by(*explicit_order_by)
+    return filtered_antibodies.order_by('-ix')
+
 
 def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filters=None):
     """
@@ -134,13 +143,13 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
         return [], 0
 
     if antibodies_count < MAX_SORTED:
-        # if sorting is not specified, we sort by the order of the ids
-        if order_by_string(filters):
+        if search:
             # /*/ 100 + F("disc_date") + 1000
             filtered_antibodies = apply_fts_sorting(
                 filtered_antibodies, filters)
         else:
-            filtered_antibodies = filtered_antibodies.order_by('-ix')
+            filtered_antibodies = apply_plain_sorting(
+                filtered_antibodies, filters)
 
     p = Paginator(filtered_antibodies, size)
     items = pageitems_if_page_in_bound(page, p)
