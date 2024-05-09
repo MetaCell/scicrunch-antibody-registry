@@ -1,7 +1,7 @@
 from django.db.models import Q
 from openapi.models import Sortorder
 from fastapi import HTTPException
-from portal.constants import FILTERABLE_FIELDS, FOREIGN_OR_M2M_FIELDS
+from portal.constants import FILTERABLE_AND_SORTABLE_FIELDS, FOREIGN_OR_M2M_FIELDS
 from openapi.models import Operation, SearchCriteriaOptions, FilterRequest
 from api.services.user_service import get_current_user_id
 
@@ -33,14 +33,14 @@ def check_filters_are_valid(filters):
                 return False
 
             for filter_value in filter_values:
-                if filter_value not in FILTERABLE_FIELDS:
+                if filter_value not in FILTERABLE_AND_SORTABLE_FIELDS:
                     return False
         else:
             if not isinstance(filter_values, list):
                 return False
 
             for filter_value in filter_values:
-                if filter_value.key not in FILTERABLE_FIELDS:
+                if filter_value.key not in FILTERABLE_AND_SORTABLE_FIELDS:
                     return False
 
     return True

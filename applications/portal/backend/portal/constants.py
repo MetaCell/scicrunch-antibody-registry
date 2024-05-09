@@ -102,11 +102,11 @@ DEFAULT_UID = '43'
 # Search limit for Antibodies for returning without ranking
 LIMIT_NUM_RESULTS = 10000
 
-FILTERABLE_FIELDS = [
+FILTERABLE_AND_SORTABLE_FIELDS = [
     'ab_id', 'ab_name', 'accession', 
     'species', 'applications', 'ab_target',
     'clonality', 'comments', 'clone_id',
-    'vendor', 'source_organism', 'catalog_num'
+    'vendor', 'source_organism', 'catalog_num', 'citation'
 ]
 
 FOREIGN_OR_M2M_FIELDS = ["vendor", "applications", "species", "source_organism"]
