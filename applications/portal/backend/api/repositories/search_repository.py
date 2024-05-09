@@ -135,7 +135,7 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
 
     if antibodies_count < MAX_SORTED:
         # if sorting is not specified, we sort by the order of the ids
-        if search:
+        if order_by_string(filters):
             # /*/ 100 + F("disc_date") + 1000
             filtered_antibodies = apply_fts_sorting(
                 filtered_antibodies, filters)
