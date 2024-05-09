@@ -82,7 +82,7 @@ if os.environ.get('KUBERNETES_SERVICE_HOST', None):
         try:
             init_services()
         except:
-            log.exception("Error initializing services. Retrying in 5 seconds...")
+            log.warning("Error initializing services. Retrying in 5 seconds...")
             time.sleep(5)
             start_auth_service()
 
@@ -95,7 +95,7 @@ if os.environ.get('KUBERNETES_SERVICE_HOST', None):
 
             log.info("User sync events listener started")
         except:
-            log.exception("Error initializing event queue. Retrying in 5 seconds...")
+            log.warning("Error initializing event queue. Retrying in 5 seconds...")
             time.sleep(5)
             start_event_listener()
 
