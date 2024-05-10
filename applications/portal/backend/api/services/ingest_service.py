@@ -24,11 +24,13 @@ class RateLimiter:
         sleep_time = max(1 - elapsed_time, 0)
         time.sleep(sleep_time)
         self.start_limiter_time = time.time()
-        logging.info(f"Total Requests made: {self.requests_cnt}, Total Time Elapsed: {total_elapsed_time}")
+        logging.info(
+            f"Total Requests made: {self.requests_cnt}, Total Time Elapsed: {total_elapsed_time}")
 
 
 def get_json_body(ab_id):
-    json_request = json.dumps(CRONJOB_REQUEST_TEMPLATE).replace("{ab_id}", ab_id)
+    json_request = json.dumps(
+        CRONJOB_REQUEST_TEMPLATE).replace("{ab_id}", ab_id)
     return json.loads(json_request)
 
 
@@ -57,3 +59,14 @@ def fetch_scicrunch_citation_metric(antibody_id, scicrunch_api_key):
         return res["hits"]["total"]
     else:
         raise FetchCitationMetricFailed(abid)
+
+
+def set_citation_metric(antibody_id, number_of_citation):
+
+    antibodies_filtered_by_id = Antibody.objects.filter(ab_id=antibody_id)
+    if not antibodies_filtered_by_id:
+        raise Antibody.DoesNotExist
+    for antibody in antibodies_filtered_by_id:
+        antibody.citation = number_of_citation
+        antibody.save()
+    return antibodies_filtered_by_id
