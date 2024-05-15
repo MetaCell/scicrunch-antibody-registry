@@ -399,6 +399,10 @@ paths:
                     content:
                         text/csv: {}
                     description: All antibodies in csv format
+            security:
+                -
+                    bearerAuth: []
+                    cookieAuth: []
 components:
     schemas:
         KeyValuePair:
@@ -433,81 +437,6 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/Antibody'
-        Antibody:
-            description: The data type associated with the antibody resource
-            type: object
-            allOf:
-                -
-                    required: []
-                    type: object
-                    properties:
-                        accession:
-                            description: >
-                                Thus value is the same as the Antibody identifier for newly added antibodies,
-                                different if antibody records have been consolidated or are not unique.
-                            type: string
-                        status:
-                            description: 'Can include: curated, rejected, queue, under_review'
-                            enum:
-                                - CURATED
-                                - REJECTED
-                                - QUEUE
-                                - UNDER_REVIEW
-                            type: string
-                        feedback:
-                            description: Feedback to the submitted stored here
-                            type: string
-                        abId:
-                            description: Antibody identifier
-                            type: string
-                        catAlt:
-                            description: >-
-                                The alternative catalog numbers for this product, delimited by comma, e.g.,
-                                9101S, 9101P, 9191L
-                            type: string
-                        curateTime:
-                            format: date-time
-                            description: Unix time stamp when the row was last updated
-                            type: string
-                        curatorComment:
-                            description: |
-                                Curator comment about this reagent
-                            type: string
-                        discDate:
-                            description: The date on which the antibody product was found to be discontinued
-                            type: string
-                        insertTime:
-                            format: date-time
-                            description: Unix time stamp when the row was inserted.
-                            type: string
-                        targetModification:
-                            description: Any modification to the target protein
-                            type: string
-                        targetSubregion:
-                            description: The subregion of the target protein that the epitope is contained in
-                            type: string
-                        vendorId:
-                            description: ''
-                            type: integer
-                        lastEditTime:
-                            format: date-time
-                            description: ''
-                            type: string
-                        ix:
-                            description: ''
-                            type: integer
-                        showLink:
-                            description: ''
-                            type: boolean
-                        vendorUrl:
-                            description: ''
-                            type: array
-                            items:
-                                type: string
-                -
-                    $ref: '#/components/schemas/AbstractAntibody'
-                -
-                    $ref: '#/components/schemas/AntibodyCoreId'
         AbstractAntibody:
             description: The common fields between all REST operations for the antibody resource.
             required: []
@@ -829,6 +758,81 @@ components:
                 - size
                 - search
             type: string
+        Antibody:
+            description: The data type associated with the antibody resource
+            type: object
+            allOf:
+                -
+                    required: []
+                    type: object
+                    properties:
+                        accession:
+                            description: >
+                                Thus value is the same as the Antibody identifier for newly added antibodies,
+                                different if antibody records have been consolidated or are not unique.
+                            type: string
+                        status:
+                            description: 'Can include: curated, rejected, queue, under_review'
+                            enum:
+                                - CURATED
+                                - REJECTED
+                                - QUEUE
+                                - UNDER_REVIEW
+                            type: string
+                        feedback:
+                            description: Feedback to the submitted stored here
+                            type: string
+                        abId:
+                            description: Antibody identifier
+                            type: string
+                        catAlt:
+                            description: >-
+                                The alternative catalog numbers for this product, delimited by comma, e.g.,
+                                9101S, 9101P, 9191L
+                            type: string
+                        curateTime:
+                            format: date-time
+                            description: Unix time stamp when the row was last updated
+                            type: string
+                        curatorComment:
+                            description: |
+                                Curator comment about this reagent
+                            type: string
+                        discDate:
+                            description: The date on which the antibody product was found to be discontinued
+                            type: string
+                        insertTime:
+                            format: date-time
+                            description: Unix time stamp when the row was inserted.
+                            type: string
+                        targetModification:
+                            description: Any modification to the target protein
+                            type: string
+                        targetSubregion:
+                            description: The subregion of the target protein that the epitope is contained in
+                            type: string
+                        vendorId:
+                            description: ''
+                            type: integer
+                        lastEditTime:
+                            format: date-time
+                            description: ''
+                            type: string
+                        ix:
+                            description: ''
+                            type: integer
+                        showLink:
+                            description: ''
+                            type: boolean
+                        vendorUrl:
+                            description: ''
+                            type: array
+                            items:
+                                type: string
+                -
+                    $ref: '#/components/schemas/AbstractAntibody'
+                -
+                    $ref: '#/components/schemas/AntibodyCoreId'
     responses:
         PaginatedAntibodies:
             content:
