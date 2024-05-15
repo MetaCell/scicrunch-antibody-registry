@@ -7,7 +7,6 @@ from cloudharness import log
 from cloudharness.applications import get_configuration
 import typing
 import re
-from api.services.keycloak_service import KeycloakService
 
 # from cloudharness.models import User as CHUser # Cloudharness 2.0.0
 
@@ -164,13 +163,3 @@ def associate_orcid_id(userid: str, orcid: str):
 
 def validate_orcid_id( orcid: str) -> bool:
     return re.match(r'^https://orcid.org/\d{4}-\d{4}-\d{4}-\d{3}[0-9X]$', orcid)
-    
-def check_if_user_is_admin():
-    """
-    Function that is used to validate the token and check if the user is an admin
-    """
-    auth = KeycloakService()
-    if auth.current_user_has_realm_role("administrator"):
-        return {}
-    raise Exception("User is not an admin")
-
