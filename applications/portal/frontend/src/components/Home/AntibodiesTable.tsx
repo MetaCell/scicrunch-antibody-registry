@@ -554,11 +554,12 @@ const AntibodiesTable = (props) => {
     {
       ...columnsDefaultProps,
       field: "numOfCitation",
-      headerName: "Number of Citations",
-      flex: 1.6,
+      headerName: "Citations",
+      flex: 1,
       filterable: false,
       sortable: true,
-      align: 'right'
+      align: 'right',
+      hide: true
     },
     {
       ...columnsDefaultProps,

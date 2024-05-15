@@ -160,7 +160,7 @@ def create_antibody(body: AddAntibody) -> None:
     )
 
 
-@prefix_router.get('/antibodies/export', response_model=None, tags=['antibody'])
+@prefix_router.get('/antibodies/export', response_model=None, tags=['antibody'], dependencies=PROTECTED)
 def get_antibodies_export() -> None:
     return antibody_controller.get_antibodies_export()
 
