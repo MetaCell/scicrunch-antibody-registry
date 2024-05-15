@@ -389,6 +389,16 @@ paths:
             operationId: filterAntibodies
             summary: Search on Antibodies with custom filters
             description: Gets a list of `Antibody` entities related with the body parameters
+    /antibodies/export/admin:
+        summary: Exports all antobodies in csv format
+        get:
+            tags:
+                - antibody
+            responses:
+                '200':
+                    content:
+                        text/csv: {}
+                    description: All antibodies in csv format
 components:
     schemas:
         KeyValuePair:
