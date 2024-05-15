@@ -19,6 +19,6 @@ def check_if_user_is_admin():
     """
     auth = KeycloakService()
     if auth.current_user_has_realm_role("administrator"):
-        return {}
+        return True
     raise Exception("User is not an admin")
 
