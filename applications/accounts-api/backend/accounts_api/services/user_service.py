@@ -163,4 +163,3 @@ def associate_orcid_id(userid: str, orcid: str):
 
 def validate_orcid_id( orcid: str) -> bool:
     return re.match(r'^https://orcid.org/\d{4}-\d{4}-\d{4}-\d{3}[0-9X]$', orcid)
-    

@@ -4,14 +4,13 @@ import os
 
 from cloudharness import log
 from api.models import Antibody, STATUS
-from api.services.user_service import UnrecognizedUser, get_current_user_id
-
+from api.services.user_service import UnrecognizedUser, get_current_user_id, check_if_user_is_admin
 
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, RedirectResponse
 
-from api.services import antibody_service
+from api.services import antibody_service, filesystem_service
 from api.utilities.exceptions import AntibodyDataException
 
 from openapi.models import AddAntibody as AddAntibodyDTO, PaginatedAntibodies
@@ -96,8 +95,27 @@ def get_antibodies_export():
 
     # check if file exists and it is created within 24 hours
     # if not, generate a new file
-    if not os.path.exists(fname) or (datetime.now() - datetime.fromtimestamp(os.path.getmtime(fname))).days > 1:
+    if filesystem_service.check_if_file_exists_and_recent(fname):
         generate_antibodies_csv_file(fname)
     return RedirectResponse("/" + fname)
     # return FileResponse(fname, filename="antibodies_export.csv")
+
+
+
+def get_antibodies_export_admin():
+    """
+    Export all fields of all antibodies to a CSV file - Only for admin users
+    """
+    try:
+        is_admin = check_if_user_is_admin()
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Unauthorized: Only admin users can access this endpoint")
+    from api.services.export_service import generate_all_antibodies_fields_to_csv
+    fname = "static/www/antibodies_admin_export.csv"
+
+    if filesystem_service.check_if_file_exists_and_recent(fname) and is_admin:
+        generate_all_antibodies_fields_to_csv(fname)
+    return RedirectResponse("/" + fname)
+
+
 
