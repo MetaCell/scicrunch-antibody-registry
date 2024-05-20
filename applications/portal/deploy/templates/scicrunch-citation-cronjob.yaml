@@ -16,6 +16,8 @@ spec:
             - python 
             - manage.py 
             - scicrunch_citation
+            - --max_requests_per_second
+            - {{ .Values.apps.portal.scicrunch.cronjob.max_requests_per_second | quote }}
             env:
             - name: CH_CURRENT_APP_NAME
               value: {{ .Values.apps.portal.harness.name | quote }}

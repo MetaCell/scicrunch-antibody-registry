@@ -86,3 +86,4 @@ sentry:
 scicrunch:
   cronjob:
     schedule: "0 1 * * 6"  # for weekend
+    max_requests_per_second: 10
