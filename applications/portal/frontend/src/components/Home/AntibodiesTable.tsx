@@ -559,7 +559,7 @@ const AntibodiesTable = (props) => {
       filterable: false,
       sortable: true,
       align: 'right',
-      hide: true
+      hide: false
     },
     {
       ...columnsDefaultProps,

@@ -218,6 +218,12 @@ export const AntibodyDetail = () => {
                     {antibody.sourceOrganism || "N/A"}
                   </Typography>
                 </Grid>
+                <Grid item xs={3}>
+                  <Typography variant="h4">Number of citations</Typography>
+                  <Typography className="ab-citations" variant="subtitle2">
+                    {antibody.numOfCitation ?? "N/A"}
+                  </Typography>
+                </Grid>
               </Grid>
               <Divider />
               <Grid container>
