@@ -21,7 +21,7 @@ import SubHeader from "../UI/SubHeader";
 import HistoryStepper from "./HistoryStepper";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { CopyIcon, ExternalLinkIcon } from "../icons";
-import { Antibody } from "../../rest";
+import { Antibody, AntibodyStatusEnum } from "../../rest";
 import { getProperCitation } from "../../utils/antibody";
 
 export const AntibodyDetail = () => {
@@ -296,6 +296,7 @@ export const AntibodyDetail = () => {
                 </Grid>
               </Grid>
               <Divider />
+              {antibody.status === AntibodyStatusEnum.Curated && (<>
               <Grid container>
                 <Grid item xs={3}>
                   <Typography variant="subtitle1">Additional information</Typography>
@@ -312,11 +313,26 @@ export const AntibodyDetail = () => {
                     href={`https://scicrunch.org/ResourceWatch/Search?q=AB_${antibody.abId}`}
                     className="open-resourcewatch-button"
                   >
-                    Open in Resource Watch
+                    See validation in Resource Watch
+                  </Button>}
+                  {<Button
+                    variant="text"
+                    target="_blank"
+                    size="small"
+                    sx={classes.buttonText}
+                    endIcon={
+                      <ExternalLinkIcon stroke={theme.palette.primary.dark} />
+                    }
+                    href={`https://scicrunch.org/resolver/RRID:AB_${antibody.abId}`}
+                    className="open-resourcewatch-button"
+                  >
+                    See citations and ratings in Resolver
                   </Button>}
                 </Grid>
               </Grid>
               <Divider />
+              </>
+              )}
               
               <Grid container>
                 <Grid item xs={3}>
