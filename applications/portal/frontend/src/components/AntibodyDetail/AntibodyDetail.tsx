@@ -283,6 +283,7 @@ export const AntibodyDetail = () => {
                   {antibody.url && <Button
                     variant="text"
                     size="small"
+                    target="_blank"
                     sx={classes.buttonText}
                     endIcon={
                       <ExternalLinkIcon stroke={theme.palette.primary.dark} />
@@ -295,6 +296,28 @@ export const AntibodyDetail = () => {
                 </Grid>
               </Grid>
               <Divider />
+              <Grid container>
+                <Grid item xs={3}>
+                  <Typography variant="subtitle1">Additional information</Typography>
+                </Grid>
+                <Grid item xs={8}>
+                  {<Button
+                    variant="text"
+                    target="_blank"
+                    size="small"
+                    sx={classes.buttonText}
+                    endIcon={
+                      <ExternalLinkIcon stroke={theme.palette.primary.dark} />
+                    }
+                    href={`https://scicrunch.org/ResourceWatch/Search?q=AB_${antibody.abId}`}
+                    className="open-resourcewatch-button"
+                  >
+                    Open in Resource Watch
+                  </Button>}
+                </Grid>
+              </Grid>
+              <Divider />
+              
               <Grid container>
                 <Grid item xs={3}>
                   <Typography variant="subtitle1">Share</Typography>
