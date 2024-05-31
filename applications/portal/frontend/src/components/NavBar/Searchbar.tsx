@@ -4,7 +4,8 @@ import { SearchIcon, SlashIcon } from "../icons";
 import { Box, Autocomplete, InputAdornment, Stack, Tooltip, Typography, Paper } from "@mui/material";
 import SearchContext from "../../context/search/SearchContext";
 import { useHistory } from 'react-router-dom'; 
-import { SEARCH_MODES } from "../../constants/constants";
+import { MYSUBMISSIONS, SEARCH_MODES } from "../../constants/constants";
+import { isFilterAndSortModelEmpty } from "../../utils/antibody";
 
 
 const styles={
@@ -40,40 +41,43 @@ const styles={
   }
 }
 
-export default function Searchbar() {
+export default function Searchbar(props) {
 
   const {
     getAntibodyList,
-    clearSearch,
     loader,
     activeSearch,
     filterModel,
+    sortModel
   } = useContext(SearchContext)
 
   const history = useHistory();
 
   const ref= useRef(null);
 
-  const autocompleteOps=[]
-
+  const autocompleteOps = []
   const handleChange=useCallback((e: any) => {
     if(e.target.value === activeSearch) {return;}
-    if(!e.target.value){
-      clearSearch()
-    } else {
-      // if the filters are empty then run the following else run for SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES
-      if (filterModel.items.length === 0) {
-        getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, e.target.value)
+    if (!e.target.value) {
+      if (props.activeTab === MYSUBMISSIONS) {
+        isFilterAndSortModelEmpty(filterModel, sortModel) ?
+          getAntibodyList(SEARCH_MODES.MY_ANTIBODIES, '') :
+          getAntibodyList(SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES, '', 1, filterModel, sortModel)
       } else {
-        getAntibodyList(
-          SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES,
-          e.target.value || activeSearch,
-          1,
-          filterModel
-        )
+        isFilterAndSortModelEmpty(filterModel, sortModel) ?
+          getAntibodyList(SEARCH_MODES.ALL_ANTIBODIES) :
+          getAntibodyList(SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES, '', 1, filterModel, sortModel)
+      }
+    } else {
+      if (props.activeTab === MYSUBMISSIONS) {
+        getAntibodyList(SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES, e.target.value, 1, filterModel, sortModel)
+      } else {
+        isFilterAndSortModelEmpty(filterModel, sortModel) ?
+          getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, e.target.value) :
+          getAntibodyList(SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES, e.target.value, 1, filterModel, sortModel)
       }
     }
-  }, [getAntibodyList, clearSearch, history]);
+  }, [getAntibodyList, history]);
 
   const handleKeyPress = useCallback((event) => {
     if(event.key==='/'){
