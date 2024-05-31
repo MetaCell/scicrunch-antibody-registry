@@ -75,7 +75,7 @@ const SearchState = (props) => {
     antibodyFilters = { ...antibodyFilters, items: filterItems }
     sortmodel = mapColumnToBackendModel(sortmodel, modelType.sort);
     const filterAndSortModelIsEmpty = isFilterAndSortModelEmpty(antibodyFilters, sortmodel)
-    const isUserScope = (searchMode === SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES);
+    const isUserScope = (searchMode === SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES || searchMode === SEARCH_MODES.MY_ANTIBODIES);
     const isSearchModeFilteredAndSearched = (searchMode === SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES) || (searchMode === SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES);
 
 

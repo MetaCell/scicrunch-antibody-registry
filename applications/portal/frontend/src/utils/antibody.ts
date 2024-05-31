@@ -1,4 +1,4 @@
-import { GridFilterModel, GridColumnVisibilityModel } from "@mui/x-data-grid";
+import { GridColumnVisibilityModel } from "@mui/x-data-grid";
 import { Antibody, SearchCriteriaOptions } from "../rest";
 import { modelType } from "../constants/constants";
 import * as yup from "yup";
