@@ -17,7 +17,7 @@ import { UserContext, User } from "../../services/UserService";
 import UserAccountMenu from "./UserAccountMenu";
 
 
-const Navbar = () => {
+const Navbar = (props) => {
   const user: User = React.useContext(UserContext)[0];
   const login = () => {
     window.location.href = "/login";
@@ -61,7 +61,7 @@ const Navbar = () => {
                 </Box>
               </Grid>
               <Grid item md={4}>
-                <Searchbar />
+                <Searchbar {...props} />
               </Grid>
               <Grid item md={4}>
                 <Box

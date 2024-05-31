@@ -20,7 +20,7 @@ export const CustomFilterPanel = (
 
 
   const filterableColumns = columns.filter((column) => {
-    return !["nameAndId", "properCitation", "reference", "url", "status"].includes(column.field);
+    return column.filterable !== false && column.type !== "actions";
   });
 
   const handleFilterSet = (filterSet) => {
