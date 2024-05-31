@@ -102,3 +102,7 @@ export const getColumnsToDisplay = (columns) => {
 }
 
 export const validateCatalogNumber = yup.string().matches(/^[^#]+$/, 'The # character is not allowed in the catalog number').required('Catalog number is required')
+
+export const isFilterAndSortModelEmpty = (antibodyFilters, sortmodel) => {
+  return antibodyFilters.items.length === 0 && sortmodel.length === 0
+}
