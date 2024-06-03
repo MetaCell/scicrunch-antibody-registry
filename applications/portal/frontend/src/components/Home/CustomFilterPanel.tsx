@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Box, Button, FormControl, Chip, MenuItem, TextField, IconButton, Stack } from "@mui/material";
 import {
   GridCloseIcon,
@@ -7,6 +7,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { getFilterOperators, getRandomId, shouldEmptyFilterValue } from "../../utils/antibody";
 import { BLANK_FILTER_MODEL } from "../../constants/constants";
 import { SearchCriteriaOptions } from "../../rest";
+import searchContext from "../../context/search/SearchContext";
 
 
 
@@ -18,6 +19,7 @@ export const CustomFilterPanel = (
     applyFilters,
   }) => {
 
+  const { activeSearch } = useContext(searchContext);
 
   const filterableColumns = columns.filter((column) => {
     return column.filterable !== false && column.type !== "actions";
@@ -84,7 +86,7 @@ export const CustomFilterPanel = (
           variant="outlined"
           color="primary"
           onClick={() => {
-            applyFilters(filterModel);
+            applyFilters(filterModel, activeSearch);
           }}
           sx={{ m: 1 }}
         >

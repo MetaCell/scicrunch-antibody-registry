@@ -373,12 +373,12 @@ const AntibodiesTable = (props) => {
   } =
     useContext(SearchContext);
 
-  const applyFilters = (filtermodel) => {
+  const applyFilters = (filtermodel, query) => {
     const searchmode = (props.activeTab === MYSUBMISSIONS) ? SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES :
       SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES
     getAntibodyList(
       searchmode,
-      searchQuery || activeSearch,
+      query,
       1,
       filtermodel
     )
@@ -410,11 +410,13 @@ const AntibodiesTable = (props) => {
   }
 
   useEffect(() => {
-    if (filterModel.items.length > 0) {
+    const isSearchInMySubmission = (props.activeTab === MYSUBMISSIONS && activeSearch)
+    if (filterModel.items.length > 0 || isSearchInMySubmission) {
       return;
     }
-    if (searchQuery) {
-      getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, searchQuery);
+
+    if (searchQuery || activeSearch) {
+      getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, searchQuery || activeSearch);
     } else if (props.activeTab === MYSUBMISSIONS) {
       getAntibodyList(SEARCH_MODES.MY_ANTIBODIES);
     } else {
@@ -424,14 +426,28 @@ const AntibodiesTable = (props) => {
 
   useEffect(() => {
     if (activeSearch && filterModel.items.length > 0) {
-      applyFilters(filterModel);
+      if (props.activeTab === MYSUBMISSIONS) {
+        applyFilters(filterModel, '')
+      } else {
+        applyFilters(filterModel, searchQuery || activeSearch)
+      }
     }
   }, [activeSearch]);
 
   useEffect(() => {
     if (filterModel.items.length > 0) {
-      applyFilters(filterModel);
+      if (props.activeTab === MYSUBMISSIONS) {
+        applyFilters(filterModel, '')
+      } else {
+        applyFilters(filterModel, searchQuery || activeSearch)
+      }
+    } else {
+      if (props.activeTab === MYSUBMISSIONS) {
+        getAntibodyList(SEARCH_MODES.MY_ANTIBODIES)
+      }
+
     }
+
   }, [props.activeTab]);
 
   const columns: GridColDef[] = [

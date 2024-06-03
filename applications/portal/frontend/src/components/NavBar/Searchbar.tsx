@@ -48,7 +48,8 @@ export default function Searchbar(props) {
     loader,
     activeSearch,
     filterModel,
-    sortModel
+    sortModel,
+    setActiveSearch
   } = useContext(SearchContext)
 
   const history = useHistory();
@@ -60,9 +61,7 @@ export default function Searchbar(props) {
     if(e.target.value === activeSearch) {return;}
     if (!e.target.value) {
       if (props.activeTab === MYSUBMISSIONS) {
-        isFilterAndSortModelEmpty(filterModel, sortModel) ?
-          getAntibodyList(SEARCH_MODES.MY_ANTIBODIES, '') :
-          getAntibodyList(SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES, '', 1, filterModel, sortModel)
+        history.push('')
       } else {
         isFilterAndSortModelEmpty(filterModel, sortModel) ?
           getAntibodyList(SEARCH_MODES.ALL_ANTIBODIES) :
@@ -70,7 +69,8 @@ export default function Searchbar(props) {
       }
     } else {
       if (props.activeTab === MYSUBMISSIONS) {
-        getAntibodyList(SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES, e.target.value, 1, filterModel, sortModel)
+        setActiveSearch(e.target.value)
+        history.push('')
       } else {
         isFilterAndSortModelEmpty(filterModel, sortModel) ?
           getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, e.target.value) :
@@ -95,7 +95,7 @@ export default function Searchbar(props) {
     };
   }, [handleKeyPress]);
 
-  
+
   return (<Stack direction="row" className="search-bar">
     <Tooltip sx={{ opacity: 0.5 }}   title={<Paper elevation={1} sx={{ p:1 }}><Typography sx={{ fontSize: "0.8rem", mb: 1 }}>
       <strong>Search tips:</strong>

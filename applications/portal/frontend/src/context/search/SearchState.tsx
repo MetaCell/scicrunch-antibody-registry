@@ -45,6 +45,13 @@ const SearchState = (props) => {
     lastUpdate: null
   })
 
+  const setActiveSearch = (searchString) => {
+    setSearch((prev) => ({
+      ...prev,
+      activeSearch: searchString
+    }))
+  }
+
   useEffect(() => {
     getDataInfo().then((res) => {
       const lastUpdate = new Date(res.lastupdate)
@@ -188,6 +195,7 @@ const SearchState = (props) => {
           ...searchState,
           currentPage: pageNumber ? pageNumber : searchState.currentPage,
           loader: false,
+          activeSearch: '',
           antibodyRequestType: SEARCH_MODES.MY_ANTIBODIES,
           totalElements: res.totalElements,
           searchedAntibodies: res.items,
@@ -198,6 +206,7 @@ const SearchState = (props) => {
         setSearch({
           ...searchState,
           loader: false,
+          activeSearch: '',
           totalElements: 0,
           searchedAntibodies: [],
           error: true
@@ -246,6 +255,7 @@ const SearchState = (props) => {
       error: searchState.error,
       getAntibodyList,
       currentPage: searchState.currentPage,
+      setActiveSearch: setActiveSearch,
       setCurrentPage,
       filterModel,
       setFilterModel,
