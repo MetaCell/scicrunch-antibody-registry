@@ -47,19 +47,18 @@ def fts_by_catalog_number(search: str, page, size, filters=None):
         Antibody.objects.annotate(
             search=vector,
             ranking=SearchRank(vector, search_query, normalization=Value(1)))
-        .filter(search=search_query, ranking__gte=MIN_CATALOG_RANKING)
+        .filter(search=search_query, ranking__gte=MIN_CATALOG_RANKING, status=STATUS.CURATED)
     ).select_related("vendor").prefetch_related("species").prefetch_related("applications")
 
     # if we match catalog_num or cat_alt, we return those results without looking for other fields
     # as the match is a perfect match or a prefix match depending on the search word,
     # sorting the normalized catalog_num by length and returning the smallest
     catalog_num_match_filtered = catalog_num_match \
-        .filter(status_q(filters)) \
         .filter(convert_filters_to_q(filters))
         
     count = catalog_num_match_filtered.count()
 
-    if count < settings.LIMIT_NUM_RESULTS:
+    if count < MAX_SORTED:
         catalog_num_match_filtered = apply_fts_sorting(
             catalog_num_match_filtered, filters)
 
@@ -127,16 +126,15 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
     # highlight_cols = flat((F(f), Value(' ')) for f in search_col_names)[:-1]
 
     if not search:
-        base_query = Antibody.objects.all()
+        base_query = Antibody.objects.filter(status=STATUS.CURATED)
     else:
         search_query = SearchQuery(search)
         ranking = SearchRank(F("antibodysearch__search_vector"), search_query)
         base_query = Antibody.objects.annotate(ranking=ranking)\
-            .filter(antibodysearch__search_vector=search_query)
+            .filter(antibodysearch__search_vector=search_query, status=STATUS.CURATED)
 
     filtered_antibodies = (
         base_query
-        .filter(status_q(filters))
         .filter(convert_filters_to_q(filters))
         .select_related("vendor").prefetch_related("species").prefetch_related("applications")
     ).distinct()
