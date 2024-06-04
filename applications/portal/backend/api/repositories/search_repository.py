@@ -11,7 +11,7 @@ from django.contrib.postgres.search import SearchVectorField, SearchRank, Search
 from django.core.paginator import Paginator
 
 from ..models import STATUS, Antibody, AntibodySearch
-from .filtering_utils import convert_filters_to_q, order_by_string
+from .filtering_utils import convert_filters_to_q, order_by_string, status_q
 from cloudharness import log
 from ..mappers.antibody_mapper import AntibodyMapper
 
@@ -47,17 +47,18 @@ def fts_by_catalog_number(search: str, page, size, filters=None):
         Antibody.objects.annotate(
             search=vector,
             ranking=SearchRank(vector, search_query, normalization=Value(1)))
-        .filter(search=search_query, status=STATUS.CURATED, ranking__gte=MIN_CATALOG_RANKING)
+        .filter(search=search_query, ranking__gte=MIN_CATALOG_RANKING, status=STATUS.CURATED)
     ).select_related("vendor").prefetch_related("species").prefetch_related("applications")
 
     # if we match catalog_num or cat_alt, we return those results without looking for other fields
     # as the match is a perfect match or a prefix match depending on the search word,
     # sorting the normalized catalog_num by length and returning the smallest
-    catalog_num_match_filtered = catalog_num_match.filter(
-        convert_filters_to_q(filters))
+    catalog_num_match_filtered = catalog_num_match \
+        .filter(convert_filters_to_q(filters))
+        
     count = catalog_num_match_filtered.count()
 
-    if count < settings.LIMIT_NUM_RESULTS:
+    if count < MAX_SORTED:
         catalog_num_match_filtered = apply_fts_sorting(
             catalog_num_match_filtered, filters)
 
@@ -150,7 +151,7 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
         else:
             filtered_antibodies = apply_plain_sorting(
                 filtered_antibodies, filters)
-
+    
     p = Paginator(filtered_antibodies, size)
     items = pageitems_if_page_in_bound(page, p)
     return items, antibodies_count

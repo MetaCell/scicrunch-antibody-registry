@@ -10,7 +10,7 @@ import {
 } from "@mui/x-data-grid";
 import { structureFiltersAndSorting } from '../../helpers/antibody';
 import { Antibody } from '../../rest';
-import { mapColumnToBackendModel } from '../../utils/antibody';
+import { checkIfRequestBodyIsSame, isFilterAndSortModelEmpty, mapColumnToBackendModel } from '../../utils/antibody';
 
 export interface SearchResult {
   loader: boolean;
@@ -45,6 +45,13 @@ const SearchState = (props) => {
     lastUpdate: null
   })
 
+  const setActiveSearch = (searchString) => {
+    setSearch((prev) => ({
+      ...prev,
+      activeSearch: searchString
+    }))
+  }
+
   useEffect(() => {
     getDataInfo().then((res) => {
       const lastUpdate = new Date(res.lastupdate)
@@ -74,15 +81,21 @@ const SearchState = (props) => {
     const filterItems = mapColumnToBackendModel(antibodyFilters.items, modelType.filter);
     antibodyFilters = { ...antibodyFilters, items: filterItems }
     sortmodel = mapColumnToBackendModel(sortmodel, modelType.sort);
-    // FIVE Kinds of search: 
-    if (isFilterAndSortModelEmpty(antibodyFilters, sortmodel) && (query || (searchMode === SEARCH_MODES.SEARCHED_ANTIBODIES))) {
+    const filterAndSortModelIsEmpty = isFilterAndSortModelEmpty(antibodyFilters, sortmodel)
+    const isUserScope = (searchMode === SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES || searchMode === SEARCH_MODES.MY_ANTIBODIES);
+    const isSearchModeFilteredAndSearched = (searchMode === SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES) || (searchMode === SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES);
+
+
+    // FOUR Kinds of Antibodies fetch:  
+    // 1. Search without filters and sorting... pure FTS
+    // 2. Get user antibodies - without (filters/sorting or fts)
+    // 3. With filters+sorting+fts
+    // 4. Get all antibodies - without (filters/sortinng or fts)
+    if (filterAndSortModelIsEmpty && (query || (searchMode === SEARCH_MODES.SEARCHED_ANTIBODIES)) && !isUserScope) {
       fetchSearchedAntibodies(pageNumber, query);
-    } else if (isFilterAndSortModelEmpty(antibodyFilters, sortmodel) && (searchMode === SEARCH_MODES.MY_ANTIBODIES)) {
+    } else if (filterAndSortModelIsEmpty && (searchMode === SEARCH_MODES.MY_ANTIBODIES)) {
       fetchUserAntibodies(pageNumber);
-    } else if (!isFilterAndSortModelEmpty(antibodyFilters, sortmodel) || (searchMode === SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES)
-      || (searchMode === SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES)
-    ) {
-      const isUserScope = (searchMode === SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES);
+    } else if (!filterAndSortModelIsEmpty || isSearchModeFilteredAndSearched) {
       const requestBody = structureFiltersAndSorting(
         searchState, antibodyFilters, pageNumber, PAGE_SIZE,
         sortmodel || sortModel, query, isUserScope
@@ -97,14 +110,6 @@ const SearchState = (props) => {
     }
   }
 
-  const isFilterAndSortModelEmpty = (antibodyFilters, sortmodel) => {
-    return antibodyFilters.items.length === 0 && sortmodel.length === 0
-  }
-
-  const checkIfRequestBodyIsSame = (requestBody, filterRequestBody) => {
-    if (filterRequestBody === null) { return false }
-    return JSON.stringify(requestBody) === JSON.stringify(filterRequestBody)
-  }
 
   const fetchFilteredAndSearchedAntibodies = async (antibodyFilters, pageNumber = 1, query: string, sortmodel) => {
     setSearch((prev) => ({
@@ -190,6 +195,7 @@ const SearchState = (props) => {
           ...searchState,
           currentPage: pageNumber ? pageNumber : searchState.currentPage,
           loader: false,
+          activeSearch: '',
           antibodyRequestType: SEARCH_MODES.MY_ANTIBODIES,
           totalElements: res.totalElements,
           searchedAntibodies: res.items,
@@ -200,6 +206,7 @@ const SearchState = (props) => {
         setSearch({
           ...searchState,
           loader: false,
+          activeSearch: '',
           totalElements: 0,
           searchedAntibodies: [],
           error: true
@@ -238,38 +245,6 @@ const SearchState = (props) => {
       });
   }
 
-  const clearSearch = () => {
-    setSearch({
-      ...searchState,
-      loader: true,
-      activeSearch: '',
-      totalElements: 0,
-      searchedAntibodies: [],
-      error: false
-    })
-    getAntibodies()
-      .then((res) => {
-        setSearch({
-          ...searchState,
-          loader: false,
-          activeSearch: "",
-          totalElements: res.totalElements,
-          searchedAntibodies: res.items,
-          error: false
-        })
-      })
-      .catch((err) => {
-        setSearch({
-          ...searchState,
-          loader: false,
-          totalElements: 0,
-          activeSearch: '',
-          searchedAntibodies: [],
-          error: true
-        })
-        console.error(err)
-      })
-  }
   return (
     <SearchContext.Provider value={{
       loader: searchState.loader,
@@ -279,11 +254,12 @@ const SearchState = (props) => {
       lastUpdate: baseData.lastupdate,
       error: searchState.error,
       getAntibodyList,
-      clearSearch,
       currentPage: searchState.currentPage,
+      setActiveSearch: setActiveSearch,
       setCurrentPage,
       filterModel,
       setFilterModel,
+      sortModel,
       setSortModel,
       warningMessage,
       setWarningMessage

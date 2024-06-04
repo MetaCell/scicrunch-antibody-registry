@@ -373,12 +373,13 @@ const AntibodiesTable = (props) => {
   } =
     useContext(SearchContext);
 
-  const applyFilters = (filtermodel) => {
+  const applyFilters = (filtermodel, query) => {
+    // Also does the applyFilters from the CustomFilterPanel - when apply button is clicked
     const searchmode = (props.activeTab === MYSUBMISSIONS) ? SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES :
       SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES
     getAntibodyList(
       searchmode,
-      searchQuery || activeSearch,
+      query,
       1,
       filtermodel
     )
@@ -410,11 +411,15 @@ const AntibodiesTable = (props) => {
   }
 
   useEffect(() => {
-    if (filterModel.items.length > 0) {
+    const isSearchInMySubmission = (props.activeTab === MYSUBMISSIONS && activeSearch)
+    // NOTE: LOGIC below - if no filters exist or search query exists in my submission - don't proceed, 
+    // since this is handled in separate useEffect
+    if (filterModel.items.length > 0 || isSearchInMySubmission) {
       return;
     }
-    if (searchQuery) {
-      getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, searchQuery);
+
+    if (searchQuery || activeSearch) {
+      getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, searchQuery || activeSearch);
     } else if (props.activeTab === MYSUBMISSIONS) {
       getAntibodyList(SEARCH_MODES.MY_ANTIBODIES);
     } else {
@@ -423,15 +428,37 @@ const AntibodiesTable = (props) => {
   }, [props.activeTab, user, searchQuery]);
 
   useEffect(() => {
+    // NOTE: LOGIC below - whenever search query changes and filters exist, then 
+    // if filters exist in My Submission - apply with empty search
+    // if filters exist in All Results - apply with search query
     if (activeSearch && filterModel.items.length > 0) {
-      applyFilters(filterModel);
+      if (props.activeTab === MYSUBMISSIONS) {
+        applyFilters(filterModel, '')
+      } else {
+        applyFilters(filterModel, searchQuery || activeSearch)
+      }
     }
   }, [activeSearch]);
 
   useEffect(() => {
+    // NOTE: LOGIC below - whenever tab is changed
+    // if filters exist in My Submission - apply with empty search
+    // if filters exist in All Results - apply with search query
+    // if no filters exist in My Submission - get My Submissions
+    // if no filters exist in All Results - this case is handled in the first useEffect 
     if (filterModel.items.length > 0) {
-      applyFilters(filterModel);
+      if (props.activeTab === MYSUBMISSIONS) {
+        applyFilters(filterModel, '')
+      } else {
+        applyFilters(filterModel, searchQuery || activeSearch)
+      }
+    } else {
+      if (props.activeTab === MYSUBMISSIONS) {
+        getAntibodyList(SEARCH_MODES.MY_ANTIBODIES)
+      }
+
     }
+
   }, [props.activeTab]);
 
   const columns: GridColDef[] = [

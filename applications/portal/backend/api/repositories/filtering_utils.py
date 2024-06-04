@@ -3,6 +3,7 @@ from openapi.models import Sortorder
 from fastapi import HTTPException
 from portal.constants import FILTERABLE_AND_SORTABLE_FIELDS, FOREIGN_OR_M2M_FIELDS
 from openapi.models import Operation, SearchCriteriaOptions, FilterRequest
+from api.models import STATUS
 from api.services.user_service import get_current_user_id
 
 FILTER_TYPES = {filter_type.value for filter_type in SearchCriteriaOptions}
@@ -91,6 +92,7 @@ def convert_filters_to_q(filters):
 		elif filter_type == SearchCriteriaOptions.isUserScope.value and filter_values == True:
 			user_id = get_current_user_id()
 			query["uid"] = user_id
+            
 		else:
 			pass
 
@@ -104,3 +106,15 @@ def order_by_string(filters):
 	for column in filters.sortOn:
 		order_by.append(f"{'-' if column.sortorder == Sortorder.desc else ''}{column.key}")
 	return order_by
+
+def is_user_scoped(filters):
+	if not filters or not isinstance(filters, FilterRequest):
+		return False
+	if filters.isUserScope == True:	
+		return True
+	return False
+
+def status_q(filters):
+	if is_user_scoped(filters):
+		return Q()     ## if user scoped, return all antibodies for the user
+	return Q(status=STATUS.CURATED)
