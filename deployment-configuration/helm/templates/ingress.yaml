@@ -44,6 +44,8 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/proxy-read-timeout: '99999'
     nginx.ingress.kubernetes.io/proxy-send-timeout: '99999'
+    nginx.ingress.kubernetes.io/limit-rps: 30
+    nginx.ingress.kubernetes.io/use-forwarded-headers: true
 
 spec:
   rules:

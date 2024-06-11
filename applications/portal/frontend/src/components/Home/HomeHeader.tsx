@@ -140,7 +140,13 @@ const TableHeader = (props: TableHeaderProps) => {
             }
             {error && (
               <Alert className="error-alert" severity="error" sx={{ mt: 1, mb: 1 }}>
-                An error occurred while fetching data. Please try again later. If the problem persists, please contact us.
+                {
+                  error >= 500 ? 
+                    "An error occurred while fetching data. Please try again later. If the problem persists, please contact us at <pre>abr-help -at- scicrunch -dot- org</pre>."
+                    : error == 401 ? "This request is unauthorized. Please log in to access this data." : 
+                      "Bad request: please try fix your search and filter parameters. If the problem persists, please contact us at <pre>abr-help -at- scicrunch -dot- org</pre>."
+                }
+
               </Alert>)
             }
             <TableToolbar
