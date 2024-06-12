@@ -48,6 +48,9 @@ harness:
       require-any-role: true
     - uri: /
       white-listed: true
+    - uri: /metrics
+      roles:
+        - administrator
 
   database:
     auto: true
