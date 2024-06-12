@@ -36,10 +36,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
-    "import_export"
+    "import_export",
+    "django_prometheus",
 ]
 
 MIDDLEWARE = [
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -47,6 +49,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "cloudharness.middleware.django.CloudharnessMiddleware",
+    "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
 ROOT_URLCONF = "portal.urls"
@@ -125,15 +128,12 @@ from cloudharness.utils.config import ALLVALUES_PATH, CloudharnessConfig
 from cloudharness_django.settings import *
 
 DATABASES["default"]["TEST"] = {
-                                   "ENGINE": "django.db.backends.postgres",
-                                   "NAME": "testdb",
-                               }
+    "ENGINE": "django.db.backends.postgres",
+    "NAME": "testdb",
+}
 
 # add the local apps
-INSTALLED_APPS += [
-    "api",
-    "portal"
-]
+INSTALLED_APPS += ["api", "portal"]
 
 # override django admin base template with a local template
 # to add some custom styling
