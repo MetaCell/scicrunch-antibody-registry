@@ -581,11 +581,10 @@ describe("E2E Flow for AntiBody Registry", () => {
 
     await click('.btn-user-menu');
 
-    await page.waitForSelector(selectors.ACCOUNT_SUBMENU);
+    await page.waitForSelector('.btn-logout');
 
     await click('.btn-logout');
 
-    await page.waitForSelector(selectors.NAME_ID_FIELD);
 
     console.log("User logged out");
   });

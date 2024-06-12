@@ -89,7 +89,7 @@ def get_by_accession(accession_number: int) -> AntibodyDTO:
     try:
         return antibody_service.get_antibody_by_accession(accession_number)
     except Antibody.DoesNotExist as e:
-        raise HTTPException(status_code=404, detail=e.message)
+        raise HTTPException(status_code=404, detail="Antibody not found")
 
 
 def get_antibodies_export():
