@@ -50,7 +50,7 @@ const SearchState = (props) => {
       const lastUpdate = new Date(res.lastupdate)
       setBaseData({ total: res.total, lastupdate: lastUpdate.toDateString(), error: false })
     }).catch((err) => {
-      setBaseData({ total: 0, lastupdate: '-', error: true })
+      setBaseData({ total: 0, lastupdate: '-', error: err?.response?.status ?? true })
       console.error("Error: ", err)
     })
   }, [])
@@ -104,7 +104,6 @@ const SearchState = (props) => {
   const checkIfRequestBodyIsSame = (requestBody, filterRequestBody) => {
     if (filterRequestBody === null) { return false }
     return JSON.stringify(requestBody) === JSON.stringify(filterRequestBody)
-
   }
 
   const fetchFilteredAndSearchedAntibodies = async (antibodyFilters, pageNumber = 1, query: string, sortmodel) => {
@@ -139,7 +138,7 @@ const SearchState = (props) => {
         loader: false,
         totalElements: 0,
         activeSearch: query,
-        error: true,
+        error: error?.response?.status ?? true ,
         searchedAntibodies: []
       })
       console.error(error)
@@ -172,7 +171,7 @@ const SearchState = (props) => {
         activeSearch: query,
         totalElements: 0,
         searchedAntibodies: [],
-        error: true
+        error: error?.response?.status ?? true 
       })
       console.error(error)
     }
@@ -233,7 +232,7 @@ const SearchState = (props) => {
           loader: false,
           totalElements: 0,
           searchedAntibodies: [],
-          error: true
+          error: err?.response?.status ?? true 
         });
         console.error(err)
       });
@@ -266,7 +265,7 @@ const SearchState = (props) => {
           totalElements: 0,
           activeSearch: '',
           searchedAntibodies: [],
-          error: true
+          error: err?.response?.status ?? true 
         })
         console.error(err)
       })

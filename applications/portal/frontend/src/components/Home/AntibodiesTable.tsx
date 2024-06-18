@@ -262,6 +262,7 @@ const RenderStatus = (props: GridRenderCellParams<string>) => {
     CURATED: ["Accepted", "success"],
     REJECTED: ["Rejected", "error"],
     QUEUE: ["In Queue", "warning"],
+    UNDER_REVIEW: ["Under Review", "warning"],
   };
 
   return (
@@ -552,6 +553,16 @@ const AntibodiesTable = (props) => {
     },
     {
       ...columnsDefaultProps,
+      field: "numOfCitation",
+      headerName: "Citations",
+      flex: 1,
+      filterable: false,
+      sortable: true,
+      align: 'right',
+      hide: false
+    },
+    {
+      ...columnsDefaultProps,
       field: "url",
       headerName: "Product URL",
       hide: true,
@@ -564,7 +575,7 @@ const AntibodiesTable = (props) => {
       headerName: "Status",
       hide: props.activeTab === ALLRESULTS,
       renderCell: RenderStatus,
-      flex: 1.3,
+      flex: 1.4,
       filterable: false,
       sortable: false,
     },

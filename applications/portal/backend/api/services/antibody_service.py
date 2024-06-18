@@ -116,3 +116,10 @@ def last_update():
             return Antibody.objects.filter(status=STATUS.CURATED).latest("curate_time").curate_time
         except Antibody.DoesNotExist:
             return datetime.now()
+
+def get_curated_antibodies_ids():
+    antibodies_ids = Antibody.objects.filter(status=STATUS.CURATED).values_list(
+        "ab_id", flat=True
+    )
+    return antibodies_ids
+

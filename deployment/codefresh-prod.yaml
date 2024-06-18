@@ -55,4 +55,5 @@ steps:
       cmd_ps: --wait --timeout 600s --create-namespace
       custom_value_files:
       - ./deployment/helm/values.yaml
-      custom_values: []
+      custom_values:
+      - apps_portal_harness_secrets_scicrunch-api-key=${{SCICRUNCH-API-KEY}}

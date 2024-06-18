@@ -74,7 +74,7 @@ export function mapColumnToBackendModel(columnItems, modeltype) {
     "applications": "applications",
     "clonality": "clonality",
     "vendorName": "vendor",
-
+    "numOfCitation": "citation"
   }
   const newFilters = columnItems.map((filter) => {
     if (modeltype == modelType.filter) {

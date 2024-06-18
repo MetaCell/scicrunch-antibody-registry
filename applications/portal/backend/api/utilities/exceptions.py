@@ -17,3 +17,15 @@ class AntibodyDataException(Exception):
         super().__init__(message)
         self.field_name = field_name
         self.field_value = field_value
+
+
+class AntibodyDoesNotExist(Exception):
+    def __init__(self, antibody_id):
+        super().__init__(f"Antibody with id {antibody_id} does not exist")
+        self.antibody_id = antibody_id
+
+
+class FetchCitationMetricFailed(Exception):
+    def __init__(self, ab_id):
+        super().__init__(f"Failed to fetch citation metrics for {ab_id}")
+    

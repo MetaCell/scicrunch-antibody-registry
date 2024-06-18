@@ -141,6 +141,12 @@ export interface AbstractAntibody {
      * @memberof AbstractAntibody
      */
     'abTargetUniprotId'?: string;
+    /**
+     * Number of citation for an Antibody - kept track using cronjob from scicrunch.
+     * @type {number}
+     * @memberof AbstractAntibody
+     */
+    'numOfCitation'?: number;
 }
 
 export const AbstractAntibodyClonalityEnum = {
@@ -291,6 +297,12 @@ export interface AddAntibody {
      */
     'abTargetUniprotId'?: string;
     /**
+     * Number of citation for an Antibody - kept track using cronjob from scicrunch.
+     * @type {number}
+     * @memberof AddAntibody
+     */
+    'numOfCitation'?: number;
+    /**
      * For company antibodies, the catalog number of the antibody. For personal/other antibodies, an identifier unique to the antibody.
      * @type {string}
      * @memberof AddAntibody
@@ -357,7 +369,7 @@ export interface Antibody {
      */
     'accession'?: string;
     /**
-     * Can include: curated, rejected, queue 
+     * Can include: curated, rejected, queue, under_review
      * @type {string}
      * @memberof Antibody
      */
@@ -561,6 +573,12 @@ export interface Antibody {
      */
     'abTargetUniprotId'?: string;
     /**
+     * Number of citation for an Antibody - kept track using cronjob from scicrunch.
+     * @type {number}
+     * @memberof Antibody
+     */
+    'numOfCitation'?: number;
+    /**
      * For company antibodies, the catalog number of the antibody. For personal/other antibodies, an identifier unique to the antibody.
      * @type {string}
      * @memberof Antibody
@@ -577,7 +595,8 @@ export interface Antibody {
 export const AntibodyStatusEnum = {
     Curated: 'CURATED',
     Rejected: 'REJECTED',
-    Queue: 'QUEUE'
+    Queue: 'QUEUE',
+    UnderReview: 'UNDER_REVIEW'
 } as const;
 
 export type AntibodyStatusEnum = typeof AntibodyStatusEnum[keyof typeof AntibodyStatusEnum];
@@ -621,7 +640,7 @@ export interface AntibodyAllOf {
      */
     'accession'?: string;
     /**
-     * Can include: curated, rejected, queue 
+     * Can include: curated, rejected, queue, under_review
      * @type {string}
      * @memberof AntibodyAllOf
      */
@@ -715,7 +734,8 @@ export interface AntibodyAllOf {
 export const AntibodyAllOfStatusEnum = {
     Curated: 'CURATED',
     Rejected: 'REJECTED',
-    Queue: 'QUEUE'
+    Queue: 'QUEUE',
+    UnderReview: 'UNDER_REVIEW'
 } as const;
 
 export type AntibodyAllOfStatusEnum = typeof AntibodyAllOfStatusEnum[keyof typeof AntibodyAllOfStatusEnum];
@@ -1105,6 +1125,12 @@ export interface UpdateAntibody {
      * @memberof UpdateAntibody
      */
     'abTargetUniprotId'?: string;
+    /**
+     * Number of citation for an Antibody - kept track using cronjob from scicrunch.
+     * @type {number}
+     * @memberof UpdateAntibody
+     */
+    'numOfCitation'?: number;
 }
 
 export const UpdateAntibodyClonalityEnum = {
@@ -1141,6 +1167,41 @@ export type UpdateAntibodyCommercialTypeEnum = typeof UpdateAntibodyCommercialTy
  */
 export const AntibodyApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        antibodiesExportAdminGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/antibodies/export/admin`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication cookieAuth required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
         /**
          * 
          * @param {*} [options] Override http request option.
@@ -1219,7 +1280,7 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
          * @param {number} [size] Corresponds to the cardinality of antibodies requested
          * @param {string} [updatedFrom] start date to include. ISO format
          * @param {string} [updatedTo] end update date to include. ISO format
-         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE. 
+         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE, UNDER_REVIEW. 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1446,6 +1507,15 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
+        async antibodiesExportAdminGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.antibodiesExportAdminGet(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         async antibodiesExportGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.antibodiesExportGet(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
@@ -1468,7 +1538,7 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
          * @param {number} [size] Corresponds to the cardinality of antibodies requested
          * @param {string} [updatedFrom] start date to include. ISO format
          * @param {string} [updatedTo] end update date to include. ISO format
-         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE. 
+         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE, UNDER_REVIEW. 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1537,6 +1607,14 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
+        antibodiesExportAdminGet(options?: any): AxiosPromise<void> {
+            return localVarFp.antibodiesExportAdminGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
         antibodiesExportGet(options?: any): AxiosPromise<void> {
             return localVarFp.antibodiesExportGet(options).then((request) => request(axios, basePath));
         },
@@ -1557,7 +1635,7 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
          * @param {number} [size] Corresponds to the cardinality of antibodies requested
          * @param {string} [updatedFrom] start date to include. ISO format
          * @param {string} [updatedTo] end update date to include. ISO format
-         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE. 
+         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE, UNDER_REVIEW. 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1622,6 +1700,16 @@ export class AntibodyApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof AntibodyApi
      */
+    public antibodiesExportAdminGet(options?: AxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).antibodiesExportAdminGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AntibodyApi
+     */
     public antibodiesExportGet(options?: AxiosRequestConfig) {
         return AntibodyApiFp(this.configuration).antibodiesExportGet(options).then((request) => request(this.axios, this.basePath));
     }
@@ -1645,7 +1733,7 @@ export class AntibodyApi extends BaseAPI {
      * @param {number} [size] Corresponds to the cardinality of antibodies requested
      * @param {string} [updatedFrom] start date to include. ISO format
      * @param {string} [updatedTo] end update date to include. ISO format
-     * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE. 
+     * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE, UNDER_REVIEW. 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AntibodyApi

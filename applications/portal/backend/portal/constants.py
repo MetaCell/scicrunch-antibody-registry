@@ -36,7 +36,7 @@ ANTIBODY_DEFINING_CITATION_MAX_LEN = 16384  # 9206
 ANTIBODY_DISC_DATE_MAX_LEN = 128  # 85
 ANTIBODY_ID_MAX_LEN = 32  # 8
 ANTIBODY_UID_MAX_LEN = 256
-STATUS_MAX_LEN = 8
+STATUS_MAX_LEN = 12
 ANTIBODY_CAT_ALT_MAX_LEN = 512  # 334
 VENDOR_COMMERCIAL_TYPE_MAX_LEN = 32  # 10
 ANTIGEN_UNIPROT_ID_MAX_LEN = 255  # 32
@@ -102,11 +102,11 @@ DEFAULT_UID = '43'
 # Search limit for Antibodies for returning without ranking
 LIMIT_NUM_RESULTS = 10000
 
-FILTERABLE_FIELDS = [
+FILTERABLE_AND_SORTABLE_FIELDS = [
     'ab_id', 'ab_name', 'accession', 
     'species', 'applications', 'ab_target',
     'clonality', 'comments', 'clone_id',
-    'vendor', 'source_organism', 'catalog_num'
+    'vendor', 'source_organism', 'catalog_num', 'citation'
 ]
 
 FOREIGN_OR_M2M_FIELDS = ["vendor", "applications", "species", "source_organism"]
@@ -128,3 +128,31 @@ USER_KEY = 'user'
 REMOVE_KEYWORD = 'remove'
 
 ANTIBODY_PERSISTENCE = 'antibodies'
+
+
+CRONJOB_REQUEST_TEMPLATE = {
+    "size": 3,
+    "from": 0,
+    "query": {
+        "bool": {
+            "should": [
+                {
+                    "match_phrase": {
+                        "resourceMentions.rrid.keyword": {"query": "RRID:{ab_id}"}
+                    }
+                },
+                {
+                    "match_phrase": {
+                        "rridMentions.rrid.keyword": {"query": "RRID:{ab_id}"}
+                    }
+                },
+                {
+                    "match_phrase": {
+                        "filteredMentions.rrid.keyword": {"query": "RRID:{ab_id}"}
+                    }
+                },
+            ]
+        }
+    },
+    "sort": [{"dc.publicationYear": {"order": "desc"}}, "_score"],
+}

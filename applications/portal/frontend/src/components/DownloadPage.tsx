@@ -18,7 +18,11 @@ How to cite this data
         </Typography>
 
         <Typography component="p" my={2} >
-* Data was downloaded from the antibodyregistry.org, &#123;access date&#125; RRID:SCR_006397
+          * Data was downloaded from the antibodyregistry.org, {new Date().toLocaleDateString('en-US', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+          })} RRID:SCR_006397
         </Typography>
         <Typography component="p" >
           <b>License</b>: CC-0
