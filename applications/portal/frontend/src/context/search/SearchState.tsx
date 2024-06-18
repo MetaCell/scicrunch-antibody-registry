@@ -57,7 +57,7 @@ const SearchState = (props) => {
       const lastUpdate = new Date(res.lastupdate)
       setBaseData({ total: res.total, lastupdate: lastUpdate.toDateString(), error: false })
     }).catch((err) => {
-      setBaseData({ total: 0, lastupdate: '-', error: true })
+      setBaseData({ total: 0, lastupdate: '-', error: err?.response?.status ?? true })
       console.error("Error: ", err)
     })
   }, [])
@@ -143,7 +143,7 @@ const SearchState = (props) => {
         loader: false,
         totalElements: 0,
         activeSearch: query,
-        error: true,
+        error: error?.response?.status ?? true ,
         searchedAntibodies: []
       })
       console.error(error)
@@ -176,7 +176,7 @@ const SearchState = (props) => {
         activeSearch: query,
         totalElements: 0,
         searchedAntibodies: [],
-        error: true
+        error: error?.response?.status ?? true 
       })
       console.error(error)
     }
@@ -239,12 +239,44 @@ const SearchState = (props) => {
           loader: false,
           totalElements: 0,
           searchedAntibodies: [],
-          error: true
+          error: err?.response?.status ?? true 
         });
         console.error(err)
       });
   }
 
+  const clearSearch = () => {
+    setSearch({
+      ...searchState,
+      loader: true,
+      activeSearch: '',
+      totalElements: 0,
+      searchedAntibodies: [],
+      error: false
+    })
+    getAntibodies()
+      .then((res) => {
+        setSearch({
+          ...searchState,
+          loader: false,
+          activeSearch: "",
+          totalElements: res.totalElements,
+          searchedAntibodies: res.items,
+          error: false
+        })
+      })
+      .catch((err) => {
+        setSearch({
+          ...searchState,
+          loader: false,
+          totalElements: 0,
+          activeSearch: '',
+          searchedAntibodies: [],
+          error: err?.response?.status ?? true 
+        })
+        console.error(err)
+      })
+  }
   return (
     <SearchContext.Provider value={{
       loader: searchState.loader,
@@ -257,6 +289,7 @@ const SearchState = (props) => {
       currentPage: searchState.currentPage,
       setActiveSearch: setActiveSearch,
       setCurrentPage,
+      clearSearch,
       filterModel,
       setFilterModel,
       sortModel,

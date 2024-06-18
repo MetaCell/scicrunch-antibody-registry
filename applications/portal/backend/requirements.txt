@@ -1,6 +1,7 @@
 gdown>=4.6.0
 pandas==1.4.4
 django-import-export==3.0.1
+django-prometheus==2.3.1
 psycopg2-binary==2.9.6
 
 # Security

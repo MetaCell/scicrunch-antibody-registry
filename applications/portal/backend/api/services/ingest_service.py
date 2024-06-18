@@ -4,7 +4,7 @@ import json
 from portal.constants import CRONJOB_REQUEST_TEMPLATE
 from api.utilities.exceptions import FetchCitationMetricFailed
 import logging
-
+from api.models import Antibody, STATUS
 
 class RateLimiter:
     def __init__(self, max_requests_per_second):
@@ -68,5 +68,5 @@ def set_citation_metric(antibody_id, number_of_citation):
         raise Antibody.DoesNotExist
     for antibody in antibodies_filtered_by_id:
         antibody.citation = number_of_citation
-        antibody.save()
+        antibody.save(update_search=False)
     return antibodies_filtered_by_id

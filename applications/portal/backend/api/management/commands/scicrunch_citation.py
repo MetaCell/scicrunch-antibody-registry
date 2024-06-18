@@ -24,10 +24,10 @@ class Command(BaseCommand):
         parser.add_argument('--max_requests_per_second', type=int, default=10)
 
     def log_error(self, error):
-        self.stdout.write(self.style.ERROR(error))
+        logging.exception(error)
 
     def log(self, msg):
-        self.stdout.write(msg)
+        logging.info(msg)
 
     def handle(self, *args, **options):
         requests_per_second_limit = options.get('max_requests_per_second', 10)

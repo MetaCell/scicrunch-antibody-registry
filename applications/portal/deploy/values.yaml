@@ -48,6 +48,9 @@ harness:
       require-any-role: true
     - uri: /
       white-listed: true
+    - uri: /metrics
+      roles:
+        - administrator
 
   database:
     auto: true
@@ -86,3 +89,4 @@ sentry:
 scicrunch:
   cronjob:
     schedule: "0 1 * * 6"  # for weekend
+    max_requests_per_second: 10
