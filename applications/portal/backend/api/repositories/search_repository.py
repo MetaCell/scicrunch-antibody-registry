@@ -102,7 +102,10 @@ def apply_fts_sorting(filtered_antibodies: QuerySet, filters):
     explicit_order_by = order_by_string(filters)
     if explicit_order_by:
         return filtered_antibodies.order_by(*explicit_order_by)
-    return filtered_antibodies.annotate(sorting=F("ranking") - F("antibodysearch__defining_citation") / 1000 - F("antibodysearch__disc") * 100).order_by('-sorting')
+    return filtered_antibodies.annotate(
+        ix_float=Cast("ix", FloatField()),
+        sorting=F("ranking") - F("antibodysearch__defining_citation") / 1000 - F("antibodysearch__disc") * 100 +  F("ix_float") / 1000000
+    ).order_by('-sorting')
 
 def apply_plain_sorting(filtered_antibodies: QuerySet, filters):
     """
