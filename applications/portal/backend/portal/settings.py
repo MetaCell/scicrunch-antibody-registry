@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "import_export",
     "django_prometheus",
+    "simple_history"
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "cloudharness.middleware.django.CloudharnessMiddleware",
     "django_prometheus.middleware.PrometheusAfterMiddleware",
+    "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
 ROOT_URLCONF = "portal.urls"

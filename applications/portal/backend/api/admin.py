@@ -13,6 +13,7 @@ from django.utils.encoding import smart_str
 from django.utils.html import escape, format_html, format_html_join, mark_safe
 from django.utils.text import format_lazy
 from import_export.admin import ImportExportModelAdmin
+from simple_history.admin import SimpleHistoryAdmin
 from keycloak.exceptions import KeycloakGetError
 from cloudharness_django.models import Member
 
@@ -112,7 +113,7 @@ antibody_fields_shown = (
 )
 
 @admin.register(Antibody)
-class AntibodyAdmin(ImportExportModelAdmin):
+class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
     
     change_form_template = "admin/antibody_change_form.html"
 
@@ -340,7 +341,7 @@ class CommercialTypeFilter(admin.SimpleListFilter):
         
 
 @admin.register(VendorDomain)
-class VendorDomainAdmin(admin.ModelAdmin):
+class VendorDomainAdmin(admin.ModelAdmin, SimpleHistoryAdmin):
     list_display = (
         "base_url",
         "vendor",
@@ -351,7 +352,7 @@ class VendorDomainAdmin(admin.ModelAdmin):
     list_filter = [CommercialTypeFilter]
 
 @admin.register(Vendor)
-class VendorAdmin(admin.ModelAdmin):
+class VendorAdmin(admin.ModelAdmin, SimpleHistoryAdmin):
     delete_confirmation_template = "admin/vendor/delete_confirmation.html"
     search_fields = ("name",)
     list_display = ("id", "name", "commercial_type", "nif_id", "eu_id")
