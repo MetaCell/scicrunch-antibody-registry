@@ -341,7 +341,7 @@ class CommercialTypeFilter(admin.SimpleListFilter):
         
 
 @admin.register(VendorDomain)
-class VendorDomainAdmin(admin.ModelAdmin, SimpleHistoryAdmin):
+class VendorDomainAdmin(SimpleHistoryAdmin):
     list_display = (
         "base_url",
         "vendor",
@@ -352,7 +352,7 @@ class VendorDomainAdmin(admin.ModelAdmin, SimpleHistoryAdmin):
     list_filter = [CommercialTypeFilter]
 
 @admin.register(Vendor)
-class VendorAdmin(admin.ModelAdmin, SimpleHistoryAdmin):
+class VendorAdmin(SimpleHistoryAdmin):
     delete_confirmation_template = "admin/vendor/delete_confirmation.html"
     search_fields = ("name",)
     list_display = ("id", "name", "commercial_type", "nif_id", "eu_id")
