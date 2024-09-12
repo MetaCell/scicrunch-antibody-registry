@@ -91,7 +91,7 @@ const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
   );
 };
 
-const RenderNameAndId = (props: GridRenderCellParams<String>) => {
+const RenderNameAndId = (props: GridRenderCellParams) => {
   const currentPath = window.location.pathname;
   const href =
     currentPath === "/submissions"
@@ -128,7 +128,7 @@ const getValueOrEmpty = (props: ValueProps) => {
   return props.row[props.field] ?? "";
 };
 
-const RenderCellContent = (props: GridRenderCellParams<String>) => {
+const RenderCellContent = (props: GridRenderCellParams) => {
   return (
     <Typography
       variant="caption"
@@ -286,7 +286,7 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   );
 };
 
-const RenderStatus = (props: GridRenderCellParams<string>) => {
+const RenderStatus = (props: GridRenderCellParams<String>) => {
   const statusesTag = {
     CURATED: ["Accepted", "success"],
     REJECTED: ["Rejected", "error"],
@@ -394,6 +394,11 @@ const AntibodiesTable = (props) => {
   const user = useContext(UserContext)[0];
   const searchParams = new URLSearchParams(window.location.search);
   const searchQuery = searchParams.get('q');
+  const [paginationModel, setPaginationModel] = React.useState({
+    pageSize: PAGE_SIZE,
+    page: 0,
+  });
+
 
   const {
     activeSearch,
@@ -433,7 +438,7 @@ const AntibodiesTable = (props) => {
   }
 
   const setNewFilterColumn = (model) => {
-    let newblankFilter = { ...BLANK_FILTER_MODEL, columnField: model.items[0].columnField, id: getRandomId() }
+    let newblankFilter = { ...BLANK_FILTER_MODEL, field: model.items[0].field, id: getRandomId() }
     filterModel.items.push(newblankFilter);
     setFilterModel(filterModel);
   }
@@ -499,19 +504,19 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "abName",
       headerName: "Name",
-      hide: true,
+      hideable: true,
     },
     {
       ...columnsDefaultProps,
       field: "abId",
       headerName: "ID",
-      hide: true,
+      hideable: true,
     },
     {
       ...columnsDefaultProps,
       field: "accession",
       headerName: "Accession",
-      hide: true,
+      hideable: true,
     },
     {
       ...columnsDefaultProps,
@@ -535,7 +540,7 @@ const AntibodiesTable = (props) => {
       field: "targetSpecies",
       headerName: "Target species",
       valueGetter: getList,
-      hide: true,
+      hideable: true,
       sortable: false,
     },
     {
@@ -544,7 +549,7 @@ const AntibodiesTable = (props) => {
       headerName: "Applications",
       valueGetter: getList,
       sortable: false,
-      hide: true,
+      hideable: true,
     },
     {
       ...columnsDefaultProps,
@@ -574,7 +579,7 @@ const AntibodiesTable = (props) => {
       field: "reference",
       headerName: "Reference",
       flex: 1.5,
-      hide: true,
+      hideable: true,
       filterable: false,
       sortable: false,
     },
@@ -590,7 +595,7 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "cloneId",
       headerName: "Clone ID",
-      hide: true,
+      hideable: true,
     },
     {
       ...columnsDefaultProps,
@@ -619,13 +624,13 @@ const AntibodiesTable = (props) => {
       filterable: false,
       sortable: true,
       align: 'right',
-      hide: false
+      hideable: false
     },
     {
       ...columnsDefaultProps,
       field: "url",
       headerName: "Product URL",
-      hide: true,
+      hideable: true,
       sortable: false,
       filterable: false,
     },
@@ -633,7 +638,7 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "status",
       headerName: "Status",
-      hide: props.activeTab === ALLRESULTS,
+      hideable: props.activeTab === ALLRESULTS,
       renderCell: RenderStatus,
       flex: 1.4,
       filterable: false,
@@ -647,7 +652,7 @@ const AntibodiesTable = (props) => {
       searchedAntibodies,
       filterModel
     },
-    noRowsOverlay: {
+    noRows: {
       activeSearch: activeSearch,
     },
     panel: {
@@ -658,11 +663,13 @@ const AntibodiesTable = (props) => {
         },
       },
     },
-    columnMenu: {
-      sx: {
-        "& .MuiMenuItem-root": {
-          fontSize: "0.875rem",
-          color: "grey.500",
+    columnMenuSlots: {
+      columnMenu: {
+        sx: {
+          "& .MuiMenuItem-root": {
+            fontSize: "0.875rem",
+            color: "grey.500",
+          },
         },
       },
     },
@@ -698,39 +705,40 @@ const AntibodiesTable = (props) => {
             rows={searchedAntibodies ?? []}
             getRowId={getRowId}
             columns={columns}
-            pageSize={PAGE_SIZE}
-            rowsPerPageOptions={[20]}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            pageSizeOptions={[20]}
             pagination={true}
             paginationMode="server"
             sortingMode="server"
             onSortModelChange={(model) => addSortingColumn(model)}
             checkboxSelection
-            disableSelectionOnClick
+            disableRowSelectionOnClick
             columnVisibilityModel={showColumns || {}}
             onColumnVisibilityModelChange={(model) => setShowColumns(model)}
             getRowHeight={() => "auto"}
             loading={!searchedAntibodies || loader}
             onFilterModelChange={(model) => addNewFilterColumn(model)}
             filterMode="server"
-            components={{
-              BaseCheckbox: StyledCheckBox,
-              ColumnFilteredIcon: FilteredColumnIcon,
-              ColumnUnsortedIcon: SortIcon,
-              ColumnSortedAscendingIcon: AscSortedIcon,
-              ColumnSortedDescendingIcon: DescSortedIcon,
-              Toolbar: CustomToolbar,
-              ColumnMenuIcon: MoreVertIcon,
-              ColumnSelectorIcon: SettingsIcon,
-              NoRowsOverlay: NoRowsOverlay,
-              Footer: TablePaginatedFooter,
-              FilterPanel: () => CustomFilterPanel({
+            slots={{
+              baseCheckbox: StyledCheckBox,
+              columnFilteredIcon: FilteredColumnIcon,
+              columnUnsortedIcon: SortIcon,
+              columnSortedAscendingIcon: AscSortedIcon,
+              columnSortedDescendingIcon: DescSortedIcon,
+              toolbar: CustomToolbar,
+              columnMenuIcon: MoreVertIcon,
+              columnSelectorIcon: SettingsIcon,
+              noRowsOverlay: NoRowsOverlay,
+              footer: TablePaginatedFooter,
+              filterPanel: () => CustomFilterPanel({
                 columns,
                 filterModel,
                 applyFilters,
                 setFilterModel,
               }),
             }}
-            componentsProps={compProps}
+            slotProps={compProps}
             localeText={{
               toolbarColumns: "Table settings",
             }}
