@@ -86,7 +86,7 @@ const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
       warningMessage={warningMessage}
       shownResultsNum={searchedAntibodies?.length}
     />
-    
+
     </>
   );
 };
@@ -102,8 +102,10 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
       <Typography
         variant="body2"
         align="left"
-        color="grey.700"
-        fontWeight={500}
+        sx={{
+          color: "grey.700",
+          fontWeight: 500
+        }}
       >
         {props.row.abName}
       </Typography>
@@ -111,7 +113,9 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
         variant="caption"
         align="left"
         component="div"
-        color="grey.500"
+        sx={{
+          color: "grey.500"
+        }}
       >
         AB_{props.row.abId}
       </Typography>
@@ -129,9 +133,11 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
     <Typography
       variant="caption"
       align="left"
-      color={"grey.500"}
       component="div"
       className="col-content"
+      sx={{
+        color: "grey.500"
+      }}
     >
       {props.field === "targetAntigen"
         ? `${props.row.abTarget} ${props.row.targetSpecies.join(", ")}`
@@ -140,16 +146,29 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
   );
 };
 
-const RenderVendor = (props) => ( 
-  
+const RenderVendor = (props) => (
+
   <Typography
     variant="caption"
     align="left"
-    color={"grey.500"}
     component="div"
     className="col-vendor"
+    sx={{
+      color: "grey.500"
+    }}
   >
-    {props.row.url ? <Link className="link-vendor" bgcolor="primary.light" px={0.5} py={0.25} display="block" underline="none" target="_blank" href={props.row.url}>
+    {props.row.url ? <Link
+      className="link-vendor"
+      underline="none"
+      target="_blank"
+      href={props.row.url}
+      sx={{
+        bgcolor: "primary.light",
+        px: 0.5,
+        py: 0.25,
+        display: "block"
+      }}
+    >
       {props.value}
     </Link> : props.value}
   </Typography>
@@ -159,11 +178,15 @@ const RenderClonality = (props) => (
   <Typography
     variant="caption"
     align="left"
-    color={"grey.500"}
-    bgcolor="grey.A200"
     component="div"
-    px={1} py={0.25} borderRadius="1rem"
     className="col-clonality"
+    sx={{
+      color: "grey.500",
+      bgcolor: "grey.A200",
+      px: 1,
+      py: 0.25,
+      borderRadius: "1rem"
+    }}
   >
     {props.value}
   </Typography>
@@ -175,10 +198,12 @@ const RenderHtml = (props: GridRenderCellParams<String>) => {
     <Typography
       variant="caption"
       align="left"
-      color="grey.500"
       component="div"
       dangerouslySetInnerHTML={{ __html: props.value }}
       className="col-html"
+      sx={{
+        color: "grey.500"
+      }}
     />
   );
 };
@@ -207,13 +232,13 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   const handleCloseCitation = useCallback(() => {
     setAnchorCitationPopover(null);
   }, [setAnchorCitationPopover]);
-    
+
   const handleClickCitation = useCallback((event) => {
     setAnchorCitationPopover(event.currentTarget);
     setTimeout(handleCloseCitation, 1000);
   }, [handleCloseCitation, setAnchorCitationPopover]);
 
-  
+
 
   const open = Boolean(anchorCitationPopover);
 
@@ -222,8 +247,10 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
       <Typography
         variant="caption"
         align="left"
-        color={props.field === "vendor" ? "primary.main" : "grey.500"}
         component="div"
+        sx={{
+          color: props.field === "vendor" ? "primary.main" : "grey.500"
+        }}
       >
         {props.value}
       </Typography>
@@ -233,7 +260,9 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
           size="small"
           sx={{ minWidth: 0 }}
           startIcon={
-            <CopyIcon sx={{ stroke: theme => theme.palette.grey[500] }} fontSize="inherit" />
+            <CopyIcon sx={theme => ({
+              stroke: theme.palette.grey[500]
+            })} fontSize="inherit" />
           }
           className="btn-citation-copy"
         />
@@ -267,17 +296,21 @@ const RenderStatus = (props: GridRenderCellParams<string>) => {
 
   return (
     <Box
-      bgcolor={`${statusesTag[props.value][1]}.contrastText`}
-      px={1}
-      py={0.25}
-      borderRadius="1rem"
       className="col-status"
+      sx={{
+        bgcolor: `${statusesTag[props.value][1]}.contrastText`,
+        px: 1,
+        py: 0.25,
+        borderRadius: "1rem"
+      }}
     >
       <Typography
         variant="caption"
         align="left"
-        color={`${statusesTag[props.value][1]}.main`}
         component="div"
+        sx={{
+          color: `${statusesTag[props.value][1]}.main`
+        }}
       >
         {statusesTag[props.value][0]}
       </Typography>
@@ -639,22 +672,22 @@ const AntibodiesTable = (props) => {
 
   const NoRowsOverlay = () =>
     typeof activeSearch === "string" &&
-    activeSearch !== "" &&
-    searchedAntibodies.length === 0 ? (
-        <NotFoundMessage activeSearch={activeSearch} />
-      ) : typeof activeSearch !== "string" ? (
-        <Error500 />
-      ) : (
-        <GridNoRowsOverlay />
-      );
+      activeSearch !== "" &&
+      searchedAntibodies.length === 0 ? (
+      <NotFoundMessage activeSearch={activeSearch} />
+    ) : typeof activeSearch !== "string" ? (
+      <Error500 />
+    ) : (
+      <GridNoRowsOverlay />
+    );
 
   const SortIcon = ({ ...other }) => <SortingIcon {...other} />;
   const currentPath = window.location.pathname;
   return (
     <Box>
-      
+
       <Box sx={{ flexGrow: 1, height: "83.5vh" }}>
-        
+
         {currentPath === "/submissions" && !user ? (
           <ConnectAccount />
         ) : (
