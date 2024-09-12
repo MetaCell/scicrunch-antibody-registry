@@ -7,9 +7,9 @@ import {
   Divider,
   Stack,
   Toolbar,
-  Link,
-  Grid,
+  Link
 } from "@mui/material";
+import Grid from "@mui/material/Grid2"
 import Searchbar from "./Searchbar";
 import NavLinks from "./NavLinks";
 import HelpMenu from "./HelpMenu";
@@ -33,8 +33,8 @@ const Navbar = (props) => {
             }}
             disableGutters
           >
-            <Grid container>
-              <Grid item md={4}>
+            <Grid container width={1}>
+              <Grid size={{ md: 4 }}>
                 <Box
                   sx={{
                     display: "flex",
@@ -60,10 +60,10 @@ const Navbar = (props) => {
                   </Stack>
                 </Box>
               </Grid>
-              <Grid item md={4}>
+              <Grid size={{ md: 4 }}>
                 <Searchbar {...props} />
               </Grid>
-              <Grid item md={4}>
+              <Grid size={{ md: 4 }}>
                 <Box
                   sx={{
                     display: "flex",
@@ -90,5 +90,4 @@ const Navbar = (props) => {
     </Box>
   );
 };
-
 export default Navbar;

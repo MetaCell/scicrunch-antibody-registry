@@ -54,43 +54,39 @@ const HistoryStepper = (props: {classes: any, antibody: Antibody}) => {
     },
   };
 
-  return (
-    <>
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="flex-start"
-        sx={classes.header}
-      >
-        <Typography variant="h6">Record History</Typography>
-        <Typography variant="caption">
-          All history information about this record
-        </Typography>
-      </Box>
-
-      <Stepper orientation="vertical" sx={classes.container}>
-        {historySteps.filter(step => step).map((step, index) => (
-          <Step key={step.label} sx={classes.step}>
-            <StepLabel
-              optional={
-                index === 1 ? (
-                  <Typography variant="caption">{step.description}</Typography>
-                ) : index === 2 ? (
-                  <Typography variant="caption">{step.description}</Typography>
-                ) : null
-              }
-            >
-              {step.label}
-            </StepLabel>
-            <StepContent>
-              <Typography variant="caption">{step.description}</Typography>
-              <Box sx={{ mb: 2 }}></Box>
-            </StepContent>
-          </Step>
-        ))}
-      </Stepper>
-    </>
-  );
+  return (<>
+    <Box
+      sx={[{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start"
+      }, classes.header]}>
+      <Typography variant="h6">Record History</Typography>
+      <Typography variant="caption">
+        All history information about this record
+      </Typography>
+    </Box>
+    <Stepper orientation="vertical" sx={classes.container}>
+      {historySteps.filter(step => step).map((step, index) => (
+        <Step key={step.label} sx={classes.step}>
+          <StepLabel
+            optional={
+              index === 1 ? (
+                <Typography variant="caption">{step.description}</Typography>
+              ) : index === 2 ? (
+                <Typography variant="caption">{step.description}</Typography>
+              ) : null
+            }
+          >
+            {step.label}
+          </StepLabel>
+          <StepContent>
+            <Typography variant="caption">{step.description}</Typography>
+            <Box sx={{ mb: 2 }}></Box>
+          </StepContent>
+        </Step>
+      ))}
+    </Stepper>
+  </>);
 };
-
 export default HistoryStepper;

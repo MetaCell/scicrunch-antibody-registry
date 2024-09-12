@@ -58,7 +58,9 @@ export const CustomFilterPanel = (
   }
 
   return (
-    <Box width="100%">
+    (<Box sx={{
+      width: "100%"
+    }}>
       {
         filterModel && filterModel.items.map((filterSet, index) => (
           <Box key={index}>
@@ -71,7 +73,12 @@ export const CustomFilterPanel = (
           </Box>
         ))
       }
-      <Box display="flex" justifyContent="space-between" width="100%">
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          width: "100%"
+        }}>
         <Button
           variant="text"
           onClick={() => {
@@ -93,8 +100,8 @@ export const CustomFilterPanel = (
           Apply
         </Button>
       </Box>
-    </Box>
-  )
+    </Box>)
+  );
 }
 
 const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet } ) => {
@@ -117,9 +124,15 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
   ];
   const operators = getFilterOperators();
   return (
-    <Stack direction="row" display="flex" alignItems="center" m={1} spacing={1}>
+    (<Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            m: 1
+          }}>
       {/* 3 parts of a filter */}
-      
       {/* columns */}
       <IconButton onClick={() => removeFilterSet(filterSet)}>
         <GridCloseIcon fontSize="small"/>
@@ -136,7 +149,6 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
           </MenuItem>
         ))}
       </Select>
-
       {/* operators */}
       <Select
         value={filterSet.operatorValue}
@@ -150,8 +162,6 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
           </MenuItem>
         ))}
       </Select>
-
-
       {/* multi-input: conditional */}
       {
         filterSet.operatorValue === SearchCriteriaOptions.IsAnyOf && (
@@ -161,7 +171,6 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
           />
         )
       }
-
       {/* input: conditional */}
       {
         operatorsWithSingleInput.includes(filterSet.operatorValue) && (
@@ -181,9 +190,8 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
         )
 
       }
-      
-    </Stack>
-  )
+    </Stack>)
+  );
 }
 
 const CustomMultiInputWithChip = ({ filterSet, handleFilterSet }) => {

@@ -12,7 +12,7 @@ const TableToolbar = ({ showFilterMenu, activeTab, filterModel }) => {
   const theme = useTheme();
   const history = useHistory();
   return (
-    <Box
+    (<Box
       sx={(theme) => ({
         width: "100%",
         display: "flex",
@@ -68,7 +68,11 @@ const TableToolbar = ({ showFilterMenu, activeTab, filterModel }) => {
           onClick={() => history.push("/submissions")}
         />
       </Tabs>
-      <Box display="flex" flexDirection="row">
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row"
+        }}>
         <Stack direction="row" spacing={3}>
           
           <Button
@@ -90,7 +94,7 @@ const TableToolbar = ({ showFilterMenu, activeTab, filterModel }) => {
           
         </Stack>
       </Box>
-    </Box>
+    </Box>)
   );
 };
 

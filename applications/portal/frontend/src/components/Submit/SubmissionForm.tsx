@@ -43,7 +43,7 @@ const SubmissionForm = (props) => {
   };
 
   return (
-    <Dialog
+    (<Dialog
       fullScreen
       open={true}
       onClose={handleClose}
@@ -70,8 +70,10 @@ const SubmissionForm = (props) => {
               component="img"
               src="./assets/logo.svg"
               title="Antibody Registry"
-              justifySelf="center"
               className="logo"
+              sx={{
+                justifySelf: "center"
+              }}
             />
             <Button
               startIcon={<CloseIcon fontSize="small" />}
@@ -98,7 +100,6 @@ const SubmissionForm = (props) => {
             hasPrevious={props.hasPrevious}
             
           />
-
           {selectedType === "commercial" ? (
             <CommercialForm
               next={props.next}
@@ -135,7 +136,7 @@ const SubmissionForm = (props) => {
           )}
         </MultiStep>
       </Box>
-    </Dialog>
+    </Dialog>)
   );
 };
 

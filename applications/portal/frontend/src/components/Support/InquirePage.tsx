@@ -7,14 +7,16 @@ import SupportTabs from '../UI/SupportTabs';
 const InquirePage = () => {
   
   return (
-    <SupportTabs>
+    (<SupportTabs>
       <Container maxWidth="lg" sx={{ display: 'flex', alignItems: "center", flexDirection: "column" }} className="container-inquire">
         <Typography component="p">
       For companies that would like to be members of the Antibody Registry, there are benefits to membership and there are steps that will need to be taken. 
 
 A few slides explain these:
         </Typography>
-        <Box my={3}>
+        <Box sx={{
+          my: 3
+        }}>
           <iframe src="https://www.slideshare.net/slideshow/embed_code/key/7ty1jMcsosffdG?hostedIn=slideshare&page=upload" width="952" height="586" frameBorder="0" marginWidth="0" marginHeight="0" scrolling="no"></iframe>
         </Box>
         <Box >
@@ -34,8 +36,8 @@ contact <a href="mailto:rii-help@scicrunch.org">rii-help@scicrunch.org</a> to be
           </Typography>
         </Box>
       </Container>
-    </SupportTabs>
-  )
+    </SupportTabs>)
+  );
 }
 
 export default InquirePage;
