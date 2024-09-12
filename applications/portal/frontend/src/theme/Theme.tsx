@@ -109,7 +109,6 @@ const theme = createTheme({
           flex-direction: column;
         }
         
-
         ::-webkit-scrollbar-thumb {
           background-color: ${btnBorderColor};
           border-radius: 3rem;
@@ -156,44 +155,53 @@ const theme = createTheme({
           fontWeight: 600,
           fontSize: "1rem",
           lineHeight: "1.5rem",
-
           "&:hover": {
             background: whiteColor,
             boxShadow: shadow,
             color: primaryColor,
           },
         },
-
-        contained: ({ ownerState, theme }) => ({
+        contained: ({
+          theme
+        }) => ({
           borderRadius: "0.375rem",
           fontWeight: 600,
           padding: `${theme.spacing(0.6)} ${theme.spacing(2)}`,
           boxShadow: "0px 1px 2px rgba(16, 24, 40, 0.05)",
-          ...(ownerState.color === "primary" && {
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.common.white,
-            boxShadow:
-              "0px 1px 2px rgba(16, 24, 40, 0.05),inset 0px -2px 0px rgba(0, 0, 0, 0.25)",
-            "&:hover": {
-              backgroundColor: darken(theme.palette.primary.main, 0.2),
+          variants: [{
+            props: {
+              color: "primary"
+            },
+            style: {
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.common.white,
               boxShadow:
                 "0px 1px 2px rgba(16, 24, 40, 0.05),inset 0px -2px 0px rgba(0, 0, 0, 0.25)",
+              "&:hover": {
+                backgroundColor: darken(theme.palette.primary.main, 0.2),
+                boxShadow:
+                  "0px 1px 2px rgba(16, 24, 40, 0.05),inset 0px -2px 0px rgba(0, 0, 0, 0.25)",
+              },
+            }
+          }, {
+            props: {
+              color: "info"
             },
-          }),
-          ...(ownerState.color === "info" && {
-            backgroundColor: theme.palette.common.white,
-            color: theme.palette.grey[700],
-            border: `1px solid ${theme.palette.grey[300]}`,
-            "&:hover": {
+            style: {
               backgroundColor: theme.palette.common.white,
-            },
-            "&.Mui-disabled": {
-              color: theme.palette.grey[300],
-              borderColor: theme.palette.grey[200],
-              backgroundColor: theme.palette.common.white,
-              boxShadow: "0px 1px 2px rgba(16, 24, 40, 0.05)",
-            },
-          }),
+              color: theme.palette.grey[700],
+              border: `1px solid ${theme.palette.grey[300]}`,
+              "&:hover": {
+                backgroundColor: theme.palette.common.white,
+              },
+              "&.Mui-disabled": {
+                color: theme.palette.grey[300],
+                borderColor: theme.palette.grey[200],
+                backgroundColor: theme.palette.common.white,
+                boxShadow: "0px 1px 2px rgba(16, 24, 40, 0.05)",
+              },
+            }
+          }]
         }),
       },
     },
