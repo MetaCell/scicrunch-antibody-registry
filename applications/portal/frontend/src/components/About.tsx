@@ -200,7 +200,9 @@ const About = () => {
     { name: 'Active Motif', url: 'https://www.activemotif.com/', img: './assets/partners/Active-Motif.jpg' },
     { name: 'Life Canvas Technologies', url: 'https://lifecanvastech.com/', img: './assets/partners/LifeCanvas.jpeg' },
     { name: 'AdipoGen Life Sciences', url: 'https://adipogen.com/', img: './assets/partners/AdipoGen_Logo_LIFE_SCIENCES_CMYK_2015_NEW_13cm_lowres.jpg' },
-    { name: 'Creative Biolabs', url: 'https://www.creativebiolabs.net/?utm_source=antibodyregistry&utm_medium=logo&utm_campaign=Creative+Biolabs-Recombinant+Antibody', img: './assets/partners/biolabs.png' }
+    { name: 'Creative Biolabs', url: 'https://www.creativebiolabs.net/?utm_source=antibodyregistry&utm_medium=logo&utm_campaign=Creative+Biolabs-Recombinant+Antibody', img: './assets/partners/biolabs.png' },
+    { name: 'Bio-techne', url: 'https://www.bio-techne.com/', img: './assets/partners/bio-techne.png'},
+    { name: 'Bio-Rad', url: 'https://www.bio-rad.com/', img: './assets/partners/bio-rad.jpg'}
   ]
   const history = useHistory();
   const navigate = () => history.push('/');
