@@ -86,12 +86,12 @@ const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
       warningMessage={warningMessage}
       shownResultsNum={searchedAntibodies?.length}
     />
-    
+
     </>
   );
 };
 
-const RenderNameAndId = (props: GridRenderCellParams<String>) => {
+const RenderNameAndId = (props: GridRenderCellParams) => {
   const currentPath = window.location.pathname;
   const href =
     currentPath === "/submissions"
@@ -102,8 +102,10 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
       <Typography
         variant="body2"
         align="left"
-        color="grey.700"
-        fontWeight={500}
+        sx={{
+          color: "grey.700",
+          fontWeight: 500
+        }}
       >
         {props.row.abName}
       </Typography>
@@ -111,7 +113,9 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
         variant="caption"
         align="left"
         component="div"
-        color="grey.500"
+        sx={{
+          color: "grey.500"
+        }}
       >
         AB_{props.row.abId}
       </Typography>
@@ -124,14 +128,16 @@ const getValueOrEmpty = (props: ValueProps) => {
   return props.row[props.field] ?? "";
 };
 
-const RenderCellContent = (props: GridRenderCellParams<String>) => {
+const RenderCellContent = (props: GridRenderCellParams) => {
   return (
     <Typography
       variant="caption"
       align="left"
-      color={"grey.500"}
       component="div"
       className="col-content"
+      sx={{
+        color: "grey.500"
+      }}
     >
       {props.field === "targetAntigen"
         ? `${props.row.abTarget} ${props.row.targetSpecies.join(", ")}`
@@ -140,16 +146,29 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
   );
 };
 
-const RenderVendor = (props) => ( 
-  
+const RenderVendor = (props) => (
+
   <Typography
     variant="caption"
     align="left"
-    color={"grey.500"}
     component="div"
     className="col-vendor"
+    sx={{
+      color: "grey.500"
+    }}
   >
-    {props.row.url ? <Link className="link-vendor" bgcolor="primary.light" px={0.5} py={0.25} display="block" underline="none" target="_blank" href={props.row.url}>
+    {props.row.url ? <Link
+      className="link-vendor"
+      underline="none"
+      target="_blank"
+      href={props.row.url}
+      sx={{
+        bgcolor: "primary.light",
+        px: 0.5,
+        py: 0.25,
+        display: "block"
+      }}
+    >
       {props.value}
     </Link> : props.value}
   </Typography>
@@ -159,11 +178,15 @@ const RenderClonality = (props) => (
   <Typography
     variant="caption"
     align="left"
-    color={"grey.500"}
-    bgcolor="grey.A200"
     component="div"
-    px={1} py={0.25} borderRadius="1rem"
     className="col-clonality"
+    sx={{
+      color: "grey.500",
+      bgcolor: "grey.A200",
+      px: 1,
+      py: 0.25,
+      borderRadius: "1rem"
+    }}
   >
     {props.value}
   </Typography>
@@ -175,10 +198,12 @@ const RenderHtml = (props: GridRenderCellParams<String>) => {
     <Typography
       variant="caption"
       align="left"
-      color="grey.500"
       component="div"
       dangerouslySetInnerHTML={{ __html: props.value }}
       className="col-html"
+      sx={{
+        color: "grey.500"
+      }}
     />
   );
 };
@@ -207,13 +232,13 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   const handleCloseCitation = useCallback(() => {
     setAnchorCitationPopover(null);
   }, [setAnchorCitationPopover]);
-    
+
   const handleClickCitation = useCallback((event) => {
     setAnchorCitationPopover(event.currentTarget);
     setTimeout(handleCloseCitation, 1000);
   }, [handleCloseCitation, setAnchorCitationPopover]);
 
-  
+
 
   const open = Boolean(anchorCitationPopover);
 
@@ -222,8 +247,10 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
       <Typography
         variant="caption"
         align="left"
-        color={props.field === "vendor" ? "primary.main" : "grey.500"}
         component="div"
+        sx={{
+          color: props.field === "vendor" ? "primary.main" : "grey.500"
+        }}
       >
         {props.value}
       </Typography>
@@ -233,7 +260,9 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
           size="small"
           sx={{ minWidth: 0 }}
           startIcon={
-            <CopyIcon sx={{ stroke: theme => theme.palette.grey[500] }} fontSize="inherit" />
+            <CopyIcon sx={theme => ({
+              stroke: theme.palette.grey[500]
+            })} fontSize="inherit" />
           }
           className="btn-citation-copy"
         />
@@ -257,7 +286,7 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   );
 };
 
-const RenderStatus = (props: GridRenderCellParams<string>) => {
+const RenderStatus = (props: GridRenderCellParams<String>) => {
   const statusesTag = {
     CURATED: ["Accepted", "success"],
     REJECTED: ["Rejected", "error"],
@@ -267,17 +296,21 @@ const RenderStatus = (props: GridRenderCellParams<string>) => {
 
   return (
     <Box
-      bgcolor={`${statusesTag[props.value][1]}.contrastText`}
-      px={1}
-      py={0.25}
-      borderRadius="1rem"
       className="col-status"
+      sx={{
+        bgcolor: `${statusesTag[props.value][1]}.contrastText`,
+        px: 1,
+        py: 0.25,
+        borderRadius: "1rem"
+      }}
     >
       <Typography
         variant="caption"
         align="left"
-        color={`${statusesTag[props.value][1]}.main`}
         component="div"
+        sx={{
+          color: `${statusesTag[props.value][1]}.main`
+        }}
       >
         {statusesTag[props.value][0]}
       </Typography>
@@ -361,6 +394,11 @@ const AntibodiesTable = (props) => {
   const user = useContext(UserContext)[0];
   const searchParams = new URLSearchParams(window.location.search);
   const searchQuery = searchParams.get('q');
+  const [paginationModel, setPaginationModel] = React.useState({
+    pageSize: PAGE_SIZE,
+    page: 0,
+  });
+
 
   const {
     activeSearch,
@@ -400,7 +438,7 @@ const AntibodiesTable = (props) => {
   }
 
   const setNewFilterColumn = (model) => {
-    let newblankFilter = { ...BLANK_FILTER_MODEL, columnField: model.items[0].columnField, id: getRandomId() }
+    let newblankFilter = { ...BLANK_FILTER_MODEL, field: model.items[0].field, id: getRandomId() }
     filterModel.items.push(newblankFilter);
     setFilterModel(filterModel);
   }
@@ -466,19 +504,19 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "abName",
       headerName: "Name",
-      hide: true,
+      hideable: true,
     },
     {
       ...columnsDefaultProps,
       field: "abId",
       headerName: "ID",
-      hide: true,
+      hideable: true,
     },
     {
       ...columnsDefaultProps,
       field: "accession",
       headerName: "Accession",
-      hide: true,
+      hideable: true,
     },
     {
       ...columnsDefaultProps,
@@ -502,7 +540,7 @@ const AntibodiesTable = (props) => {
       field: "targetSpecies",
       headerName: "Target species",
       valueGetter: getList,
-      hide: true,
+      hideable: true,
       sortable: false,
     },
     {
@@ -511,7 +549,7 @@ const AntibodiesTable = (props) => {
       headerName: "Applications",
       valueGetter: getList,
       sortable: false,
-      hide: true,
+      hideable: true,
     },
     {
       ...columnsDefaultProps,
@@ -541,7 +579,7 @@ const AntibodiesTable = (props) => {
       field: "reference",
       headerName: "Reference",
       flex: 1.5,
-      hide: true,
+      hideable: true,
       filterable: false,
       sortable: false,
     },
@@ -557,7 +595,7 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "cloneId",
       headerName: "Clone ID",
-      hide: true,
+      hideable: true,
     },
     {
       ...columnsDefaultProps,
@@ -586,13 +624,13 @@ const AntibodiesTable = (props) => {
       filterable: false,
       sortable: true,
       align: 'right',
-      hide: false
+      hideable: false
     },
     {
       ...columnsDefaultProps,
       field: "url",
       headerName: "Product URL",
-      hide: true,
+      hideable: true,
       sortable: false,
       filterable: false,
     },
@@ -600,7 +638,7 @@ const AntibodiesTable = (props) => {
       ...columnsDefaultProps,
       field: "status",
       headerName: "Status",
-      hide: props.activeTab === ALLRESULTS,
+      hideable: props.activeTab === ALLRESULTS,
       renderCell: RenderStatus,
       flex: 1.4,
       filterable: false,
@@ -614,7 +652,7 @@ const AntibodiesTable = (props) => {
       searchedAntibodies,
       filterModel
     },
-    noRowsOverlay: {
+    noRows: {
       activeSearch: activeSearch,
     },
     panel: {
@@ -625,11 +663,13 @@ const AntibodiesTable = (props) => {
         },
       },
     },
-    columnMenu: {
-      sx: {
-        "& .MuiMenuItem-root": {
-          fontSize: "0.875rem",
-          color: "grey.500",
+    columnMenuSlots: {
+      columnMenu: {
+        sx: {
+          "& .MuiMenuItem-root": {
+            fontSize: "0.875rem",
+            color: "grey.500",
+          },
         },
       },
     },
@@ -639,22 +679,22 @@ const AntibodiesTable = (props) => {
 
   const NoRowsOverlay = () =>
     typeof activeSearch === "string" &&
-    activeSearch !== "" &&
-    searchedAntibodies.length === 0 ? (
-        <NotFoundMessage activeSearch={activeSearch} />
-      ) : typeof activeSearch !== "string" ? (
-        <Error500 />
-      ) : (
-        <GridNoRowsOverlay />
-      );
+      activeSearch !== "" &&
+      searchedAntibodies.length === 0 ? (
+      <NotFoundMessage activeSearch={activeSearch} />
+    ) : typeof activeSearch !== "string" ? (
+      <Error500 />
+    ) : (
+      <GridNoRowsOverlay />
+    );
 
   const SortIcon = ({ ...other }) => <SortingIcon {...other} />;
   const currentPath = window.location.pathname;
   return (
     <Box>
-      
+
       <Box sx={{ flexGrow: 1, height: "83.5vh" }}>
-        
+
         {currentPath === "/submissions" && !user ? (
           <ConnectAccount />
         ) : (
@@ -665,39 +705,40 @@ const AntibodiesTable = (props) => {
             rows={searchedAntibodies ?? []}
             getRowId={getRowId}
             columns={columns}
-            pageSize={PAGE_SIZE}
-            rowsPerPageOptions={[20]}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            pageSizeOptions={[20]}
             pagination={true}
             paginationMode="server"
             sortingMode="server"
             onSortModelChange={(model) => addSortingColumn(model)}
             checkboxSelection
-            disableSelectionOnClick
+            disableRowSelectionOnClick
             columnVisibilityModel={showColumns || {}}
             onColumnVisibilityModelChange={(model) => setShowColumns(model)}
             getRowHeight={() => "auto"}
             loading={!searchedAntibodies || loader}
             onFilterModelChange={(model) => addNewFilterColumn(model)}
             filterMode="server"
-            components={{
-              BaseCheckbox: StyledCheckBox,
-              ColumnFilteredIcon: FilteredColumnIcon,
-              ColumnUnsortedIcon: SortIcon,
-              ColumnSortedAscendingIcon: AscSortedIcon,
-              ColumnSortedDescendingIcon: DescSortedIcon,
-              Toolbar: CustomToolbar,
-              ColumnMenuIcon: MoreVertIcon,
-              ColumnSelectorIcon: SettingsIcon,
-              NoRowsOverlay: NoRowsOverlay,
-              Footer: TablePaginatedFooter,
-              FilterPanel: () => CustomFilterPanel({
+            slots={{
+              baseCheckbox: StyledCheckBox,
+              columnFilteredIcon: FilteredColumnIcon,
+              columnUnsortedIcon: SortIcon,
+              columnSortedAscendingIcon: AscSortedIcon,
+              columnSortedDescendingIcon: DescSortedIcon,
+              toolbar: CustomToolbar,
+              columnMenuIcon: MoreVertIcon,
+              columnSelectorIcon: SettingsIcon,
+              noRowsOverlay: NoRowsOverlay,
+              footer: TablePaginatedFooter,
+              filterPanel: () => CustomFilterPanel({
                 columns,
                 filterModel,
                 applyFilters,
                 setFilterModel,
               }),
             }}
-            componentsProps={compProps}
+            slotProps={compProps}
             localeText={{
               toolbarColumns: "Table settings",
             }}

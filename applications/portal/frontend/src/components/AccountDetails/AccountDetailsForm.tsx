@@ -1,7 +1,6 @@
 import React from "react";
 import { useTheme } from "@mui/material/styles";
 import {
-  Grid,
   Typography,
   Button,
   Box,
@@ -10,6 +9,7 @@ import {
   InputAdornment,
   Alert,
 } from "@mui/material";
+import Grid from "@mui/material/Grid2"
 import { CheckIcon, EmailIcon } from "../icons";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
@@ -127,20 +127,33 @@ const AccountDetailsForm = () => {
   };
 
   return (
-    <form>
-      <Grid container p={3} gap={3} direction="column" sx={styles.main}>
+    (<form>
+      <Grid
+        container
+        direction="column"
+        sx={[{
+          p: 3,
+          gap: 3
+        }, styles.main]}>
         <Grid
-          item
-          display="flex"
-          p={0}
-          justifyContent="space-between"
-          textAlign="left"
-        >
+          sx={{
+            display: "flex",
+            p: 0,
+            justifyContent: "space-between",
+            textAlign: "left"
+          }}>
           <div>
-            <Typography variant="h2" color="grey.900" pb={0.5}>
+            <Typography
+              variant="h2"
+              sx={{
+                color: "grey.900",
+                pb: 0.5
+              }}>
               Account details
             </Typography>
-            <Typography variant="subtitle1" color="grey.500">
+            <Typography variant="subtitle1" sx={{
+              color: "grey.500"
+            }}>
               Update your personal details.
             </Typography>
           </div>
@@ -158,13 +171,31 @@ const AccountDetailsForm = () => {
 
         {updateResult !== null && <Alert severity={updateResult.includes("fail") ? "error": "info"}><>{updateResult + ""}</></Alert>}
         {updatePasswordResult !== null && <Alert severity={updatePasswordResult.includes("fail") ? "error": "info"}><>{updatePasswordResult + ""}</></Alert>}
-        <Grid item p={0} textAlign="left" display="flex" gap={4}>
-          <Grid item lg={3}>
-            <Typography color="grey.500">Personal details</Typography>
+        <Grid
+          sx={{
+            p: 0,
+            textAlign: "left",
+            display: "flex",
+            gap: 4
+          }}>
+          <Grid size={{ lg: 3 }}>
+            <Typography sx={{
+              color: "grey.500"
+            }}>Personal details</Typography>
           </Grid>
-          <Grid item lg={9} display="flex" justifyContent="space-between">
-            <Grid item lg={5.9}>
-              <Typography variant="subtitle1" color="grey.700" pb={0.75}>
+          <Grid
+            size={{ lg: 9 }}
+            sx={{
+              display: "flex",
+              justifyContent: "space-between"
+            }}>
+            <Grid size={{ lg: 5.9 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: "grey.700",
+                  pb: 0.75
+                }}>
                 First Name
               </Typography>
               <TextField 
@@ -172,8 +203,13 @@ const AccountDetailsForm = () => {
                 fullWidth 
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUser({ ...user, firstName: e.target.value })} />
             </Grid>
-            <Grid item lg={5.9}>
-              <Typography variant="subtitle1" color="grey.700" pb={0.75}>
+            <Grid size={{ lg: 5.9 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: "grey.700",
+                  pb: 0.75
+                }}>
                 Last Name
               </Typography>
               <TextField 
@@ -187,43 +223,77 @@ const AccountDetailsForm = () => {
           </Grid>
         </Grid>
         <Divider />
-        <Grid item p={0} textAlign="left" display="flex" gap={4}>
-          <Grid item lg={3}>
-            <Typography color="grey.500">Email</Typography>
-            <Typography variant="subtitle1" color="grey.500">
+        <Grid
+          sx={{
+            p: 0,
+            textAlign: "left",
+            display: "flex",
+            gap: 4
+          }}>
+          <Grid size={{ lg: 3 }}>
+            <Typography sx={{
+              color: "grey.500"
+            }}>Email</Typography>
+            <Typography variant="subtitle1" sx={{
+              color: "grey.500"
+            }}>
               This is your login credential and the email address used for
               password recovering.
             </Typography>
           </Grid>
-          <Grid item lg={9}>
-            <Typography variant="subtitle1" color="grey.700" pb={0.75}>
+          <Grid size={{ lg: 9 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                color: "grey.700",
+                pb: 0.75
+              }}>
               Email
             </Typography>
             <TextField
               fullWidth
               value={user.email}
               disabled
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start" sx={{ pl: 2 }}>
-                    <EmailIcon />
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start" sx={{ pl: 2 }}>
+                      <EmailIcon />
+                    </InputAdornment>
+                  ),
+                }
               }}
             />
           </Grid>
         </Grid>
         <Divider />
-        <Grid item p={0} textAlign="left" display="flex" gap={4}>
-          <Grid item lg={3}>
-            <Typography color="grey.500">Password</Typography>
-            <Typography variant="subtitle1" color="grey.500">
+        <Grid
+          sx={{
+            p: 0,
+            textAlign: "left",
+            display: "flex",
+            gap: 4
+          }}>
+          <Grid size={{ lg: 3 }}>
+            <Typography sx={{
+              color: "grey.500"
+            }}>Password</Typography>
+            <Typography variant="subtitle1" sx={{
+              color: "grey.500"
+            }}>
               Update your password.
             </Typography>
           </Grid>
-          <Grid item lg={9} columnSpacing={2}>
-            <Box pb={2}>
-              <Typography variant="subtitle1" color="grey.700" pb={0.75}>
+          <Grid size={{ lg: 9 }} columnSpacing={2}>
+            <Box sx={{
+              pb: 2
+            }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: "grey.700",
+                  pb: 0.75
+                }}>
                 Original password
               </Typography>
               <TextField
@@ -231,30 +301,39 @@ const AccountDetailsForm = () => {
                 type={isPassOrigShown ? "text" : "password"}
                 placeholder="Type your original password"
                 onChange={handleOrigPasswordChange}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Button
-                        startIcon={
-                          isPassOrigShown ? (
-                            <VisibilityOffOutlinedIcon sx={{ color: "#000" }} />
-                          ) : (
-                            <VisibilityOutlinedIcon sx={{ color: "#000" }} />
-                          )
-                        }
-                        sx={styles.showButton}
-                        color="inherit"
-                        onClick={() => setIsPassOrigShown(!isPassOrigShown)}
-                      >
-                        Show
-                      </Button>
-                    </InputAdornment>
-                  ),
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Button
+                          startIcon={
+                            isPassOrigShown ? (
+                              <VisibilityOffOutlinedIcon sx={{ color: "#000" }} />
+                            ) : (
+                              <VisibilityOutlinedIcon sx={{ color: "#000" }} />
+                            )
+                          }
+                          sx={styles.showButton}
+                          color="inherit"
+                          onClick={() => setIsPassOrigShown(!isPassOrigShown)}
+                        >
+                          Show
+                        </Button>
+                      </InputAdornment>
+                    ),
+                  }
                 }}
               />
             </Box>
-            <Box pb={2}>
-              <Typography variant="subtitle1" color="grey.700" pb={0.75}>
+            <Box sx={{
+              pb: 2
+            }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: "grey.700",
+                  pb: 0.75
+                }}>
                 New password
               </Typography>
               <TextField
@@ -262,30 +341,39 @@ const AccountDetailsForm = () => {
                 placeholder="Create a new password"
                 type={isPassNewShown ? "text" : "password"}
                 onChange={handleNewPasswordChange}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Button
-                        startIcon={
-                          isPassNewShown ? (
-                            <VisibilityOffOutlinedIcon sx={{ color: "#000" }} />
-                          ) : (
-                            <VisibilityOutlinedIcon sx={{ color: "#000" }} />
-                          )
-                        }
-                        sx={styles.showButton}
-                        color="inherit"
-                        onClick={() => setIsPassNewShown(!isPassNewShown)}
-                      >
-                        Show
-                      </Button>
-                    </InputAdornment>
-                  ),
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Button
+                          startIcon={
+                            isPassNewShown ? (
+                              <VisibilityOffOutlinedIcon sx={{ color: "#000" }} />
+                            ) : (
+                              <VisibilityOutlinedIcon sx={{ color: "#000" }} />
+                            )
+                          }
+                          sx={styles.showButton}
+                          color="inherit"
+                          onClick={() => setIsPassNewShown(!isPassNewShown)}
+                        >
+                          Show
+                        </Button>
+                      </InputAdornment>
+                    ),
+                  }
                 }}
               />
             </Box>
-            <Box pb={2}>
-              <Typography variant="subtitle1" color="grey.700" pb={0.75}>
+            <Box sx={{
+              pb: 2
+            }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: "grey.700",
+                  pb: 0.75
+                }}>
                 Confirm password
               </Typography>
               <TextField
@@ -295,27 +383,29 @@ const AccountDetailsForm = () => {
                 type={isPassConfirmShown ? "text" : "password"}
                 onChange={handleConfirmPasswordChange}
                 helperText={passwordError ? "Passwords do not match" : ""}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Button
-                        startIcon={
-                          isPassConfirmShown ? (
-                            <VisibilityOffOutlinedIcon sx={{ color: "#000" }} />
-                          ) : (
-                            <VisibilityOutlinedIcon sx={{ color: "#000" }} />
-                          )
-                        }
-                        sx={styles.showButton}
-                        color="inherit"
-                        onClick={() =>
-                          setIsPassConfirmShown(!isPassConfirmShown)
-                        }
-                      >
-                        Show
-                      </Button>
-                    </InputAdornment>
-                  ),
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Button
+                          startIcon={
+                            isPassConfirmShown ? (
+                              <VisibilityOffOutlinedIcon sx={{ color: "#000" }} />
+                            ) : (
+                              <VisibilityOutlinedIcon sx={{ color: "#000" }} />
+                            )
+                          }
+                          sx={styles.showButton}
+                          color="inherit"
+                          onClick={() =>
+                            setIsPassConfirmShown(!isPassConfirmShown)
+                          }
+                        >
+                          Show
+                        </Button>
+                      </InputAdornment>
+                    ),
+                  }
                 }}
               />
             </Box>
@@ -323,16 +413,32 @@ const AccountDetailsForm = () => {
         </Grid>
         <Divider />
         {orcidMsg && <Alert severity={orcidMsg.includes("fail") ? "error": "info"}>{orcidMsg}</Alert>}
-        <Grid item p={0} textAlign="left" display="flex" gap={4}>
-          <Grid item lg={3}>
-            <Typography color="grey.500">ORCID ID</Typography>
-            <Typography variant="subtitle1" color="grey.500">
+        <Grid
+          sx={{
+            p: 0,
+            textAlign: "left",
+            display: "flex",
+            gap: 4
+          }}>
+          <Grid size={{ lg: 3 }}>
+            <Typography sx={{
+              color: "grey.500"
+            }}>ORCID ID</Typography>
+            <Typography variant="subtitle1" sx={{
+              color: "grey.500"
+            }}>
               You can associate your ORCID ID to your account.
             </Typography>
           </Grid>
 
           
-          <Grid item lg={9} columnSpacing={2} justifyContent="space-between" display="flex">
+          <Grid
+            size={{ lg: 9 }}
+            columnSpacing={2}
+            sx={{
+              justifyContent: "space-between",
+              display: "flex"
+            }}>
             <TextField 
               value={orcid} 
               sx={{ pr: 2, flex: 1 }}
@@ -352,7 +458,7 @@ const AccountDetailsForm = () => {
           </Grid>
         </Grid>
       </Grid>
-    </form>
+    </form>)
   );
 };
 export default AccountDetailsForm;

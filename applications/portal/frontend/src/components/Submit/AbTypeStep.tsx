@@ -42,10 +42,15 @@ const TypeChoiceCard = ({ label, icon, handleClick, selectedValue, type }) => {
   };
 
   return (
-    <Card elevation={0} sx={classes.card}>
+    (<Card elevation={0} sx={classes.card}>
       <CardActionArea onClick={handleClick}>
         <CardContent sx={{ py: 3, px: 2 }}>
-          <Stack spacing={2} display="flex" alignItems="center">
+          <Stack
+            spacing={2}
+            sx={{
+              display: "flex",
+              alignItems: "center"
+            }}>
             {icon}
             <Typography
               gutterBottom
@@ -59,7 +64,7 @@ const TypeChoiceCard = ({ label, icon, handleClick, selectedValue, type }) => {
           </Stack>
         </CardContent>
       </CardActionArea>
-    </Card>
+    </Card>)
   );
 };
 

@@ -19,9 +19,11 @@ const Error = (props) => {
     },
   };
   return (
-    <Container maxWidth="xl" sx={classes.container} className="error-container">
+    (<Container maxWidth="xl" sx={classes.container} className="error-container">
       <Stack spacing={3} sx={classes.stack}>
-        <Typography variant="h1" color="grey.700">
+        <Typography variant="h1" sx={{
+          color: "grey.700"
+        }}>
           Something went wrong
         </Typography>
         <Typography variant="subtitle1" align="center" sx={classes.message}>
@@ -33,8 +35,7 @@ const Error = (props) => {
           </Button>
         </Box>
       </Stack>
-    </Container>
+    </Container>)
   );
 };
-
 export default Error;

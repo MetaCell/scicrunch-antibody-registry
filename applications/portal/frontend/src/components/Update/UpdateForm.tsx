@@ -78,28 +78,27 @@ const UpdateForm = () => {
     comments: antibody.comments,
   });
 
-  return (
-    <>
-      {antibody ? (
-        <AntibodyForm
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={updateAntibody}
-          title="Update Antibody Submission"
-          className="update-form"
-        />
-      ) : (
-        <Box
-          height="90vh"
-          alignItems="center"
-          display="flex"
-          justifyContent="center"
-        >
-          <CircularProgress />
-        </Box>
-      )}
-    </>
-  );
+  return (<>
+    {antibody ? (
+      <AntibodyForm
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={updateAntibody}
+        title="Update Antibody Submission"
+        className="update-form"
+      />
+    ) : (
+      <Box
+        sx={{
+          height: "90vh",
+          alignItems: "center",
+          display: "flex",
+          justifyContent: "center"
+        }}>
+        <CircularProgress />
+      </Box>
+    )}
+  </>);
 };
 
 export default UpdateForm;

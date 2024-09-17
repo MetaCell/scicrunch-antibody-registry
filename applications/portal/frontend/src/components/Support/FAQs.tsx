@@ -2,7 +2,8 @@ import React from "react";
 
 import { vars } from "../../theme/variables";
 import { AccordionPlusIcon, AccordionMinusIcon } from "../icons";
-import { Box, Grid, Typography, Accordion, AccordionSummary, AccordionDetails, Container, Link } from "@mui/material";
+import { Box, Typography, Accordion, AccordionSummary, AccordionDetails, Container, Link } from "@mui/material";
+import Grid from '@mui/material/Grid2';
 import { faqsInfo } from "../../content/faqsInfo";
 const { primaryTextColor, primarySubheaderColor, primaryHeaderColor } = vars;
 import SupportTabs from "../UI/SupportTabs";
@@ -91,7 +92,7 @@ const FAQs = () => {
 
 
   return (
-    <SupportTabs>
+    (<SupportTabs>
       <Container maxWidth="lg">
         <Box sx={styles.faqBox}>
           <Typography sx={styles.faqBoxSubheader}>Support</Typography>
@@ -100,15 +101,22 @@ const FAQs = () => {
             Please contact our team at <Link href="mailto:rii-help@scicrunch.org">rii-help@scicrunch.org</Link></Typography>
         </Box>
       </Container>
-      <Grid container spacing={2} direction="row" alignItems="start" justifyContent="center" sx={styles.grid}>
-        <Grid item xs={12} sm={6} md={4}>
+      <Grid
+        container
+        spacing={2}
+        direction="row"
+        sx={[{
+          alignItems: "start",
+          justifyContent: "center"
+        }, styles.grid]}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Box sx={styles.accordion}>
             {
               faqsInfo.slice(0, faqsInfo.length / 2).map(({ question, answer }, index) => <FAQ key={question} question={question} answer={answer} expanded={expanded[index]} handleChange={() => setExpanded({ ...expanded,  [index]: !expanded[index] })} />)
             }
           </Box>
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Box sx={styles.accordion}>
             {
               faqsInfo.slice(faqsInfo.length / 2, faqsInfo.length).map(({ question, answer }, index) => <FAQ key={question} question={question} answer={answer} expanded={expanded[index + faqsInfo.length / 2]} handleChange={() => setExpanded({ ...expanded,  [index + faqsInfo.length / 2]: !expanded[index + faqsInfo.length / 2] })} />)
@@ -116,7 +124,7 @@ const FAQs = () => {
           </Box>
         </Grid>
       </Grid>
-    </SupportTabs>
-  )
+    </SupportTabs>)
+  );
 }
 export default FAQs

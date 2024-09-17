@@ -19,9 +19,11 @@ const Error500 = () => {
     },
   };
   return (
-    <Container maxWidth="xl" sx={classes.container} className="error-container-500">
+    (<Container maxWidth="xl" sx={classes.container} className="error-container-500">
       <Stack spacing={3} sx={classes.stack}>
-        <Typography variant="h1" color="grey.700">
+        <Typography variant="h1" sx={{
+          color: "grey.700"
+        }}>
           Internal Server Error
         </Typography>
         <Typography variant="subtitle1" align="center" sx={classes.message}>
@@ -34,8 +36,7 @@ const Error500 = () => {
           </Button>
         </Box>
       </Stack>
-    </Container>
+    </Container>)
   );
 };
-
 export default Error500;

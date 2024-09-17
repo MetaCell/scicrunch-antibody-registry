@@ -111,7 +111,6 @@ export default function Searchbar(props) {
         freeSolo 
         options={autocompleteOps.map(option => option)} 
         fullWidth
-
         clearOnEscape
         disabled={loader}
         className="search-autocomplete"
@@ -151,9 +150,7 @@ export default function Searchbar(props) {
         }
         }
       />
-
     </Tooltip>
-
   </Stack>
   );
 }

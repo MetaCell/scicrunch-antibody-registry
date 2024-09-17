@@ -37,8 +37,10 @@ export const StepNavigation = (props: NavigationProps) => {
       justifyContent: "space-between",
     },
   };
-  return (
-    <>{props.formik?.isSubmitting && <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={true} ><CircularProgress color="primary" /></Backdrop>}
+  return (<>{props.formik?.isSubmitting && <Backdrop sx={theme => ({
+      color: '#fff',
+      zIndex: theme.zIndex.drawer + 1
+    })} open={true} ><CircularProgress color="primary" /></Backdrop>}
     <Toolbar sx={classes.toolbar}>
       <Container maxWidth="xl">
         <Box sx={classes.content} className="form-steps">
@@ -85,8 +87,6 @@ export const StepNavigation = (props: NavigationProps) => {
         </Box>
       </Container>
     </Toolbar>
-    </>
-  );
+  </>);
 };
-
 export default StepNavigation;
