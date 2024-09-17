@@ -95,7 +95,7 @@ export function mapColumnToBackendModel(columnItems, modeltype) {
 
 export const getColumnsToDisplay = (columns) => {
   let showcolList: GridColumnVisibilityModel = {};
-  columns.filter((column) => column?.hide === true).map((column) => {
+  columns.filter((column) => column?.hideable === true).map((column) => {
     showcolList[column.field] = false;
   });
   return showcolList;
