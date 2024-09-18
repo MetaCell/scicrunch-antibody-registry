@@ -28,4 +28,3 @@ class AntibodyDoesNotExist(Exception):
 class FetchCitationMetricFailed(Exception):
     def __init__(self, ab_id):
         super().__init__(f"Failed to fetch citation metrics for {ab_id}")
-    

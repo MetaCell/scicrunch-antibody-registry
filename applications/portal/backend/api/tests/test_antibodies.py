@@ -39,7 +39,6 @@ class AntibodiesTestCase(TestCase):
         ab = get_antibody(ab.abId, status=STATUS.QUEUE)[0]
 
         self.assertTrue("www.bdbiosciences.com" in ab.vendorUrl)
-        
 
         # current token user is different than the user that created the antibody and link is false
         # so the url should not be shown
@@ -65,7 +64,6 @@ class AntibodiesTestCase(TestCase):
         assert ab.curateTime is None
         assert ab.sourceOrganism == "mouse"
         assert len(ab.targetSpecies) == 2
-
 
         new_ant = AddAntibodyDTO(**example_ab)
         new_ant.catalogNum = "N176A/36"
@@ -194,7 +192,7 @@ class AntibodiesTestCase(TestCase):
         ab2.status = STATUS.CURATED
         ab2.save()
         assert len(fts_antibodies(search="AB_1234567").items) == 1
-        assert len(fts_antibodies(search="AB_12345689").items) == 1   ## search into accession
+        assert len(fts_antibodies(search="AB_12345689").items) == 1  # search into accession
 
     def test_update(self):
         user_id = "aaaa"
@@ -278,13 +276,12 @@ class AntibodiesTestCase(TestCase):
         self.assertEqual(len(ab.vendorUrl), 0, "Vendor URL should not be shown as it's not curated yet")
         self.curate_test_antibody_data(ab.abId)
         self.curate_vendor_domains_for_antibody(ab.abId)
-        ab = get_antibody(ab.abId)[0]  ## returns a list - get the first one
+        ab = get_antibody(ab.abId)[0]  # returns a list - get the first one
 
         self.assertIn(
             V1_D1,
             ab.vendorUrl,
         )
-
 
         # Number of vendors 1 and vendor domain 1
         self.assertEquals(VendorDomain.objects.count(), 1)
@@ -297,7 +294,7 @@ class AntibodiesTestCase(TestCase):
         modified_example_ab["url"] = "https://" + V2_D1 + "/test"
         modified_example_ab["catalogNum"] = "N176AB_23/35_SD_WEER"
         ab2 = create_antibody(AddAntibodyDTO(**modified_example_ab), "aaaa")
-        
+
         self.curate_test_antibody_data(ab2.abId)
         self.curate_vendor_domains_for_antibody(ab2.abId)
         ab2 = get_antibody(ab2.abId)[0]

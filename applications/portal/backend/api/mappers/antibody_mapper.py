@@ -36,7 +36,6 @@ class AntibodyMapper(IDAOMapper):
             ab = Antibody()
             ab.ab_id = 0
 
-
         if dto.abTarget:
             # antigen_symbol = dto.abTarget
             # del dto.abTarget
@@ -53,7 +52,7 @@ class AntibodyMapper(IDAOMapper):
 
         if dto.url or dto.vendorName:
             ab.set_vendor_from_name_url(
-                url=dto.url, name=dto.vendorName, 
+                url=dto.url, name=dto.vendorName,
                 commercial_type=dto.commercialType.value if dto.commercialType else None
             )
         else:
@@ -71,8 +70,8 @@ class AntibodyMapper(IDAOMapper):
                 if isinstance(v, enum.Enum):
                     setattr(ab, k, v.value)
                 elif not isinstance(v, (list, tuple))\
-                    and (getattr(ab, k, None) is None\
-                        or isinstance(getattr(ab, k, None), (int, str))):
+                    and (getattr(ab, k, None) is None or
+                         isinstance(getattr(ab, k, None), (int, str))):
                     setattr(ab, k, v)
             except Exception as e:
                 log.exception("Error setting attribute %s, value: %s", k, v)
@@ -133,7 +132,7 @@ class AntibodyMapper(IDAOMapper):
             ab.sourceOrganism = dao.source_organism.name
         if dao.species and not ab.targetSpecies:
             ab.targetSpecies = [s.name for s in dao.species.all()]
-        
+
         ab.numOfCitation = dao.citation
         ab.url = get_url_if_permitted(dao)
 

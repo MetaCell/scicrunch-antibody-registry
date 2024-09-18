@@ -31,7 +31,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         requests_per_second_limit = options.get('max_requests_per_second', 10)
-        
+
         antibodies_ids = get_curated_antibodies_ids()
 
         api_request_rate_limiter = RateLimiter(
@@ -63,8 +63,6 @@ class Command(BaseCommand):
         if number_of_citations is not None:
             ingested = set_citation_metric(
                 ab_id, number_of_citations)
-
-        
 
     def log_failed_antibodies(self, failed_antibody_ids):
         if failed_antibody_ids:

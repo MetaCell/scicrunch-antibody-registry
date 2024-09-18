@@ -37,13 +37,14 @@ from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 def id_with_ab(obj: Antibody):
     return f"AB_{obj.ab_id}"
 
+
 @cache
 def get_user_by_kc_id(kc_id) -> User:
     try:
         return Member.objects.get(kc_id=kc_id).user
     except Member.DoesNotExist:
         return None
-    
+
 
 class VerboseManyToManyRawIdWidget(ManyToManyRawIdWidget):
     """
@@ -101,10 +102,10 @@ class AntibodyFilesAdmin(admin.TabularInline):
     extra = 1
 
 
-# not in fields - catalog_num_search 
+# not in fields - catalog_num_search
 antibody_fields_shown = (
-    "ab_name", "ab_id", "accession", "commercial_type", "catalog_num", "cat_alt", "citation", "vendor", 
-    "url","ab_target", "entrez_id", "uniprot_id", "target_species_raw", "subregion", 
+    "ab_name", "ab_id", "accession", "commercial_type", "catalog_num", "cat_alt", "citation", "vendor",
+    "url", "ab_target", "entrez_id", "uniprot_id", "target_species_raw", "subregion",
     "modifications", "epitope", "source_organism", "clonality", "clone_id", "product_isotype",
     "product_conjugate", "defining_citation", "product_form", "comments",
     "kit_contents", "feedback", "curator_comment", "disc_date", "status", "show_link",
@@ -112,9 +113,10 @@ antibody_fields_shown = (
     "uid", "uid_legacy", "insert_time", "lastedit_time", "curate_time",
 )
 
+
 @admin.register(Antibody)
 class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
-    
+
     change_form_template = "admin/antibody_change_form.html"
 
     # Import/Export module settings
@@ -131,7 +133,7 @@ class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
     fields = antibody_fields_shown
 
     inlines = [TargetSpeciesInlineAdmin, AntibodyFilesAdmin, ApplicationsInlineAdmin]
-    
+
     readonly_fields = (
         "submitter_name",
         "submitter_email",
@@ -144,11 +146,11 @@ class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
     )
     autocomplete_fields = ("vendor", "source_organism")
     save_on_top = True
-    show_save=False
+    show_save = False
 
     formfield_overrides = {
-        models.CharField: {'widget': TextInput(attrs={'size':'120'})},
-        models.TextField: {'widget': Textarea(attrs={'rows':2, 'cols':120})}
+        models.CharField: {'widget': TextInput(attrs={'size': '120'})},
+        models.TextField: {'widget': Textarea(attrs={'rows': 2, 'cols': 120})}
     }
 
     @property
@@ -164,7 +166,7 @@ class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
     def submitter_name(self, obj: Antibody):
         if not obj.uid:
             return "Unknown"
-        
+
         dj_user: User = get_user_by_kc_id(obj.uid)
         if dj_user:
             return f"{dj_user.get_full_name()} ({dj_user.username})"
@@ -186,7 +188,7 @@ class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
         dj_user: User = get_user_by_kc_id(obj.uid)
         if dj_user:
             return dj_user.email
-            
+
         try:
             submitter = self.get_user(user_id=obj.uid)
             return f"{submitter['email']}"
@@ -338,7 +340,7 @@ class CommercialTypeFilter(admin.SimpleListFilter):
         if self.value():
             return queryset.filter(vendor__commercial_type=self.value())
         return queryset
-        
+
 
 @admin.register(VendorDomain)
 class VendorDomainAdmin(SimpleHistoryAdmin):
@@ -350,6 +352,7 @@ class VendorDomainAdmin(SimpleHistoryAdmin):
     )
     list_editable = ("is_domain_visible",)
     list_filter = [CommercialTypeFilter]
+
 
 @admin.register(Vendor)
 class VendorAdmin(SimpleHistoryAdmin):

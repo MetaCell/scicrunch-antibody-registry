@@ -387,7 +387,7 @@ class Antibody(models.Model):
         new_species = self.species_from_raw(self.target_species_raw)
 
         if new_species != old_species or len(new_species) != self.species.count():
-            to_remove =  old_species - new_species
+            to_remove = old_species - new_species
             if to_remove:
                 for specie_name in to_remove:
                     specie_name = specie_name.strip().lower()
@@ -427,7 +427,7 @@ class Antibody(models.Model):
         if self.vendor and self.catalog_num:
             duplicate_antibodies = Antibody.objects.filter(
                 vendor__id=self.vendor.id,
-                catalog_num__iexact=self.catalog_num, 
+                catalog_num__iexact=self.catalog_num,
             ).exclude(commercial_type=CommercialType.PERSONAL).exclude(ix=self.ix).exclude(status=STATUS.REJECTED)
             duplicates_length = len(duplicate_antibodies)
             if duplicates_length == 0:  # Because the save happened before there will always be one antibody in the database
@@ -455,7 +455,7 @@ class Antibody(models.Model):
             log.exception("Multiple vendors with name %s", name)
             vendor = Vendor.objects.filter(name__iexact=name)[0]
         except Vendor.DoesNotExist:
-            if not self.vendor:  ## if vendor is not set by vendor domain
+            if not self.vendor:  # if vendor is not set by vendor domain
                 vendor_name = name or base_url
                 log.info(
                     "Creating new Vendor `%s` on domain  to `%s`", vendor_name, base_url

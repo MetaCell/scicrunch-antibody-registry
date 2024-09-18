@@ -103,7 +103,7 @@ DEFAULT_UID = '43'
 LIMIT_NUM_RESULTS = 10000
 
 FILTERABLE_AND_SORTABLE_FIELDS = [
-    'ab_id', 'ab_name', 'accession', 
+    'ab_id', 'ab_name', 'accession',
     'species', 'applications', 'ab_target',
     'clonality', 'comments', 'clone_id',
     'vendor', 'source_organism', 'catalog_num', 'citation'

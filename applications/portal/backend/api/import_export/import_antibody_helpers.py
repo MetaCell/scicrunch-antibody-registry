@@ -30,10 +30,12 @@ def get_antibody_q2(dataset, catalog_number_field, vendor_field) -> Q:
         **{"%s__%s__in" % (vendor_field.attribute, vendor_field.widget.field): remove_empty_string(
             dataset[vendor_field.column_name])})
 
+
 def filter_dataset_by_ix(dataset, negate, antibodies):
     values = (str(antibody.ix) for antibody in antibodies)
     condition = dataset.df['ix'].isin(values)
     return ~condition if negate else condition
+
 
 def filter_dataset_by_accession(dataset, negate, antibodies):
     values = (str(antibody.accession) for antibody in antibodies)
@@ -64,5 +66,5 @@ def filter_dataset_by_catnum_vendor(dataset, negate, antibodies, catalog_number_
         antibody_catalog_numbers.append(antibody.catalog_num)
         antibody_vendor_names.append(antibody.vendor.name)
     condition = dataset.df[catalog_number_field.column_name].isin(antibody_catalog_numbers) & \
-                dataset.df[vendor_field.column_name].isin(antibody_vendor_names)
+        dataset.df[vendor_field.column_name].isin(antibody_vendor_names)
     return ~condition if negate else condition

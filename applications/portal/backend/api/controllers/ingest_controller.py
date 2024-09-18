@@ -15,9 +15,6 @@ def ingest(body: IngestRequest):
                                 detail="You are not authorized to ingest data.")
     except:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail="You are not authorized to ingest data.")
+                            detail="You are not authorized to ingest data.")
     execute_ingestion_workflow(body.driveLinkOrId, body.hot)
     return status.HTTP_200_OK
-
-
-

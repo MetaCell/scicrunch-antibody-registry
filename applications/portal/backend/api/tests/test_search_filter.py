@@ -35,7 +35,7 @@ class SearchAndFilterAntibodiesTestCase(TestCase):
 
         self.assertFalse(
             check_filters_are_valid(INCOMPLETE_TEST_FILTER_AND_SEARCH_REQUEST_BODY)
-        )  ## Will be false since three fields are missing
+        )  # Will be false since three fields are missing
 
         # add the ones that are missing
         INCOMPLETE_TEST_FILTER_AND_SEARCH_REQUEST_BODY.isEmpty = []
@@ -130,7 +130,7 @@ class SearchAndFilterAntibodiesTestCase(TestCase):
         self.assertEqual(antibodies[1], 2)
         self.assertEqual(
             antibodies[0][0].catalogNum, example_ab2["catalogNum"]
-        )  ## this is first because Andrew Dingwall comes first
+        )  # this is first because Andrew Dingwall comes first
         self.assertEqual(antibodies[0][1].catalogNum, example_ab["catalogNum"])
 
         filter_fts_sort.sortOn[0].sortorder = Sortorder.desc

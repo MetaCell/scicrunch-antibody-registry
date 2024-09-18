@@ -11,7 +11,6 @@ from cloudharness import log
 # AuthClient will try to refresh automatically once token expired
 
 
-
 class KeycloakService:
     def __init__(self, username=None, password=None):
         username = os.getenv("ACCOUNTS_ADMIN_USERNAME", username)
@@ -22,21 +21,19 @@ class KeycloakService:
     @refresh_keycloak_client
     def get_current_userid(self):
         return self.auth_client.get_current_user().get("id", None)
-    
 
     @refresh_keycloak_client
     def create_user(self, payload, **kwargs):
         return self.keycloak_admin.create_user(payload, **kwargs)
-    
+
     @refresh_keycloak_client
     def current_user_has_realm_role(self, role):
         return self.auth_client.user_has_realm_role(user_id=self.get_current_userid(), role=role)
 
-
     @refresh_keycloak_client
     def add_user_social_login(self, user_id, provider_id, provider_user_id, provider_user_name):
         return self.keycloak_admin.add_user_social_login(user_id, provider_id, provider_user_id, provider_user_name)
-    
+
     @refresh_keycloak_client
     def get_user_by_username(self, username):
         users = self.auth_client.get_users({"username": username})

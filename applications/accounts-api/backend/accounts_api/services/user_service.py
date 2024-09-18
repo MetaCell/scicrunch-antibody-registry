@@ -20,8 +20,10 @@ class UserNotFound(Exception):
 class UserNotAuthorized(Exception):
     pass
 
+
 class ValidationError(Exception):
     pass
+
 
 def get_user(userid: str) -> User:
     try:
@@ -112,7 +114,7 @@ def update_user(userid, user: User):
             }
         }
 
-        admin_client.update_user(userid,  updated_user)
+        admin_client.update_user(userid, updated_user)
         return get_user(userid)
     except KeycloakError as e:
         if e.response_code == 404:
@@ -145,13 +147,14 @@ def update_password(username: str, new_password: str):
         raise Exception(
             "Unhandled Keycloak exception while updating user") from e
 
+
 def associate_orcid_id(userid: str, orcid: str):
     client = AuthClient()
     admin_client = client.get_admin_client()
     try:
         orcid_no_prefix = orcid.replace("https://orcid.org/", "")
 
-        admin_client.update_user(userid,  {"attributes": {"orcid": orcid}})
+        admin_client.update_user(userid, {"attributes": {"orcid": orcid}})
         admin_client.add_user_social_login(userid, "orcid", orcid_no_prefix, orcid_no_prefix)
     except KeycloakError as e:
         try:
@@ -161,5 +164,6 @@ def associate_orcid_id(userid: str, orcid: str):
             raise Exception(
                 "Unhandled Keycloak exception while updating user") from e
 
-def validate_orcid_id( orcid: str) -> bool:
+
+def validate_orcid_id(orcid: str) -> bool:
     return re.match(r'^https://orcid.org/\d{4}-\d{4}-\d{4}-\d{3}[0-9X]$', orcid)

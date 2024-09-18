@@ -20,14 +20,15 @@ def parse_drive_link(drive_link_or_id: str):
         except:
             # https://drive.google.com/file/d/FILE_ID/view?usp=drive_link
             return drive_link_or_id.split("/")[-2]
-        
+
+
 class Command(BaseCommand):
     help = "Ingests antibody data into the database"
 
     def add_arguments(self, parser):
         parser.add_argument("file_id", type=str)
         parser.add_argument("--hot", action="store_true",
-            help="execute a hot load (no replacements)",)
+                            help="execute a hot load (no replacements)",)
 
     def handle(self, *args, **options):
         metadata = Preprocessor(parse_drive_link(options["file_id"])).preprocess()

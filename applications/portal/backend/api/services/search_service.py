@@ -11,14 +11,14 @@ from api.repositories import filter_repository
 from api.repositories.filtering_utils import is_user_scoped
 
 
-
 def fts_antibodies(page: int = 1, size: int = 10, search: str = '', filters=None) -> List[AntibodyDTO]:
     page = page or 0  # required at the moment, issue with default values in main.py-L134
     size = size or 10  # required at the moment, issue with default values in main.py-L134
     return fts_and_filter_antibodies(page=page, size=size, search=search, filters=filters)
-    
+
+
 def filter_antibodies(filter_request: FilterRequest) -> List[AntibodyDTO]:
-    if (is_user_scoped(filter_request)):   ## user's antibodies - plain filter without fts
+    if (is_user_scoped(filter_request)):  # user's antibodies - plain filter without fts
         return plain_filter_antibodies(page=filter_request.page, size=filter_request.size, filters=filter_request)
     return fts_and_filter_antibodies(page=filter_request.page, size=filter_request.size, search=filter_request.search, filters=filter_request)
 
@@ -30,11 +30,11 @@ def fts_and_filter_antibodies(page: int = 1, size: int = 10, search: str = '', f
         antibodies = antibody_service.get_antibody(strip_ab_from_id(search), filters=filters, accession=strip_ab_from_id(search))
         if antibodies:
             return PaginatedAntibodies(page=int(page), totalElements=len(antibodies), items=antibodies)
-        
+
     antibodies, count = search_repository.fts_and_filter_antibodies(page=page, size=size, search=search, filters=filters)
     return PaginatedAntibodies(page=int(page), totalElements=count, items=antibodies)
+
 
 def plain_filter_antibodies(page: int = 1, size: int = 10, filters=None) -> List[AntibodyDTO]:
     antibodies, count = filter_repository.plain_filter_antibodies(page=page, size=size, filters=filters)
     return PaginatedAntibodies(page=int(page), totalElements=count, items=antibodies)
-

@@ -7,6 +7,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+from .constants import *
+from cloudharness_django.settings import *
+from cloudharness.utils.config import ALLVALUES_PATH, CloudharnessConfig
+from cloudharness.applications import get_configuration
 import os
 from pathlib import Path
 
@@ -121,13 +125,10 @@ DATABASES = {}
 # ***********************************************************************
 # * portal settings
 # ***********************************************************************
-from cloudharness.applications import get_configuration
-from cloudharness.utils.config import ALLVALUES_PATH, CloudharnessConfig
 
 # ***********************************************************************
 # * import base CloudHarness Django settings
 # ***********************************************************************
-from cloudharness_django.settings import *
 
 DATABASES["default"]["TEST"] = {
     "ENGINE": "django.db.backends.postgres",
@@ -155,5 +156,3 @@ if not os.path.exists(STATIC_ROOT):
 KC_CLIENT_NAME = PROJECT_NAME.lower()
 
 # portal specific roles
-
-from .constants import *

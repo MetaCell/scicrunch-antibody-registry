@@ -55,7 +55,7 @@ def fts_by_catalog_number(search: str, page, size, filters=None):
     # sorting the normalized catalog_num by length and returning the smallest
     catalog_num_match_filtered = catalog_num_match \
         .filter(convert_filters_to_q(filters))
-        
+
     count = catalog_num_match_filtered.count()
 
     if count < MAX_SORTED:
@@ -104,8 +104,9 @@ def apply_fts_sorting(filtered_antibodies: QuerySet, filters):
         return filtered_antibodies.order_by(*explicit_order_by)
     return filtered_antibodies.annotate(
         ix_float=Cast("ix", FloatField()),
-        sorting=F("ranking") - F("antibodysearch__defining_citation") / 1000 - F("antibodysearch__disc") * 100 +  F("ix_float") / 1000000
+        sorting=F("ranking") - F("antibodysearch__defining_citation") / 1000 - F("antibodysearch__disc") * 100 + F("ix_float") / 1000000
     ).order_by('-sorting')
+
 
 def apply_plain_sorting(filtered_antibodies: QuerySet, filters):
     """
@@ -154,7 +155,7 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
         else:
             filtered_antibodies = apply_plain_sorting(
                 filtered_antibodies, filters)
-    
+
     p = Paginator(filtered_antibodies, size)
     items = pageitems_if_page_in_bound(page, p)
     return items, antibodies_count

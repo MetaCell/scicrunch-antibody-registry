@@ -26,7 +26,6 @@ def test_catalog_number_chunked():
     assert set(chunk_term_5.split(' ')) == set(
         'n 0304 ab 635 p s ps'.split(' '))
 
-
     SEARCH_CATALOG_TERM_6 = 'N0304-AB635P-'
     chunk_term_6 = catalog_number_chunked(SEARCH_CATALOG_TERM_6)
     assert set(chunk_term_6.split(' ')) == set('n 0304 ab 635 p'.split(' '))

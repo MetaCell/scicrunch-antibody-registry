@@ -18,7 +18,7 @@ from api.repositories.filtering_utils import convert_filters_to_q
 antibody_mapper = AntibodyMapper()
 
 
-def get_antibodies(page: int = 1, size: int = 10, date_from: datetime = None, date_to: datetime = None, status:str=None) -> PaginatedAntibodies:
+def get_antibodies(page: int = 1, size: int = 10, date_from: datetime = None, date_to: datetime = None, status: str = None) -> PaginatedAntibodies:
     try:
         query = Antibody.objects.filter(status=check_if_status_exists_or_curated(status))
         if date_from:
@@ -117,9 +117,9 @@ def last_update():
         except Antibody.DoesNotExist:
             return datetime.now()
 
+
 def get_curated_antibodies_ids():
     antibodies_ids = Antibody.objects.filter(status=STATUS.CURATED).values_list(
         "ab_id", flat=True
     )
     return antibodies_ids
-

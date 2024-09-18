@@ -4,9 +4,10 @@ from sentry_sdk.integrations.django import DjangoIntegration
 import re
 from cloudharness import log
 
+
 def init_sentry():
     try:
-        
+
         app_cfg = get_current_configuration()
         sentry_cfg = app_cfg.get("sentry", {})
         resources_extensions = set(["css", "js", "png", "jpg", "jpeg", "gif", "svg", "ico", "xml"])
@@ -24,7 +25,7 @@ def init_sentry():
             extension = "." in url and url.split(".")[-1]
             if extension in resources_extensions:
                 return sentry_cfg.get("traces_sample_rate_resources", 0.0)
-            
+
             return sentry_cfg.get("traces_sample_rate", 1.0)
 
         sentry.init(
