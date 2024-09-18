@@ -3,10 +3,6 @@
 #   timestamp: 2024-05-15T15:25:40+00:00
 
 from __future__ import annotations
-from api.helpers import init_sentry
-from cloudharness.middleware import get_authentication_token, set_authentication_token
-from cloudharness.auth import decode_token
-from api.controllers import *
 
 import os
 from datetime import datetime
@@ -35,6 +31,8 @@ apps.populate(settings.INSTALLED_APPS)
 # migrate the Django models
 os.system("python manage.py migrate")
 
+from api.controllers import *
+from cloudharness.auth import decode_token
 
 app = FastAPI(
     title="SciCrunch Antibody Registry API",
@@ -54,6 +52,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+from cloudharness.middleware import get_authentication_token, set_authentication_token # noqa: E402
 
 
 @app.middleware("http")
@@ -75,8 +75,8 @@ if os.environ.get('KUBERNETES_SERVICE_HOST', None):
     import threading
     import time
 
-    from cloudharness import log
-    from cloudharness_django.services import get_auth_service, init_services
+    from cloudharness import log # noqa: E402
+    from cloudharness_django.services import get_auth_service, init_services # noqa: E402
 
     def start_auth_service():
         try:
@@ -318,5 +318,6 @@ app.mount("/", get_asgi_application())
 #    import uvicorn
 #    uvicorn.run(app, host="0.0.0.0", port=8000)
 
+from api.helpers import init_sentry # noqa: E402
 
 init_sentry()

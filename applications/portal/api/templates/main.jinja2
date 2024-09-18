@@ -51,7 +51,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from cloudharness.middleware import set_authentication_token, get_authentication_token
+from cloudharness.middleware import set_authentication_token, get_authentication_token # noqa E402
 
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
@@ -67,8 +67,8 @@ async def add_process_time_header(request: Request, call_next):
 if os.environ.get('KUBERNETES_SERVICE_HOST', None):
     # init the auth service when running in/for k8s
     import threading 
-    from cloudharness_django.services import get_auth_service, init_services
-    from cloudharness import log
+    from cloudharness_django.services import get_auth_service, init_services # noqa E402
+    from cloudharness import log # noqa E402
     import time
     def start_auth_service():
         try:
@@ -146,6 +146,6 @@ app.mount("/", get_asgi_application())
 #    import uvicorn
 #    uvicorn.run(app, host="0.0.0.0", port=8000)
 
-from api.helpers import init_sentry
+from api.helpers import init_sentry # noqa E402
 
 init_sentry()
