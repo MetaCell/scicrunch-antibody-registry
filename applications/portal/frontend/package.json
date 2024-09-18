@@ -21,7 +21,7 @@
     "@mui/icons-material": "^6.1.0",
     "@mui/material": "^6.1.0",
     "@mui/system": "^6.1.0",
-    "@mui/x-data-grid": "^6.0.0",
+    "@mui/x-data-grid": "^7.0.0",
     "axios": "^1.6.7",
     "formik": "^2.4.5",
     "keycloak-js": "^19.0.1",

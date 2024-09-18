@@ -124,8 +124,8 @@ const RenderNameAndId = (props: GridRenderCellParams) => {
 };
 
 
-const getValueOrEmpty = (props: ValueProps) => {
-  return props.row[props.field] ?? "";
+const getValueOrEmpty = (_: unknown, row: Antibody, column: GridColDef) => {
+  return row[column.field] ?? "";
 };
 
 const RenderCellContent = (props: GridRenderCellParams) => {
@@ -318,23 +318,18 @@ const RenderStatus = (props: GridRenderCellParams<String>) => {
   );
 };
 
-interface ValueProps {
-  row: Antibody;
-  field: string;
-}
 
-
-const getList = (props: ValueProps) => {
-  return props.row[props.field]?.join(", ") ?? "";
+const getList = (_: unknown, row: Antibody, column: GridColDef) => {
+  return row[column.field]?.join(", ") ?? "";
 };
 
-const getNameAndId = (props: ValueProps) => {
-  return `${props.row.abName} AB_${props.row.abId}`;
+const getNameAndId = (_: unknown, row: Antibody) => {
+  return `${row.abName} AB_${row.abId}`;
 };
 
-const getValueForCitation = (props: ValueProps) => {
+const getValueForCitation = (_: unknown, row: Antibody) => {
 
-  return props?.row ? getProperCitation(props.row) : "";
+  return row ? getProperCitation(row) : "";
 };
 
 const columnsDefaultProps = {
@@ -681,12 +676,12 @@ const AntibodiesTable = (props) => {
     typeof activeSearch === "string" &&
       activeSearch !== "" &&
       searchedAntibodies.length === 0 ? (
-        <NotFoundMessage activeSearch={activeSearch} />
-      ) : typeof activeSearch !== "string" ? (
-        <Error500 />
-      ) : (
-        <GridNoRowsOverlay />
-      );
+      <NotFoundMessage activeSearch={activeSearch} />
+    ) : typeof activeSearch !== "string" ? (
+      <Error500 />
+    ) : (
+      <GridNoRowsOverlay />
+    );
 
   const SortIcon = ({ ...other }) => <SortingIcon {...other} />;
   const currentPath = window.location.pathname;
