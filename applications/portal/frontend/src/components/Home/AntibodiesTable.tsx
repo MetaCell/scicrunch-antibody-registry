@@ -681,12 +681,12 @@ const AntibodiesTable = (props) => {
     typeof activeSearch === "string" &&
       activeSearch !== "" &&
       searchedAntibodies.length === 0 ? (
-      <NotFoundMessage activeSearch={activeSearch} />
-    ) : typeof activeSearch !== "string" ? (
-      <Error500 />
-    ) : (
-      <GridNoRowsOverlay />
-    );
+        <NotFoundMessage activeSearch={activeSearch} />
+      ) : typeof activeSearch !== "string" ? (
+        <Error500 />
+      ) : (
+        <GridNoRowsOverlay />
+      );
 
   const SortIcon = ({ ...other }) => <SortingIcon {...other} />;
   const currentPath = window.location.pathname;
