@@ -55,7 +55,7 @@ const StyledCheckBox = (props) => {
   );
 };
 
-const getRowId = (ab: Antibody) => `${ab.abId}${Math.random()}`;
+const getRowId = (ab: Antibody) => `${ab.ix}`;
 
 const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
   const [activeSelection, setActiveSelection] = useState(true);
@@ -433,7 +433,7 @@ const AntibodiesTable = (props) => {
   }
 
   const setNewFilterColumn = (model) => {
-    let newblankFilter = { ...BLANK_FILTER_MODEL, field: model.items[0].field, id: getRandomId() }
+    let newblankFilter = { ...BLANK_FILTER_MODEL, columnField: model.items[0].field, field: model.items[0].field, id: getRandomId() }
     filterModel.items.push(newblankFilter);
     setFilterModel(filterModel);
   }
@@ -655,19 +655,22 @@ const AntibodiesTable = (props) => {
         "& .MuiTypography-body1": {
           fontSize: "0.875rem",
           color: "grey.500",
-        },
+        }
       },
     },
-    columnMenuSlots: {
-      columnMenu: {
-        sx: {
-          "& .MuiMenuItem-root": {
-            fontSize: "0.875rem",
-            color: "grey.500",
-          },
-        },
-      },
+    columnMenu: {
+      style: {
+        fontSize: "0.875rem",
+        color: "grey.500",
+      }
     },
+    basePopper: {
+      sx: {
+        "& .MuiListItemText-root .MuiListItemText-primary": {
+          display: "flex"
+        }
+      }
+    }
   };
 
   const [showColumns, setShowColumns] = useState<GridColumnVisibilityModel>(getColumnsToDisplay(columns));

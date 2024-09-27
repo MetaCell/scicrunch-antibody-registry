@@ -141,7 +141,12 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
         value={filterSet.columnField}
         onChange={(e: SelectChangeEvent) => handleFilterSet({ ...filterSet, columnField: e.target.value })}
         size="small"
-        sx={{ width: "12em" }}
+        sx={{ 
+          width: "12em",
+          '& .MuiSelect-select': {
+            textAlign: 'left'
+          }
+        }}
       >
         {columns.map((column) => (
           <MenuItem key={column.field} value={column.field}>
@@ -154,7 +159,12 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
         value={filterSet.operatorValue}
         onChange={(e: SelectChangeEvent) => changeOperator(e.target.value)}
         size="small"
-        sx={{ width: "8em" }}
+        sx={{ 
+          width: "8em",
+          '& .MuiSelect-select': {
+            textAlign: 'left'
+          }
+        }}
       >
         {Object.keys(operators).map((op) => (
           <MenuItem key={op} value={op}>
