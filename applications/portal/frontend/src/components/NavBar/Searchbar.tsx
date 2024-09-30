@@ -48,7 +48,9 @@ export default function Searchbar(props) {
     loader,
     activeSearch,
     filterModel,
+    setFilterModel,
     sortModel,
+    setSortModel,
     setActiveSearch
   } = useContext(SearchContext)
 
@@ -70,6 +72,8 @@ export default function Searchbar(props) {
     } else {
       if (props.activeTab === MYSUBMISSIONS) {
         setActiveSearch(e.target.value)
+        setFilterModel({ items: [] })
+        setSortModel([])
         history.push('')
       } else {
         isFilterAndSortModelEmpty(filterModel, sortModel) ?

@@ -16,7 +16,7 @@ export const CustomFilterPanel = (
     columns,
     filterModel,
     setFilterModel,
-    applyFilters,
+    applyFilterAndSortModels,
   }) => {
 
   const { activeSearch } = useContext(searchContext);
@@ -93,7 +93,7 @@ export const CustomFilterPanel = (
           variant="outlined"
           color="primary"
           onClick={() => {
-            applyFilters(filterModel, activeSearch);
+            applyFilterAndSortModels(filterModel, activeSearch);
           }}
           sx={{ m: 1 }}
         >
