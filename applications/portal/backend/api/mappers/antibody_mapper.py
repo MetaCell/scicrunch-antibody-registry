@@ -62,7 +62,7 @@ class AntibodyMapper(IDAOMapper):
         ab_dict = dict_to_snake(dto.dict())
 
         for k, v in ab_dict.items():
-            if not v:
+            if v is None:
                 continue
             try:
                 if isinstance(v, str):
