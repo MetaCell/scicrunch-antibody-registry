@@ -12,7 +12,7 @@ def plain_filter_antibodies(page: int = 1, size: int = 10, filters=None):
     antibodies_count = filtered_antibodies.count()
 
     if antibodies_count == 0:
-        return []
+        return [], antibodies_count
 
     if antibodies_count < MAX_SORTED:
         filtered_antibodies = apply_plain_sorting(
