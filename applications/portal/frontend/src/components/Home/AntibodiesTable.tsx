@@ -481,9 +481,9 @@ const AntibodiesTable = (props) => {
     // if no filters exist in All Results - this case is handled in the first useEffect 
     if (filterModel.items.length > 0) {
       if (props.activeTab === MYSUBMISSIONS) {
-        applyFilters(filterModel, '')
+        applyFilters({ items: [] }, '')
       } else {
-        applyFilters(filterModel, searchQuery || activeSearch)
+        applyFilters({ items: [] }, searchQuery || activeSearch)
       }
     } else {
       if (props.activeTab === MYSUBMISSIONS) {
