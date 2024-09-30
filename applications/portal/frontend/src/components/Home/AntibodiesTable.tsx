@@ -407,8 +407,8 @@ const AntibodiesTable = (props) => {
   } =
     useContext(SearchContext);
 
-  const applyFilters = (filtermodel, query, sortmodel = sortModel) => {
-    // Also does the applyFilters from the CustomFilterPanel - when apply button is clicked
+  const applyFilterAndSortModels = (filtermodel, query, sortmodel = sortModel) => {
+    // Also does the applyFilterAndSortModels from the CustomFilterPanel - when apply button is clicked
     const searchmode = (props.activeTab === MYSUBMISSIONS) ? SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES :
       SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES
     getAntibodyList(
@@ -448,7 +448,7 @@ const AntibodiesTable = (props) => {
 
   useEffect(() => {
     const isSearchInMySubmission = (props.activeTab === MYSUBMISSIONS && activeSearch)
-    // NOTE: LOGIC below - if no filters exist or search query exists in my submission - don't proceed, 
+    // NOTE: LOGIC below - if no filters/sortmodel exist or search query exists in my submission - don't proceed, 
     // since this is handled in separate useEffect
     if (filterModel.items.length > 0 || sortModel.length > 0 || isSearchInMySubmission) {
       return;
@@ -469,24 +469,24 @@ const AntibodiesTable = (props) => {
     // if filters exist in All Results - apply with search query
     if (activeSearch && filterModel.items.length > 0) {
       if (props.activeTab === MYSUBMISSIONS) {
-        applyFilters(filterModel, '')
+        applyFilterAndSortModels(filterModel, '')
       } else {
-        applyFilters(filterModel, searchQuery || activeSearch)
+        applyFilterAndSortModels(filterModel, searchQuery || activeSearch)
       }
     }
   }, [activeSearch]);
 
   useEffect(() => {
     // NOTE: LOGIC below - whenever tab is changed
-    // if filters exist in My Submission - apply with empty search
-    // if filters exist in All Results - apply with search query
-    // if no filters exist in My Submission - get My Submissions
-    // if no filters exist in All Results - this case is handled in the first useEffect 
+    // if filters/sortmodel exist in My Submission - apply with empty search and empty filters/sortmodel
+    // if filters/sortmodel exist in All Results - apply with search query but empty filters/sortmodel
+    // if no filters/sortmodel exist in My Submission - get My Submissions
+    // if no filters/sortmodel exist in All Results - this case is handled in the first useEffect 
     if (filterModel.items.length > 0 || sortModel.length > 0) {
       if (props.activeTab === MYSUBMISSIONS) {
-        applyFilters({ items: [] }, '', [])
+        applyFilterAndSortModels({ items: [] }, '', [])
       } else {
-        applyFilters({ items: [] }, searchQuery || activeSearch, [])
+        applyFilterAndSortModels({ items: [] }, searchQuery || activeSearch, [])
       }
 
     } else {
@@ -713,7 +713,7 @@ const AntibodiesTable = (props) => {
             pagination={true}
             paginationMode="server"
             sortingMode="server"
-              sortModel={sortModel}
+            sortModel={sortModel}
             onSortModelChange={(model) => addSortingColumn(model)}
             checkboxSelection
             disableRowSelectionOnClick
@@ -737,7 +737,7 @@ const AntibodiesTable = (props) => {
               filterPanel: () => CustomFilterPanel({
                 columns,
                 filterModel,
-                applyFilters,
+                applyFilterAndSortModels,
                 setFilterModel,
               }),
             }}
