@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useCallback } from "react";
+import React, { useEffect, useState, useContext, useCallback, useMemo } from "react";
 //MUI
 import {
   DataGrid,
@@ -56,6 +56,8 @@ const StyledCheckBox = (props) => {
 };
 
 const getRowId = (ab: Antibody) => `${ab.ix}`;
+
+const SortIcon = ({ sortingOrder, ...other }) => <SortingIcon {...other} />;
 
 const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
   const [activeSelection, setActiveSelection] = useState(true);
@@ -124,7 +126,7 @@ const RenderNameAndId = (props: GridRenderCellParams) => {
 };
 
 
-const getValueOrEmpty = (_: unknown, row: Antibody, column: GridColDef) => {
+const getValueOrEmpty = (_: any, row: Antibody, column: GridColDef) => {
   return row[column.field] ?? "";
 };
 
@@ -319,15 +321,15 @@ const RenderStatus = (props: GridRenderCellParams<String>) => {
 };
 
 
-const getList = (_: unknown, row: Antibody, column: GridColDef) => {
+const getList = (_: any, row: Antibody, column: GridColDef) => {
   return row[column.field]?.join(", ") ?? "";
 };
 
-const getNameAndId = (_: unknown, row: Antibody) => {
+const getNameAndId = (_: any, row: Antibody) => {
   return `${row.abName} AB_${row.abId}`;
 };
 
-const getValueForCitation = (_: unknown, row: Antibody) => {
+const getValueForCitation = (_: any, row: Antibody) => {
 
   return row ? getProperCitation(row) : "";
 };
@@ -404,10 +406,11 @@ const AntibodiesTable = (props) => {
     setFilterModel,
     sortModel,
     setSortModel,
+    totalElements
   } =
     useContext(SearchContext);
 
-  const applyFilterAndSortModels = (filtermodel, query, sortmodel = sortModel) => {
+  const applyFilterAndSortModels = useCallback((filtermodel, query, sortmodel = sortModel) => {
     // Also does the applyFilterAndSortModels from the CustomFilterPanel - when apply button is clicked
     const searchmode = (props.activeTab === MYSUBMISSIONS) ? SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES :
       SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES
@@ -420,9 +423,9 @@ const AntibodiesTable = (props) => {
     )
     filtermodel !== filterModel ? setFilterModel(filtermodel) : null;
     sortmodel !== sortModel ? setSortModel(sortmodel) : null;
-  }
+  }, [filterModel, sortModel, getAntibodyList, props.activeTab, setFilterModel, setSortModel]);
 
-  const addSortingColumn = (sortmodel) => {
+  const addSortingColumn = useCallback((sortmodel) => {
     const searchmode = (props.activeTab === MYSUBMISSIONS) ? SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES :
       SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES
     getAntibodyList(
@@ -433,18 +436,18 @@ const AntibodiesTable = (props) => {
       sortmodel
     )
     setSortModel(sortmodel)
-  }
+  }, [filterModel, searchQuery, activeSearch, getAntibodyList, props.activeTab, setSortModel]);
 
-  const setNewFilterColumn = (model) => {
+  const setNewFilterColumn = useCallback((model) => {
     let newblankFilter = { ...BLANK_FILTER_MODEL, columnField: model.items[0].field, field: model.items[0].field, id: getRandomId() }
     filterModel.items.push(newblankFilter);
     setFilterModel(filterModel);
-  }
-  const addNewFilterColumn = (model) => {
+  }, [filterModel, setFilterModel]);
+  const addNewFilterColumn = useCallback((model) => {
     if (!checkIfFilterSetExists(model, filterModel)) {
       setNewFilterColumn(model);
     }
-  }
+  }, [filterModel, setNewFilterColumn]);
 
   useEffect(() => {
     const isSearchInMySubmission = (props.activeTab === MYSUBMISSIONS && activeSearch)
@@ -474,7 +477,7 @@ const AntibodiesTable = (props) => {
         applyFilterAndSortModels(filterModel, searchQuery || activeSearch)
       }
     }
-  }, [activeSearch]);
+  }, [activeSearch, searchQuery, filterModel, props.activeTab, applyFilterAndSortModels]);
 
   useEffect(() => {
     // NOTE: LOGIC below - whenever tab is changed
@@ -498,7 +501,7 @@ const AntibodiesTable = (props) => {
 
   }, [props.activeTab]);
 
-  const columns: GridColDef[] = [
+  const columns: GridColDef[] = useMemo( () => [
     {
       ...columnsDefaultProps,
       field: "abName",
@@ -643,9 +646,9 @@ const AntibodiesTable = (props) => {
       filterable: false,
       sortable: false,
     },
-  ];
+  ], [props.activeTab]);
 
-  const compProps = {
+  const compProps = useMemo(() => ({
     toolbar: {
       activeTab: props.activeTab,
       searchedAntibodies,
@@ -675,7 +678,7 @@ const AntibodiesTable = (props) => {
         }
       }
     }
-  };
+  }), [props.activeTab, searchedAntibodies, filterModel, activeSearch]);
 
   const [showColumns, setShowColumns] = useState<GridColumnVisibilityModel>(getColumnsToDisplay(columns));
 
@@ -683,14 +686,14 @@ const AntibodiesTable = (props) => {
     typeof activeSearch === "string" &&
       activeSearch !== "" &&
       searchedAntibodies.length === 0 ? (
-      <NotFoundMessage activeSearch={activeSearch} />
-    ) : typeof activeSearch !== "string" ? (
-      <Error500 />
-    ) : (
-      <GridNoRowsOverlay />
-    );
+        <NotFoundMessage activeSearch={activeSearch} />
+      ) : typeof activeSearch !== "string" ? (
+        <Error500 />
+      ) : (
+        <GridNoRowsOverlay />
+      );
 
-  const SortIcon = ({ ...other }) => <SortingIcon {...other} />;
+  
   const currentPath = window.location.pathname;
   return (
     <Box>
@@ -712,16 +715,17 @@ const AntibodiesTable = (props) => {
             pageSizeOptions={[20]}
             pagination={true}
             paginationMode="server"
+            rowCount={totalElements}
             sortingMode="server"
             sortModel={sortModel}
-            onSortModelChange={(model) => addSortingColumn(model)}
+            onSortModelChange={addSortingColumn}
             checkboxSelection
             disableRowSelectionOnClick
             columnVisibilityModel={showColumns || {}}
-            onColumnVisibilityModelChange={(model) => setShowColumns(model)}
+            onColumnVisibilityModelChange={setShowColumns}
             getRowHeight={() => "auto"}
             loading={!searchedAntibodies || loader}
-            onFilterModelChange={(model) => addNewFilterColumn(model)}
+            onFilterModelChange={addNewFilterColumn}
             filterMode="server"
             slots={{
               baseCheckbox: StyledCheckBox,
