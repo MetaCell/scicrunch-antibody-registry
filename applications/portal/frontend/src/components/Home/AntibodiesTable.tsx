@@ -156,7 +156,8 @@ const RenderVendor = (props) => (
     component="div"
     className="col-vendor"
     sx={{
-      color: "grey.500"
+      color: "grey.500",
+      width: "fit-content"
     }}
   >
     {props.row.url ? <Link
@@ -187,7 +188,8 @@ const RenderClonality = (props) => (
       bgcolor: "grey.A200",
       px: 1,
       py: 0.25,
-      borderRadius: "1rem"
+      borderRadius: "1rem",
+      width: "fit-content"
     }}
   >
     {props.value}
@@ -353,8 +355,15 @@ const dataGridStyles = {
       pointerEvents: "auto",
     },
   },
+  "& .MuiDataGrid-row": {
+    height: '100%'
+  },
   "& .MuiDataGrid-row:hover": {
     backgroundColor: "grey.50",
+  },
+  "& .MuiDataGrid-cell": {
+    display: "flex",
+    alignItems: "center"
   },
   "& .MuiDataGrid-columnHeadersInner": {
     backgroundColor: "grey.50",
@@ -568,13 +577,16 @@ const AntibodiesTable = (props) => {
       valueGetter: getValueForCitation,
       renderCell: RenderProperCitation,
       type: "actions",
-      hideable: false
+      hideable: false,
+      headerAlign: "left",
+      align: "left",
     },
     {
       ...columnsDefaultProps,
       field: "clonality",
       headerName: "Clonality",
       renderCell: RenderClonality,
+      flex: 1.5,
     },
     {
       ...columnsDefaultProps,
