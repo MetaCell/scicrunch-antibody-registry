@@ -74,6 +74,7 @@ harness:
       - user
   test:
     e2e:
+      smoketest: false
       enabled: true
   secrets:
     scicrunch-api-key: 
