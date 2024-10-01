@@ -13,6 +13,8 @@ harness:
     path: /api/live
   readinessProbe:
     path: /api/ready
+  envmap:
+    WORKERS: 10
   dependencies:
     build:
       - cloudharness-django
