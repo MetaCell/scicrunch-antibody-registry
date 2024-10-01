@@ -9,12 +9,19 @@ harness:
     auto: true
     replicas: 2
     port: 8080
+    resources:
+      requests:
+        memory: 0.9Gi
+        cpu: 50m
+      limits:
+        cpu: 4
+        memory: 2Gi
   livenessProbe:
     path: /api/live
   readinessProbe:
     path: /api/ready
   envmap:
-    WORKERS: 10
+    WORKERS: 2
   dependencies:
     build:
       - cloudharness-django
@@ -64,7 +71,7 @@ harness:
     resources:
       requests:
         memory: 1Gi
-        cpu: 200m
+        cpu: 50m
       limits:
         memory: 4Gi
   accounts:
