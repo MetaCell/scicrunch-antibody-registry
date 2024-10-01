@@ -361,10 +361,6 @@ const dataGridStyles = {
   "& .MuiDataGrid-row:hover": {
     backgroundColor: "grey.50",
   },
-  "& .MuiDataGrid-cell": {
-    display: "flex",
-    alignItems: "center"
-  },
   "& .MuiDataGrid-columnHeadersInner": {
     backgroundColor: "grey.50",
   },
@@ -516,18 +512,21 @@ const AntibodiesTable = (props) => {
       field: "abName",
       headerName: "Name",
       hideable: true,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
       field: "abId",
       headerName: "ID",
       hideable: true,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
       field: "accession",
       headerName: "Accession",
       hideable: true,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -539,6 +538,7 @@ const AntibodiesTable = (props) => {
       valueGetter: getNameAndId,
       headerAlign: "left",
       align: "left",
+      display: "flex",
     },
     // {
     //   ...columnsDefaultProps,
@@ -553,6 +553,7 @@ const AntibodiesTable = (props) => {
       valueGetter: getList,
       hideable: true,
       sortable: false,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -561,6 +562,7 @@ const AntibodiesTable = (props) => {
       valueGetter: getList,
       sortable: false,
       hideable: true,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -568,6 +570,7 @@ const AntibodiesTable = (props) => {
       headerName: "Target antigen",
       flex: 1.5,
       valueGetter: getValueOrEmpty,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -580,6 +583,7 @@ const AntibodiesTable = (props) => {
       hideable: false,
       headerAlign: "left",
       align: "left",
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -587,6 +591,7 @@ const AntibodiesTable = (props) => {
       headerName: "Clonality",
       renderCell: RenderClonality,
       flex: 1.5,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -596,6 +601,7 @@ const AntibodiesTable = (props) => {
       hideable: true,
       filterable: false,
       sortable: false,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -604,18 +610,21 @@ const AntibodiesTable = (props) => {
       renderCell: RenderHtml,
       flex: 3,
       align: "left",
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
       field: "cloneId",
       headerName: "Clone ID",
       hideable: true,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
       field: "sourceOrganism",
       headerName: "Host organism",
       flex: 1.5,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -623,12 +632,13 @@ const AntibodiesTable = (props) => {
       headerName: "Vendor",
       flex: 1.5,
       renderCell: RenderVendor,
-
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
       field: "catalogNum",
       headerName: "Cat Num",
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -638,7 +648,8 @@ const AntibodiesTable = (props) => {
       filterable: false,
       sortable: true,
       align: 'right',
-      hideable: false
+      hideable: false,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -647,6 +658,7 @@ const AntibodiesTable = (props) => {
       hideable: true,
       sortable: false,
       filterable: false,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -657,6 +669,7 @@ const AntibodiesTable = (props) => {
       flex: 1.4,
       filterable: false,
       sortable: false,
+      display: "flex",
     },
   ], [props.activeTab]);
 
