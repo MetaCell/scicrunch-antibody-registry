@@ -356,7 +356,7 @@ const dataGridStyles = {
     },
   },
   "& .MuiDataGrid-row": {
-    height: '100%'
+    height: "100%"
   },
   "& .MuiDataGrid-row:hover": {
     backgroundColor: "grey.50",
