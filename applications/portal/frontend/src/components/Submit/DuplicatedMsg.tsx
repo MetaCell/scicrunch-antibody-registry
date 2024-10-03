@@ -43,13 +43,15 @@ const styles = {
 const DuplicatedMsg = (props) => { 
 
   return (
-    <Container maxWidth="xl" sx={styles.container} className="container-duplicate">
+    (<Container maxWidth="xl" sx={styles.container} className="container-duplicate">
       <Box />
       <Stack direction="column" spacing={3} sx={styles.stack}>
         <Box>
           <CircleAlertIcon />
         </Box>
-        <Typography variant="h1" color="error.light" className="duplicate-message">
+        <Typography variant="h1" className="duplicate-message" sx={{
+          color: "error.light"
+        }}>
           This antibody is a duplicate
         </Typography>
         <Divider>
@@ -97,8 +99,7 @@ const DuplicatedMsg = (props) => {
       >
         Need help? Contact us
       </Link>
-    </Container>
+    </Container>)
   );
 };
-
 export default DuplicatedMsg;

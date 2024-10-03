@@ -17,6 +17,7 @@ from openapi.models import AddAntibody as AddAntibodyDTO, PaginatedAntibodies
 from openapi.models import UpdateAntibody as UpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO
 
+
 def get_antibodies(page: int, size: int, updated_from: datetime, updated_to: datetime, status=str) -> PaginatedAntibodies:
     if page is None:
         page = 1
@@ -82,8 +83,9 @@ def update_user_antibody(accession_number: str, body: UpdateAntibodyDTO) -> Anti
 
 
 def delete_antibody(antibody_id: str) -> None:
-    #FIXME this must be protected
+    # FIXME this must be protected
     return antibody_service.delete_antibody(antibody_id)
+
 
 def get_by_accession(accession_number: int) -> AntibodyDTO:
     try:
@@ -104,7 +106,6 @@ def get_antibodies_export():
     # return FileResponse(fname, filename="antibodies_export.csv")
 
 
-
 def get_antibodies_export_admin():
     """
     Export all fields of all antibodies to a CSV file - Only for admin users
@@ -119,6 +120,3 @@ def get_antibodies_export_admin():
     if filesystem_service.check_if_file_exists_and_recent(fname) and is_admin:
         generate_all_antibodies_fields_to_csv(fname)
     return RedirectResponse("/" + fname)
-
-
-

@@ -155,16 +155,17 @@ const TermsAndConditions = () => {
   }
   
   return (
-    <SupportTabs>
+    (<SupportTabs>
       <Container maxWidth='xl' sx={styles.container} className="container-terms-conditions">
         <Stack spacing={4}>
-          <Typography variant='h1' color='grey.700'>Terms and Conditions</Typography>
+          <Typography variant='h1' sx={{
+            color: 'grey.700'
+          }}>Terms and Conditions</Typography>
           {termsArray.map((ele,index) => <BasicCard key={index}title={ele.title} >{ele.content}{ele.link && <Link href={ele.url}>{ele.link}</Link>}{ele.content2? ele.content2:null}</BasicCard>)}
-
         </Stack>
      
       </Container>
-    </SupportTabs>
-  )
+    </SupportTabs>)
+  );
 }
 export default TermsAndConditions;

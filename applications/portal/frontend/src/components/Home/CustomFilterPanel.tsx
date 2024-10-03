@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Box, Button, FormControl, Chip, MenuItem, TextField, IconButton, Stack } from "@mui/material";
 import {
   GridCloseIcon,
@@ -7,6 +7,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { getFilterOperators, getRandomId, shouldEmptyFilterValue } from "../../utils/antibody";
 import { BLANK_FILTER_MODEL } from "../../constants/constants";
 import { SearchCriteriaOptions } from "../../rest";
+import searchContext from "../../context/search/SearchContext";
 
 
 
@@ -15,12 +16,13 @@ export const CustomFilterPanel = (
     columns,
     filterModel,
     setFilterModel,
-    applyFilters,
+    applyFilterAndSortModels,
   }) => {
 
+  const { activeSearch } = useContext(searchContext);
 
   const filterableColumns = columns.filter((column) => {
-    return !["nameAndId", "properCitation", "reference", "url", "status"].includes(column.field);
+    return column.filterable !== false && column.type !== "actions";
   });
 
   const handleFilterSet = (filterSet) => {
@@ -56,7 +58,9 @@ export const CustomFilterPanel = (
   }
 
   return (
-    <Box width="100%">
+    (<Box sx={{
+      width: "100%"
+    }}>
       {
         filterModel && filterModel.items.map((filterSet, index) => (
           <Box key={index}>
@@ -69,7 +73,12 @@ export const CustomFilterPanel = (
           </Box>
         ))
       }
-      <Box display="flex" justifyContent="space-between" width="100%">
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          width: "100%"
+        }}>
         <Button
           variant="text"
           onClick={() => {
@@ -84,15 +93,15 @@ export const CustomFilterPanel = (
           variant="outlined"
           color="primary"
           onClick={() => {
-            applyFilters(filterModel);
+            applyFilterAndSortModels(filterModel, activeSearch);
           }}
           sx={{ m: 1 }}
         >
           Apply
         </Button>
       </Box>
-    </Box>
-  )
+    </Box>)
+  );
 }
 
 const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet } ) => {
@@ -115,9 +124,15 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
   ];
   const operators = getFilterOperators();
   return (
-    <Stack direction="row" display="flex" alignItems="center" m={1} spacing={1}>
+    (<Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            m: 1
+          }}>
       {/* 3 parts of a filter */}
-      
       {/* columns */}
       <IconButton onClick={() => removeFilterSet(filterSet)}>
         <GridCloseIcon fontSize="small"/>
@@ -126,7 +141,12 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
         value={filterSet.columnField}
         onChange={(e: SelectChangeEvent) => handleFilterSet({ ...filterSet, columnField: e.target.value })}
         size="small"
-        sx={{ width: "12em" }}
+        sx={{ 
+          width: "12em",
+          '& .MuiSelect-select': {
+            textAlign: 'left'
+          }
+        }}
       >
         {columns.map((column) => (
           <MenuItem key={column.field} value={column.field}>
@@ -134,13 +154,17 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
           </MenuItem>
         ))}
       </Select>
-
       {/* operators */}
       <Select
         value={filterSet.operatorValue}
         onChange={(e: SelectChangeEvent) => changeOperator(e.target.value)}
         size="small"
-        sx={{ width: "8em" }}
+        sx={{ 
+          width: "8em",
+          '& .MuiSelect-select': {
+            textAlign: 'left'
+          }
+        }}
       >
         {Object.keys(operators).map((op) => (
           <MenuItem key={op} value={op}>
@@ -148,8 +172,6 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
           </MenuItem>
         ))}
       </Select>
-
-
       {/* multi-input: conditional */}
       {
         filterSet.operatorValue === SearchCriteriaOptions.IsAnyOf && (
@@ -159,7 +181,6 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
           />
         )
       }
-
       {/* input: conditional */}
       {
         operatorsWithSingleInput.includes(filterSet.operatorValue) && (
@@ -179,9 +200,8 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
         )
 
       }
-      
-    </Stack>
-  )
+    </Stack>)
+  );
 }
 
 const CustomMultiInputWithChip = ({ filterSet, handleFilterSet }) => {

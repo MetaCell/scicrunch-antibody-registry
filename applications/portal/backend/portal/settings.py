@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "import_export",
     "django_prometheus",
+    "simple_history"
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "cloudharness.middleware.django.CloudharnessMiddleware",
     "django_prometheus.middleware.PrometheusAfterMiddleware",
+    "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
 ROOT_URLCONF = "portal.urls"
@@ -119,13 +121,13 @@ DATABASES = {}
 # ***********************************************************************
 # * portal settings
 # ***********************************************************************
-from cloudharness.applications import get_configuration
-from cloudharness.utils.config import ALLVALUES_PATH, CloudharnessConfig
+from cloudharness.applications import get_configuration # noqa: E402
+from cloudharness.utils.config import ALLVALUES_PATH, CloudharnessConfig # noqa: E402
 
 # ***********************************************************************
 # * import base CloudHarness Django settings
 # ***********************************************************************
-from cloudharness_django.settings import *
+from cloudharness_django.settings import * # noqa: E402
 
 DATABASES["default"]["TEST"] = {
     "ENGINE": "django.db.backends.postgres",
@@ -154,4 +156,4 @@ KC_CLIENT_NAME = PROJECT_NAME.lower()
 
 # portal specific roles
 
-from .constants import *
+from .constants import * # noqa: E402

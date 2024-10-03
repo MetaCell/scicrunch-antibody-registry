@@ -6,7 +6,6 @@ import {
   Container,
   TextField,
   Paper,
-  Grid,
   Typography,
   InputAdornment,
   Divider,
@@ -15,6 +14,7 @@ import {
   MenuItem,
   Link
 } from "@mui/material";
+import Grid from "@mui/material/Grid2"
 import { AlertIcon } from "../icons";
 
 import StepNavigation from "./StepNavigation";
@@ -113,22 +113,23 @@ const Iframe = ({ formik }) => {
 
 
   return (
-    <Box sx={styles.leftBox}>
+    (<Box sx={styles.leftBox}>
       <Grid
         container
         direction="column"
-        gap={3}
-        m={0}
-        width="100%"
-        height="100%"
         wrap="nowrap"
-      >
-        <Grid item>
+        sx={{
+          gap: 3,
+          m: 0,
+          width: "100%",
+          height: "100%"
+        }}>
+        <Grid>
           <Typography variant="h1" sx={styles.header}>
             2. Product Page Link
           </Typography>
         </Grid>
-        <Grid item>
+        <Grid>
           <Typography variant="h5" sx={styles.label}>
             Vendor Product Page Link (Mandatory)
           </Typography>
@@ -140,15 +141,17 @@ const Iframe = ({ formik }) => {
             {...getFieldProps("url")}
             error={Boolean(touched.url && errors.url)}
             helperText={touched.url && errors.url}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  {touched.url && errors.url && <AlertIcon />}
-                </InputAdornment>
-              ),
-              style: {
-                backgroundColor: "white",
-              },
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {touched.url && errors.url && <AlertIcon />}
+                  </InputAdornment>
+                ),
+                style: {
+                  backgroundColor: "white",
+                },
+              }
             }}
           />
           {!touched.catalogNumber && !errors.catalogNumber && (
@@ -162,7 +165,7 @@ const Iframe = ({ formik }) => {
           </Typography>
         </Grid>
         <Divider sx={{ my: 1 }} />
-        <Grid item lg={8}>
+        <Grid size={{ lg: 8 }}>
           {touched.url && !errors.url ? (
             <CardMedia
               sx={styles.iframeDefault}
@@ -178,32 +181,28 @@ const Iframe = ({ formik }) => {
           )}
         </Grid>
       </Grid>
-    </Box>
+    </Box>)
   );
 };
-
 const FormLine = ({ children }) => {
   const child = React.Children.toArray(children) as React.ReactElement[];
   return (
     <Grid container spacing={3}>
-      <Grid item lg={6}>
+      <Grid size={{ lg: 6 }}>
         {child[0]}
       </Grid>
-      <Grid item lg={6}>
+      <Grid size={{ lg: 6 }}>
         {child[1]}
       </Grid>
     </Grid>
   );
 };
 const CommercialForm = (props) => {
-
   const { setAntibodyId, setApiResponse, next } = props;
-
   const postAntibody = (antibody) => {
     let ab = { ...antibody, type: "commercial" };
     postNewAntibody(ab, setAntibodyId, setApiResponse, next);
   };
-
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -231,30 +230,35 @@ const CommercialForm = (props) => {
     validateOnChange: true,
     validateOnBlur: true,
   });
-
   const { errors, touched, handleSubmit, getFieldProps } = formik;
-
   return (
-    <Box component="form"
-      onSubmit={handleSubmit}
-      sx={styles.background}
-      autoComplete="off"
-      className="antibody-form type-commercial"
-    >
+    (<Box component="form"
+        onSubmit={handleSubmit}
+        sx={styles.background}
+        autoComplete="off"
+        className="antibody-form type-commercial"
+      >
       <Container maxWidth="xl">
         <Grid container>
-          <Grid item lg={6} sx={styles.leftContainer}>
+          <Grid size={{ lg: 6 }} sx={styles.leftContainer}>
             <Iframe formik={formik} />
           </Grid>
-          <Grid item lg={6} sx={styles.rightContainer} >
+          <Grid size={{ lg: 6 }} sx={styles.rightContainer} >
             <Paper sx={styles.paper}>
-              <Grid container direction="column" gap={3} m={0} width="100%">
-                <Grid item>
+              <Grid
+                container
+                direction="column"
+                sx={{
+                  gap: 3,
+                  m: 0,
+                  width: "100%"
+                }}>
+                <Grid>
                   <Typography variant="h1" sx={styles.header}>
                     3. Antibody Details
                   </Typography>
                 </Grid>
-                <Grid item>
+                <Grid>
                   <Typography variant="h5" sx={styles.label}>
                     Catalog Number (Mandatory)
                   </Typography>
@@ -269,14 +273,16 @@ const CommercialForm = (props) => {
                       touched.catalogNumber && errors.catalogNumber
                     )}
                     helperText={touched.catalogNumber && errors.catalogNumber}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          {touched.catalogNumber && errors.catalogNumber && (
-                            <AlertIcon />
-                          )}
-                        </InputAdornment>
-                      ),
+                    slotProps={{
+                      input: {
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            {touched.catalogNumber && errors.catalogNumber && (
+                              <AlertIcon />
+                            )}
+                          </InputAdornment>
+                        ),
+                      }
                     }}
                   />
                   {!touched.catalogNumber && !errors.catalogNumber && (
@@ -285,7 +291,7 @@ const CommercialForm = (props) => {
                     </Typography>
                   )}
                 </Grid>
-                <Grid item>
+                <Grid>
                   <Typography variant="h5" sx={styles.label}>
                     Vendor
                   </Typography>
@@ -298,7 +304,7 @@ const CommercialForm = (props) => {
                     onChange={formik.handleChange}
                   />
                 </Grid>
-                <Grid item sx={styles.formItem}>
+                <Grid sx={styles.formItem}>
                   <FormLine>
                     <Box>
                       <Typography variant="h5" sx={styles.label}>
@@ -328,7 +334,7 @@ const CommercialForm = (props) => {
                     </Box>
                   </FormLine>
                 </Grid>
-                <Grid item sx={styles.formItem}>
+                <Grid sx={styles.formItem}>
                   <FormLine>
                     <Box>
                       <Typography variant="h5" sx={styles.label}>
@@ -356,13 +362,12 @@ const CommercialForm = (props) => {
                     </Box>
                   </FormLine>
                 </Grid>
-                <Grid item sx={styles.formItem}>
+                <Grid sx={styles.formItem}>
                   <FormLine>
                     <Box>
                       <Typography variant="h5" sx={styles.label}>
                         Clonality
                       </Typography>
-
                       <Select
                         name="clonality"
                         value={formik.values.clonality}
@@ -413,7 +418,7 @@ const CommercialForm = (props) => {
                     </Box>
                   </FormLine>
                 </Grid>
-                <Grid item sx={styles.formItem}>
+                <Grid sx={styles.formItem}>
                   <FormLine>
                     <Box>
                       <Typography variant="h5" sx={styles.label}>
@@ -441,7 +446,7 @@ const CommercialForm = (props) => {
                     </Box>
                   </FormLine>
                 </Grid>
-                <Grid item sx={styles.formItem}>
+                <Grid sx={styles.formItem}>
                   <FormLine>
                     <Box>
                       <Typography variant="h5" sx={styles.label}>
@@ -469,7 +474,7 @@ const CommercialForm = (props) => {
                     </Box>
                   </FormLine>
                 </Grid>
-                <Grid item sx={styles.formItem}>
+                <Grid sx={styles.formItem}>
                   <FormLine>
                     <Box>
                       <Typography variant="h5" sx={styles.label}>
@@ -497,7 +502,7 @@ const CommercialForm = (props) => {
                     </Box>
                   </FormLine>
                 </Grid>
-                <Grid item>
+                <Grid>
                   <Typography variant="h5" sx={styles.label}>
                     Comments
                   </Typography>
@@ -524,8 +529,7 @@ const CommercialForm = (props) => {
         activeStep={2}
         formik={formik}
       />
-    </Box>
+    </Box>)
   );
 };
-
 export default CommercialForm;

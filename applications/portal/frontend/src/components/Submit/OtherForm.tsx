@@ -6,12 +6,12 @@ import {
   Container,
   TextField,
   Paper,
-  Grid,
   Typography,
   InputAdornment,
   Select,
   MenuItem,
 } from "@mui/material";
+import Grid from "@mui/material/Grid2"
 import { AlertIcon } from "../icons";
 
 import StepNavigation from "./StepNavigation";
@@ -72,85 +72,85 @@ const validationSchema = yup.object().shape({
 const Input = ({ formik, label, name, required, placeholder }) => {
   const { errors, touched, getFieldProps, values, handleChange } = formik;
 
-  return (
-    <>
-      <Typography variant="h5" sx={styles.label} className={`label-${name}`}>
-        {label} {required && "(Mandatory)"}
-      </Typography>
-      {name === "clonality" ? (
-        <Select
-          name="clonality"
-          value={formik.values.clonality}
-          onChange={formik.handleChange}
+  return (<>
+    <Typography variant="h5" sx={styles.label} className={`label-${name}`}>
+      {label} {required && "(Mandatory)"}
+    </Typography>
+    {name === "clonality" ? (
+      <Select
+        name="clonality"
+        value={formik.values.clonality}
+        onChange={formik.handleChange}
+        fullWidth
+        className="select-clonality"
+      >
+        <MenuItem value={"unknown"}>Unknown</MenuItem>
+        <MenuItem value={"cocktail"}>Cocktail</MenuItem>
+        <MenuItem value={"control"}>Control</MenuItem>
+        <MenuItem value={"isotype control"}>Isotype Control</MenuItem>
+        <MenuItem value={"monoclonal"}>Monoclonal</MenuItem>
+        <MenuItem value={"monoclonal secondary"}>
+          Monoclonal Secondary
+        </MenuItem>
+        <MenuItem value={"polyclonal"}>Polyclonal</MenuItem>
+        <MenuItem value={"polyclonal secondary"}>
+          Polyclonal Secondary
+        </MenuItem>
+        <MenuItem value={"oligoclonal"}>Oligoclonal</MenuItem>
+        <MenuItem value={"recombinant"}>Recombinant</MenuItem>
+        <MenuItem value={"recombinant monoclonal"}>
+          Recombinant Monoclonal
+        </MenuItem>
+        <MenuItem value={"recombinant monoclonal secondary"}>
+          Recombinant Monoclonal Secondary
+        </MenuItem>
+        <MenuItem value={"recombinant polyclonal"}>
+          Recombinant Polyclonal
+        </MenuItem>
+        <MenuItem value={"recombinant polyclonal secondary"}>
+          Recombinant Polyclonal Secondary
+        </MenuItem>
+      </Select>
+    ) : (
+      <>
+        <TextField
           fullWidth
-          className="select-clonality"
-        >
-          <MenuItem value={"unknown"}>Unknown</MenuItem>
-          <MenuItem value={"cocktail"}>Cocktail</MenuItem>
-          <MenuItem value={"control"}>Control</MenuItem>
-          <MenuItem value={"isotype control"}>Isotype Control</MenuItem>
-          <MenuItem value={"monoclonal"}>Monoclonal</MenuItem>
-          <MenuItem value={"monoclonal secondary"}>
-            Monoclonal Secondary
-          </MenuItem>
-          <MenuItem value={"polyclonal"}>Polyclonal</MenuItem>
-          <MenuItem value={"polyclonal secondary"}>
-            Polyclonal Secondary
-          </MenuItem>
-          <MenuItem value={"oligoclonal"}>Oligoclonal</MenuItem>
-          <MenuItem value={"recombinant"}>Recombinant</MenuItem>
-          <MenuItem value={"recombinant monoclonal"}>
-            Recombinant Monoclonal
-          </MenuItem>
-          <MenuItem value={"recombinant monoclonal secondary"}>
-            Recombinant Monoclonal Secondary
-          </MenuItem>
-          <MenuItem value={"recombinant polyclonal"}>
-            Recombinant Polyclonal
-          </MenuItem>
-          <MenuItem value={"recombinant polyclonal secondary"}>
-            Recombinant Polyclonal Secondary
-          </MenuItem>
-        </Select>
-      ) : (
-        <>
-          <TextField
-            fullWidth
-            name={name}
-            placeholder={placeholder}
-            value={values[name]}
-            onChange={handleChange}
-            {...getFieldProps(name)}
-            error={Boolean(touched[name] && errors[name])}
-            helperText={touched[name] && errors[name]}
-            InputProps={{
+          name={name}
+          placeholder={placeholder}
+          value={values[name]}
+          onChange={handleChange}
+          {...getFieldProps(name)}
+          error={Boolean(touched[name] && errors[name])}
+          helperText={touched[name] && errors[name]}
+          className={`input-${name}`}
+          slotProps={{
+            input: {
               endAdornment: (
                 <InputAdornment position="end">
                   {touched[name] && errors[name] && <AlertIcon />}
                 </InputAdornment>
               ),
-            }}
-            className={`input-${name}`}
-          />
-          {!touched[name] && !errors[name] && name === "catalogNumber" && (
-            <Typography variant="subtitle1" sx={styles.note} className="note">
-              Note: Submit unregistered antibodies only
-            </Typography>
-          )}
-        </>
-      )}
-    </>
-  );
+            }
+          }}
+        />
+        {!touched[name] && !errors[name] && name === "catalogNumber" && (
+          <Typography variant="subtitle1" sx={styles.note} className="note">
+            Note: Submit unregistered antibodies only
+          </Typography>
+        )}
+      </>
+    )}
+  </>);
 };
 
 const FormLine = ({ children }) => {
   const child = React.Children.toArray(children) as React.ReactElement[];
   return (
     <Grid container spacing={3}>
-      <Grid item lg={6}>
+      <Grid size={{ lg: 6 }}>
         {child[0]}
       </Grid>
-      <Grid item lg={6}>
+      <Grid size={{ lg: 6 }}>
         {child[1]}
       </Grid>
     </Grid>
@@ -197,23 +197,24 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
   const { handleSubmit } = formik;
 
   return (
-    <form className="antibody-form type-other" onSubmit={handleSubmit} autoComplete="off">
+    (<form className="antibody-form type-other" onSubmit={handleSubmit} autoComplete="off">
       <Container maxWidth="xl" sx={styles.container}>
         <Paper sx={styles.paper}>
           <Grid
             container
             direction="column"
-            gap={3}
-            m={0}
-            width="100%"
-            height="100%"
-          >
-            <Grid item>
+            sx={{
+              gap: 3,
+              m: 0,
+              width: "100%",
+              height: "100%"
+            }}>
+            <Grid>
               <Typography variant="h1" sx={styles.header}>
                 2. Antibody Details
               </Typography>
             </Grid>
-            <Grid item sx={styles.formItem}>
+            <Grid sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -235,7 +236,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item sx={styles.formItem}>
+            <Grid sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -257,7 +258,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item sx={styles.formItem}>
+            <Grid sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -279,7 +280,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item sx={styles.formItem}>
+            <Grid sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -301,7 +302,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item sx={styles.formItem}>
+            <Grid sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -323,7 +324,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item sx={styles.formItem}>
+            <Grid sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -345,7 +346,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item sx={styles.formItem}>
+            <Grid sx={styles.formItem}>
               <FormLine>
                 <Box>
                   <Input
@@ -367,7 +368,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item>
+            <Grid>
               <FormLine>
                 <Box>
                   <Input
@@ -389,7 +390,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
                 </Box>
               </FormLine>
             </Grid>
-            <Grid item>
+            <Grid>
               <Typography variant="h5" sx={styles.label}>
                 Comments
               </Typography>
@@ -414,7 +415,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
         activeStep={2}
         formik={formik}
       />
-    </form>
+    </form>)
   );
 };
 

@@ -7,10 +7,10 @@ import {
   Box,
   Button,
   Container,
-  Grid,
   Stack,
   Typography,
 } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import { useTheme } from "@mui/material/styles";
 import { AddAntibodyIcon, DownloadIcon } from "../icons";
 import TableToolbar from "./TableToolbar";
@@ -30,7 +30,11 @@ const HideOnScroll = (props: Props) => {
 
   const trigger = useScrollTrigger();
 
-  return <Box display={trigger ? "none" : "block"}>{children}</Box>;
+  return (
+    <Box sx={{
+      display: trigger ? "none" : "block"
+    }}>{children}</Box>
+  );
 };
 
 type TableHeaderProps = {
@@ -50,43 +54,65 @@ const TableHeader = (props: TableHeaderProps) => {
   const { activeSearch, totalElements, lastUpdate, error } = useContext(searchContext)
   const showAlert = warningMessage.length > 0;
   return (
-    <Box className="container-home-header">
+    (<Box className="container-home-header">
       <AppBar elevation={0} sx={{ top: "4.5rem" }}>
         <Container maxWidth="xl">
-          <Stack direction="column" spacing={1.5} mb={1} width="100%">
+          <Stack
+            direction="column"
+            spacing={1.5}
+            sx={{
+              mb: 1,
+              width: "100%"
+            }}>
             <HideOnScroll>
-              <Box display="flex" mt={6} justifyContent="space-between">
+              <Box
+                sx={{
+                  display: "flex",
+                  mt: 6,
+                  justifyContent: "space-between"
+                }}>
                 <Box>
                   <Grid container columnSpacing={1.5} rowSpacing={1}>
-                    <Grid item>
-                      <Typography variant="h1" color="grey.700" align="left">
+                    <Grid>
+                      <Typography variant="h1" align="left" sx={{
+                        color: "grey.700"
+                      }}>
                         Antibody Registry <sub>beta</sub>
                       </Typography>
                     </Grid>
-                    <Grid item display="flex" alignItems="center">
+                    <Grid
+                      sx={{
+                        display: "flex",
+                        alignItems: "center"
+                      }}>
                       <Box
-                        bgcolor="primary.main"
-                        borderRadius={2}
-                        py={0.25}
-                        px={1.25}
                         className="search-info"
-                      >
+                        sx={{
+                          bgcolor: "primary.main",
+                          borderRadius: 2,
+                          py: 0.25,
+                          px: 1.25
+                        }}>
                         <Typography
                           variant="h6"
-                          color="common.white"
                           align="left"
+                          sx={{
+                            color: "common.white"
+                          }}
                         >
                           <span className="total-elements">{totalElements && totalElements?.toLocaleString('en-US')}</span> {Pluralize("antibody",totalElements)}
                           <span className="active-search">{activeSearch && ` for "${activeSearch}"` }</span>
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                       <Typography
                         variant="subtitle1"
-                        color="grey.400"
                         align="left"
                         className="last-updated"
+                        sx={{
+                          color: "grey.400"
+                        }}
                       >
                         Last Updated: {lastUpdate?.toLocaleString('en-US', { day: '2-digit', month:'long', weekday: "long" })}
                       </Typography>
@@ -158,9 +184,12 @@ const TableHeader = (props: TableHeaderProps) => {
           </Stack>
         </Container>
       </AppBar>
-      <Box sx={{ height: showAlert ? "16.5rem" : "12.5rem" }} component="div" />
-    </Box>
+      <Box sx={[showAlert ? {
+        height: "16.5rem"
+      } : {
+        height: "12.5rem"
+      }]} component="div" />
+    </Box>)
   );
 };
-
 export default TableHeader;

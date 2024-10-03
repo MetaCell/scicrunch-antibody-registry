@@ -39,33 +39,32 @@ class ScicrunchCitationMetricCronJobTests(TestCase):
         # run the command
         command.handle()
 
-        # now check for all the antibodies - if the number of citation is as expected. 
+        # now check for all the antibodies - if the number of citation is as expected.
         for testab in TEST_ANTIBODIES_FOR_SCICRUNCH_CITATION[:4]:
             a = Antibody.objects.get(ab_id=testab["ab_id"])
             self.assertEqual(
-                a.citation, 
+                a.citation,
                 testab["expected_citation"]
             )
-        
+
         # Add an antibody not present in the Scicrunch website
         unknown_id_antibody = TEST_ANTIBODIES_FOR_SCICRUNCH_CITATION[4]
         ab2 = Antibody.objects.create(
-            ab_id=unknown_id_antibody["ab_id"],  ## unknown Id [100]
+            ab_id=unknown_id_antibody["ab_id"],  # unknown Id [100]
             ab_name=unknown_id_antibody["ab_name"],
             status=STATUS.CURATED
         )
         ab2.save()
 
         command.handle()
-        
+
         # Antibody with unknown_id should not have any citation - hence it should be 0
         a2 = Antibody.objects.get(ab_id=unknown_id_antibody["ab_id"])
         self.assertEqual(a2.citation, 0)
 
-
     def test_rate_limiter(self):
         limiter = RateLimiter(max_requests_per_second=10)
-        
+
         # test if allows 10 requests per second
         t1 = time.time()
         for i in range(1, 28):
@@ -73,7 +72,5 @@ class ScicrunchCitationMetricCronJobTests(TestCase):
                 t2 = time.time()
             limiter.add_request()
         t3 = time.time()
-        self.assertGreaterEqual(t2-t1, 1)
-        self.assertGreaterEqual(t3-t1, 2)
-        
-
+        self.assertGreaterEqual(t2 - t1, 1)
+        self.assertGreaterEqual(t3 - t1, 2)

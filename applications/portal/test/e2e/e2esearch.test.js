@@ -152,11 +152,13 @@ describe("E2E Flow for AntiBody Registry", () => {
      
     expect(targAntigens[0]).toBe("Target antigen");
     expect(targAntigens[1]).not.toBeNull;
-
+    await page.waitForSelector(s.SEARCH_INPUT);
     const inputValue = await getValue(s.SEARCH_INPUT);
     console.log("inputValue", inputValue);
 
     await page.click(s.SEARCH_INPUT)
+
+    await page.waitForSelector(s.SEARCH_DELETE_BUTTON);
 
     await page.click(s.SEARCH_DELETE_BUTTON)
   

@@ -11,6 +11,8 @@ from django.db.models import Transform, CharField, Index, Q, Value
 from django.db.models.functions import Length, Coalesce
 from django.utils import timezone
 
+from simple_history.models import HistoricalRecords
+
 from api.services.user_service import UnrecognizedUser, get_current_user_id
 from api.utilities.exceptions import RequiredParameterMissing
 from api.utilities.functions import catalog_number_chunked, generate_id_aux, extract_base_url, \
@@ -100,6 +102,7 @@ class Vendor(models.Model):
         db_index=True,
     )
     show_link = models.BooleanField(default=False, null=True, blank=True, db_index=True)
+    history = HistoricalRecords()
 
     class Meta:
         indexes = [
@@ -159,6 +162,7 @@ class VendorDomain(models.Model):
         choices=STATUS.choices,
         default=STATUS.QUEUE, db_index=True
     )
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.base_url
@@ -273,6 +277,7 @@ class Antibody(models.Model):
     curate_time = models.DateTimeField(db_index=True, null=True, blank=True)
     # whether the full link to the antibody is shown. If None, the vendor's default is used
     show_link = models.BooleanField(null=True, blank=True, db_index=True)
+    history = HistoricalRecords()
 
     def import_save(self):
         first_save = self.ix is None
@@ -382,7 +387,7 @@ class Antibody(models.Model):
         new_species = self.species_from_raw(self.target_species_raw)
 
         if new_species != old_species or len(new_species) != self.species.count():
-            to_remove =  old_species - new_species
+            to_remove = old_species - new_species
             if to_remove:
                 for specie_name in to_remove:
                     specie_name = specie_name.strip().lower()
@@ -422,7 +427,7 @@ class Antibody(models.Model):
         if self.vendor and self.catalog_num:
             duplicate_antibodies = Antibody.objects.filter(
                 vendor__id=self.vendor.id,
-                catalog_num__iexact=self.catalog_num, 
+                catalog_num__iexact=self.catalog_num,
             ).exclude(commercial_type=CommercialType.PERSONAL).exclude(ix=self.ix).exclude(status=STATUS.REJECTED)
             duplicates_length = len(duplicate_antibodies)
             if duplicates_length == 0:  # Because the save happened before there will always be one antibody in the database
@@ -450,7 +455,7 @@ class Antibody(models.Model):
             log.exception("Multiple vendors with name %s", name)
             vendor = Vendor.objects.filter(name__iexact=name)[0]
         except Vendor.DoesNotExist:
-            if not self.vendor:  ## if vendor is not set by vendor domain
+            if not self.vendor:  # if vendor is not set by vendor domain
                 vendor_name = name or base_url
                 log.info(
                     "Creating new Vendor `%s` on domain  to `%s`", vendor_name, base_url
@@ -615,7 +620,7 @@ class AntibodySearch(models.Model):
     # This model is a materialized view: have to remove all migrations related to it when generated
     ix = models.OneToOneField(Antibody, on_delete=models.DO_NOTHING, db_column='ix', primary_key=True)
     search_vector = SearchVectorField(null=True)
-    defining_citation = models.IntegerField(null=False)
+    defining_citation = models.IntegerField(null=False, default=0)
     disc = models.IntegerField(null=False)
     status = models.CharField(
         max_length=STATUS_MAX_LEN,

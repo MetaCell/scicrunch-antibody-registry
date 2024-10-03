@@ -18,7 +18,7 @@ from api.repositories.filtering_utils import convert_filters_to_q
 antibody_mapper = AntibodyMapper()
 
 
-def get_antibodies(page: int = 1, size: int = 10, date_from: datetime = None, date_to: datetime = None, status:str=None) -> PaginatedAntibodies:
+def get_antibodies(page: int = 1, size: int = 10, date_from: datetime = None, date_to: datetime = None, status: str = None) -> PaginatedAntibodies:
     try:
         query = Antibody.objects.filter(status=check_if_status_exists_or_curated(status))
         if date_from:
@@ -105,21 +105,22 @@ def count():
     return Antibody.objects.all().filter(status=STATUS.CURATED).count()
 
 
-def last_update():
+def last_update(last_date: datetime = None):
     # Used to improve performance -- otherwise need to sort all antibodies!
-    last_date = datetime.now() - dateutil.relativedelta.relativedelta(months=6)
+    if last_date == None:
+        last_date = datetime.now() - dateutil.relativedelta.relativedelta(months=6)
     try:
         return Antibody.objects.filter(status=STATUS.CURATED, curate_time__gte=last_date) \
             .latest("curate_time").curate_time
     except Antibody.DoesNotExist:
         try:
-            return Antibody.objects.filter(status=STATUS.CURATED).latest("curate_time").curate_time
+            return last_update(last_date - dateutil.relativedelta.relativedelta(months=6))
         except Antibody.DoesNotExist:
             return datetime.now()
+
 
 def get_curated_antibodies_ids():
     antibodies_ids = Antibody.objects.filter(status=STATUS.CURATED).values_list(
         "ab_id", flat=True
     )
     return antibodies_ids
-

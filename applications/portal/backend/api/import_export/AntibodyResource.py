@@ -21,6 +21,7 @@ from cloudharness import log
 CLONALITIES = {c[0] for c in AntibodyClonality.choices}
 COMMERCIAL_TYPES = {c[0] for c in CommercialType.choices}
 
+
 class AntibodyIdentifier:
     def __init__(self, fields, condition: Callable, q: Callable, filter_dataset: Callable):
         """

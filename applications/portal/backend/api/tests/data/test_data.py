@@ -79,23 +79,23 @@ example_ab2 = {
 
 # test data for list of antibodies
 # PLEASE CHECK - https://scicrunch.org/resources/data/record/nif-0000-07730-1/AB_90755/resolver
-# if the expected_citatino is failing to check if it has changed. 
+# if the expected_citatino is failing to check if it has changed.
 TEST_ANTIBODIES_FOR_SCICRUNCH_CITATION = [
-	{
-		"ab_id": "90755",
-		"ab_name": "ab1",
-		"expected_citation": 137
+    {
+        "ab_id": "90755",
+        "ab_name": "ab1",
+        "expected_citation": 137
     },
     {
         "ab_id": "493345",
         "ab_name": "ab2",
         "expected_citation": 2,
-    }, 
+    },
     {
         "ab_id": "3073618",
         "ab_name": "ab3",
         "expected_citation": 1,
-    }, 
+    },
     {
         "ab_id": "2687628",
         "ab_name": "ab4",
@@ -103,7 +103,6 @@ TEST_ANTIBODIES_FOR_SCICRUNCH_CITATION = [
     },
     {
         "ab_id": "100",
-        "ab_name": "ab5", ## unknown Id and should give back 0 citation
+        "ab_name": "ab5",  # unknown Id and should give back 0 citation
     }
 ]
-

@@ -6,6 +6,7 @@ from api.utilities.exceptions import FetchCitationMetricFailed
 import logging
 from api.models import Antibody, STATUS
 
+
 class RateLimiter:
     def __init__(self, max_requests_per_second):
         self.max_requests_per_second = max_requests_per_second

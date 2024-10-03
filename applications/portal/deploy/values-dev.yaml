@@ -2,8 +2,21 @@ harness:
   
   deployment:
     replicas: 1
+    resources:
+      requests:
+        memory: 0.6Gi
+        cpu: 50m
+      limits:
+        cpu: 2
+        memory: 2Gi
   database:
     size: 20Gi
+    resources:
+      requests:
+        memory: 200Mi
+        cpu: 10m
+      limits:
+        memory: 4Gi
 
 sentry:
   sample_rate: 1.0
@@ -12,3 +25,5 @@ sentry:
   traces_sample_rate_patterns:
     "/api/": 0
     "/admin/": 0
+
+    

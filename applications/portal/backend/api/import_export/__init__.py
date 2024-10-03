@@ -1,1 +1,1 @@
-from .AntibodyResource import AntibodyResource # noqa: F401
+from .AntibodyResource import AntibodyResource  # noqa: F401

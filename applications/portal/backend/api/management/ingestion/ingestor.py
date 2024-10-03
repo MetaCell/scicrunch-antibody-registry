@@ -80,7 +80,7 @@ class Ingestor:
         self.data_paths = data_paths
         self.connection = connection
         self.keycloak_service = KeycloakService()
-        self.hot=hot
+        self.hot = hot
         self.users_map = {}
         if data_paths.users:
             try:
@@ -105,7 +105,7 @@ class Ingestor:
         self.data_paths.vendor_domains and self._insert_vendor_domains(self.data_paths.vendor_domains)
         self._insert_antibodies(self.ANTIBODIES_TMP_TABLE)
         species_map = self._insert_species(species_map)
-        
+
         self._swap_antibodies(self.ANTIBODIES_TMP_TABLE, self.ANTIBODY_TABLE)
         self._insert_antibody_species(species_map)
         try:
@@ -201,8 +201,8 @@ class Ingestor:
     def _insert_antibodies(self, table):
         with connection.cursor() as cursor:
             cursor.execute(get_create_table_stm(
-            table, ANTIBODY_HEADER))
-        
+                table, ANTIBODY_HEADER))
+
         error = False
 
         # Insert raw data into table
@@ -232,7 +232,6 @@ class Ingestor:
         if error:
             raise Exception("Error inserting antibodies")
 
-
     @timed_class_method('Species added')
     def _insert_species(self, species_map):
         get_species_stm = f"""SELECT DISTINCT target_species FROM {self.ANTIBODIES_TMP_TABLE}
@@ -246,7 +245,8 @@ class Ingestor:
                 specie_str = row[0]
                 if specie_str:
                     for specie in get_species_from_targets(specie_str):
-                        if not is_valid_specie(specie): continue
+                        if not is_valid_specie(specie):
+                            continue
 
                         clean_specie = get_clean_species_str(specie)
                         if self.hot:
@@ -256,15 +256,14 @@ class Ingestor:
                                 continue
                             except Specie.DoesNotExist:
                                 pass
-                            
+
                         if clean_specie not in species_map:
                             new_species[clean_specie] = species_id
                             species_id += 1
             species_insert_stm = get_insert_values_into_table_stm(self.SPECIE_TABLE,
-                                                                ['name', 'id'],
-                                                                len(new_species.keys()))
-            
-            
+                                                                  ['name', 'id'],
+                                                                  len(new_species.keys()))
+
             if len(new_species) > 0:
                 logging.info("Inserting %s species", len(new_species.keys()))
                 cursor.execute(species_insert_stm, list(itertools.chain.from_iterable(new_species.items())))
@@ -312,7 +311,8 @@ class Ingestor:
                     target_species = row['target_species']
                     if target_species:
                         for specie in get_species_from_targets(row['target_species']):
-                            if not is_valid_specie(specie): continue
+                            if not is_valid_specie(specie):
+                                continue
                             clean_specie = get_clean_species_str(specie)
                             species_params.extend(
                                 [row['ix'], species_map[clean_specie]])
@@ -323,7 +323,6 @@ class Ingestor:
                     int(len(species_params) / 2))
 
                 self._execute(antibody_species_insert_stm, species_params)
-                
 
     @timed_class_method('Antibody files added ')
     def _insert_antibody_files(self, csv_file):
@@ -365,7 +364,7 @@ class Ingestor:
                     ttr, tables_to_restart_seq[ttr]))
 
             reset_sequence_sql = connection.ops.sequence_reset_sql(no_style(),
-                                                                [Specie, AntibodySpecies, VendorSynonym])
+                                                                   [Specie, AntibodySpecies, VendorSynonym])
             for rss in reset_sequence_sql:
                 cursor.execute(rss)
 

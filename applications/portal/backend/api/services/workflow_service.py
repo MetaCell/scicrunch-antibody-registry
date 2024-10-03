@@ -17,7 +17,8 @@ def _create_task(image_name, **kwargs):
         resources={"requests": {"cpu": "100m", "memory": "3Gi"}}
     )
 
-def execute_ingestion_workflow(file_id: str, hot: bool=False):
+
+def execute_ingestion_workflow(file_id: str, hot: bool = False):
     if hot:
         from django.db import transaction, connection
 
@@ -29,12 +30,12 @@ def execute_ingestion_workflow(file_id: str, hot: bool=False):
         with transaction.atomic():
             Ingestor(metadata, connection, hot).ingest()
         return
-    ttl_strategy={
-    'secondsAfterCompletion': 60 * 60 * 24,
-    'secondsAfterSuccess': 60 * 20,
-    'secondsAfterFailure': 60 * 60 * 24
-    }       
-    
+    ttl_strategy = {
+        'secondsAfterCompletion': 60 * 60 * 24,
+        'secondsAfterSuccess': 60 * 20,
+        'secondsAfterFailure': 60 * 60 * 24
+    }
+
     operations.PipelineOperation(
         basename=INGEST_OP,
         tasks=(

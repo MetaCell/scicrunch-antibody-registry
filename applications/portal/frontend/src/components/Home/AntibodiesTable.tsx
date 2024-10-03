@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useCallback } from "react";
+import React, { useEffect, useState, useContext, useCallback, useMemo } from "react";
 //MUI
 import {
   DataGrid,
@@ -55,7 +55,9 @@ const StyledCheckBox = (props) => {
   );
 };
 
-const getRowId = (ab: Antibody) => `${ab.abId}${Math.random()}`;
+const getRowId = (ab: Antibody) => `${ab.ix}`;
+
+const SortIcon = ({ sortingOrder, ...other }) => <SortingIcon {...other} />;
 
 const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
   const [activeSelection, setActiveSelection] = useState(true);
@@ -86,12 +88,12 @@ const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
       warningMessage={warningMessage}
       shownResultsNum={searchedAntibodies?.length}
     />
-    
+
     </>
   );
 };
 
-const RenderNameAndId = (props: GridRenderCellParams<String>) => {
+const RenderNameAndId = (props: GridRenderCellParams) => {
   const currentPath = window.location.pathname;
   const href =
     currentPath === "/submissions"
@@ -102,8 +104,10 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
       <Typography
         variant="body2"
         align="left"
-        color="grey.700"
-        fontWeight={500}
+        sx={{
+          color: "grey.700",
+          fontWeight: 500
+        }}
       >
         {props.row.abName}
       </Typography>
@@ -111,7 +115,9 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
         variant="caption"
         align="left"
         component="div"
-        color="grey.500"
+        sx={{
+          color: "grey.500"
+        }}
       >
         AB_{props.row.abId}
       </Typography>
@@ -120,18 +126,20 @@ const RenderNameAndId = (props: GridRenderCellParams<String>) => {
 };
 
 
-const getValueOrEmpty = (props: ValueProps) => {
-  return props.row[props.field] ?? "";
+const getValueOrEmpty = (_: any, row: Antibody, column: GridColDef) => {
+  return row[column.field] ?? "";
 };
 
-const RenderCellContent = (props: GridRenderCellParams<String>) => {
+const RenderCellContent = (props: GridRenderCellParams) => {
   return (
     <Typography
       variant="caption"
       align="left"
-      color={"grey.500"}
       component="div"
       className="col-content"
+      sx={{
+        color: "grey.500"
+      }}
     >
       {props.field === "targetAntigen"
         ? `${props.row.abTarget} ${props.row.targetSpecies.join(", ")}`
@@ -140,16 +148,30 @@ const RenderCellContent = (props: GridRenderCellParams<String>) => {
   );
 };
 
-const RenderVendor = (props) => ( 
-  
+const RenderVendor = (props) => (
+
   <Typography
     variant="caption"
     align="left"
-    color={"grey.500"}
     component="div"
     className="col-vendor"
+    sx={{
+      color: "grey.500",
+      width: "fit-content"
+    }}
   >
-    {props.row.url ? <Link className="link-vendor" bgcolor="primary.light" px={0.5} py={0.25} display="block" underline="none" target="_blank" href={props.row.url}>
+    {props.row.url ? <Link
+      className="link-vendor"
+      underline="none"
+      target="_blank"
+      href={props.row.url}
+      sx={{
+        bgcolor: "primary.light",
+        px: 0.5,
+        py: 0.25,
+        display: "block"
+      }}
+    >
       {props.value}
     </Link> : props.value}
   </Typography>
@@ -159,11 +181,16 @@ const RenderClonality = (props) => (
   <Typography
     variant="caption"
     align="left"
-    color={"grey.500"}
-    bgcolor="grey.A200"
     component="div"
-    px={1} py={0.25} borderRadius="1rem"
     className="col-clonality"
+    sx={{
+      color: "grey.500",
+      bgcolor: "grey.A200",
+      px: 1,
+      py: 0.25,
+      borderRadius: "1rem",
+      width: "fit-content"
+    }}
   >
     {props.value}
   </Typography>
@@ -175,10 +202,12 @@ const RenderHtml = (props: GridRenderCellParams<String>) => {
     <Typography
       variant="caption"
       align="left"
-      color="grey.500"
       component="div"
       dangerouslySetInnerHTML={{ __html: props.value }}
       className="col-html"
+      sx={{
+        color: "grey.500"
+      }}
     />
   );
 };
@@ -207,13 +236,13 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   const handleCloseCitation = useCallback(() => {
     setAnchorCitationPopover(null);
   }, [setAnchorCitationPopover]);
-    
+
   const handleClickCitation = useCallback((event) => {
     setAnchorCitationPopover(event.currentTarget);
     setTimeout(handleCloseCitation, 1000);
   }, [handleCloseCitation, setAnchorCitationPopover]);
 
-  
+
 
   const open = Boolean(anchorCitationPopover);
 
@@ -222,8 +251,10 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
       <Typography
         variant="caption"
         align="left"
-        color={props.field === "vendor" ? "primary.main" : "grey.500"}
         component="div"
+        sx={{
+          color: props.field === "vendor" ? "primary.main" : "grey.500"
+        }}
       >
         {props.value}
       </Typography>
@@ -233,7 +264,9 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
           size="small"
           sx={{ minWidth: 0 }}
           startIcon={
-            <CopyIcon sx={{ stroke: theme => theme.palette.grey[500] }} fontSize="inherit" />
+            <CopyIcon sx={theme => ({
+              stroke: theme.palette.grey[500]
+            })} fontSize="inherit" />
           }
           className="btn-citation-copy"
         />
@@ -257,7 +290,7 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   );
 };
 
-const RenderStatus = (props: GridRenderCellParams<string>) => {
+const RenderStatus = (props: GridRenderCellParams<String>) => {
   const statusesTag = {
     CURATED: ["Accepted", "success"],
     REJECTED: ["Rejected", "error"],
@@ -267,17 +300,21 @@ const RenderStatus = (props: GridRenderCellParams<string>) => {
 
   return (
     <Box
-      bgcolor={`${statusesTag[props.value][1]}.contrastText`}
-      px={1}
-      py={0.25}
-      borderRadius="1rem"
       className="col-status"
+      sx={{
+        bgcolor: `${statusesTag[props.value][1]}.contrastText`,
+        px: 1,
+        py: 0.25,
+        borderRadius: "1rem"
+      }}
     >
       <Typography
         variant="caption"
         align="left"
-        color={`${statusesTag[props.value][1]}.main`}
         component="div"
+        sx={{
+          color: `${statusesTag[props.value][1]}.main`
+        }}
       >
         {statusesTag[props.value][0]}
       </Typography>
@@ -285,23 +322,18 @@ const RenderStatus = (props: GridRenderCellParams<string>) => {
   );
 };
 
-interface ValueProps {
-  row: Antibody;
-  field: string;
-}
 
-
-const getList = (props: ValueProps) => {
-  return props.row[props.field]?.join(", ") ?? "";
+const getList = (_: any, row: Antibody, column: GridColDef) => {
+  return row[column.field]?.join(", ") ?? "";
 };
 
-const getNameAndId = (props: ValueProps) => {
-  return `${props.row.abName} AB_${props.row.abId}`;
+const getNameAndId = (_: any, row: Antibody) => {
+  return `${row.abName} AB_${row.abId}`;
 };
 
-const getValueForCitation = (props: ValueProps) => {
+const getValueForCitation = (_: any, row: Antibody) => {
 
-  return props?.row ? getProperCitation(props.row) : "";
+  return row ? getProperCitation(row) : "";
 };
 
 const columnsDefaultProps = {
@@ -322,6 +354,9 @@ const dataGridStyles = {
     "& div": {
       pointerEvents: "auto",
     },
+  },
+  "& .MuiDataGrid-row": {
+    height: "100%"
   },
   "& .MuiDataGrid-row:hover": {
     backgroundColor: "grey.50",
@@ -361,6 +396,11 @@ const AntibodiesTable = (props) => {
   const user = useContext(UserContext)[0];
   const searchParams = new URLSearchParams(window.location.search);
   const searchQuery = searchParams.get('q');
+  const [paginationModel, setPaginationModel] = React.useState({
+    pageSize: PAGE_SIZE,
+    page: 0,
+  });
+
 
   const {
     activeSearch,
@@ -369,23 +409,28 @@ const AntibodiesTable = (props) => {
     getAntibodyList,
     filterModel,
     setFilterModel,
+    sortModel,
     setSortModel,
+    totalElements
   } =
     useContext(SearchContext);
 
-  const applyFilters = (filtermodel) => {
+  const applyFilterAndSortModels = useCallback((filtermodel, query, sortmodel = sortModel) => {
+    // Also does the applyFilterAndSortModels from the CustomFilterPanel - when apply button is clicked
     const searchmode = (props.activeTab === MYSUBMISSIONS) ? SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES :
       SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES
     getAntibodyList(
       searchmode,
-      searchQuery || activeSearch,
+      query,
       1,
-      filtermodel
+      filtermodel,
+      sortmodel
     )
     filtermodel !== filterModel ? setFilterModel(filtermodel) : null;
-  }
+    sortmodel !== sortModel ? setSortModel(sortmodel) : null;
+  }, [filterModel, sortModel, getAntibodyList, props.activeTab, setFilterModel, setSortModel]);
 
-  const addSortingColumn = (sortmodel) => {
+  const addSortingColumn = useCallback((sortmodel) => {
     const searchmode = (props.activeTab === MYSUBMISSIONS) ? SEARCH_MODES.MY_FILTERED_AND_SEARCHED_ANTIBODIES :
       SEARCH_MODES.ALL_FILTERED_AND_SEARCHED_ANTIBODIES
     getAntibodyList(
@@ -396,25 +441,29 @@ const AntibodiesTable = (props) => {
       sortmodel
     )
     setSortModel(sortmodel)
-  }
+  }, [filterModel, searchQuery, activeSearch, getAntibodyList, props.activeTab, setSortModel]);
 
-  const setNewFilterColumn = (model) => {
-    let newblankFilter = { ...BLANK_FILTER_MODEL, columnField: model.items[0].columnField, id: getRandomId() }
+  const setNewFilterColumn = useCallback((model) => {
+    let newblankFilter = { ...BLANK_FILTER_MODEL, columnField: model.items[0].field, field: model.items[0].field, id: getRandomId() }
     filterModel.items.push(newblankFilter);
     setFilterModel(filterModel);
-  }
-  const addNewFilterColumn = (model) => {
+  }, [filterModel, setFilterModel]);
+  const addNewFilterColumn = useCallback((model) => {
     if (!checkIfFilterSetExists(model, filterModel)) {
       setNewFilterColumn(model);
     }
-  }
+  }, [filterModel, setNewFilterColumn]);
 
   useEffect(() => {
-    if (filterModel.items.length > 0) {
+    const isSearchInMySubmission = (props.activeTab === MYSUBMISSIONS && activeSearch)
+    // NOTE: LOGIC below - if no filters/sortmodel exist or search query exists in my submission - don't proceed, 
+    // since this is handled in separate useEffect
+    if (filterModel.items.length > 0 || sortModel.length > 0 || isSearchInMySubmission) {
       return;
     }
-    if (searchQuery) {
-      getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, searchQuery);
+
+    if (searchQuery || activeSearch) {
+      getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, searchQuery || activeSearch);
     } else if (props.activeTab === MYSUBMISSIONS) {
       getAntibodyList(SEARCH_MODES.MY_ANTIBODIES);
     } else {
@@ -423,35 +472,61 @@ const AntibodiesTable = (props) => {
   }, [props.activeTab, user, searchQuery]);
 
   useEffect(() => {
+    // NOTE: LOGIC below - whenever search query changes and filters exist, then 
+    // if filters exist in My Submission - apply with empty search
+    // if filters exist in All Results - apply with search query
     if (activeSearch && filterModel.items.length > 0) {
-      applyFilters(filterModel);
+      if (props.activeTab === MYSUBMISSIONS) {
+        applyFilterAndSortModels(filterModel, '')
+      } else {
+        applyFilterAndSortModels(filterModel, searchQuery || activeSearch)
+      }
     }
-  }, [activeSearch]);
+  }, [activeSearch, searchQuery, filterModel, props.activeTab, applyFilterAndSortModels]);
 
   useEffect(() => {
-    if (filterModel.items.length > 0) {
-      applyFilters(filterModel);
+    // NOTE: LOGIC below - whenever tab is changed
+    // if filters/sortmodel exist in My Submission - apply with empty search and empty filters/sortmodel
+    // if filters/sortmodel exist in All Results - apply with search query but empty filters/sortmodel
+    // if no filters/sortmodel exist in My Submission - get My Submissions
+    // if no filters/sortmodel exist in All Results - this case is handled in the first useEffect 
+    if (filterModel.items.length > 0 || sortModel.length > 0) {
+      if (props.activeTab === MYSUBMISSIONS) {
+        applyFilterAndSortModels({ items: [] }, '', [])
+      } else {
+        applyFilterAndSortModels({ items: [] }, searchQuery || activeSearch, [])
+      }
+
+    } else {
+      if (props.activeTab === MYSUBMISSIONS) {
+        getAntibodyList(SEARCH_MODES.MY_ANTIBODIES)
+      }
+
     }
+
   }, [props.activeTab]);
 
-  const columns: GridColDef[] = [
+  const columns: GridColDef[] = useMemo( () => [
     {
       ...columnsDefaultProps,
       field: "abName",
       headerName: "Name",
-      hide: true,
+      hideable: true,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
       field: "abId",
       headerName: "ID",
-      hide: true,
+      hideable: true,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
       field: "accession",
       headerName: "Accession",
-      hide: true,
+      hideable: true,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -463,6 +538,7 @@ const AntibodiesTable = (props) => {
       valueGetter: getNameAndId,
       headerAlign: "left",
       align: "left",
+      display: "flex",
     },
     // {
     //   ...columnsDefaultProps,
@@ -475,8 +551,9 @@ const AntibodiesTable = (props) => {
       field: "targetSpecies",
       headerName: "Target species",
       valueGetter: getList,
-      hide: true,
+      hideable: true,
       sortable: false,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -484,7 +561,8 @@ const AntibodiesTable = (props) => {
       headerName: "Applications",
       valueGetter: getList,
       sortable: false,
-      hide: true,
+      hideable: true,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -492,6 +570,7 @@ const AntibodiesTable = (props) => {
       headerName: "Target antigen",
       flex: 1.5,
       valueGetter: getValueOrEmpty,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -501,22 +580,28 @@ const AntibodiesTable = (props) => {
       valueGetter: getValueForCitation,
       renderCell: RenderProperCitation,
       type: "actions",
-      hideable: false
+      hideable: false,
+      headerAlign: "left",
+      align: "left",
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
       field: "clonality",
       headerName: "Clonality",
       renderCell: RenderClonality,
+      flex: 1.5,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
       field: "reference",
       headerName: "Reference",
       flex: 1.5,
-      hide: true,
+      hideable: true,
       filterable: false,
       sortable: false,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -525,18 +610,21 @@ const AntibodiesTable = (props) => {
       renderCell: RenderHtml,
       flex: 3,
       align: "left",
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
       field: "cloneId",
       headerName: "Clone ID",
-      hide: true,
+      hideable: true,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
       field: "sourceOrganism",
       headerName: "Host organism",
       flex: 1.5,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -544,12 +632,13 @@ const AntibodiesTable = (props) => {
       headerName: "Vendor",
       flex: 1.5,
       renderCell: RenderVendor,
-
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
       field: "catalogNum",
       headerName: "Cat Num",
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
@@ -559,35 +648,38 @@ const AntibodiesTable = (props) => {
       filterable: false,
       sortable: true,
       align: 'right',
-      hide: false
+      hideable: false,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
       field: "url",
       headerName: "Product URL",
-      hide: true,
+      hideable: true,
       sortable: false,
       filterable: false,
+      display: "flex",
     },
     {
       ...columnsDefaultProps,
       field: "status",
       headerName: "Status",
-      hide: props.activeTab === ALLRESULTS,
+      hideable: props.activeTab === ALLRESULTS,
       renderCell: RenderStatus,
       flex: 1.4,
       filterable: false,
       sortable: false,
+      display: "flex",
     },
-  ];
+  ], [props.activeTab]);
 
-  const compProps = {
+  const compProps = useMemo(() => ({
     toolbar: {
       activeTab: props.activeTab,
       searchedAntibodies,
       filterModel
     },
-    noRowsOverlay: {
+    noRows: {
       activeSearch: activeSearch,
     },
     panel: {
@@ -595,25 +687,30 @@ const AntibodiesTable = (props) => {
         "& .MuiTypography-body1": {
           fontSize: "0.875rem",
           color: "grey.500",
-        },
+        }
       },
     },
     columnMenu: {
-      sx: {
-        "& .MuiMenuItem-root": {
-          fontSize: "0.875rem",
-          color: "grey.500",
-        },
-      },
+      style: {
+        fontSize: "0.875rem",
+        color: "grey.500",
+      }
     },
-  };
+    basePopper: {
+      sx: {
+        "& .MuiListItemText-root .MuiListItemText-primary": {
+          display: "flex"
+        }
+      }
+    }
+  }), [props.activeTab, searchedAntibodies, filterModel, activeSearch]);
 
   const [showColumns, setShowColumns] = useState<GridColumnVisibilityModel>(getColumnsToDisplay(columns));
 
   const NoRowsOverlay = () =>
     typeof activeSearch === "string" &&
-    activeSearch !== "" &&
-    searchedAntibodies.length === 0 ? (
+      activeSearch !== "" &&
+      searchedAntibodies.length === 0 ? (
         <NotFoundMessage activeSearch={activeSearch} />
       ) : typeof activeSearch !== "string" ? (
         <Error500 />
@@ -621,13 +718,13 @@ const AntibodiesTable = (props) => {
         <GridNoRowsOverlay />
       );
 
-  const SortIcon = ({ ...other }) => <SortingIcon {...other} />;
+  
   const currentPath = window.location.pathname;
   return (
     <Box>
-      
+
       <Box sx={{ flexGrow: 1, height: "83.5vh" }}>
-        
+
         {currentPath === "/submissions" && !user ? (
           <ConnectAccount />
         ) : (
@@ -638,39 +735,42 @@ const AntibodiesTable = (props) => {
             rows={searchedAntibodies ?? []}
             getRowId={getRowId}
             columns={columns}
-            pageSize={PAGE_SIZE}
-            rowsPerPageOptions={[20]}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            pageSizeOptions={[20]}
             pagination={true}
             paginationMode="server"
+            rowCount={totalElements}
             sortingMode="server"
-            onSortModelChange={(model) => addSortingColumn(model)}
+            sortModel={sortModel}
+            onSortModelChange={addSortingColumn}
             checkboxSelection
-            disableSelectionOnClick
+            disableRowSelectionOnClick
             columnVisibilityModel={showColumns || {}}
-            onColumnVisibilityModelChange={(model) => setShowColumns(model)}
+            onColumnVisibilityModelChange={setShowColumns}
             getRowHeight={() => "auto"}
             loading={!searchedAntibodies || loader}
-            onFilterModelChange={(model) => addNewFilterColumn(model)}
+            onFilterModelChange={addNewFilterColumn}
             filterMode="server"
-            components={{
-              BaseCheckbox: StyledCheckBox,
-              ColumnFilteredIcon: FilteredColumnIcon,
-              ColumnUnsortedIcon: SortIcon,
-              ColumnSortedAscendingIcon: AscSortedIcon,
-              ColumnSortedDescendingIcon: DescSortedIcon,
-              Toolbar: CustomToolbar,
-              ColumnMenuIcon: MoreVertIcon,
-              ColumnSelectorIcon: SettingsIcon,
-              NoRowsOverlay: NoRowsOverlay,
-              Footer: TablePaginatedFooter,
-              FilterPanel: () => CustomFilterPanel({
+            slots={{
+              baseCheckbox: StyledCheckBox,
+              columnFilteredIcon: FilteredColumnIcon,
+              columnUnsortedIcon: SortIcon,
+              columnSortedAscendingIcon: AscSortedIcon,
+              columnSortedDescendingIcon: DescSortedIcon,
+              toolbar: CustomToolbar,
+              columnMenuIcon: MoreVertIcon,
+              columnSelectorIcon: SettingsIcon,
+              noRowsOverlay: NoRowsOverlay,
+              footer: TablePaginatedFooter,
+              filterPanel: () => CustomFilterPanel({
                 columns,
                 filterModel,
-                applyFilters,
+                applyFilterAndSortModels,
                 setFilterModel,
               }),
             }}
-            componentsProps={compProps}
+            slotProps={compProps}
             localeText={{
               toolbarColumns: "Table settings",
             }}

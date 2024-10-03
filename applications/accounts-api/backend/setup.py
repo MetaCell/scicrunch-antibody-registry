@@ -37,4 +37,3 @@ setup(
     accounts_api
     """
 )
-

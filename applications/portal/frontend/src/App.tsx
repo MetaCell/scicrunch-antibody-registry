@@ -35,7 +35,7 @@ function SearchRedirect() {
       }
     } else {
       return <>
-        <Navbar />
+        <Navbar activeTab={ALLRESULTS} />
         <Home activeTab={ALLRESULTS} />
       </>
     }
@@ -76,7 +76,7 @@ const App = () => {
           <SearchState>
             <Switch>
               <Route exact path="/">
-                <Navbar />
+                <Navbar activeTab={ALLRESULTS} />
                 <Home activeTab={ALLRESULTS} />
                 <Footer/>
               </Route>
@@ -130,7 +130,7 @@ const App = () => {
                 <Footer/>
               </Route>
               <Route path="/submissions">
-                <Navbar />
+                <Navbar activeTab={MYSUBMISSIONS} />
                 <Home activeTab={MYSUBMISSIONS} />
                 <Footer/>
               </Route>

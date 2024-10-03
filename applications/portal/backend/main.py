@@ -53,7 +53,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from cloudharness.middleware import get_authentication_token, set_authentication_token
+from cloudharness.middleware import get_authentication_token, set_authentication_token # noqa: E402
 
 
 @app.middleware("http")
@@ -75,8 +75,8 @@ if os.environ.get('KUBERNETES_SERVICE_HOST', None):
     import threading
     import time
 
-    from cloudharness import log
-    from cloudharness_django.services import get_auth_service, init_services
+    from cloudharness import log # noqa: E402
+    from cloudharness_django.services import get_auth_service, init_services # noqa: E402
 
     def start_auth_service():
         try:
@@ -318,6 +318,6 @@ app.mount("/", get_asgi_application())
 #    import uvicorn
 #    uvicorn.run(app, host="0.0.0.0", port=8000)
 
-from api.helpers import init_sentry
+from api.helpers import init_sentry # noqa: E402
 
 init_sentry()

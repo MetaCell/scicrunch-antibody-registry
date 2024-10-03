@@ -15,9 +15,9 @@ import FooterLinks from "./FooterLinks";
 const Footer = () => {
 
   return (
-    <Box
-      width={1}
+    (<Box
       sx={{
+        width: 1,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -25,9 +25,10 @@ const Footer = () => {
         borderTop: '1px solid #EAECF0',
         background: '#fff',
         marginTop: 'auto'
-      }}
-    >
-      <Stack direction="row" spacing={2} alignItems="center">
+      }}>
+      <Stack direction="row" spacing={2} sx={{
+        alignItems: "center"
+      }}>
         <Link className="logo" href="/">
           <img src={"/assets/footer-logo.svg"} title="Antibody Registry" alt="Antibody Registry Logo" />
         </Link>
@@ -45,10 +46,12 @@ const Footer = () => {
           </Link>
         </Typography>
       </Stack>
-      <Stack direction="row" alignItems="center" spacing={3}>
+      <Stack direction="row" spacing={3} sx={{
+        alignItems: "center"
+      }}>
         <FooterLinks />
       </Stack>
-    </Box>
+    </Box>)
   );
 };
 

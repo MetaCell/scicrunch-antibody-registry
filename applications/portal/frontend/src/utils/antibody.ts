@@ -1,4 +1,4 @@
-import { GridFilterModel, GridColumnVisibilityModel } from "@mui/x-data-grid";
+import { GridColumnVisibilityModel } from "@mui/x-data-grid";
 import { Antibody, SearchCriteriaOptions } from "../rest";
 import { modelType } from "../constants/constants";
 import * as yup from "yup";
@@ -95,10 +95,19 @@ export function mapColumnToBackendModel(columnItems, modeltype) {
 
 export const getColumnsToDisplay = (columns) => {
   let showcolList: GridColumnVisibilityModel = {};
-  columns.filter((column) => column?.hide === true).map((column) => {
+  columns.filter((column) => column?.hideable === true).map((column) => {
     showcolList[column.field] = false;
   });
   return showcolList;
 }
 
 export const validateCatalogNumber = yup.string().matches(/^[^#]+$/, 'The # character is not allowed in the catalog number').required('Catalog number is required')
+
+export const isFilterAndSortModelEmpty = (filtermodel, sortmodel) => {
+  return filtermodel.items.length === 0 && sortmodel.length === 0
+}
+
+export const checkIfRequestBodyIsSame = (newRequestBody, prevRequestBody) => {
+  if (prevRequestBody === null) { return false }
+  return JSON.stringify(newRequestBody) === JSON.stringify(prevRequestBody)
+}

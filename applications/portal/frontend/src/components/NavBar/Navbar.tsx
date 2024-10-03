@@ -7,9 +7,9 @@ import {
   Divider,
   Stack,
   Toolbar,
-  Link,
-  Grid,
+  Link
 } from "@mui/material";
+import Grid from "@mui/material/Grid2"
 import Searchbar from "./Searchbar";
 import NavLinks from "./NavLinks";
 import HelpMenu from "./HelpMenu";
@@ -17,7 +17,7 @@ import { UserContext, User } from "../../services/UserService";
 import UserAccountMenu from "./UserAccountMenu";
 
 
-const Navbar = () => {
+const Navbar = (props) => {
   const user: User = React.useContext(UserContext)[0];
   const login = () => {
     window.location.href = "/login";
@@ -33,8 +33,8 @@ const Navbar = () => {
             }}
             disableGutters
           >
-            <Grid container>
-              <Grid item md={4}>
+            <Grid container width={1}>
+              <Grid size={{ md: 4 }}>
                 <Box
                   sx={{
                     display: "flex",
@@ -60,10 +60,10 @@ const Navbar = () => {
                   </Stack>
                 </Box>
               </Grid>
-              <Grid item md={4}>
-                <Searchbar />
+              <Grid size={{ md: 4 }}>
+                <Searchbar {...props} />
               </Grid>
-              <Grid item md={4}>
+              <Grid size={{ md: 4 }}>
                 <Box
                   sx={{
                     display: "flex",
@@ -90,5 +90,4 @@ const Navbar = () => {
     </Box>
   );
 };
-
 export default Navbar;
