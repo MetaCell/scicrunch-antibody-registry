@@ -17,7 +17,8 @@ VERSION = "1.0.0"
 REQUIRES = [
     "django-import-export>=3.0.1",
     "sentry-sdk[django]",
-    "django-simple-history"
+    "django-simple-history",
+    "pandas"
 ]
 
 setup(
