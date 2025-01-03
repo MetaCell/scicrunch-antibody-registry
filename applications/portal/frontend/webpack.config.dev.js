@@ -48,7 +48,14 @@ module.exports = env => {
         cookieDomainRewrite: {  "localhost": "areg" },
         withCredentials: true,
         pathRewrite: { '^/proxy/accounts-api': '' }
-      }
+      },
+      '/media/': {
+        target: replaceHost(proxyTarget, 'portal'),
+        secure: false,
+        changeOrigin: true,
+        cookieDomainRewrite: { "localhost": "areg" },
+        withCredentials: true,
+      },
     },
   };
 
