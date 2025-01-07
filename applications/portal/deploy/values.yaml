@@ -16,6 +16,12 @@ harness:
       limits:
         cpu: 4
         memory: 2Gi
+    volume:
+      name: areg-persistent-files
+      mountpath: /usr/src/app/persistent
+      auto: true
+      size: 5Gi
+      usenfs: false
   livenessProbe:
     path: /api/live
   readinessProbe:
