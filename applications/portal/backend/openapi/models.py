@@ -301,3 +301,10 @@ class PaginatedAntibodies(BaseModel):
     page: float = Field(..., description='')
     totalElements: int = Field(..., description='')
     items: List[Antibody] = Field(..., description='')
+
+
+class PartnerResponseObject(BaseModel):
+    name: Optional[str] = None
+    url: Optional[str] = None
+    image: Optional[str] = None
+

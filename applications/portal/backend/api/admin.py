@@ -25,7 +25,8 @@ from api.models import (
     Vendor,
     Specie,
     VendorDomain,
-    VendorSynonym, AntibodyFiles, CommercialType
+    VendorSynonym, AntibodyFiles, CommercialType,
+    Partner,
 )
 from api.import_export import AntibodyResource
 from api.services.keycloak_service import KeycloakService
@@ -442,3 +443,8 @@ class VendorAdmin(SimpleHistoryAdmin):
                 self._force_delete(src_vendor)
                 return super().get_deleted_objects(objs, request)
         return super().get_deleted_objects(objs, request)
+
+
+@admin.register(Partner)
+class PartnerAdmin(admin.ModelAdmin):
+    pass

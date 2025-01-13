@@ -403,6 +403,27 @@ paths:
                 -
                     bearerAuth: []
                     cookieAuth: []
+    /partners:
+        description: get the list of partners and related images
+        get:
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/PartnerResponseObject'
+                            examples:
+                                Partner Response:
+                                    value:
+                                        -
+                                            name: Partner 1
+                                            url: www.partner.com
+                                            image: 'https:areg.com/media/partner/image.jpg'
+                    description: ''
+            operationId: getPartners
+            summary: get the list of partners and related images
 components:
     schemas:
         KeyValuePair:
@@ -833,6 +854,21 @@ components:
                     $ref: '#/components/schemas/AbstractAntibody'
                 -
                     $ref: '#/components/schemas/AntibodyCoreId'
+        PartnerResponseObject:
+            title: Root Type for PartnerResponse
+            description: Response of the list of partners and related images
+            type: object
+            properties:
+                name:
+                    type: string
+                url:
+                    type: string
+                image:
+                    type: string
+            example:
+                name: Partner 1
+                url: www.partner.com
+                image: 'https:areg.com/media/partner/image.jpg'
     responses:
         PaginatedAntibodies:
             content:

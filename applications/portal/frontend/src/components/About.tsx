@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import { Box, Button, Container, Divider, Link, Typography } from '@mui/material';
 import Grid from "@mui/material/Grid2"
 import Slider from "react-slick";
 import { vars } from "../theme/variables";
 import { useHistory } from 'react-router-dom';
+import { getPartners } from '../services/InfoService';
+import { PartnerResponseObject } from '../rest';
 
 const { footerBg, whiteColor, sepratorColor, primaryColor, contentBg, contentBorderColor, primaryTextColor, bannerHeadingColor } = vars;
 
@@ -157,56 +159,15 @@ const About = () => {
     slidesToShow: 3,
     cssEase: "linear"
   };
-  const partners = [
-    { name: 'thermofisher', url: 'https://www.thermofisher.com/' },
-    { name: 'proteintech', url: 'https://www.ptglab.com/' },
-    { name: 'biocell', url: 'https://bxcell.com/' },
-    { name: 'chromotek', url: 'http://www.chromotek.com/home-of-alpaca-antibodies/' },
-    { name: 'jesselllab', url: 'https://jesselllab.com/' },
-    { name: 'encorbio', url: 'https://encorbio.com/' },
-    { name: 'biolegend', url: 'https://www.biolegend.com/' },
-    { name: 'leinco', url: 'https://www.leinco.com/' },
-    { name: 'jacksonimmuno', url: 'https://www.jacksonimmuno.com/' },
-    { name: 'dshb', url: 'http://dshb.biology.uiowa.edu/' },
-    { name: 'immunostar', url: 'http://immunostar.com/' },
-    { name: 'neuromab', url: 'http://neuromab.ucdavis.edu/' },
-    { name: 'sysy', url: 'https://www.sysy.com/' },
-    { name: 'atlasantibodies', url: 'https://atlasantibodies.com/' },
-    { name: 'frontier', url: 'https://www.frontier-institute.com/wp/antibodies/?lang=en' },
-    { name: 'aeonianbiotech', url: 'https://aeonianbiotech.com/' },
-    { name: 'bdbiosciences', url: 'http://www.bdbiosciences.com/us/home' },
-    { name: 'miltenyibiotec', url: 'https://www.miltenyibiotec.com/US-en/' },
-    { name: 'revmab', url: 'https://www.revmab.com/' },
-    { name: 'southernbiotech', url: 'https://www.southernbiotech.com/' },
-    { name: 'wagner', url: 'http://gwagner.med.harvard.edu/' },
-    { name: 'zebrafish', url: 'https://zebrafish.org/home/guide.php' },
-    { name: 'genetex', url: 'https://www.genetex.com/' },
-    { name: 'licor', url: 'https://www.licor.com/bio', img: './assets/partners/LICORbio.png' },
-    { name: 'hytest', url: 'https://www.hytest.fi/home' },
-    { name: 'Ansh Labs', url: 'https://www.anshlabs.com/', img: './assets/partners/anshlabs.png' },
-    { name: 'Oasis Biofarm', url: 'https://www.oasisbiofarm.net', img: './assets/partners/oasis.png' },
-    { name: 'Nittobo Medical', url: 'https://www.nittobo.co.jp/', img: './assets/partners/Nittobo.png' },
-    { name: 'SICGEN', url: 'https://sicgen.pt/', img: './assets/partners/Sicgen_antibodies.png' },
-    { name: 'Sino Biological', url: 'https://www.sinobiological.com/', img: './assets/partners/Sino-Biological.png' },
-    { name: 'Niels Danbolt University of Oslo', url: 'https://www.uio.no/', img: './assets/partners/University_of_Oslo.png' },
-    { name: 'NIH', url: 'https://www.nhpreagents.org/', img: './assets/partners/NIH.png' },
-    { name: 'ichorbio', url: 'https://ichor.bio/', img: './assets/partners/ichorbio.png' },
-    { name: 'Antibodies Incorporated', url: 'https://www.antibodiesinc.com/', img: './assets/partners/antibodies_incorporated.jpg' },
-    { name: 'HUABIO', url: 'https://www.huabio.com/', img: './assets/partners/HUABIO.png' },
-    { name: 'NanoTag', url: 'https://nano-tag.com/', img: './assets/partners/NanoTag.jpg' },
-    { name: 'Institute for Protein Innovation', url: 'https://proteininnovation.org/', img: './assets/partners/Institute_for_Protein_Innovation.png' },
-    { name: 'Fujirebio', url: 'https://www.fujirebio.com/en', img: './assets/partners/Fujirebio.jpeg' },
-    { name: 'Boster Biological Technology', url: 'https://www.bosterbio.com/', img: './assets/partners/Boster_Biological-logo.png' },
-    { name: 'Fujifilm Wako USA', url: 'https://wakousa.com/', img: './assets/partners/fujifilm-wako-chemicals-usa-corporation-logo-vector.png' },
-    { name: 'Active Motif', url: 'https://www.activemotif.com/', img: './assets/partners/Active-Motif.jpg' },
-    { name: 'Life Canvas Technologies', url: 'https://lifecanvastech.com/', img: './assets/partners/LifeCanvas.jpeg' },
-    { name: 'AdipoGen Life Sciences', url: 'https://adipogen.com/', img: './assets/partners/AdipoGen_Logo_LIFE_SCIENCES_CMYK_2015_NEW_13cm_lowres.jpg' },
-    { name: 'Creative Biolabs', url: 'https://www.creativebiolabs.net/?utm_source=antibodyregistry&utm_medium=logo&utm_campaign=Creative+Biolabs-Recombinant+Antibody', img: './assets/partners/biolabs.png' },
-    { name: 'Bio-techne', url: 'https://www.bio-techne.com/', img: './assets/partners/bio-techne.png'},
-    { name: 'Bio-Rad', url: 'https://www.bio-rad.com/', img: './assets/partners/bio-rad.jpg'}
-  ]
+  const [partners, setPartners] = React.useState<PartnerResponseObject[]>([]);
   const history = useHistory();
   const navigate = () => history.push('/');
+
+  useEffect(() => {
+    getPartners().then((data) => {
+      setPartners(data);
+    });
+  }, []);
   return (<>
     <Box sx={styles.banner} className="about-banner">
       <Container maxWidth="xl">
@@ -244,7 +205,7 @@ const About = () => {
                     width: '150px',
                   }}>
                     <Box
-                      component="img" src={partner.img || `./assets/partners/${partner.name}.svg`}
+                      component="img" src={partner.image}
                       alt={partner.name}
                       title={partner.name}
                       sx={{ filter: "grayscale(1)", width: '100%', '&:hover': { opacity: 0.9 } }} />
