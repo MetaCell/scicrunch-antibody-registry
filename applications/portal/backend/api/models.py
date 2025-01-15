@@ -637,3 +637,16 @@ class AntibodySearch(models.Model):
                 name='antibody_search_fts_idx'),
 
         ]
+
+
+class Partner(models.Model):
+    name = models.CharField(max_length=VENDOR_MAX_LEN, db_index=True)
+    url = models.URLField(max_length=URL_MAX_LEN, db_index=True)
+    image = models.ImageField(upload_to='partners', null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ('name',)
+        verbose_name_plural = "Partners"

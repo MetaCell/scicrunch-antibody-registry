@@ -981,6 +981,31 @@ export interface PaginatedAntibodies {
     'items': Array<Antibody>;
 }
 /**
+ * Response of the list of partners and related images
+ * @export
+ * @interface PartnerResponseObject
+ */
+export interface PartnerResponseObject {
+    /**
+     * 
+     * @type {string}
+     * @memberof PartnerResponseObject
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PartnerResponseObject
+     */
+    'url'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PartnerResponseObject
+     */
+    'image'?: string;
+}
+/**
  * 
  * @export
  * @enum {string}
@@ -1829,6 +1854,36 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @summary get the list of partners and related images
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPartners: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/partners`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -1846,6 +1901,16 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          */
         async datainfoGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DataInfo>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.datainfoGet(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary get the list of partners and related images
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getPartners(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PartnerResponseObject>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getPartners(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -1866,6 +1931,15 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
         datainfoGet(options?: any): AxiosPromise<DataInfo> {
             return localVarFp.datainfoGet(options).then((request) => request(axios, basePath));
         },
+        /**
+         * 
+         * @summary get the list of partners and related images
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPartners(options?: any): AxiosPromise<Array<PartnerResponseObject>> {
+            return localVarFp.getPartners(options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -1884,6 +1958,17 @@ export class DefaultApi extends BaseAPI {
      */
     public datainfoGet(options?: AxiosRequestConfig) {
         return DefaultApiFp(this.configuration).datainfoGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary get the list of partners and related images
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public getPartners(options?: AxiosRequestConfig) {
+        return DefaultApiFp(this.configuration).getPartners(options).then((request) => request(this.axios, this.basePath));
     }
 }
 

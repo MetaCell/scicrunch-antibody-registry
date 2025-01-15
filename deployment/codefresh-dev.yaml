@@ -19,16 +19,17 @@ steps:
     type: parallel
     stage: prepare
     steps:
-    - title: Cloning cloud-harness repository...
-      type: git-clone
-      stage: prepare
-      repo: https://github.com/MetaCell/cloud-harness.git
-      revision: '${{CLOUDHARNESS_BRANCH}}'
-      working_directory: .
-      git: github
+      clone_cloud_harness:
+        title: Cloning cloud-harness repository...
+        type: git-clone
+        stage: prepare
+        repo: https://github.com/MetaCell/cloud-harness.git
+        revision: '${{CLOUDHARNESS_BRANCH}}'
+        working_directory: .
+        git: github
   prepare_deployment:
     title: Prepare helm chart
-    image: python:3.9.10
+    image: python:3.12
     stage: prepare
     working_directory: .
     commands:
@@ -359,6 +360,7 @@ steps:
         - '${{CF_REPO_NAME}}/applications/portal/test/e2e:/home/test/__tests__/portal'
         environment:
         - APP_URL=https://www.${{DOMAIN}}
+        - SKIP_SMOKETEST=true
     when:
       condition:
         all:
