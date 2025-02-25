@@ -403,6 +403,13 @@ paths:
                 -
                     bearerAuth: []
                     cookieAuth: []
+        parameters:
+            -
+                name: status
+                description: Requests for Antibodies for a specific status - by default it returns All Antibodies
+                schema:
+                    $ref: '#/components/schemas/AntibodyStatusEnum'
+                in: query
     /partners:
         description: get the list of partners and related images
         get:
@@ -793,13 +800,8 @@ components:
                                 different if antibody records have been consolidated or are not unique.
                             type: string
                         status:
+                            $ref: '#/components/schemas/AntibodyStatusEnum'
                             description: 'Can include: curated, rejected, queue, under_review'
-                            enum:
-                                - CURATED
-                                - REJECTED
-                                - QUEUE
-                                - UNDER_REVIEW
-                            type: string
                         feedback:
                             description: Feedback to the submitted stored here
                             type: string
@@ -869,6 +871,13 @@ components:
                 name: Partner 1
                 url: www.partner.com
                 image: 'https:areg.com/media/partner/image.jpg'
+        AntibodyStatusEnum:
+            enum:
+                - CURATED
+                - REJECTED
+                - QUEUE
+                - UNDER_REVIEW
+            type: string
     responses:
         PaginatedAntibodies:
             content:
