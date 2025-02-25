@@ -369,8 +369,8 @@ export interface Antibody {
      */
     'accession'?: string;
     /**
-     * Can include: curated, rejected, queue, under_review
-     * @type {string}
+     * 
+     * @type {AntibodyStatusEnum}
      * @memberof Antibody
      */
     'status'?: AntibodyStatusEnum;
@@ -592,14 +592,6 @@ export interface Antibody {
     'vendorName'?: string;
 }
 
-export const AntibodyStatusEnum = {
-    Curated: 'CURATED',
-    Rejected: 'REJECTED',
-    Queue: 'QUEUE',
-    UnderReview: 'UNDER_REVIEW'
-} as const;
-
-export type AntibodyStatusEnum = typeof AntibodyStatusEnum[keyof typeof AntibodyStatusEnum];
 export const AntibodyClonalityEnum = {
     Unknown: 'unknown',
     Cocktail: 'cocktail',
@@ -640,11 +632,11 @@ export interface AntibodyAllOf {
      */
     'accession'?: string;
     /**
-     * Can include: curated, rejected, queue, under_review
-     * @type {string}
+     * 
+     * @type {AntibodyStatusEnum}
      * @memberof AntibodyAllOf
      */
-    'status'?: AntibodyAllOfStatusEnum;
+    'status'?: AntibodyStatusEnum;
     /**
      * Feedback to the submitted stored here
      * @type {string}
@@ -730,16 +722,6 @@ export interface AntibodyAllOf {
      */
     'vendorUrl'?: Array<string>;
 }
-
-export const AntibodyAllOfStatusEnum = {
-    Curated: 'CURATED',
-    Rejected: 'REJECTED',
-    Queue: 'QUEUE',
-    UnderReview: 'UNDER_REVIEW'
-} as const;
-
-export type AntibodyAllOfStatusEnum = typeof AntibodyAllOfStatusEnum[keyof typeof AntibodyAllOfStatusEnum];
-
 /**
  * Related attributes used to uniquely identify antibodies
  * @export
@@ -759,6 +741,22 @@ export interface AntibodyCoreId {
      */
     'vendorName'?: string;
 }
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const AntibodyStatusEnum = {
+    Curated: 'CURATED',
+    Rejected: 'REJECTED',
+    Queue: 'QUEUE',
+    UnderReview: 'UNDER_REVIEW'
+} as const;
+
+export type AntibodyStatusEnum = typeof AntibodyStatusEnum[keyof typeof AntibodyStatusEnum];
+
+
 /**
  * Information about the data in the system
  * @export
@@ -1194,10 +1192,11 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
     return {
         /**
          * 
+         * @param {AntibodyStatusEnum} [status] Requests for Antibodies for a specific status - by default it returns All Antibodies
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        antibodiesExportAdminGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        antibodiesExportAdminGet: async (status?: AntibodyStatusEnum, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/antibodies/export/admin`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1215,6 +1214,10 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
             // authentication cookieAuth required
+
+            if (status !== undefined) {
+                localVarQueryParameter['status'] = status;
+            }
 
 
     
@@ -1529,11 +1532,12 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
+         * @param {AntibodyStatusEnum} [status] Requests for Antibodies for a specific status - by default it returns All Antibodies
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async antibodiesExportAdminGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.antibodiesExportAdminGet(options);
+        async antibodiesExportAdminGet(status?: AntibodyStatusEnum, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.antibodiesExportAdminGet(status, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1629,11 +1633,12 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
     return {
         /**
          * 
+         * @param {AntibodyStatusEnum} [status] Requests for Antibodies for a specific status - by default it returns All Antibodies
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        antibodiesExportAdminGet(options?: any): AxiosPromise<void> {
-            return localVarFp.antibodiesExportAdminGet(options).then((request) => request(axios, basePath));
+        antibodiesExportAdminGet(status?: AntibodyStatusEnum, options?: any): AxiosPromise<void> {
+            return localVarFp.antibodiesExportAdminGet(status, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1721,12 +1726,13 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
 export class AntibodyApi extends BaseAPI {
     /**
      * 
+     * @param {AntibodyStatusEnum} [status] Requests for Antibodies for a specific status - by default it returns All Antibodies
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AntibodyApi
      */
-    public antibodiesExportAdminGet(options?: AxiosRequestConfig) {
-        return AntibodyApiFp(this.configuration).antibodiesExportAdminGet(options).then((request) => request(this.axios, this.basePath));
+    public antibodiesExportAdminGet(status?: AntibodyStatusEnum, options?: AxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).antibodiesExportAdminGet(status, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
