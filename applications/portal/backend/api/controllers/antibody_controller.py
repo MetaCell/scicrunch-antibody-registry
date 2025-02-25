@@ -106,7 +106,7 @@ def get_antibodies_export():
     # return FileResponse(fname, filename="antibodies_export.csv")
 
 
-def get_antibodies_export_admin():
+def get_antibodies_export_admin(status: str = None):
     """
     Export all fields of all antibodies to a CSV file - Only for admin users
     """
@@ -114,9 +114,13 @@ def get_antibodies_export_admin():
         is_admin = check_if_user_is_admin()
     except Exception as e:
         raise HTTPException(status_code=401, detail="Unauthorized: Only admin users can access this endpoint")
+    
+    if status is not None and status.value not in STATUS.values:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    
     from api.services.export_service import generate_all_antibodies_fields_to_csv
     fname = "static/www/antibodies_admin_export.csv"
 
     if filesystem_service.check_if_file_exists_and_recent(fname) and is_admin:
-        generate_all_antibodies_fields_to_csv(fname)
+        generate_all_antibodies_fields_to_csv(fname, status.value)
     return RedirectResponse("/" + fname)

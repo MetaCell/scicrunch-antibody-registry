@@ -26,10 +26,14 @@ def generate_antibodies_csv_file(fname, status="CURATED"):
         raise Exception("Error during csv export: %s", proc.stdout)
 
 
-def generate_all_antibodies_fields_to_csv(fname, status="CURATED"):
+def generate_all_antibodies_fields_to_csv(fname, status:str=''):
     app = get_current_configuration()
     my_env = os.environ
     os.environ["PGPASSWORD"] = app.harness.database['pass']
+    # construct the query based on the status
+    query = app['export_all_fields_query']
+    if status:
+        query += f" AND status='{status}'"
     # execute shell command
     proc = subprocess.run([
         "psql", "-h",
@@ -37,7 +41,7 @@ def generate_all_antibodies_fields_to_csv(fname, status="CURATED"):
         "-U", app.harness.database.user,
         "-d", app.harness.database.postgres['initialdb'],
         "-c",
-        f"\\copy ({app['export_all_fields_query']} AND status='{status}') TO '{fname}' DELIMITER ',' CSV HEADER"],
+        f"\\copy ({query}) TO '{fname}' DELIMITER ',' CSV HEADER"],
         env=my_env,
         stderr=subprocess.STDOUT,
         text=True
