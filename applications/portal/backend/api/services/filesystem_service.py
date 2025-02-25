@@ -15,5 +15,6 @@ def replace_file(previous_path, new_path, max_tries=MAX_TRIES):
     os.rename(new_path, previous_path)
 
 
-def check_if_file_exists_and_recent(fname):
+def check_if_file_does_not_exist_and_recent(fname):
+    """not (exist and recent) => not exist or not recent""" 
     return not os.path.exists(fname) or (datetime.now() - datetime.fromtimestamp(os.path.getmtime(fname))).days > 1

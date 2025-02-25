@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Union
+from typing import List, Union, Optional
 import os
 
 from cloudharness import log
@@ -16,7 +16,7 @@ from api.utilities.exceptions import AntibodyDataException
 from openapi.models import AddAntibody as AddAntibodyDTO, PaginatedAntibodies
 from openapi.models import UpdateAntibody as UpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO
-
+from openapi.models import AntibodyStatusEnum
 
 def get_antibodies(page: int, size: int, updated_from: datetime, updated_to: datetime, status=str) -> PaginatedAntibodies:
     if page is None:
@@ -100,27 +100,31 @@ def get_antibodies_export():
 
     # check if file exists and it is created within 24 hours
     # if not, generate a new file
-    if filesystem_service.check_if_file_exists_and_recent(fname):
+    if filesystem_service.check_if_file_does_not_exist_and_recent(fname):
         generate_antibodies_csv_file(fname)
     return RedirectResponse("/" + fname)
     # return FileResponse(fname, filename="antibodies_export.csv")
 
 
-def get_antibodies_export_admin(status: str = None):
+def get_antibodies_export_admin(status: Optional[AntibodyStatusEnum] = None):
     """
     Export all fields of all antibodies to a CSV file - Only for admin users
     """
+    exception_msg = "Unauthorized: Only admin users can access this endpoint"
     try:
         is_admin = check_if_user_is_admin()
+        if not is_admin:
+            raise Exception(exception_msg)
     except Exception as e:
-        raise HTTPException(status_code=401, detail="Unauthorized: Only admin users can access this endpoint")
+        raise HTTPException(status_code=401, detail=exception_msg)
     
-    if status is not None and status.value not in STATUS.values:
+    if status and status.value not in STATUS.values:
         raise HTTPException(status_code=400, detail="Invalid status")
     
     from api.services.export_service import generate_all_antibodies_fields_to_csv
-    fname = "static/www/antibodies_admin_export.csv"
+    fname = f"static/www/antibodies_admin_export_{status.value}.csv" if status is not None \
+        else "static/www/antibodies_admin_export.csv"
 
-    if filesystem_service.check_if_file_exists_and_recent(fname) and is_admin:
-        generate_all_antibodies_fields_to_csv(fname, status.value)
+    if filesystem_service.check_if_file_does_not_exist_and_recent(fname):
+        generate_all_antibodies_fields_to_csv(fname, status.value if status else '')    
     return RedirectResponse("/" + fname)
