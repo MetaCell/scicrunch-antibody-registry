@@ -121,10 +121,10 @@ def get_antibodies_export_admin(status: Optional[AntibodyStatusEnum] = None):
     if status and status.value not in STATUS.values:
         raise HTTPException(status_code=400, detail="Invalid status")
     
-    from api.services.export_service import generate_all_antibodies_fields_to_csv
+    from api.services.export_service import generate_antibodies_fields_by_status_to_csv
     fname = f"static/www/antibodies_admin_export_{status.value}.csv" if status is not None \
         else "static/www/antibodies_admin_export.csv"
 
     if filesystem_service.check_if_file_does_not_exist_and_recent(fname):
-        generate_all_antibodies_fields_to_csv(fname, status.value if status else '')    
+        generate_antibodies_fields_by_status_to_csv(fname, status.value if status else '')    
     return RedirectResponse("/" + fname)

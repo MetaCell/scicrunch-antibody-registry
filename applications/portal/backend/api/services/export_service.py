@@ -26,7 +26,7 @@ def generate_antibodies_csv_file(fname, status="CURATED"):
         raise Exception("Error during csv export: %s", proc.stdout)
 
 
-def generate_all_antibodies_fields_to_csv(fname, status:str=''):
+def generate_antibodies_fields_by_status_to_csv(fname, status:str=''):
     app = get_current_configuration()
     my_env = os.environ
     os.environ["PGPASSWORD"] = app.harness.database['pass']
