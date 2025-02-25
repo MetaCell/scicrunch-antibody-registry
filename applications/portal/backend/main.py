@@ -55,10 +55,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from cloudharness.middleware import (
-    get_authentication_token,  # noqa E402
-    set_authentication_token,
-)
+from cloudharness.middleware import get_authentication_token, set_authentication_token # noqa E402
 
 
 @app.middleware("http")
@@ -81,16 +78,13 @@ if os.environ.get('KUBERNETES_SERVICE_HOST', None):
     import time
 
     from cloudharness import log  # noqa E402
-    from cloudharness_django.services import (
-        get_auth_service,  # noqa E402
-        init_services,
-    )
+    from cloudharness_django.services import get_auth_service, init_services  # noqa E402
 
     def start_auth_service():
         try:
             init_services()
         except:
-            log.exception("Error initializing services. Retrying in 5 seconds...")
+            log.warning("Error initializing services. Retrying in 5 seconds...")
             time.sleep(5)
             start_auth_service()
 
@@ -103,7 +97,7 @@ if os.environ.get('KUBERNETES_SERVICE_HOST', None):
 
             log.info("User sync events listener started")
         except:
-            log.exception("Error initializing event queue. Retrying in 5 seconds...")
+            log.warning("Error initializing event queue. Retrying in 5 seconds...")
             time.sleep(5)
             start_event_listener()
 
@@ -122,6 +116,11 @@ async def has_access():
     if not os.environ.get('KUBERNETES_SERVICE_HOST', None):
         return {}
     token = get_authentication_token()
+
+    if not token:
+        raise HTTPException(
+            status_code=401,
+        )
 
     try:
         payload = decode_token(token)
@@ -168,7 +167,7 @@ def create_antibody(body: AddAntibody) -> None:
     )
 
 
-@prefix_router.get('/antibodies/export', response_model=None, tags=['antibody'])
+@prefix_router.get('/antibodies/export', response_model=None, tags=['antibody'], dependencies=PROTECTED)
 def get_antibodies_export() -> None:
     return antibody_controller.get_antibodies_export()
 

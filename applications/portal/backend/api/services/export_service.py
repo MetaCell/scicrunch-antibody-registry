@@ -30,7 +30,6 @@ def generate_antibodies_fields_by_status_to_csv(fname, status:str=''):
     app = get_current_configuration()
     my_env = os.environ
     os.environ["PGPASSWORD"] = app.harness.database['pass']
-    # construct the query based on the status
     query = app['export_all_fields_query']
     if status:
         query += f" AND status='{status}'"
