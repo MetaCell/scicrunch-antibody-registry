@@ -6,5 +6,5 @@ class ApiConfig(AppConfig):
     name = 'api'
 
     def ready(self):
-        import api.signals 
+        from api.signals import clear_antibody_cache 
         return super().ready()
