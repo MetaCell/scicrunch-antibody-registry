@@ -5,7 +5,7 @@ from django.conf import settings
 from api.utilities.cache import ttl_cache
 
 
-@ttl_cache(maxsize=128, ttl=3600)
+@ttl_cache(maxsize=8, ttl=3600)
 def get_datainfo():
     return DataInfo(total=antibody_service.count(), lastupdate=antibody_service.last_update())
 

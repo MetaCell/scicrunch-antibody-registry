@@ -20,7 +20,7 @@ from openapi.models import AntibodyStatusEnum
 from api.utilities.cache import ttl_cache
 
 
-@ttl_cache(maxsize=128, ttl=3600)
+@ttl_cache(maxsize=512, ttl=3600)
 def get_antibodies(page: int, size: int, updated_from: datetime, updated_to: datetime, status=str) -> PaginatedAntibodies:
     if page is None:
         page = 1
