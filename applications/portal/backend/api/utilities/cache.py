@@ -2,7 +2,7 @@ from functools import lru_cache, update_wrapper
 from typing import Callable, Any
 from math import floor
 import time
-
+from cloudharness import log
 
 # TTL Cache Decorator
 def ttl_cache(maxsize: int = 128, typed: bool = False, ttl: int = -1):
@@ -17,7 +17,7 @@ def ttl_cache(maxsize: int = 128, typed: bool = False, ttl: int = -1):
 
         def wrapped(*args, **kwargs) -> Any:
             th = next(hash_gen)
-            print("th from ttl_cache: ", th, func)
+            log.info("TTL Cache Hash: %s", th)
             return ttl_func(th, *args, **kwargs)
 
         return update_wrapper(wrapped, func)
