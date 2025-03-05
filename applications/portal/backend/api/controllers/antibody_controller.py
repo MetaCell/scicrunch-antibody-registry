@@ -17,7 +17,10 @@ from openapi.models import AddAntibody as AddAntibodyDTO, PaginatedAntibodies
 from openapi.models import UpdateAntibody as UpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO
 from openapi.models import AntibodyStatusEnum
+from api.utilities.cache import ttl_cache
 
+
+@ttl_cache(maxsize=128, ttl=3600)
 def get_antibodies(page: int, size: int, updated_from: datetime, updated_to: datetime, status=str) -> PaginatedAntibodies:
     if page is None:
         page = 1
