@@ -2,10 +2,8 @@ from openapi.models import DataInfo, PartnerResponseObject
 from api.services import antibody_service, partner_service
 from typing import List
 from django.conf import settings
-from api.utilities.cache import ttl_cache
 
 
-@ttl_cache(maxsize=8, ttl=3600)
 def get_datainfo():
     return DataInfo(total=antibody_service.count(), lastupdate=antibody_service.last_update())
 
