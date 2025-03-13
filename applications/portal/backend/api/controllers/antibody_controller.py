@@ -18,6 +18,7 @@ from openapi.models import UpdateAntibody as UpdateAntibodyDTO
 from openapi.models import Antibody as AntibodyDTO
 from openapi.models import AntibodyStatusEnum
 
+
 def get_antibodies(page: int, size: int, updated_from: datetime, updated_to: datetime, status=str) -> PaginatedAntibodies:
     if page is None:
         page = 1

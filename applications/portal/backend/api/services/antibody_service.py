@@ -14,10 +14,11 @@ from openapi.models import UpdateAntibody as UpdateAntibodyDTO, AntibodyStatusEn
 from openapi.models import Antibody as AntibodyDTO, PaginatedAntibodies
 from api.utilities.functions import check_if_status_exists_or_curated
 from api.repositories.filtering_utils import convert_filters_to_q
+from api.utilities.cache import ttl_cache
 
 antibody_mapper = AntibodyMapper()
 
-
+@ttl_cache(maxsize=512, ttl=3600)
 def get_antibodies(page: int = 1, size: int = 10, date_from: datetime = None, date_to: datetime = None, status: str = None) -> PaginatedAntibodies:
     try:
         query = Antibody.objects.filter(status=check_if_status_exists_or_curated(status))
@@ -100,11 +101,11 @@ def update_antibody(user_id: str, antibody_accession_number: str, body: UpdateAn
 def delete_antibody(antibody_id: str) -> None:
     return Antibody.objects.delete(ab_id=antibody_id)
 
-
+@ttl_cache(maxsize=8, ttl=3600)
 def count():
     return Antibody.objects.all().filter(status=STATUS.CURATED).count()
 
-
+@ttl_cache(maxsize=8, ttl=3600)
 def last_update(last_date: datetime = None):
     # Used to improve performance -- otherwise need to sort all antibodies!
     if last_date == None:

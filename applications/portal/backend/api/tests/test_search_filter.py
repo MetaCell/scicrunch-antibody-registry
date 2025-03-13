@@ -77,8 +77,10 @@ class SearchAndFilterAntibodiesTestCase(TestCase):
             an.save()
 
         # convert them to curated
+        filter_fts_sort = COMPLETE_TEST_FILTER_AND_SEARCH_REQUEST_BODY
+        filter_fts_sort.isUserScope = False
         antibodies = fts_and_filter_antibodies(
-            1, 10, "N176A", COMPLETE_TEST_FILTER_AND_SEARCH_REQUEST_BODY
+            1, 10, "N176A", filter_fts_sort
         )
         # Check the count - antibodies[1] and items - antibodies[0]
         self.assertEqual(antibodies[1], 1)
@@ -89,6 +91,7 @@ class SearchAndFilterAntibodiesTestCase(TestCase):
         filter_fts_sort = COMPLETE_TEST_FILTER_AND_SEARCH_REQUEST_BODY
         sortpair = KeyValueSortOrderPair(key="catalog_num", value=Sortorder.asc)
         filter_fts_sort.sortOn.append(sortpair)
+        filter_fts_sort.isUserScope = False
         antibodies = fts_and_filter_antibodies(1, 10, "", filter_fts_sort)
         self.assertEqual(antibodies[1], 2)
 
