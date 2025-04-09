@@ -17,7 +17,6 @@ def ttl_cache(maxsize: int = 128, typed: bool = False, ttl: int = -1):
 
         def wrapped(*args, **kwargs) -> Any:
             th = next(hash_gen)
-            log.info("TTL Cache Hash: %s", th)
             return ttl_func(th, *args, **kwargs)
         
         wrapped.cache_info = ttl_func.cache_info

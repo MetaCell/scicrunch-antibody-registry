@@ -39,7 +39,7 @@ export function checkIfFilterSetExists(model, filterModel) {
   // BEHAVIOR: if the same filterset is already present, simply show 
   // the existing one instead of adding a new one
   let isFilterSetPresent = false;
-  filterModel.items.forEach((item, index) => {
+  filterModel.items.forEach((item) => {
     if (item.columnField === model.items[0].columnField) {
       isFilterSetPresent = true;
     }

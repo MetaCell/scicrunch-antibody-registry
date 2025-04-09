@@ -1,10 +1,10 @@
-import re
-from datetime import datetime
+
+from functools import lru_cache
 from typing import List
 
 import dateutil
 from django.core.paginator import Paginator
-
+from django.utils.timezone import now, datetime
 from api.mappers.antibody_mapper import AntibodyMapper
 from api.models import STATUS, Antibody, CommercialType
 from api.utilities.exceptions import DuplicatedAntibody, AntibodyDataException
@@ -18,7 +18,7 @@ from api.utilities.cache import ttl_cache
 
 antibody_mapper = AntibodyMapper()
 
-@ttl_cache(maxsize=512, ttl=3600)
+@lru_cache
 def get_antibodies(page: int = 1, size: int = 10, date_from: datetime = None, date_to: datetime = None, status: str = None) -> PaginatedAntibodies:
     try:
         query = Antibody.objects.filter(status=check_if_status_exists_or_curated(status))
@@ -33,7 +33,6 @@ def get_antibodies(page: int = 1, size: int = 10, date_from: datetime = None, da
     except Antibody.DoesNotExist:
         return PaginatedAntibodies(page=int(page), totalElements=0, items=[])
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
-
 
 def get_user_antibodies(userid: str, page: int = 1, size: int = 10) -> PaginatedAntibodies:
     p = Paginator(Antibody.objects.filter(
@@ -101,15 +100,15 @@ def update_antibody(user_id: str, antibody_accession_number: str, body: UpdateAn
 def delete_antibody(antibody_id: str) -> None:
     return Antibody.objects.delete(ab_id=antibody_id)
 
-@ttl_cache(maxsize=8, ttl=3600)
+@lru_cache
 def count():
     return Antibody.objects.all().filter(status=STATUS.CURATED).count()
 
-@ttl_cache(maxsize=8, ttl=3600)
+@lru_cache
 def last_update(last_date: datetime = None):
     # Used to improve performance -- otherwise need to sort all antibodies!
     if last_date == None:
-        last_date = datetime.now() - dateutil.relativedelta.relativedelta(months=6)
+        last_date = now() - dateutil.relativedelta.relativedelta(months=6)
     try:
         return Antibody.objects.filter(status=STATUS.CURATED, curate_time__gte=last_date) \
             .latest("curate_time").curate_time
@@ -117,7 +116,7 @@ def last_update(last_date: datetime = None):
         try:
             return last_update(last_date - dateutil.relativedelta.relativedelta(months=6))
         except Antibody.DoesNotExist:
-            return datetime.now()
+            return now()
 
 
 def get_curated_antibodies_ids():
