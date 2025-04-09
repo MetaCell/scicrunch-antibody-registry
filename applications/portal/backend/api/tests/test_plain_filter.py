@@ -29,26 +29,26 @@ class PlainFilterAntibodiesTestCase(TestCase):
         COMPLETE_TEST_FILTER_AND_SEARCH_REQUEST_BODY.isUserScope = True
         COMPLETE_TEST_FILTER_AND_SEARCH_REQUEST_BODY.isNotEmpty = []
 
-        antibodies = plain_filter_antibodies(1, 10, COMPLETE_TEST_FILTER_AND_SEARCH_REQUEST_BODY)
-        self.assertEqual(antibodies[0], 3)
-        self.assertEqual(antibodies[1][0].catalogNum, example_ab3["catalogNum"])  # since plain sorting by default "-ix"
-        self.assertEqual(antibodies[1][1].catalogNum, example_ab2["catalogNum"])
-        self.assertEqual(antibodies[1][0].vendorName, example_ab3["vendorName"])
+        antibodies, count = plain_filter_antibodies(1, 10, COMPLETE_TEST_FILTER_AND_SEARCH_REQUEST_BODY)
+        self.assertEqual(count, 3)
+        self.assertEqual(antibodies[0].catalogNum, example_ab3["catalogNum"])  # since plain sorting by default "-ix"
+        self.assertEqual(antibodies[1].catalogNum, example_ab2["catalogNum"])
+        self.assertEqual(antibodies[0].vendorName, example_ab3["vendorName"])
 
         # FILTERING WITHOUT SORTING
         filter_sort = COMPLETE_TEST_FILTER_AND_SEARCH_REQUEST_BODY
 
         filter_sort.contains.append(KeyValuePair(key="catalog_num", value="N176A/35"))
-        antibodies = plain_filter_antibodies(1, 10, filter_sort)
-        self.assertEqual(antibodies[0], 1)
-        self.assertEqual(antibodies[1][0].catalogNum, example_ab["catalogNum"])
+        antibodies, count = plain_filter_antibodies(1, 10, filter_sort)
+        self.assertEqual(count, 1)
+        self.assertEqual(antibodies[0].catalogNum, example_ab["catalogNum"])
 
         filter_sort.contains = []
         filter_sort.sortOn = [KeyValueSortOrderPair(key="catalog_num", sortorder=Sortorder.asc)]
-        antibodies = plain_filter_antibodies(1, 10, filter_sort)
-        self.assertEqual(antibodies[0], 3)
+        antibodies, count = plain_filter_antibodies(1, 10, filter_sort)
+        self.assertEqual(count, 3)
 
         # ab2 -> ab3 -> ab : ENCAB558DXQ -> FOX176A/35 -> N176A/35
-        self.assertEqual(antibodies[1][0].vendorName, example_ab2["vendorName"])
-        self.assertEqual(antibodies[1][1].catalogNum, example_ab3["catalogNum"])
-        self.assertEqual(antibodies[1][2].catalogNum, example_ab["catalogNum"])
+        self.assertEqual(antibodies[0].vendorName, example_ab2["vendorName"])
+        self.assertEqual(antibodies[1].catalogNum, example_ab3["catalogNum"])
+        self.assertEqual(antibodies[2].catalogNum, example_ab["catalogNum"])

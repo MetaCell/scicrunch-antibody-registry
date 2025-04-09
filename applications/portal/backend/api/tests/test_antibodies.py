@@ -7,7 +7,7 @@ from api.utilities.exceptions import DuplicatedAntibody
 
 from openapi.models import (
     AddAntibody as AddAntibodyDTO,
-    Status,
+    AntibodyStatusEnum as Status,
     CommercialType,
     Clonality,
     UpdateAntibody,
