@@ -44,6 +44,7 @@ import { PAGE_SIZE } from "../../constants/constants";
 import { TablePaginatedFooter } from "./TablePaginatedFooter";
 import { CustomFilterPanel } from "./CustomFilterPanel";
 
+declare const window: any;
 
 const StyledCheckBox = (props) => {
   return (
@@ -148,13 +149,22 @@ const RenderCellContent = (props: GridRenderCellParams) => {
   );
 };
 
-const RenderVendor = (props) => (
-
-  <Typography
+const RenderVendor = (props) => {
+  const handleClick = () => {
+    if (window.gtag) {
+      window.gtag('event', 'click', {
+        event_category: 'Vendor clicks',
+        event_label: props.row.vendorName, // Track the vendor name
+        value: 1, // Optional: You can use this to count clicks
+      });
+    }
+  };
+  return <Typography
     variant="caption"
     align="left"
     component="div"
     className="col-vendor"
+    onClick={handleClick}
     sx={{
       color: "grey.500",
       width: "fit-content"
@@ -175,7 +185,7 @@ const RenderVendor = (props) => (
       {props.value}
     </Link> : props.value}
   </Typography>
-)
+}
 
 const RenderClonality = (props) => (
   <Typography
