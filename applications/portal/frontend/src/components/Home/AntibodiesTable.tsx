@@ -151,7 +151,7 @@ const RenderCellContent = (props: GridRenderCellParams) => {
 };
 
 const RenderVendor = (props) => {
-  const handleClick = useCallback(() => trackVendorClick(props.row.vendorName), [props.row.vendorName]);
+  const handleClick = useCallback(() => trackVendorClick(props.row.vendorName, props.row.vendorId), [props.row.vendorName, props.row.vendorId]);
   return <Typography
     variant="caption"
     align="left"

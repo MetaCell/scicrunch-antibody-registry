@@ -297,7 +297,7 @@ export const AntibodyDetail = () => {
                   href={antibody.url}
                   onClick={(e) => {
                     e.preventDefault();
-                    trackVendorClick(antibody.vendorName);
+                    trackVendorClick(antibody.vendorName, antibody.vendorId);
                     window.open(antibody.url, "_blank");
                   }}
                   className="open-vendor-website-button"
