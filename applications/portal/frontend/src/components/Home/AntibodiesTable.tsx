@@ -43,8 +43,9 @@ import Error500 from "../UI/Error500";
 import { PAGE_SIZE } from "../../constants/constants";
 import { TablePaginatedFooter } from "./TablePaginatedFooter";
 import { CustomFilterPanel } from "./CustomFilterPanel";
+import { trackVendorClick } from "../../utils/tracking";
 
-declare const window: any;
+
 
 const StyledCheckBox = (props) => {
   return (
@@ -150,15 +151,7 @@ const RenderCellContent = (props: GridRenderCellParams) => {
 };
 
 const RenderVendor = (props) => {
-  const handleClick = () => {
-    if (window.gtag) {
-      window.gtag('event', 'click', {
-        event_category: 'Vendor clicks',
-        event_label: props.row.vendorName, // Track the vendor name
-        value: 1, // Optional: You can use this to count clicks
-      });
-    }
-  };
+  const handleClick = trackVendorClick(props.row.vendorName);
   return <Typography
     variant="caption"
     align="left"
@@ -792,6 +785,7 @@ const AntibodiesTable = (props) => {
 };
 
 export default AntibodiesTable;
+
 
 
 
