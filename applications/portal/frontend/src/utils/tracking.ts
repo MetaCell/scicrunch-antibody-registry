@@ -2,7 +2,6 @@
 declare const window: any;
 
 export function trackVendorClick(vendorName: string) {
-  return () => {
     if (window.gtag) {
       window.gtag('event', 'click', {
         event_category: 'Vendor clicks',
@@ -10,5 +9,4 @@ export function trackVendorClick(vendorName: string) {
         value: vendorName,
       });
     }
-  };
 }
