@@ -7,10 +7,11 @@ from api.repositories.maintainance import refresh_search_view
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector, SearchVectorField
 from django.db import models, transaction
-from django.db.models import Transform, CharField, Index, Q, Value
+from django.db.models import Transform, CharField, Index, Q, Func
 from django.db.models.functions import Length, Coalesce
 from django.utils import timezone
 
+import logging
 from simple_history.models import HistoricalRecords
 
 from api.services.user_service import UnrecognizedUser, get_current_user_id
@@ -91,9 +92,9 @@ class Vendor(models.Model):
     name = models.CharField(max_length=VENDOR_MAX_LEN,
                             db_column='vendor', db_index=True, unique=False)
     nif_id = models.CharField(
-        max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id', null=True, blank=True)
+        max_length=VENDOR_NIF_MAX_LEN, db_column='nif_id', db_index=True, null=True, blank=True)
     eu_id = models.CharField(
-        max_length=VENDOR_EU_ID_MAX_LEN, db_column='euid', null=True, blank=True)
+        max_length=VENDOR_EU_ID_MAX_LEN, db_column='euid', db_index=True, null=True, blank=True)
     commercial_type = models.CharField(
         max_length=VENDOR_COMMERCIAL_TYPE_MAX_LEN,
         choices=CommercialType.choices,
@@ -202,7 +203,7 @@ class Antibody(models.Model):
     uid = models.CharField(
         max_length=ANTIBODY_UID_MAX_LEN, null=True, db_index=True, blank=True)
     # Maps to old users -- used only for migration purpose
-    uid_legacy = models.IntegerField(null=True, blank=True)
+    uid_legacy = models.IntegerField(null=True, blank=True, db_index=True)
     catalog_num = models.CharField(
         max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True, blank=True)
     catalog_num_search = models.CharField(
@@ -281,6 +282,7 @@ class Antibody(models.Model):
 
     def import_save(self):
         first_save = self.ix is None
+        logging.info("0 Saving antibody - cat num %s", self.catalog_num)
         if first_save:
             super().save()
             self._handle_duplicates()
@@ -291,6 +293,7 @@ class Antibody(models.Model):
         if not self.accession or not self.ab_id:
             self._generate_automatic_attributes()
         super().save()
+        logging.info("Saving antibody %s", self.ab_id)
 
     @transaction.atomic
     def save(self, *args, update_search=True, **kwargs):
@@ -314,6 +317,7 @@ class Antibody(models.Model):
             self._generate_automatic_attributes(*args, **kwargs)
 
         super(Antibody, self).save()
+        logging.info("Saved antibody %s", self.ab_id)
         if int(self.ab_id) == 0:
             raise Exception(f"Error during antibody id assignment: {self.ix}")
         if update_search and self.status == STATUS.CURATED:
@@ -542,7 +546,16 @@ class Antibody(models.Model):
                      name='antibody_catalog_num_fts_idx'),
 
             Index(fields=['-disc_date'], name='antibody_discontinued_idx'),
-
+            Index(
+                Func('catalog_num', function='LOWER'),
+                'vendor_id',
+                name='antibody_catalog_num_lower_idx'
+            ),
+            Index(
+                Func('catalog_num', function='UPPER'),
+                'vendor_id',
+                name='antibody_catalog_num_upper_idx'
+            ),
         ]
 
 
