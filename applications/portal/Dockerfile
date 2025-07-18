@@ -36,13 +36,8 @@ COPY --from=frontend /app/dist ${APP_DIR}/www
 ENV DJANGO_SETTINGS_MODULE=portal.settings
 # COPY default nginx configuration
 COPY deploy/resources/nginx.conf /etc/nginx/nginx.conf
-COPY healthcheck.sh startup.sh ${APP_DIR}/
-RUN chmod +x ${APP_DIR}/healthcheck.sh ${APP_DIR}/startup.sh
+
 EXPOSE 80 8000
-COPY supervisord.properties /etc/supervisor/conf.d/supervisord.properties
+COPY deploy/resources/supervisord.properties /etc/supervisor/conf.d/supervisord.properties
 
-# Add health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD ${APP_DIR}/healthcheck.sh
-
-CMD ["./startup.sh"]
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.properties"]

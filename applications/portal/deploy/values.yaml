@@ -9,6 +9,9 @@ harness:
     - name: nginx-config
       src: "nginx.conf"
       dst: "/etc/nginx/nginx.conf"
+    - name: supervisord-config
+      src: "supervisord.properties"
+      dst: "/etc/supervisor/conf.d/supervisord.properties"
   deployment:
     auto: true
     replicas: 1
