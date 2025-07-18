@@ -5,6 +5,10 @@ harness:
   service:
     port: 8080
     auto: true
+  resources:
+    - name: nginx-config
+      src: "nginx.conf"
+      dst: "/etc/nginx/nginx.conf"
   deployment:
     auto: true
     replicas: 1
