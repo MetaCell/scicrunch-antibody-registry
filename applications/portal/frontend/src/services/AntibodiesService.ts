@@ -42,7 +42,7 @@ export async function getAntibody(id: number): Promise<Antibody[]> {
 }
 
 export async function addAntibody(antibodyObj): Promise<any> {
-  let ab = mapAntibodyFromForm(antibodyObj);
+  const ab = mapAntibodyFromForm(antibodyObj);
   return (
     await new AntibodyApi(
       new Configuration({ apiKey: getToken(), accessToken: getToken() })
@@ -51,7 +51,7 @@ export async function addAntibody(antibodyObj): Promise<any> {
 }
 
 function mapAntibodyFromForm(antibody): AddAntibody {
-  let commercialAb = {
+  const commercialAb = {
     clonality: antibody.clonality,
     epitope: antibody.epitope,
     comments: antibody.comments,
@@ -119,7 +119,7 @@ export async function getAntibodyByAccessionNumber(accesionNumber:number){
 }
 
 export async function updateSubmittedAntibody(updatedAntibody, accesionNumber){
-  let ab = mapAntibodyFromForm(updatedAntibody);
+  const ab = mapAntibodyFromForm(updatedAntibody);
   delete ab.vendorName 
   delete ab.catalogNum
   return (

@@ -17,7 +17,6 @@ import {
   Popover,
   Button
 } from "@mui/material";
-import { CopyToClipboard } from "react-copy-to-clipboard";
 
 //project imports
 import {
@@ -59,7 +58,7 @@ const StyledCheckBox = (props) => {
 
 const getRowId = (ab: Antibody) => `${ab.ix}`;
 
-const SortIcon = ({ sortingOrder, ...other }) => <SortingIcon {...other} />;
+const SortIcon = ({ ...other }) => <SortingIcon {...other} />;
 
 const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
   const [activeSelection, setActiveSelection] = useState(true);
@@ -75,9 +74,11 @@ const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
   const showFilterMenu = () => apiRef.current.showFilterPanel();
 
   useEffect(() => {
-    selectedRows.size === 0
-      ? setActiveSelection(false)
-      : setActiveSelection(true);
+    if (selectedRows.size === 0) {
+      setActiveSelection(false);
+    } else {
+      setActiveSelection(true);
+    }
   }, [selectedRows]);
 
   return (
@@ -200,7 +201,7 @@ const RenderClonality = (props) => (
 );
 
 
-const RenderHtml = (props: GridRenderCellParams<String>) => {
+const RenderHtml = (props: GridRenderCellParams<string>) => {
   return (
     <Typography
       variant="caption"
@@ -231,7 +232,7 @@ const citationStyles = {
   },
 };
 
-const RenderProperCitation = (props: GridRenderCellParams<String>) => {
+const RenderProperCitation = (props: GridRenderCellParams<string>) => {
 
   const [anchorCitationPopover, setAnchorCitationPopover] =
     useState<HTMLButtonElement | null>(null);
@@ -240,10 +241,16 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
     setAnchorCitationPopover(null);
   }, [setAnchorCitationPopover]);
 
-  const handleClickCitation = useCallback((event) => {
-    setAnchorCitationPopover(event.currentTarget);
-    setTimeout(handleCloseCitation, 1000);
-  }, [handleCloseCitation, setAnchorCitationPopover]);
+  const handleClickCitation = useCallback(async (event) => {
+    const target = event.currentTarget;
+    try {
+      await navigator.clipboard.writeText(props.value);
+      setAnchorCitationPopover(target);
+      setTimeout(handleCloseCitation, 1000);
+    } catch (err) {
+      console.error('Failed to copy citation:', err);
+    }
+  }, [handleCloseCitation, setAnchorCitationPopover, props.value]);
 
 
 
@@ -261,31 +268,30 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
       >
         {props.value}
       </Typography>
-      <CopyToClipboard text={props.value} >
-        <Button
-          onClick={handleClickCitation}
-          size="small"
-          sx={{ minWidth: 0 }}
-          startIcon={
-            <CopyIcon sx={theme => ({
-              stroke: theme.palette.grey[500]
-            })} fontSize="inherit" />
-          }
-          className="btn-citation-copy"
-        />
-      </CopyToClipboard>
+      <Button
+        onClick={handleClickCitation}
+        size="small"
+        sx={{ minWidth: 0 }}
+        startIcon={
+          <CopyIcon sx={theme => ({
+            stroke: theme.palette.grey[500]
+          })} fontSize="inherit" />
+        }
+        className="btn-citation-copy"
+      />
       {open && <Popover
         open={open}
         anchorEl={anchorCitationPopover}
         onClose={handleCloseCitation}
         anchorOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "center",
+          vertical: "bottom",
           horizontal: "center",
         }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+        disableRestoreFocus
       >
         <Typography className="msg-citation-copied" sx={citationStyles.popover}>Citation copied</Typography>
       </Popover>}
@@ -293,7 +299,7 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   );
 };
 
-const RenderStatus = (props: GridRenderCellParams<String>) => {
+const RenderStatus = (props: GridRenderCellParams<string>) => {
   const statusesTag = {
     CURATED: ["Accepted", "success"],
     REJECTED: ["Rejected", "error"],
@@ -395,8 +401,8 @@ const dataGridStyles = {
   },
 };
 
-const AntibodiesTable = (props) => {
-  const user = useContext(UserContext)[0];
+const AntibodiesTable = (props: any) => {
+  const user = useContext(UserContext)?.[0];
   const searchParams = new URLSearchParams(window.location.search);
   const searchQuery = searchParams.get('q');
   const [paginationModel, setPaginationModel] = React.useState({
@@ -429,8 +435,12 @@ const AntibodiesTable = (props) => {
       filtermodel,
       sortmodel
     )
-    filtermodel !== filterModel ? setFilterModel(filtermodel) : null;
-    sortmodel !== sortModel ? setSortModel(sortmodel) : null;
+    if (filtermodel !== filterModel) {
+      setFilterModel(filtermodel);
+    }
+    if (sortmodel !== sortModel) {
+      setSortModel(sortmodel);
+    }
   }, [filterModel, sortModel, getAntibodyList, props.activeTab, setFilterModel, setSortModel]);
 
   const addSortingColumn = useCallback((sortmodel) => {
@@ -447,7 +457,7 @@ const AntibodiesTable = (props) => {
   }, [filterModel, searchQuery, activeSearch, getAntibodyList, props.activeTab, setSortModel]);
 
   const setNewFilterColumn = useCallback((model) => {
-    let newblankFilter = { ...BLANK_FILTER_MODEL, columnField: model.items[0].field, field: model.items[0].field, id: getRandomId() }
+    const newblankFilter = { ...BLANK_FILTER_MODEL, columnField: model.items[0].field, field: model.items[0].field, id: getRandomId() }
     filterModel.items.push(newblankFilter);
     setFilterModel(filterModel);
   }, [filterModel, setFilterModel]);

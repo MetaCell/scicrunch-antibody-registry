@@ -13,7 +13,8 @@ import { Antibody } from "../../rest";
 
 
 const HistoryStepper = (props: {classes: any, antibody: Antibody}) => {
-  let { classes, antibody } = props;
+  let { classes } = props;
+  const { antibody } = props;
   const theme = useTheme();
 
   const historySteps = [

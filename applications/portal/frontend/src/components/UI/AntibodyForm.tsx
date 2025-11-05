@@ -1,5 +1,4 @@
 import React from "react";
-import { makeStyles } from "@mui/styles";
 import { vars } from "../../theme/variables";
 import {
   Box,
@@ -83,11 +82,11 @@ const AntibodyForm = (props) => {
 
   return (
     (<form
-        onSubmit={handleSubmit}
-        autoComplete="off"
-        style={{ background: backgroundColorForm }}
-        className="antibody-form"
-      >
+      onSubmit={handleSubmit}
+      autoComplete="off"
+      style={{ background: backgroundColorForm }}
+      className="antibody-form"
+    >
       {formik.isSubmitting && <Backdrop sx={theme => ({
         color: '#fff',
         zIndex: theme.zIndex.drawer + 1

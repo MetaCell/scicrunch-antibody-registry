@@ -47,7 +47,7 @@ const UpdateForm = () => {
   };
 
   const updateAntibody = (updatedAntibody) => {
-    let ab = { ...updatedAntibody, type: antibody.commercialType };
+    const ab = { ...updatedAntibody, type: antibody.commercialType };
     updateSubmittedAntibody(ab, ab_accession_number)
       .then(() => {
         history.push("/submissions");

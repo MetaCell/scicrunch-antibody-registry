@@ -1,4 +1,3 @@
-import { ThemeContext } from "@emotion/react";
 import { createTheme, darken } from "@mui/material/styles";
 import { vars } from "./variables";
 

@@ -34,7 +34,7 @@ export function postNewAntibody(
 
 
 export const structureFiltersAndSorting = (searchState, antibodyFilters, pagenumber, size, sortmodel, newsearch, isUserScope) => {
-  let body: FilterRequest = {
+  const body: FilterRequest = {
     search: newsearch,
     contains: [],
     equals: [],

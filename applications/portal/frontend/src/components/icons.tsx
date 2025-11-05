@@ -729,7 +729,7 @@ export const CircleCheckIcon = (props: SvgIconProps) => (
   </SvgIcon>
 );
 
-export const CircleAlertIcon = (props: SvgIconProps) => (
+export const CircleAlertIcon = () => (
   <SvgIcon viewBox="0 0 56 56">
     <rect x="4" y="4" width="48" height="48" rx="24" fill="#FEE4E2" />
     <path

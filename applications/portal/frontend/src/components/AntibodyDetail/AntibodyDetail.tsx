@@ -19,7 +19,6 @@ import { useTheme } from "@mui/material/styles";
 
 import SubHeader from "../UI/SubHeader";
 import HistoryStepper from "./HistoryStepper";
-import { CopyToClipboard } from "react-copy-to-clipboard";
 import { CopyIcon, ExternalLinkIcon } from "../icons";
 import { Antibody, AntibodyStatusEnum } from "../../rest";
 import { getProperCitation } from "../../utils/antibody";
@@ -97,27 +96,53 @@ export const AntibodyDetail = () => {
   };
   const { antibody_id } = useParams();
   const abId = antibody_id.replace("AB_", "").replace("RRID:", "");
-  const [antibodies, setAntibodies] = useState<Antibody[]>(null);
-  const [error, setError] = useState<string>(null);
+  const [antibodies, setAntibodies] = useState<Antibody[]>();
+  const [error, setError] = useState<string>();
   const accession = document.location.hash ? document.location.hash.split("#")[1]: abId;
 
   const antibody = antibodies && (antibodies.find(a => a.accession === accession) || antibodies[0]);
 
   const [anchorCitationPopover, setAnchorCitationPopover] =
     useState<HTMLButtonElement | null>(null);
+  const [anchorLinkPopover, setAnchorLinkPopover] =
+    useState<HTMLButtonElement | null>(null);
 
-  const handleClickCitation = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorCitationPopover(event.currentTarget);
+  const handleClickCitation = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    const target = event.currentTarget;
+    try {
+      const citationText = antibody ? getProperCitation(antibody) : '';
+      await navigator.clipboard.writeText(citationText);
+      setAnchorCitationPopover(target);
+      setTimeout(() => setAnchorCitationPopover(null), 1000);
+    } catch (err) {
+      console.error('Failed to copy citation:', err);
+    }
   };
 
   const handleCloseCitation = () => {
     setAnchorCitationPopover(null);
   };
 
+  const handleClickCopyLink = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    const target = event.currentTarget;
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setAnchorLinkPopover(target);
+      setTimeout(() => setAnchorLinkPopover(null), 1000);
+    } catch (err) {
+      console.error('Failed to copy link:', err);
+    }
+  };
+
+  const handleCloseLink = () => {
+    setAnchorLinkPopover(null);
+  };
+
   const open = Boolean(anchorCitationPopover);
+  const openLink = Boolean(anchorLinkPopover);
 
 
-  const fetchAntibody = (id) => {
+  const fetchAntibody = (id: number) => {
     getAntibody(id)
       .then((res) => {
         if(res.length === 0){
@@ -146,7 +171,7 @@ export const AntibodyDetail = () => {
     );
   }
   const citation = antibody && getProperCitation(antibody);
-  return (<>
+  return antibody && (<>
     <SubHeader>AB_{antibody.abId}</SubHeader>
     <Container id="antibody-detail" maxWidth="lg" sx={{ pb: 2 }}>
       <Grid container>
@@ -196,7 +221,7 @@ export const AntibodyDetail = () => {
               <Grid size={3}>
                 <Typography variant="h4">Target antigen</Typography>
                 <Typography className="ab-target" variant="subtitle2">
-                  {antibody.abTarget} - {antibody.targetSpecies.join(", ")}
+                  {antibody.abTarget} - {antibody.targetSpecies?.join(", ")}
                 </Typography>
               </Grid>
               
@@ -233,32 +258,31 @@ export const AntibodyDetail = () => {
               </Grid>
               <Grid size={8}>
                 <Typography className="ab-propercitation" variant="subtitle2">{citation}</Typography>
-                <CopyToClipboard text={citation}>
-                  <Button
-                    variant="text"
-                    size="small"
-                    startIcon={
-                      <CopyIcon stroke={theme.palette.primary.dark} />
-                    }
-                    onClick={handleClickCitation}
-                    sx={classes.buttonText}
-                    className="copy-citation-button"
-                  >
-                    Copy citation
-                  </Button>
-                </CopyToClipboard>
+                <Button
+                  variant="text"
+                  size="small"
+                  startIcon={
+                    <CopyIcon stroke={theme.palette.primary.dark} />
+                  }
+                  onClick={handleClickCitation}
+                  sx={classes.buttonText}
+                  className="copy-citation-button"
+                >
+                  Copy citation
+                </Button>
                 <Popover
                   open={open}
                   anchorEl={anchorCitationPopover}
                   onClose={handleCloseCitation}
                   anchorOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  transformOrigin={{
-                    vertical: "center",
+                    vertical: "bottom",
                     horizontal: "center",
                   }}
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "center",
+                  }}
+                  disableRestoreFocus
                   className="copy-citation"
                 >
                   <Typography sx={classes.popover}>
@@ -273,7 +297,7 @@ export const AntibodyDetail = () => {
                 <Typography variant="subtitle1">Comments</Typography>
               </Grid>
               <Grid size={8}>
-                <Typography className="ab-comments" variant="subtitle2" dangerouslySetInnerHTML={{ __html: antibody.comments }} />
+                <Typography className="ab-comments" variant="subtitle2" dangerouslySetInnerHTML={{ __html: antibody.comments ?? "" }} />
               </Grid>
             </Grid>
             <Divider />
@@ -297,7 +321,7 @@ export const AntibodyDetail = () => {
                   href={antibody.url}
                   onClick={(e) => {
                     e.preventDefault();
-                    trackVendorClick(antibody.vendorName, antibody.vendorId);
+                    trackVendorClick(antibody.vendorName ?? "", antibody.vendorId ?? -1);
                     window.open(antibody.url, "_blank");
                   }}
                   className="open-vendor-website-button"
@@ -308,40 +332,40 @@ export const AntibodyDetail = () => {
             </Grid>
             <Divider />
             {antibody.status === AntibodyStatusEnum.Curated && (<>
-            <Grid container>
-              <Grid size={3}>
-                <Typography variant="subtitle1">Additional information</Typography>
-              </Grid>
-              <Grid size={8}>
-                {<Button
-                  variant="text"
-                  target="_blank"
-                  size="small"
-                  sx={classes.buttonText}
-                  endIcon={
-                    <ExternalLinkIcon stroke={theme.palette.primary.dark} />
-                  }
-                  href={`https://scicrunch.org/ResourceWatch/Search?q=AB_${antibody.abId}`}
-                  className="open-resourcewatch-button"
-                >
+              <Grid container>
+                <Grid size={3}>
+                  <Typography variant="subtitle1">Additional information</Typography>
+                </Grid>
+                <Grid size={8}>
+                  {<Button
+                    variant="text"
+                    target="_blank"
+                    size="small"
+                    sx={classes.buttonText}
+                    endIcon={
+                      <ExternalLinkIcon stroke={theme.palette.primary.dark} />
+                    }
+                    href={`https://scicrunch.org/ResourceWatch/Search?q=AB_${antibody.abId}`}
+                    className="open-resourcewatch-button"
+                  >
                   See validation in Resource Watch
-                </Button>}
-                {<Button
-                  variant="text"
-                  target="_blank"
-                  size="small"
-                  sx={classes.buttonText}
-                  endIcon={
-                    <ExternalLinkIcon stroke={theme.palette.primary.dark} />
-                  }
-                  href={`https://scicrunch.org/resolver/RRID:AB_${antibody.abId}`}
-                  className="open-resourcewatch-button"
-                >
+                  </Button>}
+                  {<Button
+                    variant="text"
+                    target="_blank"
+                    size="small"
+                    sx={classes.buttonText}
+                    endIcon={
+                      <ExternalLinkIcon stroke={theme.palette.primary.dark} />
+                    }
+                    href={`https://scicrunch.org/resolver/RRID:AB_${antibody.abId}`}
+                    className="open-resourcewatch-button"
+                  >
                   See citations and ratings in Resolver
-                </Button>}
+                  </Button>}
+                </Grid>
               </Grid>
-            </Grid>
-            <Divider />
+              <Divider />
             </>
             )}
             
@@ -357,21 +381,39 @@ export const AntibodyDetail = () => {
                   <Box sx={classes.input}>
                     <Typography>{window.location.href}</Typography>
                   </Box>
-                  <CopyToClipboard text={window.location.href}>
-                    <Button
-                      variant="text"
-                      color="info"
-                      size="small"
-                      startIcon={
-                        <CopyIcon stroke={theme.palette.grey[700]} />
-                      }
-                      sx={classes.buttonGrey}
-                      className="copy-link-button"
-                    >
-                      Copy link
-                    </Button>
-                  </CopyToClipboard>
+                  <Button
+                    variant="text"
+                    color="info"
+                    size="small"
+                    startIcon={
+                      <CopyIcon stroke={theme.palette.grey[700]} />
+                    }
+                    sx={classes.buttonGrey}
+                    className="copy-link-button"
+                    onClick={handleClickCopyLink}
+                  >
+                    Copy link
+                  </Button>
                 </Box>
+                <Popover
+                  open={openLink}
+                  anchorEl={anchorLinkPopover}
+                  onClose={handleCloseLink}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center",
+                  }}
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "center",
+                  }}
+                  disableRestoreFocus
+                  className="copy-link-popover"
+                >
+                  <Typography sx={classes.popover}>
+                    Link copied to clipboard
+                  </Typography>
+                </Popover>
               </Grid>
             </Grid>
           </Stack>
@@ -383,10 +425,10 @@ export const AntibodyDetail = () => {
       {antibodies && antibodies.length > 1 && 
       <Alert severity="info" className="ab-duplicates-info">Multiple antibodies have been found for this id: showing accession AB_{antibody.accession}. Other entries:&nbsp;
         {antibodies.filter((a) => a.accession != accession).map((a, i, arr) => <>
-        <Link href={"#" + a.accession}>
+          <Link href={"#" + a.accession}>
           AB_{a.accession}
-        </Link>{i < arr.length - 1 ? ", ": "."}
-          </>)}
+          </Link>{i < arr.length - 1 ? ", ": "."}
+        </>)}
       </Alert>}
     </Container>
   </>);

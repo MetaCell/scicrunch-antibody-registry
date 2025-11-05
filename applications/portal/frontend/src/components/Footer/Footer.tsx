@@ -1,13 +1,9 @@
 import React from "react";
 import {
-  AppBar,
   Box,
-  Container,
-  Toolbar,
   Link,
   Stack,
-  Typography,
-  Grid
+  Typography
 } from "@mui/material";
 import FooterLinks from "./FooterLinks";
 
