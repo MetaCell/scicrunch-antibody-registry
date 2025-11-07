@@ -48,7 +48,7 @@ harness:
       - accounts-api
   use_services:
     - name: common
-    - name: accounts_api
+    - name: accounts-api
   uri_role_mapping:
     - uri: /admin/*
       roles:
@@ -78,8 +78,9 @@ harness:
     auto: true
     type: postgres
     size: 40Gi
+    image: postgres:17
     postgres:
-      image: postgres:13
+      image: postgres:17
       initialdb: antibody_registry
     resources:
       requests:
@@ -101,7 +102,7 @@ harness:
     scicrunch-api-key:
   proxy:
     payload:
-      max: 99999
+      max: 10
     timeout:
       keepalive: 99999
       read: 99999

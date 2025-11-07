@@ -8,7 +8,8 @@ from api.models import Antibody, STATUS
 from django.core.management.base import BaseCommand
 from cloudharness.utils.secrets import get_secret
 from api.services.antibody_service import get_curated_antibodies_ids
-from api.services.ingest_service import fetch_scicrunch_citation_metric, RateLimiter, set_citation_metric
+from api.services.ingest_service import fetch_scicrunch_citation_metric, set_citation_metric
+from api.utilities.rate_limiter import RateLimiter
 from api.utilities.exceptions import FetchCitationMetricFailed
 import sys
 import os

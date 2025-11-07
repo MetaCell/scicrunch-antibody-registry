@@ -18,7 +18,8 @@ REQUIRES = [
     "django-import-export>=3.0.1",
     "sentry-sdk[django]",
     "django-simple-history",
-    "pandas"
+    "pandas",
+    "psycopg2-binary",
 ]
 
 setup(

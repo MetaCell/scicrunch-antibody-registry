@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "import_export",
     "django_prometheus",
-    "simple_history"
+    "simple_history",
+    "ninja",  # Django Ninja
 ]
 
 MIDDLEWARE = [
@@ -135,7 +136,8 @@ DATABASES["default"]["TEST"] = {
 }
 
 # add the local apps
-INSTALLED_APPS += ["api", "portal"]
+# Remove any duplicates that might come from cloudharness_django.settings
+INSTALLED_APPS = list(dict.fromkeys(INSTALLED_APPS + ["api", "portal"]))
 
 # override django admin base template with a local template
 # to add some custom styling
@@ -157,3 +159,16 @@ KC_CLIENT_NAME = PROJECT_NAME.lower()
 # portal specific roles
 
 from .constants import * # noqa: E402
+
+# ***********************************************************************
+# * Django Ninja Configuration
+# ***********************************************************************
+
+# Django Ninja pagination settings
+NINJA_PAGINATION_CLASS = 'ninja.pagination.PageNumberPagination'
+NINJA_PAGINATION_PER_PAGE = 50
+NINJA_PAGINATION_MAX_PER_PAGE = 100
+
+# Note: NINJA_DOCS_VIEW, NINJA_PARSER_CLASS, and NINJA_RENDERER_CLASS are deprecated
+# Configure these directly in NinjaAPI initialization in api/api.py instead
+# Example: NinjaAPI(docs_decorator=..., parser=..., renderer=...)

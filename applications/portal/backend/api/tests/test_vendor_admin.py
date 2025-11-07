@@ -1,6 +1,5 @@
 from django.test import TestCase
 from django.contrib.admin.sites import AdminSite
-from api.services.antibody_service import *
 from api.models import Vendor, VendorDomain
 
 from ..admin import VendorAdmin
@@ -21,24 +20,24 @@ class VendorAdminTests(TestCase):
 
         ab2 = Antibody.objects.create(vendor=vendor, url="https://example.com")
 
-        self.assertEquals(len(Vendor.objects.all()), 1)
-        self.assertEquals(len(VendorDomain.objects.all()), 1)
+        self.assertEqual(len(Vendor.objects.all()), 1)
+        self.assertEqual(len(VendorDomain.objects.all()), 1)
 
         domain = VendorDomain.objects.create(vendor=vendor)
 
-        self.assertEquals(ab1.vendor, vendor)
-        self.assertEquals(ab2.vendor, vendor)
-        self.assertEquals(domain.vendor, vendor)
-        self.assertEquals(len(Antibody.objects.all()), 2)
-        self.assertEquals(len(Vendor.objects.all()), 1)
-        self.assertEquals(len(VendorDomain.objects.all()), 2)
+        self.assertEqual(ab1.vendor, vendor)
+        self.assertEqual(ab2.vendor, vendor)
+        self.assertEqual(domain.vendor, vendor)
+        self.assertEqual(len(Antibody.objects.all()), 2)
+        self.assertEqual(len(Vendor.objects.all()), 1)
+        self.assertEqual(len(VendorDomain.objects.all()), 2)
 
         # # Instanciante and tests
         va = VendorAdmin(Vendor, self.site)
         va._force_delete(vendor)
-        self.assertEquals(len(Antibody.objects.all()), 0)
-        self.assertEquals(len(VendorDomain.objects.all()), 0)
-        self.assertEquals(len(Vendor.objects.all()), 1)
+        self.assertEqual(len(Antibody.objects.all()), 0)
+        self.assertEqual(len(VendorDomain.objects.all()), 0)
+        self.assertEqual(len(Vendor.objects.all()), 1)
 
     def test_swap_ownership_antibodies(self):
         # Create data
@@ -50,14 +49,14 @@ class VendorAdminTests(TestCase):
 
         domain = VendorDomain.objects.create(vendor=v1)
 
-        self.assertEquals(ab1.vendor, v1)
+        self.assertEqual(ab1.vendor, v1)
         self.assertIn(ab1, v1.antibody_set.all())
-        self.assertEquals(ab2.vendor, v1)
+        self.assertEqual(ab2.vendor, v1)
         self.assertIn(ab2, v1.antibody_set.all())
-        self.assertEquals(domain.vendor, v1)
-        self.assertEquals(len(Antibody.objects.all()), 2)
-        self.assertEquals(len(Vendor.objects.all()), 2)
-        self.assertEquals(len(VendorDomain.objects.all()), 2)
+        self.assertEqual(domain.vendor, v1)
+        self.assertEqual(len(Antibody.objects.all()), 2)
+        self.assertEqual(len(Vendor.objects.all()), 2)
+        self.assertEqual(len(VendorDomain.objects.all()), 2)
 
         # Instanciante and tests
         va = VendorAdmin(Vendor, AdminSite())
@@ -69,6 +68,6 @@ class VendorAdminTests(TestCase):
         self.assertNotIn(ab2, v1.antibody_set.all())
         self.assertIn(domain, v2.vendordomain_set.all())
         self.assertNotIn(domain, v1.vendordomain_set.all())
-        self.assertEquals(len(Antibody.objects.all()), 2)
-        self.assertEquals(len(Vendor.objects.all()), 2)
-        # FIXME self.assertEquals(len(VendorDomain.objects.all()), 1)
+        self.assertEqual(len(Antibody.objects.all()), 2)
+        self.assertEqual(len(Vendor.objects.all()), 2)
+        # FIXME self.assertEqual(len(VendorDomain.objects.all()), 1)

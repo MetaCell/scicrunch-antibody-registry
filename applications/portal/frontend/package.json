@@ -12,7 +12,9 @@
     "start": "DOMAIN=http://localhost:8000 vite --host --port 9000",
     "start:dev": "DOMAIN=https://www.areg.dev.metacell.us  vite --host --port 9000 --mode development",
     "start:local": "DOMAIN=http://areg ACCOUNTS_API_DOMAIN=http://api.accounts.areg  vite --host --port 9000",
-    "preview": "vite preview"
+    "preview": "vite preview",
+       "generate-client": "openapi-generator-cli generate -g typescript-fetch -i ../api/openapi.json -o ./src/rest/neuroglass-research --additional-properties=modelPropertyNaming=camelCase"
+
   },
   "author": "",
   "license": "ISC",
@@ -40,6 +42,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@openapitools/openapi-generator-cli": "^2.14.0",
     "@types/node": "^24.6.0",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
@@ -52,6 +55,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.45.0",
     "vite": "^7.1.14"
+
   },
   "resolutions": {
     "graceful-fs": "^4.2.11"
