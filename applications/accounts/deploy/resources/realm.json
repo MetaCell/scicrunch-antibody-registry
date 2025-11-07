@@ -10,9 +10,11 @@
 {{- end}}
 {{- define "deploy_accounts_utils.user" }}
     {
-        "username": {{ .user.username | quote }},
+        "username": {{ .user.username | default .user.email | quote }},
         "email": {{ .user.email | default .user.username | quote }},
         "enabled": true,
+        "firstName": {{ .user.firstName | default "Test" | quote }},
+        "lastName": {{ .user.lastName | default "User" | quote }},
         "credentials": [
             {
                 "type": "password",
@@ -29,53 +31,99 @@
 {
         "id": {{ .Values.namespace | quote }},
         "realm": {{ .Values.namespace | quote }},
-        
-        "sslRequired": {{ ternary "none" "external" (not .Values.tls) | quote }},
         "enabled": true,
-        "loginTheme": "custom",
-        "accountTheme": "custom",
+        "sslRequired": {{ ternary "none" "external" (not .Values.tls) | quote }},
+        "loginTheme": "keycloak",
+        "accountTheme": "keycloak",
         "adminTheme": "keycloak",
         "emailTheme": "keycloak",
         "registrationAllowed": true,
-        "registrationEmailAsUsername": true,
+        "registrationEmailAsUsername": false,
         "rememberMe": true,
         "verifyEmail": false,
         "loginWithEmailAllowed": true,
         "duplicateEmailsAllowed": false,
         "resetPasswordAllowed": true,
-        "editUsernameAllowed": false,
-        "eventsListeners": [
-            "metacell-admin-event-listener",
-            "jboss-logging"
-        ],
-        "identityProviders": [
+        "editUsernameAllowed": true,
+        "components": {
+          "org.keycloak.userprofile.UserProfileProvider": [
             {
-              "alias": "orcid",
-              "internalId": "bcc1bc98-c0e5-4f95-8acf-f679e3abe156",
-              "providerId": "orcid",
-              "enabled": true,
-              "updateProfileFirstLoginMode": "on",
-              "trustEmail": false,
-              "storeToken": false,
-              "addReadTokenRoleOnCreate": false,
-              "authenticateByDefault": false,
-              "linkOnly": false,
-              "firstBrokerLoginFlowAlias": "first broker login",
+              "id": "002b69df-9702-40dd-b73e-3a66d161bf11",
+              "providerId": "declarative-user-profile",
+              "subComponents": {},
               "config": {
-                "syncMode": "IMPORT",
-                "clientSecret": "**********",
-                "clientId": "APP-K13R7EHQQ0AK88W1",
-                "useJwksUrl": "true"
+                "kc.user.profile.config": [
+                  "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"username-prohibited-characters\":{},\"up-username-not-idn-homograph\":{}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"annotations\":{},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"annotations\":{},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"annotations\":{},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}]}"
+                ]
               }
             }
           ],
+          "org.keycloak.keys.KeyProvider": [
+            {
+              "id": "e632ce46-36ad-421a-b1a5-776383cc1565",
+              "name": "rsa-generated",
+              "providerId": "rsa-generated",
+              "subComponents": {},
+              "config": {
+                "priority": [
+                  "100"
+                ]
+              }
+            },
+            {
+              "id": "b68bee45-a8f0-46ca-b7d9-0df90189736a",
+              "name": "hmac-generated-hs512",
+              "providerId": "hmac-generated",
+              "subComponents": {},
+              "config": {
+                "priority": [
+                  "100"
+                ],
+                "algorithm": [
+                  "HS512"
+                ]
+              }
+            },
+            {
+              "id": "55960a57-af77-4f4c-8b6e-925c74bb44db",
+              "name": "aes-generated",
+              "providerId": "aes-generated",
+              "subComponents": {},
+              "config": {
+                "priority": [
+                  "100"
+                ]
+              }
+            },
+            {
+              "id": "ce068675-5cae-434e-851f-09f653ccc604",
+              "name": "rsa-enc-generated",
+              "providerId": "rsa-enc-generated",
+              "subComponents": {},
+              "config": {
+                "priority": [
+                  "100"
+                ],
+                "algorithm": [
+                  "RSA-OAEP"
+                ]
+              }
+            }
+          ]
+        },
         "users": [
+            {{- $j := 0}}
             {{- range $app := .Values.apps }}
               {{- if (hasKey $app.harness "accounts")  }}
+                {{- if $j}},{{end}}
+                {{- if $app.harness.accounts.users}}
+                    {{- $j = add1 $j }}
+                {{- end }}
                 {{- range $i, $user := $app.harness.accounts.users }}{{if $i}},{{end}}
                 {{ include "deploy_accounts_utils.user" (dict "root" $ "app" $app "user" $user) }}
                 {{- end }}
               {{- end }}
+              
             {{- end }}
         ],
         "roles": {
@@ -108,19 +156,112 @@
                 }
             ],
             "client": {
+            {{- $k := 0}}
             {{- range $app := .Values.apps }}
+
               {{- if (hasKey $app.harness "accounts")  }}
+                {{- if $k}},{{end}}
                 {{ $app.harness.name | quote }}: [
                 {{- range $i, $role := $app.harness.accounts.roles }}
                 {{if $i}},{{end}}
-                {{ include "deploy_accounts_utils.role" (dict "root" $ "app" $app "role" $role) }}
+                {{- include "deploy_accounts_utils.role" (dict "root" $ "app" $app "role" $role) }}
                 {{- end }}
                 ]
+                {{- $k = add1 $k }}
               {{- end }}
             {{- end }}
             }
         },
+        "clientScopeMappings": {
+                "account": [
+                {
+                    "client": "account-console",
+                    "roles": [
+                    "manage-account",
+                    "view-groups"
+                    ]
+                }
+                ]
+            },
+        "identityProviders": [
+            {
+              "alias": "orcid",
+              "internalId": "bcc1bc98-c0e5-4f95-8acf-f679e3abe156",
+              "providerId": "orcid",
+              "enabled": true,
+              "updateProfileFirstLoginMode": "on",
+              "trustEmail": false,
+              "storeToken": false,
+              "addReadTokenRoleOnCreate": false,
+              "authenticateByDefault": false,
+              "linkOnly": false,
+              "firstBrokerLoginFlowAlias": "first broker login",
+              "config": {
+                "syncMode": "IMPORT",
+                "clientSecret": "**********",
+                "clientId": "APP-K13R7EHQQ0AK88W1",
+                "useJwksUrl": "true"
+              }
+            }
+          ],
         "clients": [
+            {
+            "id": "18893fbb-8252-4aaa-bc9b-60799ceb9931",
+            "clientId": "account-console-copy",
+            "name": "${client_account-console} (Copy)",
+            "rootUrl": "${authBaseUrl}",
+            "baseUrl": {{ printf "/realms/%s/account" .Values.namespace | quote }},
+            "surrogateAuthRequired": false,
+            "enabled": true,
+            "alwaysDisplayInConsole": false,
+            "clientAuthenticatorType": "client-secret",
+            "redirectUris": [
+                {{ printf "/realms/%s/account/*" .Values.namespace | quote }}
+            ],
+            "webOrigins": [],
+            "notBefore": 0,
+            "bearerOnly": false,
+            "consentRequired": false,
+            "standardFlowEnabled": true,
+            "implicitFlowEnabled": false,
+            "directAccessGrantsEnabled": false,
+            "serviceAccountsEnabled": false,
+            "publicClient": true,
+            "frontchannelLogout": false,
+            "protocol": "openid-connect",
+            "attributes": {
+                "realm_client": "false",
+                "post.logout.redirect.uris": "+",
+                "pkce.code.challenge.method": "S256"
+            },
+            "authenticationFlowBindingOverrides": {},
+            "fullScopeAllowed": false,
+            "nodeReRegistrationTimeout": 0,
+            "protocolMappers": [
+                {
+                "id": "9a68ec2d-943d-49cb-9fdd-cd821d606210",
+                "name": "audience resolve",
+                "protocol": "openid-connect",
+                "protocolMapper": "oidc-audience-resolve-mapper",
+                "consentRequired": false,
+                "config": {}
+                }
+            ],
+            "defaultClientScopes": [
+                "service_account",
+                "web-origins",
+                "acr",
+                "address",
+                "administrator-scope",
+                "phone",
+                "profile",
+                "roles",
+                "microprofile-jwt",
+                "basic",
+                "email"
+            ],
+            "optionalClientScopes": []
+            },
             {
                 "id": "9a6a2560-c6be-4493-8bd5-3fdc4522d82b",
                 "clientId": {{ .Values.apps.accounts.client.id | quote }},
@@ -293,6 +434,17 @@
                             "claim.name": "groups",
                             "jsonType.label": "String"
                         }
+                    },
+                    {
+                    "id": "f99f57ac-a765-4aba-9b45-9425beec0a9f",
+                    "name": "sub",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-sub-mapper",
+                    "consentRequired": false,
+                    "config": {
+                        "introspection.token.claim": "true",
+                        "access.token.claim": "true"
+                    }
                     }
                 ]
             },
@@ -738,5 +890,5 @@
                 }
             }
         ],
-        "keycloakVersion": "9.0.2"
+        "keycloakVersion": "26.2.1"
     }
