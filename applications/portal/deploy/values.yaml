@@ -73,6 +73,14 @@ harness:
     - uri: /metrics
       roles:
         - administrator
+    - uri: /assets/*
+      white-listed: true
+    - uri: /static/*
+      white-listed: true
+    - uri: /favicon.ico
+      white-listed: true
+    - uri: /robots.txt
+      white-listed: true
 
   database:
     auto: true
