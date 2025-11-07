@@ -6,7 +6,7 @@ import {
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { getFilterOperators, getRandomId, shouldEmptyFilterValue } from "../../utils/antibody";
 import { BLANK_FILTER_MODEL } from "../../constants/constants";
-import { SearchCriteriaOptions } from "../../rest";
+import { SearchCriteriaOptions } from "../../utils/antibody";
 import searchContext from "../../context/search/SearchContext";
 
 

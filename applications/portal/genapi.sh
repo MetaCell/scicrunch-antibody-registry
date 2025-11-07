@@ -15,7 +15,7 @@ function json2yaml {
 }
 
 # Generates the openAPI specification
-(cd backend && DJANGO_EXTRA_APPS="ninja" python manage.py export_openapi_schema --api neuroglass_research.api.api --output $PARENT_PATH/$OPENAPI_JSON_PATH --indent 2)
+(cd backend && DJANGO_EXTRA_APPS="ninja" python manage.py export_openapi_schema --api api.api.api --output $PARENT_PATH/$OPENAPI_JSON_PATH --indent 2)
 
 cd "${PARENT_PATH}"
 

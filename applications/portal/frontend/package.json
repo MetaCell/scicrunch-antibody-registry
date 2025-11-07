@@ -9,11 +9,11 @@
     "build": "tsc && vite build",
     "build-dev": "tsc && vite build --mode development",
     "prestart": "eslint . --color --fix",
-    "start": "DOMAIN=http://localhost:8000 vite --host --port 9000",
-    "start:dev": "DOMAIN=https://www.areg.dev.metacell.us  vite --host --port 9000 --mode development",
-    "start:local": "DOMAIN=http://areg ACCOUNTS_API_DOMAIN=http://api.accounts.areg  vite --host --port 9000",
+    "start": "DOMAIN=http://localhost:8000 vite --host",
+    "start:dev": "DOMAIN=https://www.areg.dev.metacell.us  vite --host --mode development",
+    "start:local": "DOMAIN=http://areg ACCOUNTS_API_DOMAIN=http://api.accounts.areg  vite --host",
     "preview": "vite preview",
-       "generate-client": "openapi-generator-cli generate -g typescript-fetch -i ../api/openapi.json -o ./src/rest/neuroglass-research --additional-properties=modelPropertyNaming=camelCase"
+       "generate-client": "openapi-generator-cli generate -g typescript-axios -i ../api/openapi.json -o ./src/rest --additional-properties=modelPropertyNaming=camelCase"
 
   },
   "author": "",
