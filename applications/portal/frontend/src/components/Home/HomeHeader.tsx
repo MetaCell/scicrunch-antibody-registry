@@ -53,7 +53,7 @@ const TableHeader = (props: TableHeaderProps) => {
   const theme = useTheme();
  
   const { activeSearch, totalElements, lastUpdate, error } = useContext(searchContext)
-  const showAlert = warningMessage.length > 0;
+  const showAlert = !!warningMessage?.length;
   return (
     (<Box className="container-home-header">
       <AppBar elevation={0} >
@@ -168,7 +168,7 @@ const TableHeader = (props: TableHeaderProps) => {
             {error && (
               <Alert className="error-alert" severity="error" sx={{ mt: 1, mb: 1 }}>
                 {
-                  error >= 500 ? 
+                  error == 500 ? 
                     <>An error occurred while fetching data. Please try again later. If the problem persists, please contact us at  <Link
                       target="_blank"
                       href="mailto:rii-help@scicrunch.org"

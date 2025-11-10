@@ -7,7 +7,8 @@ import {
   GridRenderCellParams,
   GridCsvExportOptions,
   GridNoRowsOverlay,
-  GridColumnVisibilityModel
+  GridColumnVisibilityModel,
+  GridFilterModel
 } from "@mui/x-data-grid";
 import {
   Typography,
@@ -36,7 +37,7 @@ import { checkIfFilterSetExists, getColumnsToDisplay, getProperCitation, getRand
 import { UserContext } from "../../services/UserService";
 import ConnectAccount from "./ConnectAccount";
 import { ALLRESULTS, SEARCH_MODES, MYSUBMISSIONS, BLANK_FILTER_MODEL } from "../../constants/constants";
-import SearchContext from "../../context/search/SearchContext";
+import SearchContext, { SearchContextProps } from "../../context/search/SearchContext";
 import NotFoundMessage from "./NotFoundMessage";
 import Error500 from "../UI/Error500";
 import { PAGE_SIZE } from "../../constants/constants";
@@ -60,11 +61,23 @@ const getRowId = (ab: Antibody) => `${ab.ix}`;
 
 const SortIcon = ({ ...other }) => <SortingIcon {...other} />;
 
-const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
+interface CustomToolbarProps {
+  activeTab?: string;
+  searchedAntibodies?: Antibody[];
+  filterModel?: GridFilterModel;
+  [key: string]: any; // Allow additional props from DataGrid
+}
+
+const CustomToolbar = (props: CustomToolbarProps) => {
+  const { 
+    activeTab = ALLRESULTS, 
+    searchedAntibodies = [], 
+    filterModel = { items: [] } 
+  } = props;
+  
   const [activeSelection, setActiveSelection] = useState(true);
-  const {
-    warningMessage
-  } = useContext(SearchContext);
+  const searchContext = useContext(SearchContext);
+  const warningMessage = searchContext?.warningMessage;
   const apiRef = useGridApiContext();
   const selectedRows = apiRef.current.getSelectedRows();
 
@@ -89,7 +102,7 @@ const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
       activeTab={activeTab}
       filterModel={filterModel}
       warningMessage={warningMessage}
-      shownResultsNum={searchedAntibodies?.length}
+      shownResultsNum={searchedAntibodies.length}
     />
 
     </>
@@ -201,7 +214,7 @@ const RenderClonality = (props) => (
 );
 
 
-const RenderHtml = (props: GridRenderCellParams<string>) => {
+const RenderHtml = (props: GridRenderCellParams<any>) => {
   return (
     <Typography
       variant="caption"
@@ -232,7 +245,7 @@ const citationStyles = {
   },
 };
 
-const RenderProperCitation = (props: GridRenderCellParams<string>) => {
+const RenderProperCitation = (props: GridRenderCellParams<any>) => {
 
   const [anchorCitationPopover, setAnchorCitationPopover] =
     useState<HTMLButtonElement | null>(null);
@@ -299,7 +312,7 @@ const RenderProperCitation = (props: GridRenderCellParams<string>) => {
   );
 };
 
-const RenderStatus = (props: GridRenderCellParams<string>) => {
+const RenderStatus = (props: GridRenderCellParams<any>) => {
   const statusesTag = {
     CURATED: ["Accepted", "success"],
     REJECTED: ["Rejected", "error"],
@@ -422,7 +435,7 @@ const AntibodiesTable = (props: any) => {
     setSortModel,
     totalElements
   } =
-    useContext(SearchContext);
+    useContext(SearchContext) as SearchContextProps;
 
   const applyFilterAndSortModels = useCallback((filtermodel, query, sortmodel = sortModel) => {
     // Also does the applyFilterAndSortModels from the CustomFilterPanel - when apply button is clicked
@@ -467,22 +480,32 @@ const AntibodiesTable = (props: any) => {
     }
   }, [filterModel, setNewFilterColumn]);
 
+
+  const activeSearchRef = React.useRef(activeSearch);
+  activeSearchRef.current = activeSearch;
+
+  const filterModelRef = React.useRef(filterModel);
+  filterModelRef.current = filterModel;
+
+  const sortModelRef = React.useRef(sortModel);
+  sortModelRef.current = sortModel;
+
   useEffect(() => {
-    const isSearchInMySubmission = (props.activeTab === MYSUBMISSIONS && activeSearch)
+    const isSearchInMySubmission = (props.activeTab === MYSUBMISSIONS && activeSearchRef.current)
     // NOTE: LOGIC below - if no filters/sortmodel exist or search query exists in my submission - don't proceed, 
     // since this is handled in separate useEffect
-    if (filterModel.items.length > 0 || sortModel.length > 0 || isSearchInMySubmission) {
+    if (filterModelRef.current.items.length > 0 || sortModelRef.current.length > 0 || isSearchInMySubmission) {
       return;
     }
 
-    if (searchQuery || activeSearch) {
-      getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, searchQuery || activeSearch);
+    if (searchQuery || activeSearchRef.current) {
+      getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, searchQuery || activeSearchRef.current);
     } else if (props.activeTab === MYSUBMISSIONS) {
       getAntibodyList(SEARCH_MODES.MY_ANTIBODIES);
     } else {
       getAntibodyList(SEARCH_MODES.ALL_ANTIBODIES);
     }
-  }, [props.activeTab, user, searchQuery]);
+  }, [props.activeTab, user, searchQuery, getAntibodyList]);
 
   useEffect(() => {
     // NOTE: LOGIC below - whenever search query changes and filters exist, then 
@@ -723,7 +746,7 @@ const AntibodiesTable = (props: any) => {
   const NoRowsOverlay = () =>
     typeof activeSearch === "string" &&
       activeSearch !== "" &&
-      searchedAntibodies.length === 0 ? (
+      searchedAntibodies?.length === 0 ? (
         <NotFoundMessage activeSearch={activeSearch} />
       ) : typeof activeSearch !== "string" ? (
         <Error500 />
