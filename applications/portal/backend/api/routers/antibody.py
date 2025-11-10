@@ -280,14 +280,14 @@ def update_user_antibody(
 def get_antibody(request: HttpRequest, antibody_id: int):
     """Get a Antibody"""
     user = request.user
-    if user.is_anonymous:
+    if user.is_anonymous or not user.member:
         antibodies = Antibody.objects.filter(ab_id=antibody_id, status=STATUS.CURATED)
     else:
         antibodies = Antibody.objects.filter(ab_id=antibody_id, uid=user.member.kc_id) 
     
     # If no antibody found by ab_id, try searching by accession
     if not antibodies.exists():
-        if user.is_anonymous:
+        if user.is_anonymous or not user.member:
             antibodies = Antibody.objects.filter(accession=antibody_id, status=STATUS.CURATED)
         else:
             antibodies = Antibody.objects.filter(accession=antibody_id, uid=user.member.kc_id)

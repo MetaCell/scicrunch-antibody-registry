@@ -176,8 +176,8 @@ export const AntibodyDetail = () => {
     <SubHeader>AB_{antibody.abId}</SubHeader>
     <Container id="antibody-detail" maxWidth="lg" sx={{ pb: 2 }}>
       {isRetrievedByAccession && (
-        <Alert severity="info" sx={{ mb: 2 }} className="ab-retrieved-by-accession">
-          No antibody found with ID AB_{abId}. Showing antibody AB_{antibody.abId} instead.
+        <Alert severity="info" sx={{ mt: 2 }} className="ab-retrieved-by-accession">
+          You have been redirected from AB_{abId}, which is now AB_{antibody.abId}.
         </Alert>
       )}
       <Grid container>
