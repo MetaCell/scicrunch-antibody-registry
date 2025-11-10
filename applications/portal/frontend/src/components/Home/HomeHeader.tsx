@@ -56,7 +56,7 @@ const TableHeader = (props: TableHeaderProps) => {
   const showAlert = warningMessage.length > 0;
   return (
     (<Box className="container-home-header">
-      <AppBar elevation={0} sx={{ top: "4.5rem" }}>
+      <AppBar elevation={0} >
         <Container maxWidth="xl">
           <Stack
             direction="column"
