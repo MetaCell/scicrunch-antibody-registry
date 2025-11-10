@@ -94,13 +94,13 @@ export const AntibodyDetail = () => {
       fontSize: "1rem",
     },
   };
-  const { antibody_id } = useParams();
-  const abId = antibody_id.replace("AB_", "").replace("RRID:", "");
+  const { antibody_id } = useParams<{ antibody_id: string }>();
+  const abId = parseInt(antibody_id.replace("AB_", "").replace("RRID:", ""));
   const [antibodies, setAntibodies] = useState<Antibody[]>();
   const [error, setError] = useState<string>();
   const accession = document.location.hash ? document.location.hash.split("#")[1]: abId;
 
-  const antibody = antibodies && (antibodies.find(a => a.accession === accession) || antibodies[0]);
+  const antibody = antibodies && (antibodies.find(a => a.accession?.toString() === accession) || antibodies[0]);
 
   const [anchorCitationPopover, setAnchorCitationPopover] =
     useState<HTMLButtonElement | null>(null);
@@ -171,9 +171,15 @@ export const AntibodyDetail = () => {
     );
   }
   const citation = antibody && getProperCitation(antibody);
+  const isRetrievedByAccession = antibody && abId !== antibody.abId;
   return antibody && (<>
     <SubHeader>AB_{antibody.abId}</SubHeader>
     <Container id="antibody-detail" maxWidth="lg" sx={{ pb: 2 }}>
+      {isRetrievedByAccession && (
+        <Alert severity="info" sx={{ mb: 2 }} className="ab-retrieved-by-accession">
+          No antibody found with ID AB_{abId}. Showing antibody AB_{antibody.abId} instead.
+        </Alert>
+      )}
       <Grid container>
         <Grid size={8}>
           <Stack spacing={3} sx={classes.card}>
@@ -322,7 +328,10 @@ export const AntibodyDetail = () => {
                   onClick={(e) => {
                     e.preventDefault();
                     trackVendorClick(antibody.vendorName ?? "", antibody.vendorId ?? -1);
-                    window.open(antibody.url, "_blank");
+                    if(antibody.url) {
+                      window.open(antibody.url, "_blank");
+                    }
+                    
                   }}
                   className="open-vendor-website-button"
                 >
@@ -424,7 +433,7 @@ export const AntibodyDetail = () => {
       </Grid>
       {antibodies && antibodies.length > 1 && 
       <Alert severity="info" className="ab-duplicates-info">Multiple antibodies have been found for this id: showing accession AB_{antibody.accession}. Other entries:&nbsp;
-        {antibodies.filter((a) => a.accession != accession).map((a, i, arr) => <>
+        {antibodies.filter((a) => a.accession?.toString() != accession).map((a, i, arr) => <>
           <Link href={"#" + a.accession}>
           AB_{a.accession}
           </Link>{i < arr.length - 1 ? ", ": "."}
