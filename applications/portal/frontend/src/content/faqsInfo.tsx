@@ -74,9 +74,9 @@ export const faqsInfo = [
   },
   {
     question: "How can I download data?",
-    answer: <> <b>Humans: </b> Selecting a handful of antibodies and downloading the list is accomplished by clicking the box icon on the left of each antibody.<br />
-      <b>Humans Bulk: </b>Downloading all data in bulk requires API access via <a href="https://scicrunch.org/">scicrunch.org</a> (see above). 
-      We currently do not have a method to access the data via the AntibodyRegistry website. 
+    answer: <><b>Humans: </b> Selecting a handful of antibodies and downloading the list is accomplished by clicking the box icon on the left of each antibody.<br />
+      <b>Humans Bulk: </b>Please go to the <a href="/download">Download</a> section and get the csv file, the file is CC-0 but the fields are limited. 
+      Downloading data in bulk can also be done via the <a href="https://scicrunch.org/">scicrunch.org</a> website which requires API access. 
     </>
   },
   {
