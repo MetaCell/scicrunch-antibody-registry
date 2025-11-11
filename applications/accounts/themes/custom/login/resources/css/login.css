@@ -404,6 +404,7 @@ ul#kc-totp-supported-apps {
 /* Social */
 .kc-social-links {
     margin-top: 20px;
+    padding-inline-start: 0;
 }
 
 .kc-social-provider-logo {
@@ -423,11 +424,6 @@ ul#kc-totp-supported-apps {
     margin-bottom: var(--pf-global--spacer--sm);
     font-size: 15px;
     text-align: center;
-}
-
-.kc-social-provider-name {
-    position: relative;
-    top: 3px;
 }
 
 .kc-social-icon-text {
