@@ -1,6 +1,6 @@
 # Default KC roles
-KC_ADMIN_ROLE = f"portal:administrator"  # admin user
-KC_MANAGER_ROLE = f"portal:manager"  # manager user
+KC_ADMIN_ROLE = f"administrator"  # admin user
+KC_MANAGER_ROLE = f"manager"  # manager user
 KC_USER_ROLE = f"user"  # customer user
 KC_ALL_ROLES = [
     KC_ADMIN_ROLE,
