@@ -19,9 +19,10 @@ def to_camel(string: str) -> str:
 class CamelModelSchema(Schema):
     """Base schema class that converts snake_case field names to camelCase in API responses"""
     
-    class Config(Schema.Config):
-        alias_generator = to_camel
-        populate_by_name = True  # Allow both snake_case and camelCase
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True  # Allow both snake_case and camelCase
+    )
 
 
 class ValidationErrorDetail(Schema):
@@ -227,8 +228,7 @@ class Antibody(AbstractAntibody, AntibodyCoreId):
             return f"{catalog_num} (also {obj.cat_alt})"
         return obj.catalog_num
 
-    class Config(CamelModelSchema.Config):
-        from_attributes = True  # Enable ORM mode for Django models
+    model_config = ConfigDict(from_attributes=True)  # Enable ORM mode for Django models
 
 
 class PaginatedAntibodies(CamelModelSchema):
