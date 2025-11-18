@@ -10,6 +10,7 @@ from django.http import HttpRequest
 from django.shortcuts import redirect
 from django.core.paginator import Paginator
 from django.conf import settings
+from django.db.models import Q
 from cloudharness import log
 
 from api.schemas import (
@@ -281,16 +282,16 @@ def get_antibody(request: HttpRequest, antibody_id: int):
     """Get a Antibody"""
     user = request.user
     if user.is_anonymous:
-        antibodies = Antibody.objects.filter(ab_id=antibody_id, status=STATUS.CURATED)
+        antibodies = Antibody.objects.filter(
+            Q(ab_id=antibody_id) | Q(accession=antibody_id),
+            status=STATUS.CURATED
+        )
     else:
-        antibodies = Antibody.objects.filter(ab_id=antibody_id, uid=user.member.kc_id) 
-    
-    # If no antibody found by ab_id, try searching by accession
-    if not antibodies.exists():
-        if user.is_anonymous:
-            antibodies = Antibody.objects.filter(accession=antibody_id, status=STATUS.CURATED)
-        else:
-            antibodies = Antibody.objects.filter(accession=antibody_id, uid=user.member.kc_id)
+        antibodies = Antibody.objects.filter(
+            Q(ab_id=antibody_id) | Q(accession=antibody_id)
+        ).filter(
+            Q(status=STATUS.CURATED) | Q(uid=user.member.kc_id)
+        )
             
     return list(antibodies.select_related("vendor", "source_organism") \
             .prefetch_related("species", "applications"))
