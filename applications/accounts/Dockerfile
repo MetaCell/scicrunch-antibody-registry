@@ -10,6 +10,6 @@ USER keycloak
 
 # Customize keycloak look
 COPY themes/custom /opt/keycloak/themes/custom
-COPY plugins/* /opt/keycloak/standalone/deployments/
+COPY plugins/* /opt/keycloak/providers/
 ENTRYPOINT [ "/opt/keycloak/bin/kc-entrypoint.sh" ]
 CMD [ "start", "--import-realm", "--health-enabled=true", "--http-enabled=true", "--hostname-strict=false", "--metrics-enabled=true" ]
