@@ -24,6 +24,7 @@ from api.helpers import CamelCaseRouter
 from api.models import Antibody, STATUS
 from api.services.user_service import check_if_user_is_admin
 from api.services.specie_service import get_or_create_specie
+from api.services.application_service import get_or_create_application
 from api.services.export_service import generate_antibodies_csv_file
 from api.utilities.exceptions import AntibodyDataException, DuplicatedAntibody
 from api.utilities.functions import check_if_status_exists_or_curated
@@ -134,6 +135,13 @@ def create_antibody(request: HttpRequest, body: AddAntibody):
         
         antibody.uid = user_id
         antibody.save()
+        
+        # Handle applications many-to-many relation
+        if body.applications:
+            for app_name in body.applications:
+                if app_name:  # Skip empty strings
+                    application, created = get_or_create_application(app_name)
+                    antibody.applications.add(application)
 
         if antibody.accession != antibody.ab_id:
             # Raise DuplicatedAntibody exception which will be handled by the exception handler
@@ -270,6 +278,17 @@ def update_user_antibody(
         
         current_antibody.status = STATUS.QUEUE
         current_antibody.save()
+        
+        # Handle applications many-to-many relation
+        if body.applications is not None:  # Check for None to allow clearing applications
+            # Clear existing applications
+            current_antibody.applications.clear()
+            # Add new applications
+            for app_name in body.applications:
+                if app_name:  # Skip empty strings
+                    application, created = get_or_create_application(app_name)
+                    current_antibody.applications.add(application)
+        
         return 202, current_antibody
     except AntibodyDataException as e:
         raise HttpError(400, {"name": e.field_name, "value": e.field_value})
