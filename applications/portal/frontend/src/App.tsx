@@ -86,26 +86,9 @@ const App = () => {
                 <Footer/>
               </Route>
               <Route exact path="/add" component={Submit} />
-              <Route path="/login" render={() => {
-                // Prevent caching of login page
-                if (typeof document !== 'undefined') {
-                  const meta = document.createElement('meta');
-                  meta.httpEquiv = 'Cache-Control';
-                  meta.content = 'no-cache, no-store, must-revalidate';
-                  document.head.appendChild(meta);
-                  
-                  const metaPragma = document.createElement('meta');
-                  metaPragma.httpEquiv = 'Pragma';
-                  metaPragma.content = 'no-cache';
-                  document.head.appendChild(metaPragma);
-                  
-                  const metaExpires = document.createElement('meta');
-                  metaExpires.httpEquiv = 'Expires';
-                  metaExpires.content = '0';
-                  document.head.appendChild(metaExpires);
-                }
-                return <Redirect to="/" />;
-              }} />
+              <Route path="/login">
+                <Redirect to="/" />
+              </Route>
               <Route path="/oauth/logout">
                 <Redirect to="/" />
               </Route>
