@@ -8,9 +8,10 @@ from django.http import HttpRequest
 from django.conf import settings
 from django.utils.timezone import now
 import dateutil.relativedelta
+from cloudharness import log
 
 from api.schemas import DataInfo, PartnerResponseObject
-from api.models import Antibody, STATUS
+from api.models import Antibody, AntibodyStats, STATUS
 from api.services.partner_service import get_all_partners
 
 
@@ -20,7 +21,15 @@ router = Router()
 @router.get("/datainfo", response=DataInfo, tags=["general"])
 def get_datainfo(request: HttpRequest):
     """Get data information"""
-    total = Antibody.objects.filter(status=STATUS.CURATED).count()
+    # Use cached statistics for fast count
+    try:
+        total = AntibodyStats.objects.filter(status=STATUS.CURATED).values_list('count', flat=True).first()
+        if total is None:
+            # Fallback if stats table is empty
+            total = Antibody.objects.filter(status=STATUS.CURATED).count()
+    except Exception as e:
+        log.warning(f"Failed to get count from AntibodyStats, using direct count: {e}")
+        total = Antibody.objects.filter(status=STATUS.CURATED).count()
     
     # Get last update date
     last_date = now() - dateutil.relativedelta.relativedelta(months=6)

@@ -21,6 +21,7 @@ from api.forms.AntibodyImportForm import AntibodyImportForm
 from api.models import (
     STATUS,
     Antibody,
+    AntibodyStats,
     Application,
     Vendor,
     Specie,
@@ -448,3 +449,18 @@ class VendorAdmin(SimpleHistoryAdmin):
 @admin.register(Partner)
 class PartnerAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(AntibodyStats)
+class AntibodyStatsAdmin(admin.ModelAdmin):
+    """Read-only admin for monitoring cached antibody statistics"""
+    list_display = ('status', 'count', 'last_updated')
+    readonly_fields = ('status', 'count', 'last_updated')
+    
+    def has_add_permission(self, request):
+        # Prevent manual additions - managed by trigger
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        # Allow deletion for manual refresh
+        return True

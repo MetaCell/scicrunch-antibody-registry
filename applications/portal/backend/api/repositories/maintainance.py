@@ -4,6 +4,42 @@ from cloudharness import log
 from api.utilities.functions import catalog_number_chunked
 
 
+def refresh_antibody_stats():
+    """
+    Refresh the antibody statistics cache table for CURATED antibodies only.
+    Runs in a separate thread to avoid blocking the main request.
+    """
+    import threading
+    sync_execution = os.getenv('TEST', False)
+
+    def refresh_stats_thread():
+        log.info("Refreshing antibody stats for CURATED status")
+        try:
+            from api.models import STATUS
+            with connection.cursor() as cursor:
+                # Upsert only CURATED status count
+                cursor.execute("""
+                    INSERT INTO api_antibody_stats (status, count, last_updated)
+                    SELECT %s, COUNT(*), NOW()
+                    FROM api_antibody
+                    WHERE status = %s
+                    ON CONFLICT (status)
+                    DO UPDATE SET 
+                        count = EXCLUDED.count,
+                        last_updated = EXCLUDED.last_updated;
+                """, [STATUS.CURATED, STATUS.CURATED])
+            if not sync_execution:
+                connection.commit()
+            log.info("Antibody stats refreshed successfully")
+        except Exception as e:
+            log.error(f"Error refreshing antibody stats: {e}")
+    
+    if not sync_execution:
+        threading.Thread(target=refresh_stats_thread).start()
+    else:
+        refresh_stats_thread()
+
+
 def refresh_search_view():
     import threading
     sync_execution = os.getenv('TEST', False)
