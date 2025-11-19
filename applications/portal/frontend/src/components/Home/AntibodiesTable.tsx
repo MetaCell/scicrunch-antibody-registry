@@ -8,7 +8,8 @@ import {
   GridCsvExportOptions,
   GridNoRowsOverlay,
   GridColumnVisibilityModel,
-  GridFilterModel
+  GridFilterModel,
+  GridRowSelectionModel
 } from "@mui/x-data-grid";
 import {
   Typography,
@@ -65,6 +66,7 @@ interface CustomToolbarProps {
   activeTab?: string;
   searchedAntibodies?: Antibody[];
   filterModel?: GridFilterModel;
+  rowSelectionModel?: GridRowSelectionModel;
   [key: string]: any; // Allow additional props from DataGrid
 }
 
@@ -72,27 +74,20 @@ const CustomToolbar = (props: CustomToolbarProps) => {
   const { 
     activeTab = ALLRESULTS, 
     searchedAntibodies = [], 
-    filterModel = { items: [] } 
+    filterModel = { items: [] },
+    rowSelectionModel = []
   } = props;
   
-  const [activeSelection, setActiveSelection] = useState(true);
   const searchContext = useContext(SearchContext);
   const warningMessage = searchContext?.warningMessage;
   const apiRef = useGridApiContext();
-  const selectedRows = apiRef.current.getSelectedRows();
 
   const handleExport = (options: GridCsvExportOptions) =>
     apiRef.current.exportDataAsCsv(options);
 
   const showFilterMenu = () => apiRef.current.showFilterPanel();
 
-  useEffect(() => {
-    if (selectedRows.size === 0) {
-      setActiveSelection(false);
-    } else {
-      setActiveSelection(true);
-    }
-  }, [selectedRows]);
+  const activeSelection = rowSelectionModel.length > 0;
 
   return (
     <><TableHeader
@@ -422,6 +417,7 @@ const AntibodiesTable = (props: any) => {
     pageSize: PAGE_SIZE,
     page: 0,
   });
+  const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
 
 
   const {
@@ -713,7 +709,8 @@ const AntibodiesTable = (props: any) => {
     toolbar: {
       activeTab: props.activeTab,
       searchedAntibodies,
-      filterModel
+      filterModel,
+      rowSelectionModel
     },
     noRows: {
       activeSearch: activeSearch,
@@ -739,7 +736,7 @@ const AntibodiesTable = (props: any) => {
         }
       }
     }
-  }), [props.activeTab, searchedAntibodies, filterModel, activeSearch]);
+  }), [props.activeTab, searchedAntibodies, filterModel, activeSearch, rowSelectionModel]);
 
   const [showColumns, setShowColumns] = useState<GridColumnVisibilityModel>(getColumnsToDisplay(columns));
 
@@ -782,6 +779,8 @@ const AntibodiesTable = (props: any) => {
             onSortModelChange={addSortingColumn}
             checkboxSelection
             disableRowSelectionOnClick
+            rowSelectionModel={rowSelectionModel}
+            onRowSelectionModelChange={setRowSelectionModel}
             columnVisibilityModel={showColumns || {}}
             onColumnVisibilityModelChange={setShowColumns}
             getRowHeight={() => "auto"}
