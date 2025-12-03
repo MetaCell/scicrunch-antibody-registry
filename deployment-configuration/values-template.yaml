@@ -12,4 +12,4 @@ backup:
     requests: {cpu: 25m, memory: 32Mi}
   schedule: '0 * * * *'
   suffix: .gz
-  volumesize: 20Gi
+  volumesize: 40Gi
