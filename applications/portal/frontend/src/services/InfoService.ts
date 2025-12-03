@@ -1,6 +1,6 @@
 
 import {
-  DefaultApi,
+  GeneralApi as DefaultApi,
   DataInfo,
   PartnerResponseObject,
 } from "../rest/api";
@@ -8,9 +8,9 @@ import {
 const api = new DefaultApi();
 
 export async function getDataInfo():Promise<DataInfo>{
-  return (await api.datainfoGet()).data;
+  return (await api.apiRoutersGeneralGetDatainfo()).data;
 }
 
 export async function getPartners(): Promise<PartnerResponseObject[]> {
-  return (await api.getPartners()).data;
+  return (await api.apiRoutersGeneralGetPartners()).data;
 }

@@ -2,7 +2,7 @@ import os
 import re
 from random import randint
 from typing import Optional, Tuple
-from api.repositories.maintainance import refresh_search_view
+from api.repositories.maintainance import refresh_search_view, refresh_antibody_stats
 
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector, SearchVectorField
@@ -304,6 +304,8 @@ class Antibody(models.Model):
         # We need to merge the data in a smart way
         old_instance = Antibody.objects.filter(pk=self.pk).first()
         old_species = self.species_from_raw(old_instance.target_species_raw) if old_instance else set()
+        old_status = old_instance.status if old_instance else None
+        status_changed = old_status != self.status
 
         super(Antibody, self).save(*args, **kwargs)
 
@@ -320,8 +322,15 @@ class Antibody(models.Model):
         logging.info("Saved antibody %s", self.ab_id)
         if int(self.ab_id) == 0:
             raise Exception(f"Error during antibody id assignment: {self.ix}")
+        
+        # Refresh search view and stats when status is CURATED
         if update_search and self.status == STATUS.CURATED:
             refresh_search_view()
+            refresh_antibody_stats()
+        
+        # Refresh stats when status changes from or to CURATED (to keep counts accurate)
+        elif (status_changed or first_save) and (self.status == STATUS.CURATED or old_status == STATUS.CURATED):
+            refresh_antibody_stats()
 
     def _has_target_species_raw_changed(self, old_instance):
         if old_instance:
@@ -329,9 +338,11 @@ class Antibody(models.Model):
         return self.target_species_raw is not None
 
     def delete(self, *args, **kwargs):
+        status_before_delete = self.status
         super(Antibody, self).delete(*args, **kwargs)
-        if self.status == STATUS.CURATED:
+        if status_before_delete == STATUS.CURATED:
             refresh_search_view()
+            refresh_antibody_stats()
 
     def _generate_automatic_attributes(self, *args, **kwargs):
         """
@@ -650,6 +661,20 @@ class AntibodySearch(models.Model):
                 name='antibody_search_fts_idx'),
 
         ]
+
+
+class AntibodyStats(models.Model):
+    """Cached statistics for antibody counts by status"""
+    status = models.CharField(max_length=STATUS_MAX_LEN, unique=True, db_index=True)
+    count = models.IntegerField(default=0)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'api_antibody_stats'
+        verbose_name_plural = "Antibody Statistics"
+
+    def __str__(self):
+        return f"{self.status}: {self.count}"
 
 
 class Partner(models.Model):

@@ -1,10 +1,9 @@
 from django.test import TestCase
 from api.models import Antibody, STATUS
 from api.management.commands.scicrunch_citation import Command
-from api.services.antibody_service import *
 from unittest.mock import patch
 from api.utilities.exceptions import FetchCitationMetricFailed
-from api.services.ingest_service import RateLimiter
+from api.utilities.rate_limiter import RateLimiter
 import time
 from api.tests.data.test_data import TEST_ANTIBODIES_FOR_SCICRUNCH_CITATION
 

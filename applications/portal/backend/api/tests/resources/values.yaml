@@ -1,0 +1,617 @@
+apps:
+  accounts:
+    accounts:
+      roles: [role1, role2, role3]
+      users:
+      - clientRoles: [role1]
+        realmRoles: [administrator, offline_access]
+        username: sample@testuser.com
+      - clientRoles: [role1]
+        email: sample2@testuser.com
+        password: test1
+        realmRoles: [offline_access]
+        username: samples-test-user2
+    admin: {pass: metacell, role: administrator, user: admin}
+    build: true
+    client: {id: rest-client, secret: 5678eb6e-9e2c-4ee5-bd54-34e7411339e8}
+    enabled: true
+    harness:
+      aliases: []
+      database:
+        auto: true
+        expose: false
+        image_ref: null
+        name: keycloak-postgres
+        image: postgres:17
+        pass: password
+        postgres:
+          
+          initialdb: auth_db
+          ports:
+          - {name: http, port: 5432}
+        resources:
+          limits: {cpu: 1000m, memory: 2Gi}
+          requests: {cpu: 100m, memory: 512Mi}
+        size: 2Gi
+        type: postgres
+        user: user
+      dependencies:
+        build: []
+        hard: []
+        soft: []
+      deployment:
+        auto: true
+        image: areg/accounts:1
+        name: accounts
+        port: 8080
+        replicas: 1
+        resources: &id001
+          limits: {cpu: 2000m, memory: 1024Mi}
+          requests: {cpu: 10m, memory: 512Mi}
+        volume: null
+      domain: null
+      env:
+      - {name: KC_BOOTSTRAP_ADMIN_USERNAME, value: admin}
+      - {name: KC_BOOTSTRAP_ADMIN_PASSWORD, value: metacell}
+      - {name: KC_PROXY_HEADERS, value: xforwarded}
+      - {name: KC_DB, value: postgres}
+      - {name: KC_DB_URL_HOST, value: keycloak-postgres}
+      - {name: KC_DB_URL_DATABASE, value: auth_db}
+      - {name: KC_DB_USERNAME, value: user}
+      - {name: KC_DB_PASSWORD, value: password}
+      - {name: KC_HTTP_ENABLED, value: 'true'}
+      - {name: KC_PROXY, value: edge}
+      - {name: KC_HOSTNAME_STRICT, value: 'false'}
+      - {name: KC_HOSTNAME_STRICT_HTTPS, value: 'false'}
+      - {name: KC_HEALTH_ENABLED, value: 'true'}
+      - {name: KC_METRICS_ENABLED, value: 'true'}
+      - {name: JAVA_OPTS, value: '-server -Xms64m -Xmx896m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m
+          -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman
+          -Djava.awt.headless=true  --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
+          --add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED --add-exports=jdk.unsupported/sun.reflect=ALL-UNNAMED'}
+      livenessProbe: {path: /health/live, port: 9000}
+      name: accounts
+      proxy:
+        gatekeeper:
+          image: quay.io/gogatekeeper/gatekeeper:2.14.3
+          replicas: 1
+          resources:
+            limits: {memory: 64Mi}
+            requests: {memory: 32Mi}
+        payload: {max: null}
+        timeout: {keepalive: null, read: null, send: null}
+      readinessProbe: {path: /health/ready, port: 9000}
+      resources:
+      - {dst: /opt/keycloak/data/import/realm.json, name: realm-config, src: realm.json}
+      secrets: {api_user_password: ''}
+      secured: false
+      sentry: false
+      service: {auto: true, name: accounts, port: 8080}
+      startupProbe: {path: /health/started, port: 9000}
+      subdomain: accounts
+      test:
+        api:
+          autotest: true
+          checks: [all]
+          enabled: false
+          runParams: []
+        e2e: {enabled: false, ignoreConsoleErrors: false, ignoreRequestErrors: false,
+          smoketest: true}
+        unit:
+          commands: []
+          enabled: true
+      uri_role_mapping:
+      - roles: [administrator]
+        uri: /*
+      - {uri: /api/openapi.json, white-listed: true}
+      - {uri: /openapi.json, white-listed: true}
+      use_services: []
+    harvest: true
+    image: areg/accounts:1
+    name: accounts
+    port: 8080
+    resources: *id001
+    task-images: {}
+    webclient: {id: web-client, secret: 452952ae-922c-4766-b912-7b106271e34b}
+  accounts-api:
+    build: true
+    harness:
+      aliases: []
+      dependencies:
+        build: [cloudharness-base, cloudharness-flask]
+        hard: [accounts]
+        soft: []
+      deployment:
+        auto: true
+        image: areg/accounts-api:1
+        name: accounts-api
+        port: 8080
+        replicas: 1
+        resources: &id002
+          limits: {cpu: 500m, memory: 500Mi}
+          requests: {cpu: 10m, memory: 32Mi}
+        volume: null
+      domain: null
+      livenessProbe: {path: /api/live}
+      name: accounts-api
+      proxy:
+        gatekeeper:
+          image: quay.io/gogatekeeper/gatekeeper:2.14.3
+          replicas: 1
+          resources:
+            limits: {memory: 64Mi}
+            requests: {memory: 32Mi}
+        payload: {max: null}
+        timeout: {keepalive: null, read: null, send: null}
+      readinessProbe: {path: /api/ready}
+      secrets: {}
+      secured: false
+      sentry: false
+      service: {auto: true, name: accounts-api, port: 8080}
+      subdomain: api.accounts
+      test:
+        api:
+          autotest: true
+          checks: [all]
+          enabled: false
+          runParams: []
+        e2e: {enabled: false, ignoreConsoleErrors: false, ignoreRequestErrors: false,
+          smoketest: true}
+        unit:
+          commands: []
+          enabled: true
+      uri_role_mapping:
+      - roles: [administrator]
+        uri: /*
+      - {uri: /api/openapi.json, white-listed: true}
+      - {uri: /openapi.json, white-listed: true}
+      use_services: []
+    image: areg/accounts-api:1
+    name: accounts-api
+    port: 8080
+    resources: *id002
+    task-images: {cloudharness-base: 'cloud-harness/cloudharness-base:1', cloudharness-flask: 'cloud-harness/cloudharness-flask:1'}
+  argo:
+    build: true
+    harness:
+      aliases: []
+      dependencies:
+        build: []
+        hard: []
+        soft: []
+      deployment:
+        auto: false
+        image: null
+        name: argo
+        port: 8080
+        replicas: 1
+        resources: &id003
+          limits: {cpu: 500m, memory: 500Mi}
+          requests: {cpu: 10m, memory: 32Mi}
+        volume: null
+      domain: null
+      name: argo
+      proxy:
+        gatekeeper:
+          image: quay.io/gogatekeeper/gatekeeper:2.14.3
+          replicas: 1
+          resources:
+            limits: {memory: 64Mi}
+            requests: {memory: 32Mi}
+        payload: {max: null}
+        timeout: {keepalive: null, read: null, send: null}
+      secrets: {}
+      secured: true
+      sentry: false
+      service: {auto: false, name: argo-server, port: 2746}
+      subdomain: argo
+      test:
+        api:
+          autotest: true
+          checks: [all]
+          enabled: false
+          runParams: []
+        e2e: {enabled: false, ignoreConsoleErrors: false, ignoreRequestErrors: false,
+          smoketest: true}
+        unit:
+          commands: []
+          enabled: true
+      uri_role_mapping:
+      - roles: [administrator]
+        uri: /*
+      - {uri: /api/openapi.json, white-listed: true}
+      - {uri: /openapi.json, white-listed: true}
+      use_services: []
+    image: null
+    name: argo
+    port: 8080
+    resources: *id003
+    serviceaccount: argo-workflows
+    task-images: {}
+  common:
+    build: true
+    harness:
+      aliases: []
+      dependencies:
+        build: [cloudharness-flask]
+        hard: []
+        soft: []
+      deployment:
+        auto: true
+        image: cloud-harness/common:1
+        name: common
+        port: 8080
+        replicas: 1
+        resources: &id004
+          limits: {cpu: 200m, memory: 256Mi}
+          requests: {cpu: 50m, memory: 128Mi}
+        volume: null
+      domain: null
+      env:
+      - {name: SENTRY_DSN, value: 'https://57b1ca8a70634782bd6c90dd119eeab5@o4506739169951744.ingest.sentry.io/4506758817382404'}
+      name: common
+      proxy:
+        gatekeeper:
+          image: quay.io/gogatekeeper/gatekeeper:2.14.3
+          replicas: 1
+          resources:
+            limits: {memory: 64Mi}
+            requests: {memory: 32Mi}
+        payload: {max: null}
+        timeout: {keepalive: null, read: null, send: null}
+      secrets: {}
+      secured: false
+      sentry: false
+      service: {auto: true, name: common, port: 8080}
+      subdomain: common
+      test:
+        api:
+          autotest: true
+          checks: [all]
+          enabled: true
+          runParams: []
+        e2e: {enabled: false, ignoreConsoleErrors: false, ignoreRequestErrors: false,
+          smoketest: true}
+        unit:
+          commands: []
+          enabled: true
+      uri_role_mapping:
+      - roles: [administrator]
+        uri: /*
+      - {uri: /api/openapi.json, white-listed: true}
+      - {uri: /openapi.json, white-listed: true}
+      use_services: []
+    image: cloud-harness/common:1
+    name: common
+    port: 8080
+    resources: *id004
+    task-images: {cloudharness-flask: 'cloud-harness/cloudharness-flask:1'}
+  events:
+    build: true
+    harness:
+      aliases: []
+      dependencies:
+        build: []
+        hard: []
+        soft: []
+      deployment:
+        auto: false
+        image: null
+        name: events
+        port: 8080
+        replicas: 1
+        resources: &id005
+          limits: {cpu: 500m, memory: 500Mi}
+          requests: {cpu: 10m, memory: 32Mi}
+        volume: null
+      domain: null
+      env:
+      - {name: ZK_HOSTS, value: 'zookeeper:2181'}
+      name: events
+      proxy:
+        gatekeeper:
+          image: quay.io/gogatekeeper/gatekeeper:2.14.3
+          replicas: 1
+          resources:
+            limits: {memory: 64Mi}
+            requests: {memory: 32Mi}
+        payload: {max: null}
+        timeout: {keepalive: null, read: null, send: null}
+      secrets: {}
+      secured: false
+      sentry: false
+      service: {auto: false, name: events-ui, port: 80}
+      subdomain: events
+      test:
+        api:
+          autotest: true
+          checks: [all]
+          enabled: false
+          runParams: []
+        e2e: {enabled: true, ignoreConsoleErrors: false, ignoreRequestErrors: false,
+          smoketest: true}
+        unit:
+          commands: []
+          enabled: true
+      uri_role_mapping:
+      - roles: [administrator]
+        uri: /*
+      - {uri: /api/openapi.json, white-listed: true}
+      - {uri: /openapi.json, white-listed: true}
+      use_services: []
+    image: null
+    kafka:
+      name: bootstrap
+      port: 9092
+      resources:
+        limits: {cpu: 500m, memory: 600Mi}
+        requests: {cpu: 50m, memory: 100Mi}
+      storage: 100Mi
+    name: events
+    port: 8080
+    pzoo:
+      resources:
+        limits: {memory: 500Mi}
+        requests: {cpu: 10m, memory: 100Mi}
+      storage: 1Gi
+    resources: *id005
+    task-images: {}
+    zoo:
+      resources:
+        limits: {memory: 500Mi}
+        requests: {cpu: 10m, memory: 100Mi}
+      storage: 1Gi
+  pgadmin:
+    build: true
+    harness:
+      aliases: []
+      dependencies:
+        build: []
+        hard: []
+        soft: []
+      deployment:
+        auto: false
+        image: null
+        name: pgadmin
+        port: 8080
+        replicas: 1
+        resources: &id006
+          limits: {cpu: 500m, memory: 500Mi}
+          requests: {cpu: 10m, memory: 32Mi}
+        volume: null
+      domain: null
+      name: pgadmin
+      proxy:
+        gatekeeper:
+          image: quay.io/gogatekeeper/gatekeeper:2.14.3
+          replicas: 1
+          resources:
+            limits: {memory: 64Mi}
+            requests: {memory: 32Mi}
+        payload: {max: null}
+        timeout: {keepalive: null, read: null, send: null}
+      secrets: {}
+      secured: false
+      sentry: false
+      service: {auto: false, name: areg-pgadmin, port: 80}
+      subdomain: pg
+      test:
+        api:
+          autotest: true
+          checks: [all]
+          enabled: false
+          runParams: []
+        e2e: {enabled: false, ignoreConsoleErrors: false, ignoreRequestErrors: false,
+          smoketest: true}
+        unit:
+          commands: []
+          enabled: true
+      uri_role_mapping:
+      - roles: [administrator]
+        uri: /*
+      - {uri: /api/openapi.json, white-listed: true}
+      - {uri: /openapi.json, white-listed: true}
+      use_services: []
+    image: null
+    name: pgadmin
+    port: 8080
+    resources: *id006
+    task-images: {}
+  portal:
+    build: true
+    export_all_fields_query: WITH applications_subquery AS (SELECT ix, string_agg(api_application.name,
+      ', ') as applications FROM api_antibody LEFT JOIN api_antibodyapplications on
+      api_antibodyapplications.antibody_id = api_antibody.ix LEFT JOIN api_application
+      on api_application.id = api_antibodyapplications.application_id GROUP BY ix)
+      SELECT api_antibody.ix, 'AB_' || ab_id as rrid, ab_name, accession, api_antibody.commercial_type,
+      uid, uid_legacy, catalog_num, catalog_num_search, cat_alt, api_vendor.vendor
+      as vendor_name, api_vendor.vendor || ' Cat# ' || catalog_num || ', RRID:AB_'
+      || ab_id AS proper_citation, url, ab_target, ab_target_entrez_gid, uniprot_id,
+      target_species_raw, target_subregion, target_modification, applications_subquery.applications,
+      epitope, api_specie.name as source_organism, clonality, clone_id, product_isotype,
+      product_conjugate, defining_citation, product_form, comments, kit_contents,
+      feedback, curator_comment, disc_date, status, insert_time, lastedit_time, curate_time,
+      api_antibody.show_link FROM api_antibody LEFT JOIN api_vendor on api_vendor.id
+      = vendor_id LEFT JOIN api_specie on api_specie.id = api_antibody.source_organism_id
+      LEFT JOIN applications_subquery on applications_subquery.ix = api_antibody.ix
+      WHERE true
+    export_query: SELECT 'AB_' || ab_id as rrid, ab_name, catalog_num, cat_alt, api_vendor.vendor
+      as vendor_name, api_vendor.vendor || ' Cat# ' || catalog_num || ', RRID:AB_'
+      || ab_id AS proper_citation from api_antibody LEFT JOIN api_vendor on api_vendor.id
+      = vendor_id WHERE true
+    harness:
+      accounts:
+        roles: ['portal:administrator', 'portal:manager']
+        users:
+        - clientRoles: [administrator, 'portal:administrator']
+          email: admin@testuser.com
+          realmRoles: [administrator]
+          username: admin
+        - clientRoles: [manager, 'portal:manager']
+          email: manager@testuser.com
+          username: manager
+      aliases: []
+      database:
+        auto: true
+        expose: false
+        image_ref: null
+        name: portal-db
+        pass: metacell
+        postgres:
+          image: postgres:13
+          initialdb: antibody_registry
+          ports:
+          - {name: http, port: 5432}
+        resources:
+          limits: {cpu: 4, memory: 4Gi}
+          requests: {cpu: 10m, memory: 200Mi}
+        size: 10Gi
+        type: postgres
+        user: mnp
+      dependencies:
+        build: [cloudharness-django]
+        hard: [common, events, accounts, argo]
+        soft: [pgadmin, accounts-api]
+      deployment:
+        auto: true
+        image: areg/portal:1
+        name: portal
+        port: 80
+        replicas: 1
+        resources: &id007
+          limits: {cpu: 2, memory: 2Gi}
+          requests: {cpu: 50m, memory: 0.6Gi}
+        volume: {auto: true, mountpath: /usr/src/app/persistent, name: areg-persistent-files,
+          size: 5Gi, usenfs: false}
+      domain: null
+      envmap: {WORKERS: 2}
+      livenessProbe: {path: /api/live}
+      name: portal
+      proxy:
+        gatekeeper:
+          image: quay.io/gogatekeeper/gatekeeper:2.14.3
+          replicas: 1
+          resources:
+            limits: {memory: 64Mi}
+            requests: {memory: 32Mi}
+        payload: {max: 10}
+        timeout: {keepalive: 99999, read: 99999, send: 99999}
+      readinessProbe: {path: /api/ready}
+      resources:
+      - {dst: /etc/nginx/nginx.conf, name: nginx-config, src: nginx.conf}
+      - {dst: /etc/supervisor/conf.d/supervisord.properties, name: supervisord-config,
+        src: supervisord.properties}
+      secrets: {scicrunch-api-key: sjshkjdjkdkjh}
+      secured: open
+      sentry: false
+      service: {auto: true, name: portal, port: 8080}
+      subdomain: www
+      test:
+        api:
+          autotest: true
+          checks: [all]
+          enabled: false
+          runParams: []
+        e2e: {enabled: true, ignoreConsoleErrors: false, ignoreRequestErrors: false,
+          smoketest: false}
+        unit:
+          commands: []
+          enabled: true
+      uri_role_mapping:
+      - roles: [administrator]
+        uri: /admin/*
+      - roles: []
+        uri: /api/antibodies/export
+      - require-any-role: true
+        roles: [administrator]
+        uri: /admin
+      - require-any-role: true
+        roles: []
+        uri: /add
+      - require-any-role: false
+        roles: []
+        uri: /submissions
+      - require-any-role: true
+        roles: []
+        uri: /login
+      - {uri: /, white-listed: true}
+      - roles: [administrator]
+        uri: /metrics
+      use_services:
+      - {name: common}
+      - {name: accounts-api}
+    image: areg/portal:1
+    name: portal
+    port: 80
+    resources: *id007
+    scicrunch:
+      cronjob: {max_requests_per_second: 10, schedule: 0 1 * * 6}
+    sentry:
+      sample_rate: 1.0
+      traces_sample_rate: 0
+      traces_sample_rate_patterns: {/admin/: 0, /api/: 0}
+      traces_sample_rate_resources: 0
+    task-images: {cloudharness-django: 'cloud-harness/cloudharness-django:1'}
+backup:
+  active: false
+  dir: /backups
+  keep_days: '7'
+  keep_months: '6'
+  keep_weeks: '4'
+  resources:
+    limits: {cpu: 50m, memory: 64Mi}
+    requests: {cpu: 25m, memory: 32Mi}
+  schedule: 0 * * * *
+  suffix: .gz
+  volumesize: 20Gi
+build_hash: cfa2808
+debug: true
+domain: areg
+env:
+- {name: CH_VERSION, value: 2.5.0}
+- {name: CH_ARGO_SUBDOMAIN, value: argo}
+- {name: CH_ARGO_NAME, value: argo}
+- {name: CH_COMMON_SUBDOMAIN, value: common}
+- {name: CH_COMMON_NAME, value: common}
+- {name: CH_PORTAL_SUBDOMAIN, value: www}
+- {name: CH_PORTAL_NAME, value: portal}
+- {name: CH_ACCOUNTS_SUBDOMAIN, value: accounts}
+- {name: CH_ACCOUNTS_NAME, value: accounts}
+- {name: CH_PGADMIN_SUBDOMAIN, value: pg}
+- {name: CH_PGADMIN_NAME, value: pgadmin}
+- {name: CH_EVENTS_SUBDOMAIN, value: events}
+- {name: CH_EVENTS_NAME, value: events}
+- {name: CH_ACCOUNTS_API_SUBDOMAIN, value: api.accounts}
+- {name: CH_ACCOUNTS_API_NAME, value: accounts-api}
+- {name: CH_DOMAIN, value: areg}
+- {name: CH_IMAGE_REGISTRY, value: ''}
+- {name: CH_IMAGE_TAG, value: '1'}
+ingress:
+  enabled: true
+  letsencrypt: {email: cloudharness@metacell.us}
+  name: cloudharness-ingress
+  ssl_redirect: false
+local: true
+mainapp: areg-portal
+name: areg
+namespace: areg
+privenv:
+- {name: CH_SECRET, value: In God we trust; all others must bring data. ― W. Edwards
+    Deming}
+proxy:
+  forwardedHeaders: true
+  gatekeeper:
+    image: quay.io/gogatekeeper/gatekeeper:2.14.3
+    replicas: 1
+    resources:
+      limits: {memory: 64Mi}
+      requests: {memory: 32Mi}
+  payload: {max: 250}
+  timeout: {keepalive: 60, read: 60, send: 60}
+registry: {name: '', secret: ''}
+secured_gatekeepers: false
+tag: '1'
+task-images: {cloudharness-base: 'cloud-harness/cloudharness-base:1', cloudharness-django: 'cloud-harness/cloudharness-django:1',
+  cloudharness-flask: 'cloud-harness/cloudharness-flask:1'}
+test-images: {test-api: 'cloud-harness/test-api:1', test-e2e: 'cloud-harness/test-e2e:1'}
+tls: false

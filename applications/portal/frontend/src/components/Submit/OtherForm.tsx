@@ -161,7 +161,7 @@ const OtherForm = ({ setAntibodyId, setApiResponse, next, previous, hasPrevious 
 
 
   const postAntibody = (antibody) => {
-    let ab = { ...antibody, type: "other" };
+    const ab = { ...antibody, type: "other" };
     postNewAntibody(ab, setAntibodyId, setApiResponse, next);
   };
 

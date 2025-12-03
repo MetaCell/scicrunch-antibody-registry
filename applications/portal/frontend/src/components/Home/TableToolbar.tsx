@@ -90,7 +90,7 @@ const TableToolbar = ({ showFilterMenu, activeTab, filterModel }) => {
           </Button>
           
           
-          <GridToolbarColumnsButton slotProps={{ button: { size: 'medium', color: 'info' }}} />
+          <GridToolbarColumnsButton slotProps={{ button: { size: 'medium', color: 'info' } }} />
           
         </Stack>
       </Box>

@@ -1,4 +1,4 @@
-from openapi.models import FilterRequest, KeyValuePair, KeyValueArrayPair, Operation
+from api.schemas import FilterRequest, KeyValuePair, KeyValueArrayPair, OperationEnum
 
 
 CONTAINS_FILTER: KeyValuePair = KeyValuePair(key="ab_name", value="sars")
@@ -8,29 +8,29 @@ INCOMPLETE_TEST_FILTER_AND_SEARCH_REQUEST_BODY: FilterRequest = FilterRequest(
     search="",
     contains=[CONTAINS_FILTER],
     equals=[],
-    startsWith=[],
-    endsWith=[],
-    isNotEmpty=[],
-    isAnyOf=[IS_ANY_OF_FILTER],
+    starts_with=[],
+    ends_with=[],
+    is_not_empty=[],
+    is_any_of=[IS_ANY_OF_FILTER],
     size=10,
     page=1,
-    sortOn=[],
+    sort_on=[],
 )
 
 COMPLETE_TEST_FILTER_AND_SEARCH_REQUEST_BODY: FilterRequest = FilterRequest(
     search="",
     contains=[],
     equals=[],
-    startsWith=[],
-    endsWith=[],
-    isEmpty=[],
-    isNotEmpty=[],
-    isAnyOf=[],
+    starts_with=[],
+    ends_with=[],
+    is_empty=[],
+    is_not_empty=[],
+    is_any_of=[],
     size=10,
     page=1,
-    sortOn=[],
-    operation=Operation.and_,
-    isUserScope=False,
+    sort_on=[],
+    operation=OperationEnum.and_,
+    is_user_scope=False,
 )
 
 example_ab = {

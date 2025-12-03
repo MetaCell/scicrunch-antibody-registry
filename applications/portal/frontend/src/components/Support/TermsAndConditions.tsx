@@ -56,11 +56,11 @@ const termsArray=[{
 
 `,
   content2:<>
-<li>upload, post, email, transmit or otherwise make available any information, materials or other content that is illegal, harmful, threatening, abusive, harassing, defamatory, obscene, pornographic, or offensive; or that infringes another's rights, including any intellectual property rights;</li>
-<li>impersonate any person or entity or falsely state or otherwise misrepresent your affiliation with a person or entity; or obtain, collect, store or modify personal information about other users;</li>
-<li>upload, post, email, transmit or otherwise make available any unsolicited or unauthorized advertising, promotional materials, "junk mail," "spam," "chain letters," "pyramid schemes," or any other form of solicitation;</li>
-<li>modify, adapt or hack the The Antibody Registry's Sites/Services or falsely imply that some other site or service is associated with The Antibody Registry's Sites/Services or The Antibody Registry's; or</li>
-<li>use the The Antibody Registry's Sites/Services for any illegal or unauthorized purpose. You must not, in the use of The Antibody Registry's Sites/Services, violate any laws in your jurisdiction (including but not limited to copyright laws).</li></> },
+    <li>upload, post, email, transmit or otherwise make available any information, materials or other content that is illegal, harmful, threatening, abusive, harassing, defamatory, obscene, pornographic, or offensive; or that infringes another's rights, including any intellectual property rights;</li>
+    <li>impersonate any person or entity or falsely state or otherwise misrepresent your affiliation with a person or entity; or obtain, collect, store or modify personal information about other users;</li>
+    <li>upload, post, email, transmit or otherwise make available any unsolicited or unauthorized advertising, promotional materials, "junk mail," "spam," "chain letters," "pyramid schemes," or any other form of solicitation;</li>
+    <li>modify, adapt or hack the The Antibody Registry's Sites/Services or falsely imply that some other site or service is associated with The Antibody Registry's Sites/Services or The Antibody Registry's; or</li>
+    <li>use the The Antibody Registry's Sites/Services for any illegal or unauthorized purpose. You must not, in the use of The Antibody Registry's Sites/Services, violate any laws in your jurisdiction (including but not limited to copyright laws).</li></> },
 {
   title:'Violation of these Terms of Use',
   content:`The Antibody Registry reserves the right to investigate and prosecute violations of any of these Terms of Use to the fullest extent of the law. The Antibody Registry may involve and cooperate with law enforcement authorities in prosecuting users who violate the Terms of Use. You acknowledge that The Antibody Registry has no obligation to pre-screen or monitor your access to or use of The Antibody Registry's Sites/Services or any information, materials or other content provided or made available through the The Antibody Registry's Sites/Services, but has the right to do so. You hereby agree that The Antibody Registry may, in the exercise of The Antibody Registry's sole discretion, remove or delete any entries, information, materials or other content that violates these Terms of Use or that is otherwise objectionable.`
@@ -127,8 +127,8 @@ These "Terms of Use" were adapted from the PLoS Terms of Use which are licensed 
     <li>type of browser software and operating system used to access The Antibody Registry's services;</li>
     <li>date and time of your visit;</li>
     <li>identity of pages you visit;</li>
- <br/>
-  <span>This data enables us to become more familiar with which customers visit our site, how often they visit, and what parts of the site they visit most often. The Antibody Registry uses this information to improve its Web-based offerings and services. This information is collected automatically and requires no action on your part.</span>
+    <br/>
+    <span>This data enables us to become more familiar with which customers visit our site, how often they visit, and what parts of the site they visit most often. The Antibody Registry uses this information to improve its Web-based offerings and services. This information is collected automatically and requires no action on your part.</span>
   </>
 },
 {
@@ -143,10 +143,10 @@ These "Terms of Use" were adapted from the PLoS Terms of Use which are licensed 
   url:'https://www.scicrunch.com/contact',
   link:'contact us.',
   content2:<>
-  <br/><br/>
-  <span>The Privacy Statement posted on this site was updated on or about March 10, 2017, (Version 1.0).</span>
-  <br/><br/>
-  <span>This Privacy Policy was adapted from the PLoS Privacy Policy which is licensed under a <Link href='https://creativecommons.org/licenses/by/2.5/'>Creative Commons Attribution License</Link></span></>
+    <br/><br/>
+    <span>The Privacy Statement posted on this site was updated on or about March 10, 2017, (Version 1.0).</span>
+    <br/><br/>
+    <span>This Privacy Policy was adapted from the PLoS Privacy Policy which is licensed under a <Link href='https://creativecommons.org/licenses/by/2.5/'>Creative Commons Attribution License</Link></span></>
 }]
 
 const TermsAndConditions = () => {

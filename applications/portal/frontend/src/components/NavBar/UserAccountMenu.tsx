@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
-import { ThreeDotsIcon, UserIcon, LogoutIcon, CubeIcon } from "../icons";
+import { ThreeDotsIcon, UserIcon, LogoutIcon } from "../icons";
 
 import { User } from "../../services/UserService"
 

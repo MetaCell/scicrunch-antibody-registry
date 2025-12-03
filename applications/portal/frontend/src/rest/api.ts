@@ -13,739 +13,90 @@
  */
 
 
-import { Configuration } from './configuration';
-import globalAxios, { AxiosPromise, AxiosInstance, AxiosRequestConfig } from 'axios';
+import type { Configuration } from './configuration';
+import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
+import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
 import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from './common';
+import type { RequestArgs } from './base';
 // @ts-ignore
-import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } from './base';
+import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
 
 /**
- * The common fields between all REST operations for the antibody resource.
- * @export
- * @interface AbstractAntibody
- */
-export interface AbstractAntibody {
-    /**
-     * Can include the following options: Unknown, Cocktail, Control, Isotype Control, Monoclonal, Monoclonal Secondary, Polyclonal, Polyclonal Secondary, Oligoclonal, Recombinant, Recombinant Monoclonal, Recombinant Monoclonal Secondary, Recombinant Polyclonal, Recombinant Polyclonal Secondary
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'clonality'?: AbstractAntibodyClonalityEnum;
-    /**
-     * The AA sequence that the antibody reagent binds to
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'epitope'?: string;
-    /**
-     * A free text comment.
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'comments'?: string;
-    /**
-     * Link to more information about the antibody. For personal antibodies this usually lists the the principal investigator\'s lab website or university affiliation.
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'url'?: string;
-    /**
-     * Name provided by the company or the investigator; this does not need to be unique.
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'abName'?: string;
-    /**
-     * The symbol of the antigen molecule that the antibody was raised against.
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'abTarget'?: string;
-    /**
-     * The identifier given by the manufacturer or creator of monoclonal antibodies, typically associated with the cell line name.
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'cloneId'?: string;
-    /**
-     * Can include the following: commercial, non-profit, personal, other
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'commercialType'?: AbstractAntibodyCommercialTypeEnum;
-    /**
-     * The manuscript that describes the creation of the antibody. 
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'definingCitation'?: string;
-    /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'productConjugate'?: string;
-    /**
-     * The formulation of the antibody product. Can include: Lyophilized, Affinity purified, Liquid
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'productForm'?: string;
-    /**
-     * Can include the following: IgG, IgY, IgA, IgM as well as the IgG subtypes
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'productIsotype'?: string;
-    /**
-     * The organism that the antibody was raised in; common antibodies are raised in goat, rabbit or mouse. Synthetic or bacterial origins can be noted for recombinant antibodies. 
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'sourceOrganism'?: string;
-    /**
-     * The species associated with the antigen molecule. Multiple species are specified as a comma separated string
-     * @type {Array<string>}
-     * @memberof AbstractAntibody
-     */
-    'targetSpecies'?: Array<string>;
-    /**
-     * Protein identifier from UNIPROT 
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'uniprotId'?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof AbstractAntibody
-     */
-    'applications'?: Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'kitContents'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'abTargetEntrezId'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AbstractAntibody
-     */
-    'abTargetUniprotId'?: string;
-    /**
-     * Number of citation for an Antibody - kept track using cronjob from scicrunch.
-     * @type {number}
-     * @memberof AbstractAntibody
-     */
-    'numOfCitation'?: number;
-}
-
-export const AbstractAntibodyClonalityEnum = {
-    Unknown: 'unknown',
-    Cocktail: 'cocktail',
-    Control: 'control',
-    IsotypeControl: 'isotype control',
-    Monoclonal: 'monoclonal',
-    MonoclonalSecondary: 'monoclonal secondary',
-    Polyclonal: 'polyclonal',
-    PolyclonalSecondary: 'polyclonal secondary',
-    Oligoclonal: 'oligoclonal',
-    Recombinant: 'recombinant',
-    RecombinantMonoclonal: 'recombinant monoclonal',
-    RecombinantMonoclonalSecondary: 'recombinant monoclonal secondary',
-    RecombinantPolyclonal: 'recombinant polyclonal',
-    RecombinantPolyclonalSecondary: 'recombinant polyclonal secondary'
-} as const;
-
-export type AbstractAntibodyClonalityEnum = typeof AbstractAntibodyClonalityEnum[keyof typeof AbstractAntibodyClonalityEnum];
-export const AbstractAntibodyCommercialTypeEnum = {
-    Commercial: 'commercial',
-    NonProfit: 'non-profit',
-    Personal: 'personal',
-    Other: 'other'
-} as const;
-
-export type AbstractAntibodyCommercialTypeEnum = typeof AbstractAntibodyCommercialTypeEnum[keyof typeof AbstractAntibodyCommercialTypeEnum];
-
-/**
- * The data type associated with the POST and PUT methods of the antibody resource
- * @export
- * @interface AddAntibody
+ * The data type associated with the POST method of the antibody resource
  */
 export interface AddAntibody {
-    /**
-     * Link to more information about the antibody. For personal antibodies this usually lists the the principal investigator\'s lab website or university affiliation.
-     * @type {string}
-     * @memberof AddAntibody
-     */
+    'catalogNum'?: string | null;
+    'vendorName'?: string | null;
+    'clonality'?: ClonalityEnum | null;
+    'epitope'?: string | null;
+    'comments'?: string | null;
     'url': string;
-    /**
-     * Can include the following options: Unknown, Cocktail, Control, Isotype Control, Monoclonal, Monoclonal Secondary, Polyclonal, Polyclonal Secondary, Oligoclonal, Recombinant, Recombinant Monoclonal, Recombinant Monoclonal Secondary, Recombinant Polyclonal, Recombinant Polyclonal Secondary
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'clonality'?: AddAntibodyClonalityEnum;
-    /**
-     * The AA sequence that the antibody reagent binds to
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'epitope'?: string;
-    /**
-     * A free text comment.
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'comments'?: string;
-    /**
-     * Name provided by the company or the investigator; this does not need to be unique.
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'abName'?: string;
-    /**
-     * The symbol of the antigen molecule that the antibody was raised against.
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'abTarget'?: string;
-    /**
-     * The identifier given by the manufacturer or creator of monoclonal antibodies, typically associated with the cell line name.
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'cloneId'?: string;
-    /**
-     * Can include the following: commercial, non-profit, personal, other
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'commercialType'?: AddAntibodyCommercialTypeEnum;
-    /**
-     * The manuscript that describes the creation of the antibody. 
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'definingCitation'?: string;
-    /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'productConjugate'?: string;
-    /**
-     * The formulation of the antibody product. Can include: Lyophilized, Affinity purified, Liquid
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'productForm'?: string;
-    /**
-     * Can include the following: IgG, IgY, IgA, IgM as well as the IgG subtypes
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'productIsotype'?: string;
-    /**
-     * The organism that the antibody was raised in; common antibodies are raised in goat, rabbit or mouse. Synthetic or bacterial origins can be noted for recombinant antibodies. 
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'sourceOrganism'?: string;
-    /**
-     * The species associated with the antigen molecule. Multiple species are specified as a comma separated string
-     * @type {Array<string>}
-     * @memberof AddAntibody
-     */
-    'targetSpecies'?: Array<string>;
-    /**
-     * Protein identifier from UNIPROT 
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'uniprotId'?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof AddAntibody
-     */
-    'applications'?: Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'kitContents'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'abTargetEntrezId'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'abTargetUniprotId'?: string;
-    /**
-     * Number of citation for an Antibody - kept track using cronjob from scicrunch.
-     * @type {number}
-     * @memberof AddAntibody
-     */
-    'numOfCitation'?: number;
-    /**
-     * For company antibodies, the catalog number of the antibody. For personal/other antibodies, an identifier unique to the antibody.
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'catalogNum'?: string;
-    /**
-     * The name of the company or laboratory for commercial antibodies. The principal investigator name for personal/other antibodies.
-     * @type {string}
-     * @memberof AddAntibody
-     */
-    'vendorName'?: string;
+    'abName'?: string | null;
+    'abTarget'?: string | null;
+    'cloneId'?: string | null;
+    'commercialType'?: CommercialTypeEnum | null;
+    'definingCitation'?: string | null;
+    'productConjugate'?: string | null;
+    'productForm'?: string | null;
+    'productIsotype'?: string | null;
+    'sourceOrganism'?: string | null;
+    'targetSpecies'?: Array<string> | null;
+    'uniprotId'?: string | null;
+    'applications'?: Array<string> | null;
+    'kitContents'?: string | null;
+    'abTargetEntrezId'?: string | null;
+    'abTargetUniprotId'?: string | null;
+    'numOfCitation'?: number | null;
 }
 
-export const AddAntibodyClonalityEnum = {
-    Unknown: 'unknown',
-    Cocktail: 'cocktail',
-    Control: 'control',
-    IsotypeControl: 'isotype control',
-    Monoclonal: 'monoclonal',
-    MonoclonalSecondary: 'monoclonal secondary',
-    Polyclonal: 'polyclonal',
-    PolyclonalSecondary: 'polyclonal secondary',
-    Oligoclonal: 'oligoclonal',
-    Recombinant: 'recombinant',
-    RecombinantMonoclonal: 'recombinant monoclonal',
-    RecombinantMonoclonalSecondary: 'recombinant monoclonal secondary',
-    RecombinantPolyclonal: 'recombinant polyclonal',
-    RecombinantPolyclonalSecondary: 'recombinant polyclonal secondary'
-} as const;
 
-export type AddAntibodyClonalityEnum = typeof AddAntibodyClonalityEnum[keyof typeof AddAntibodyClonalityEnum];
-export const AddAntibodyCommercialTypeEnum = {
-    Commercial: 'commercial',
-    NonProfit: 'non-profit',
-    Personal: 'personal',
-    Other: 'other'
-} as const;
-
-export type AddAntibodyCommercialTypeEnum = typeof AddAntibodyCommercialTypeEnum[keyof typeof AddAntibodyCommercialTypeEnum];
-
-/**
- * 
- * @export
- * @interface AddAntibodyAllOf
- */
-export interface AddAntibodyAllOf {
-    /**
-     * 
-     * @type {string}
-     * @memberof AddAntibodyAllOf
-     */
-    'url': string;
-}
 /**
  * The data type associated with the antibody resource
- * @export
- * @interface Antibody
  */
 export interface Antibody {
-    /**
-     * Thus value is the same as the Antibody identifier for newly added antibodies, different if antibody records have been consolidated or are not unique. 
-     * @type {string}
-     * @memberof Antibody
-     */
-    'accession'?: string;
-    /**
-     * 
-     * @type {AntibodyStatusEnum}
-     * @memberof Antibody
-     */
-    'status'?: AntibodyStatusEnum;
-    /**
-     * Feedback to the submitted stored here
-     * @type {string}
-     * @memberof Antibody
-     */
-    'feedback'?: string;
-    /**
-     * Antibody identifier
-     * @type {string}
-     * @memberof Antibody
-     */
-    'abId'?: string;
-    /**
-     * The alternative catalog numbers for this product, delimited by comma, e.g., 9101S, 9101P, 9191L
-     * @type {string}
-     * @memberof Antibody
-     */
-    'catAlt'?: string;
-    /**
-     * Unix time stamp when the row was last updated
-     * @type {string}
-     * @memberof Antibody
-     */
-    'curateTime'?: string;
-    /**
-     * Curator comment about this reagent 
-     * @type {string}
-     * @memberof Antibody
-     */
-    'curatorComment'?: string;
-    /**
-     * The date on which the antibody product was found to be discontinued
-     * @type {string}
-     * @memberof Antibody
-     */
-    'discDate'?: string;
-    /**
-     * Unix time stamp when the row was inserted.
-     * @type {string}
-     * @memberof Antibody
-     */
-    'insertTime'?: string;
-    /**
-     * Any modification to the target protein
-     * @type {string}
-     * @memberof Antibody
-     */
-    'targetModification'?: string;
-    /**
-     * The subregion of the target protein that the epitope is contained in
-     * @type {string}
-     * @memberof Antibody
-     */
-    'targetSubregion'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Antibody
-     */
-    'vendorId'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Antibody
-     */
-    'lastEditTime'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Antibody
-     */
-    'ix'?: number;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Antibody
-     */
-    'showLink'?: boolean;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof Antibody
-     */
-    'vendorUrl'?: Array<string>;
-    /**
-     * Can include the following options: Unknown, Cocktail, Control, Isotype Control, Monoclonal, Monoclonal Secondary, Polyclonal, Polyclonal Secondary, Oligoclonal, Recombinant, Recombinant Monoclonal, Recombinant Monoclonal Secondary, Recombinant Polyclonal, Recombinant Polyclonal Secondary
-     * @type {string}
-     * @memberof Antibody
-     */
-    'clonality'?: AntibodyClonalityEnum;
-    /**
-     * The AA sequence that the antibody reagent binds to
-     * @type {string}
-     * @memberof Antibody
-     */
-    'epitope'?: string;
-    /**
-     * A free text comment.
-     * @type {string}
-     * @memberof Antibody
-     */
-    'comments'?: string;
-    /**
-     * Link to more information about the antibody. For personal antibodies this usually lists the the principal investigator\'s lab website or university affiliation.
-     * @type {string}
-     * @memberof Antibody
-     */
-    'url'?: string;
-    /**
-     * Name provided by the company or the investigator; this does not need to be unique.
-     * @type {string}
-     * @memberof Antibody
-     */
-    'abName'?: string;
-    /**
-     * The symbol of the antigen molecule that the antibody was raised against.
-     * @type {string}
-     * @memberof Antibody
-     */
-    'abTarget'?: string;
-    /**
-     * The identifier given by the manufacturer or creator of monoclonal antibodies, typically associated with the cell line name.
-     * @type {string}
-     * @memberof Antibody
-     */
-    'cloneId'?: string;
-    /**
-     * Can include the following: commercial, non-profit, personal, other
-     * @type {string}
-     * @memberof Antibody
-     */
-    'commercialType'?: AntibodyCommercialTypeEnum;
-    /**
-     * The manuscript that describes the creation of the antibody. 
-     * @type {string}
-     * @memberof Antibody
-     */
-    'definingCitation'?: string;
-    /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
-     * @type {string}
-     * @memberof Antibody
-     */
-    'productConjugate'?: string;
-    /**
-     * The formulation of the antibody product. Can include: Lyophilized, Affinity purified, Liquid
-     * @type {string}
-     * @memberof Antibody
-     */
-    'productForm'?: string;
-    /**
-     * Can include the following: IgG, IgY, IgA, IgM as well as the IgG subtypes
-     * @type {string}
-     * @memberof Antibody
-     */
-    'productIsotype'?: string;
-    /**
-     * The organism that the antibody was raised in; common antibodies are raised in goat, rabbit or mouse. Synthetic or bacterial origins can be noted for recombinant antibodies. 
-     * @type {string}
-     * @memberof Antibody
-     */
-    'sourceOrganism'?: string;
-    /**
-     * The species associated with the antigen molecule. Multiple species are specified as a comma separated string
-     * @type {Array<string>}
-     * @memberof Antibody
-     */
-    'targetSpecies'?: Array<string>;
-    /**
-     * Protein identifier from UNIPROT 
-     * @type {string}
-     * @memberof Antibody
-     */
-    'uniprotId'?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof Antibody
-     */
-    'applications'?: Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof Antibody
-     */
-    'kitContents'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Antibody
-     */
-    'abTargetEntrezId'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Antibody
-     */
-    'abTargetUniprotId'?: string;
-    /**
-     * Number of citation for an Antibody - kept track using cronjob from scicrunch.
-     * @type {number}
-     * @memberof Antibody
-     */
-    'numOfCitation'?: number;
-    /**
-     * For company antibodies, the catalog number of the antibody. For personal/other antibodies, an identifier unique to the antibody.
-     * @type {string}
-     * @memberof Antibody
-     */
-    'catalogNum'?: string;
-    /**
-     * The name of the company or laboratory for commercial antibodies. The principal investigator name for personal/other antibodies.
-     * @type {string}
-     * @memberof Antibody
-     */
-    'vendorName'?: string;
+    'catalogNum'?: string | null;
+    'vendorName'?: string | null;
+    'clonality'?: ClonalityEnum | null;
+    'epitope'?: string | null;
+    'comments'?: string | null;
+    'url'?: string | null;
+    'abName'?: string | null;
+    'abTarget'?: string | null;
+    'cloneId'?: string | null;
+    'commercialType'?: CommercialTypeEnum | null;
+    'definingCitation'?: string | null;
+    'productConjugate'?: string | null;
+    'productForm'?: string | null;
+    'productIsotype'?: string | null;
+    'sourceOrganism'?: string | null;
+    'targetSpecies'?: Array<string> | null;
+    'uniprotId'?: string | null;
+    'applications'?: Array<string> | null;
+    'kitContents'?: string | null;
+    'abTargetEntrezId'?: string | null;
+    'abTargetUniprotId'?: string | null;
+    'numOfCitation'?: number | null;
+    'accession'?: number | null;
+    'status'?: AntibodyStatusEnum | null;
+    'feedback'?: string | null;
+    'abId'?: number | null;
+    'catAlt'?: string | null;
+    'curateTime'?: string | null;
+    'curatorComment'?: string | null;
+    'discDate'?: string | null;
+    'insertTime'?: string | null;
+    'targetModification'?: string | null;
+    'targetSubregion'?: string | null;
+    'vendorId'?: number | null;
+    'lastEditTime'?: string | null;
+    'ix'?: number | null;
+    'showLink'?: boolean | null;
+    'vendorUrl'?: Array<string> | null;
 }
 
-export const AntibodyClonalityEnum = {
-    Unknown: 'unknown',
-    Cocktail: 'cocktail',
-    Control: 'control',
-    IsotypeControl: 'isotype control',
-    Monoclonal: 'monoclonal',
-    MonoclonalSecondary: 'monoclonal secondary',
-    Polyclonal: 'polyclonal',
-    PolyclonalSecondary: 'polyclonal secondary',
-    Oligoclonal: 'oligoclonal',
-    Recombinant: 'recombinant',
-    RecombinantMonoclonal: 'recombinant monoclonal',
-    RecombinantMonoclonalSecondary: 'recombinant monoclonal secondary',
-    RecombinantPolyclonal: 'recombinant polyclonal',
-    RecombinantPolyclonalSecondary: 'recombinant polyclonal secondary'
-} as const;
 
-export type AntibodyClonalityEnum = typeof AntibodyClonalityEnum[keyof typeof AntibodyClonalityEnum];
-export const AntibodyCommercialTypeEnum = {
-    Commercial: 'commercial',
-    NonProfit: 'non-profit',
-    Personal: 'personal',
-    Other: 'other'
-} as const;
-
-export type AntibodyCommercialTypeEnum = typeof AntibodyCommercialTypeEnum[keyof typeof AntibodyCommercialTypeEnum];
-
-/**
- * 
- * @export
- * @interface AntibodyAllOf
- */
-export interface AntibodyAllOf {
-    /**
-     * Thus value is the same as the Antibody identifier for newly added antibodies, different if antibody records have been consolidated or are not unique. 
-     * @type {string}
-     * @memberof AntibodyAllOf
-     */
-    'accession'?: string;
-    /**
-     * 
-     * @type {AntibodyStatusEnum}
-     * @memberof AntibodyAllOf
-     */
-    'status'?: AntibodyStatusEnum;
-    /**
-     * Feedback to the submitted stored here
-     * @type {string}
-     * @memberof AntibodyAllOf
-     */
-    'feedback'?: string;
-    /**
-     * Antibody identifier
-     * @type {string}
-     * @memberof AntibodyAllOf
-     */
-    'abId'?: string;
-    /**
-     * The alternative catalog numbers for this product, delimited by comma, e.g., 9101S, 9101P, 9191L
-     * @type {string}
-     * @memberof AntibodyAllOf
-     */
-    'catAlt'?: string;
-    /**
-     * Unix time stamp when the row was last updated
-     * @type {string}
-     * @memberof AntibodyAllOf
-     */
-    'curateTime'?: string;
-    /**
-     * Curator comment about this reagent 
-     * @type {string}
-     * @memberof AntibodyAllOf
-     */
-    'curatorComment'?: string;
-    /**
-     * The date on which the antibody product was found to be discontinued
-     * @type {string}
-     * @memberof AntibodyAllOf
-     */
-    'discDate'?: string;
-    /**
-     * Unix time stamp when the row was inserted.
-     * @type {string}
-     * @memberof AntibodyAllOf
-     */
-    'insertTime'?: string;
-    /**
-     * Any modification to the target protein
-     * @type {string}
-     * @memberof AntibodyAllOf
-     */
-    'targetModification'?: string;
-    /**
-     * The subregion of the target protein that the epitope is contained in
-     * @type {string}
-     * @memberof AntibodyAllOf
-     */
-    'targetSubregion'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof AntibodyAllOf
-     */
-    'vendorId'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof AntibodyAllOf
-     */
-    'lastEditTime'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof AntibodyAllOf
-     */
-    'ix'?: number;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof AntibodyAllOf
-     */
-    'showLink'?: boolean;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof AntibodyAllOf
-     */
-    'vendorUrl'?: Array<string>;
-}
-/**
- * Related attributes used to uniquely identify antibodies
- * @export
- * @interface AntibodyCoreId
- */
-export interface AntibodyCoreId {
-    /**
-     * For company antibodies, the catalog number of the antibody. For personal/other antibodies, an identifier unique to the antibody.
-     * @type {string}
-     * @memberof AntibodyCoreId
-     */
-    'catalogNum'?: string;
-    /**
-     * The name of the company or laboratory for commercial antibodies. The principal investigator name for personal/other antibodies.
-     * @type {string}
-     * @memberof AntibodyCoreId
-     */
-    'vendorName'?: string;
-}
-/**
- * 
- * @export
- * @enum {string}
- */
 
 export const AntibodyStatusEnum = {
     Curated: 'CURATED',
@@ -757,406 +108,8 @@ export const AntibodyStatusEnum = {
 export type AntibodyStatusEnum = typeof AntibodyStatusEnum[keyof typeof AntibodyStatusEnum];
 
 
-/**
- * Information about the data in the system
- * @export
- * @interface DataInfo
- */
-export interface DataInfo {
-    /**
-     * The total number of antibodies in the system
-     * @type {number}
-     * @memberof DataInfo
-     */
-    'total': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof DataInfo
-     */
-    'lastupdate': string;
-}
-/**
- * The search request body that allows filtering combinations over multiple columns
- * @export
- * @interface FilterRequest
- */
-export interface FilterRequest {
-    /**
-     * Array of key-value pairs, where key represents the column and value the string that should be contained
-     * @type {Array<KeyValuePair>}
-     * @memberof FilterRequest
-     */
-    'contains'?: Array<KeyValuePair>;
-    /**
-     * Array of key-value pairs, where key represents the column and value the string that should be equalled to
-     * @type {Array<KeyValuePair>}
-     * @memberof FilterRequest
-     */
-    'equals'?: Array<KeyValuePair>;
-    /**
-     * Represents the page requested, considering the size parameter
-     * @type {number}
-     * @memberof FilterRequest
-     */
-    'page'?: number;
-    /**
-     * Corresponds to the cardinality of antibodies requested
-     * @type {number}
-     * @memberof FilterRequest
-     */
-    'size'?: number;
-    /**
-     * The string to use to search for Antibodies
-     * @type {string}
-     * @memberof FilterRequest
-     */
-    'search'?: string;
-    /**
-     * Array of key-value pairs, where key represents the column and value the string that should be ending with
-     * @type {Array<KeyValuePair>}
-     * @memberof FilterRequest
-     */
-    'endsWith'?: Array<KeyValuePair>;
-    /**
-     * Array of key-value pairs, where key represents the column and value the string ascending or descending  Order in the array, matches with the order of sorting filters, index 0 will be used to sort first
-     * @type {Array<KeyValueSortOrderPair>}
-     * @memberof FilterRequest
-     */
-    'sortOn'?: Array<KeyValueSortOrderPair>;
-    /**
-     * Array of key-value pairs, where key represents the column and value the string that should be starting with
-     * @type {Array<KeyValuePair>}
-     * @memberof FilterRequest
-     */
-    'startsWith'?: Array<KeyValuePair>;
-    /**
-     * Array of strings, where string represents the column which should be empty.
-     * @type {Array<string>}
-     * @memberof FilterRequest
-     */
-    'isEmpty'?: Array<string>;
-    /**
-     * Array of strings, where string represents the column which should not be empty.
-     * @type {Array<string>}
-     * @memberof FilterRequest
-     */
-    'isNotEmpty'?: Array<string>;
-    /**
-     * Array of strings, where string represents the column which should not be empty.
-     * @type {Array<KeyValueArrayPair>}
-     * @memberof FilterRequest
-     */
-    'isAnyOf'?: Array<KeyValueArrayPair>;
-    /**
-     * Which operation to perform in the Backend - AND or OR.
-     * @type {string}
-     * @memberof FilterRequest
-     */
-    'operation'?: FilterRequestOperationEnum;
-    /**
-     * Whether to get users antibodies or not.
-     * @type {boolean}
-     * @memberof FilterRequest
-     */
-    'isUserScope'?: boolean;
-}
 
-export const FilterRequestOperationEnum = {
-    And: 'and',
-    Or: 'or'
-} as const;
-
-export type FilterRequestOperationEnum = typeof FilterRequestOperationEnum[keyof typeof FilterRequestOperationEnum];
-
-/**
- * 
- * @export
- * @interface IngestRequest
- */
-export interface IngestRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof IngestRequest
-     */
-    'driveLinkOrId'?: string;
-    /**
-     * Whether to add directly to the current data without reset
-     * @type {boolean}
-     * @memberof IngestRequest
-     */
-    'hot'?: boolean;
-}
-/**
- * Utility type to represent a key-value object, where value is an array. This is helpful when the filter is - isAnyOf, where filter column needs to be matched with multiple strings.
- * @export
- * @interface KeyValueArrayPair
- */
-export interface KeyValueArrayPair {
-    /**
-     * String representation of the key
-     * @type {string}
-     * @memberof KeyValueArrayPair
-     */
-    'key': string;
-    /**
-     * String representation of the value
-     * @type {Array<string>}
-     * @memberof KeyValueArrayPair
-     */
-    'value': Array<string>;
-}
-/**
- * Utility type to represent a key-value object
- * @export
- * @interface KeyValuePair
- */
-export interface KeyValuePair {
-    /**
-     * String representation of the key
-     * @type {string}
-     * @memberof KeyValuePair
-     */
-    'key': string;
-    /**
-     * String representation of the value
-     * @type {string}
-     * @memberof KeyValuePair
-     */
-    'value': string;
-}
-/**
- * Utility type to represent a key-value object, where value is enum - \"asc\" or \"desc\" to describe if the sorting order is ascending or descending. 
- * @export
- * @interface KeyValueSortOrderPair
- */
-export interface KeyValueSortOrderPair {
-    /**
-     * String representation of the key
-     * @type {string}
-     * @memberof KeyValueSortOrderPair
-     */
-    'key': string;
-    /**
-     * String representation of the value
-     * @type {string}
-     * @memberof KeyValueSortOrderPair
-     */
-    'sortorder'?: KeyValueSortOrderPairSortorderEnum;
-}
-
-export const KeyValueSortOrderPairSortorderEnum = {
-    Asc: 'asc',
-    Desc: 'desc'
-} as const;
-
-export type KeyValueSortOrderPairSortorderEnum = typeof KeyValueSortOrderPairSortorderEnum[keyof typeof KeyValueSortOrderPairSortorderEnum];
-
-/**
- * 
- * @export
- * @interface PaginatedAntibodies
- */
-export interface PaginatedAntibodies {
-    /**
-     * 
-     * @type {number}
-     * @memberof PaginatedAntibodies
-     */
-    'page': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof PaginatedAntibodies
-     */
-    'totalElements': number;
-    /**
-     * 
-     * @type {Array<Antibody>}
-     * @memberof PaginatedAntibodies
-     */
-    'items': Array<Antibody>;
-}
-/**
- * Response of the list of partners and related images
- * @export
- * @interface PartnerResponseObject
- */
-export interface PartnerResponseObject {
-    /**
-     * 
-     * @type {string}
-     * @memberof PartnerResponseObject
-     */
-    'name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PartnerResponseObject
-     */
-    'url'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PartnerResponseObject
-     */
-    'image'?: string;
-}
-/**
- * 
- * @export
- * @enum {string}
- */
-
-export const SearchCriteriaOptions = {
-    Contains: 'contains',
-    Equals: 'equals',
-    EndsWith: 'endsWith',
-    StartsWith: 'startsWith',
-    SortOn: 'sortOn',
-    IsEmpty: 'isEmpty',
-    IsNotEmpty: 'isNotEmpty',
-    IsAnyOf: 'isAnyOf',
-    Operation: 'operation',
-    IsUserScope: 'isUserScope',
-    Page: 'page',
-    Size: 'size',
-    Search: 'search'
-} as const;
-
-export type SearchCriteriaOptions = typeof SearchCriteriaOptions[keyof typeof SearchCriteriaOptions];
-
-
-/**
- * The data type associated with the POST and PUT methods of the antibody resource
- * @export
- * @interface UpdateAntibody
- */
-export interface UpdateAntibody {
-    /**
-     * Link to more information about the antibody. For personal antibodies this usually lists the the principal investigator\'s lab website or university affiliation.
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'url': string;
-    /**
-     * Can include the following options: Unknown, Cocktail, Control, Isotype Control, Monoclonal, Monoclonal Secondary, Polyclonal, Polyclonal Secondary, Oligoclonal, Recombinant, Recombinant Monoclonal, Recombinant Monoclonal Secondary, Recombinant Polyclonal, Recombinant Polyclonal Secondary
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'clonality'?: UpdateAntibodyClonalityEnum;
-    /**
-     * The AA sequence that the antibody reagent binds to
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'epitope'?: string;
-    /**
-     * A free text comment.
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'comments'?: string;
-    /**
-     * Name provided by the company or the investigator; this does not need to be unique.
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'abName'?: string;
-    /**
-     * The symbol of the antigen molecule that the antibody was raised against.
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'abTarget'?: string;
-    /**
-     * The identifier given by the manufacturer or creator of monoclonal antibodies, typically associated with the cell line name.
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'cloneId'?: string;
-    /**
-     * Can include the following: commercial, non-profit, personal, other
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'commercialType'?: UpdateAntibodyCommercialTypeEnum;
-    /**
-     * The manuscript that describes the creation of the antibody. 
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'definingCitation'?: string;
-    /**
-     * The molecule that the antibody is conjugated to. This is generally used for secondary antibodies but the field is not restricted as there can be various tags on primary antibodies as well.  
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'productConjugate'?: string;
-    /**
-     * The formulation of the antibody product. Can include: Lyophilized, Affinity purified, Liquid
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'productForm'?: string;
-    /**
-     * Can include the following: IgG, IgY, IgA, IgM as well as the IgG subtypes
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'productIsotype'?: string;
-    /**
-     * The organism that the antibody was raised in; common antibodies are raised in goat, rabbit or mouse. Synthetic or bacterial origins can be noted for recombinant antibodies. 
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'sourceOrganism'?: string;
-    /**
-     * The species associated with the antigen molecule. Multiple species are specified as a comma separated string
-     * @type {Array<string>}
-     * @memberof UpdateAntibody
-     */
-    'targetSpecies'?: Array<string>;
-    /**
-     * Protein identifier from UNIPROT 
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'uniprotId'?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof UpdateAntibody
-     */
-    'applications'?: Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'kitContents'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'abTargetEntrezId'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof UpdateAntibody
-     */
-    'abTargetUniprotId'?: string;
-    /**
-     * Number of citation for an Antibody - kept track using cronjob from scicrunch.
-     * @type {number}
-     * @memberof UpdateAntibody
-     */
-    'numOfCitation'?: number;
-}
-
-export const UpdateAntibodyClonalityEnum = {
+export const ClonalityEnum = {
     Unknown: 'unknown',
     Cocktail: 'cocktail',
     Control: 'control',
@@ -1173,103 +126,164 @@ export const UpdateAntibodyClonalityEnum = {
     RecombinantPolyclonalSecondary: 'recombinant polyclonal secondary'
 } as const;
 
-export type UpdateAntibodyClonalityEnum = typeof UpdateAntibodyClonalityEnum[keyof typeof UpdateAntibodyClonalityEnum];
-export const UpdateAntibodyCommercialTypeEnum = {
+export type ClonalityEnum = typeof ClonalityEnum[keyof typeof ClonalityEnum];
+
+
+
+export const CommercialTypeEnum = {
     Commercial: 'commercial',
     NonProfit: 'non-profit',
     Personal: 'personal',
     Other: 'other'
 } as const;
 
-export type UpdateAntibodyCommercialTypeEnum = typeof UpdateAntibodyCommercialTypeEnum[keyof typeof UpdateAntibodyCommercialTypeEnum];
+export type CommercialTypeEnum = typeof CommercialTypeEnum[keyof typeof CommercialTypeEnum];
 
 
 /**
+ * Information about the data in the system
+ */
+export interface DataInfo {
+    'total': number;
+    'lastupdate': string;
+}
+/**
+ * The search request body that allows filtering combinations over multiple columns
+ */
+export interface FilterRequest {
+    'contains'?: Array<KeyValuePair> | null;
+    'equals'?: Array<KeyValuePair> | null;
+    'page'?: number | null;
+    'size'?: number | null;
+    'search'?: string | null;
+    'endsWith'?: Array<KeyValuePair> | null;
+    'sortOn'?: Array<KeyValueSortOrderPair> | null;
+    'startsWith'?: Array<KeyValuePair> | null;
+    'isEmpty'?: Array<string> | null;
+    'isNotEmpty'?: Array<string> | null;
+    'isAnyOf'?: Array<KeyValueArrayPair> | null;
+    'operation'?: OperationEnum | null;
+    'isUserScope'?: boolean | null;
+}
+
+
+/**
+ * Request body for data ingestion
+ */
+export interface IngestRequest {
+    'driveLinkOrId'?: string | null;
+    'hot'?: boolean | null;
+}
+/**
+ * Utility type to represent a key-value object where value is an array
+ */
+export interface KeyValueArrayPair {
+    'key': string;
+    'value': Array<string>;
+}
+/**
+ * Utility type to represent a key-value object
+ */
+export interface KeyValuePair {
+    'key': string;
+    'value': string;
+}
+/**
+ * Utility type to represent a key-value object with sort order
+ */
+export interface KeyValueSortOrderPair {
+    'key': string;
+    'sortorder': SortOrderEnum;
+}
+
+
+
+export const OperationEnum = {
+    And: 'and',
+    Or: 'or'
+} as const;
+
+export type OperationEnum = typeof OperationEnum[keyof typeof OperationEnum];
+
+
+/**
+ * Paginated response for antibodies
+ */
+export interface PaginatedAntibodies {
+    'page': number;
+    'totalElements': number;
+    'items': Array<Antibody>;
+}
+/**
+ * Response of the list of partners and related images
+ */
+export interface PartnerResponseObject {
+    'name'?: string | null;
+    'url'?: string | null;
+    'image'?: string | null;
+}
+
+export const SortOrderEnum = {
+    Asc: 'asc',
+    Desc: 'desc'
+} as const;
+
+export type SortOrderEnum = typeof SortOrderEnum[keyof typeof SortOrderEnum];
+
+
+/**
+ * The data type associated with the PUT method of the antibody resource
+ */
+export interface UpdateAntibody {
+    'clonality'?: ClonalityEnum | null;
+    'epitope'?: string | null;
+    'comments'?: string | null;
+    'url': string;
+    'abName'?: string | null;
+    'abTarget'?: string | null;
+    'cloneId'?: string | null;
+    'commercialType'?: CommercialTypeEnum | null;
+    'definingCitation'?: string | null;
+    'productConjugate'?: string | null;
+    'productForm'?: string | null;
+    'productIsotype'?: string | null;
+    'sourceOrganism'?: string | null;
+    'targetSpecies'?: Array<string> | null;
+    'uniprotId'?: string | null;
+    'applications'?: Array<string> | null;
+    'kitContents'?: string | null;
+    'abTargetEntrezId'?: string | null;
+    'abTargetUniprotId'?: string | null;
+    'numOfCitation'?: number | null;
+}
+
+
+/**
+ * Vendor information
+ */
+export interface VendorSchema {
+    'id'?: number | null;
+    'name'?: string | null;
+    'url'?: string | null;
+    'description'?: string | null;
+}
+
+/**
  * AntibodyApi - axios parameter creator
- * @export
  */
 export const AntibodyApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * 
-         * @param {AntibodyStatusEnum} [status] Requests for Antibodies for a specific status - by default it returns All Antibodies
+         * Create a Antibody
+         * @summary Create Antibody
+         * @param {AddAntibody} addAntibody 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        antibodiesExportAdminGet: async (status?: AntibodyStatusEnum, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/antibodies/export/admin`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            // authentication cookieAuth required
-
-            if (status !== undefined) {
-                localVarQueryParameter['status'] = status;
-            }
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        antibodiesExportGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/antibodies/export`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Creates a new instance of a `Antibody`.
-         * @summary Create a Antibody
-         * @param {AddAntibody} addAntibody A new &#x60;Antibody&#x60; to be created.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createAntibody: async (addAntibody: AddAntibody, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiRoutersAntibodyCreateAntibody: async (addAntibody: AddAntibody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'addAntibody' is not null or undefined
-            assertParamExists('createAntibody', 'addAntibody', addAntibody)
-            const localVarPath = `/antibodies`;
+            assertParamExists('apiRoutersAntibodyCreateAntibody', 'addAntibody', addAntibody)
+            const localVarPath = `/api/antibodies`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1281,11 +295,9 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication bearerAuth required
+            // authentication BearerAuth required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            // authentication cookieAuth required
 
 
     
@@ -1302,18 +314,52 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * Gets a list of `Antibody` entities.
-         * @summary List Antibodies
-         * @param {number} [page] Represents the page requested, considering the size parameter
-         * @param {number} [size] Corresponds to the cardinality of antibodies requested
-         * @param {string} [updatedFrom] start date to include. ISO format
-         * @param {string} [updatedTo] end update date to include. ISO format
-         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE, UNDER_REVIEW. 
+         * Export antibodies as CSV
+         * @summary Export Antibodies Post
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAntibodies: async (page?: number, size?: number, updatedFrom?: string, updatedTo?: string, status?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/antibodies`;
+        apiRoutersAntibodyExportAntibodiesPost: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/antibodies/export`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * List Antibodies
+         * @summary Get Antibodies
+         * @param {number | null} [page] 
+         * @param {number | null} [size] 
+         * @param {string | null} [updatedFrom] 
+         * @param {string | null} [updatedTo] 
+         * @param {string | null} [status] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiRoutersAntibodyGetAntibodies: async (page?: number | null, size?: number | null, updatedFrom?: string | null, updatedTo?: string | null, status?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/antibodies`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1361,16 +407,89 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * Gets the details of a single instance of a `Antibody`.
-         * @summary Get a Antibody
-         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
+         * Export all antibodies in csv format
+         * @summary Get Antibodies Export
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAntibody: async (antibodyId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiRoutersAntibodyGetAntibodiesExport: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/antibodies/export`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Export all fields of all antibodies to a CSV file - Only for admin users
+         * @summary Get Antibodies Export Admin
+         * @param {AntibodyStatusEnum | null} [status] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiRoutersAntibodyGetAntibodiesExportAdmin: async (status?: AntibodyStatusEnum | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/antibodies/export/admin`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (status !== undefined) {
+                localVarQueryParameter['status'] = status;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get a Antibody
+         * @summary Get Antibody
+         * @param {number} antibodyId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiRoutersAntibodyGetAntibody: async (antibodyId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'antibodyId' is not null or undefined
-            assertParamExists('getAntibody', 'antibodyId', antibodyId)
-            const localVarPath = `/antibodies/{antibody_id}`
+            assertParamExists('apiRoutersAntibodyGetAntibody', 'antibodyId', antibodyId)
+            const localVarPath = `/api/antibodies/{antibody_id}`
                 .replace(`{${"antibody_id"}}`, encodeURIComponent(String(antibodyId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1395,16 +514,16 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * 
-         * @summary Get antibody by the accession number
-         * @param {number} accessionNumber An unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
+         * Get antibody by the accession number
+         * @summary Get By Accession
+         * @param {number} accessionNumber 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getByAccession: async (accessionNumber: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiRoutersAntibodyGetByAccession: async (accessionNumber: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'accessionNumber' is not null or undefined
-            assertParamExists('getByAccession', 'accessionNumber', accessionNumber)
-            const localVarPath = `/antibodies/user/{accession_number}`
+            assertParamExists('apiRoutersAntibodyGetByAccession', 'accessionNumber', accessionNumber)
+            const localVarPath = `/api/antibodies/user/{accession_number}`
                 .replace(`{${"accession_number"}}`, encodeURIComponent(String(accessionNumber)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1429,15 +548,15 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * Gets a list of `Antibody` entities.
-         * @summary List Antibodies
-         * @param {number} [page] Represents the page requested, considering the size parameter
-         * @param {number} [size] Corresponds to the cardinality of antibodies requested
+         * List user\'s Antibodies
+         * @summary Get User Antibodies
+         * @param {number | null} [page] 
+         * @param {number | null} [size] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getUserAntibodies: async (page?: number, size?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/antibodies/user`;
+        apiRoutersAntibodyGetUserAntibodies: async (page?: number | null, size?: number | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/antibodies/user`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1449,11 +568,9 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication bearerAuth required
+            // authentication BearerAuth required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            // authentication cookieAuth required
 
             if (page !== undefined) {
                 localVarQueryParameter['page'] = page;
@@ -1475,19 +592,19 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * Updates a submitted `Antibody`.
-         * @summary Update a submitted Antibody
-         * @param {number} accessionNumber An unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
-         * @param {UpdateAntibody} updateAntibody Updated &#x60;Antibody&#x60; information.
+         * Update a submitted Antibody
+         * @summary Update User Antibody
+         * @param {number} accessionNumber 
+         * @param {UpdateAntibody} updateAntibody 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateUserAntibody: async (accessionNumber: number, updateAntibody: UpdateAntibody, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiRoutersAntibodyUpdateUserAntibody: async (accessionNumber: number, updateAntibody: UpdateAntibody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'accessionNumber' is not null or undefined
-            assertParamExists('updateUserAntibody', 'accessionNumber', accessionNumber)
+            assertParamExists('apiRoutersAntibodyUpdateUserAntibody', 'accessionNumber', accessionNumber)
             // verify required parameter 'updateAntibody' is not null or undefined
-            assertParamExists('updateUserAntibody', 'updateAntibody', updateAntibody)
-            const localVarPath = `/antibodies/user/{accession_number}`
+            assertParamExists('apiRoutersAntibodyUpdateUserAntibody', 'updateAntibody', updateAntibody)
+            const localVarPath = `/api/antibodies/user/{accession_number}`
                 .replace(`{${"accession_number"}}`, encodeURIComponent(String(accessionNumber)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1500,11 +617,9 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication bearerAuth required
+            // authentication BearerAuth required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            // authentication cookieAuth required
 
 
     
@@ -1525,319 +640,360 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
 
 /**
  * AntibodyApi - functional programming interface
- * @export
  */
 export const AntibodyApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = AntibodyApiAxiosParamCreator(configuration)
     return {
         /**
-         * 
-         * @param {AntibodyStatusEnum} [status] Requests for Antibodies for a specific status - by default it returns All Antibodies
+         * Create a Antibody
+         * @summary Create Antibody
+         * @param {AddAntibody} addAntibody 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async antibodiesExportAdminGet(status?: AntibodyStatusEnum, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.antibodiesExportAdminGet(status, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersAntibodyCreateAntibody(addAntibody: AddAntibody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Antibody>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersAntibodyCreateAntibody(addAntibody, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AntibodyApi.apiRoutersAntibodyCreateAntibody']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
+         * Export antibodies as CSV
+         * @summary Export Antibodies Post
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async antibodiesExportGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.antibodiesExportGet(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersAntibodyExportAntibodiesPost(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersAntibodyExportAntibodiesPost(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AntibodyApi.apiRoutersAntibodyExportAntibodiesPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Creates a new instance of a `Antibody`.
-         * @summary Create a Antibody
-         * @param {AddAntibody} addAntibody A new &#x60;Antibody&#x60; to be created.
+         * List Antibodies
+         * @summary Get Antibodies
+         * @param {number | null} [page] 
+         * @param {number | null} [size] 
+         * @param {string | null} [updatedFrom] 
+         * @param {string | null} [updatedTo] 
+         * @param {string | null} [status] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async createAntibody(addAntibody: AddAntibody, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Antibody>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createAntibody(addAntibody, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersAntibodyGetAntibodies(page?: number | null, size?: number | null, updatedFrom?: string | null, updatedTo?: string | null, status?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAntibodies>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersAntibodyGetAntibodies(page, size, updatedFrom, updatedTo, status, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AntibodyApi.apiRoutersAntibodyGetAntibodies']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Gets a list of `Antibody` entities.
-         * @summary List Antibodies
-         * @param {number} [page] Represents the page requested, considering the size parameter
-         * @param {number} [size] Corresponds to the cardinality of antibodies requested
-         * @param {string} [updatedFrom] start date to include. ISO format
-         * @param {string} [updatedTo] end update date to include. ISO format
-         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE, UNDER_REVIEW. 
+         * Export all antibodies in csv format
+         * @summary Get Antibodies Export
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAntibodies(page?: number, size?: number, updatedFrom?: string, updatedTo?: string, status?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAntibodies>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getAntibodies(page, size, updatedFrom, updatedTo, status, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersAntibodyGetAntibodiesExport(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersAntibodyGetAntibodiesExport(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AntibodyApi.apiRoutersAntibodyGetAntibodiesExport']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Gets the details of a single instance of a `Antibody`.
-         * @summary Get a Antibody
-         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
+         * Export all fields of all antibodies to a CSV file - Only for admin users
+         * @summary Get Antibodies Export Admin
+         * @param {AntibodyStatusEnum | null} [status] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAntibody(antibodyId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Antibody>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getAntibody(antibodyId, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersAntibodyGetAntibodiesExportAdmin(status?: AntibodyStatusEnum | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersAntibodyGetAntibodiesExportAdmin(status, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AntibodyApi.apiRoutersAntibodyGetAntibodiesExportAdmin']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary Get antibody by the accession number
-         * @param {number} accessionNumber An unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
+         * Get a Antibody
+         * @summary Get Antibody
+         * @param {number} antibodyId 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getByAccession(accessionNumber: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Antibody>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getByAccession(accessionNumber, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersAntibodyGetAntibody(antibodyId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Antibody>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersAntibodyGetAntibody(antibodyId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AntibodyApi.apiRoutersAntibodyGetAntibody']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Gets a list of `Antibody` entities.
-         * @summary List Antibodies
-         * @param {number} [page] Represents the page requested, considering the size parameter
-         * @param {number} [size] Corresponds to the cardinality of antibodies requested
+         * Get antibody by the accession number
+         * @summary Get By Accession
+         * @param {number} accessionNumber 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getUserAntibodies(page?: number, size?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAntibodies>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserAntibodies(page, size, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersAntibodyGetByAccession(accessionNumber: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Antibody>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersAntibodyGetByAccession(accessionNumber, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AntibodyApi.apiRoutersAntibodyGetByAccession']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Updates a submitted `Antibody`.
-         * @summary Update a submitted Antibody
-         * @param {number} accessionNumber An unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
-         * @param {UpdateAntibody} updateAntibody Updated &#x60;Antibody&#x60; information.
+         * List user\'s Antibodies
+         * @summary Get User Antibodies
+         * @param {number | null} [page] 
+         * @param {number | null} [size] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async updateUserAntibody(accessionNumber: number, updateAntibody: UpdateAntibody, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.updateUserAntibody(accessionNumber, updateAntibody, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersAntibodyGetUserAntibodies(page?: number | null, size?: number | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAntibodies>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersAntibodyGetUserAntibodies(page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AntibodyApi.apiRoutersAntibodyGetUserAntibodies']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Update a submitted Antibody
+         * @summary Update User Antibody
+         * @param {number} accessionNumber 
+         * @param {UpdateAntibody} updateAntibody 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiRoutersAntibodyUpdateUserAntibody(accessionNumber: number, updateAntibody: UpdateAntibody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Antibody>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersAntibodyUpdateUserAntibody(accessionNumber, updateAntibody, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AntibodyApi.apiRoutersAntibodyUpdateUserAntibody']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
 };
 
 /**
  * AntibodyApi - factory interface
- * @export
  */
 export const AntibodyApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = AntibodyApiFp(configuration)
     return {
         /**
-         * 
-         * @param {AntibodyStatusEnum} [status] Requests for Antibodies for a specific status - by default it returns All Antibodies
+         * Create a Antibody
+         * @summary Create Antibody
+         * @param {AddAntibody} addAntibody 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        antibodiesExportAdminGet(status?: AntibodyStatusEnum, options?: any): AxiosPromise<void> {
-            return localVarFp.antibodiesExportAdminGet(status, options).then((request) => request(axios, basePath));
+        apiRoutersAntibodyCreateAntibody(addAntibody: AddAntibody, options?: RawAxiosRequestConfig): AxiosPromise<Antibody> {
+            return localVarFp.apiRoutersAntibodyCreateAntibody(addAntibody, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
+         * Export antibodies as CSV
+         * @summary Export Antibodies Post
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        antibodiesExportGet(options?: any): AxiosPromise<void> {
-            return localVarFp.antibodiesExportGet(options).then((request) => request(axios, basePath));
+        apiRoutersAntibodyExportAntibodiesPost(options?: RawAxiosRequestConfig): AxiosPromise<string> {
+            return localVarFp.apiRoutersAntibodyExportAntibodiesPost(options).then((request) => request(axios, basePath));
         },
         /**
-         * Creates a new instance of a `Antibody`.
-         * @summary Create a Antibody
-         * @param {AddAntibody} addAntibody A new &#x60;Antibody&#x60; to be created.
+         * List Antibodies
+         * @summary Get Antibodies
+         * @param {number | null} [page] 
+         * @param {number | null} [size] 
+         * @param {string | null} [updatedFrom] 
+         * @param {string | null} [updatedTo] 
+         * @param {string | null} [status] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createAntibody(addAntibody: AddAntibody, options?: any): AxiosPromise<Antibody> {
-            return localVarFp.createAntibody(addAntibody, options).then((request) => request(axios, basePath));
+        apiRoutersAntibodyGetAntibodies(page?: number | null, size?: number | null, updatedFrom?: string | null, updatedTo?: string | null, status?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<PaginatedAntibodies> {
+            return localVarFp.apiRoutersAntibodyGetAntibodies(page, size, updatedFrom, updatedTo, status, options).then((request) => request(axios, basePath));
         },
         /**
-         * Gets a list of `Antibody` entities.
-         * @summary List Antibodies
-         * @param {number} [page] Represents the page requested, considering the size parameter
-         * @param {number} [size] Corresponds to the cardinality of antibodies requested
-         * @param {string} [updatedFrom] start date to include. ISO format
-         * @param {string} [updatedTo] end update date to include. ISO format
-         * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE, UNDER_REVIEW. 
+         * Export all antibodies in csv format
+         * @summary Get Antibodies Export
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAntibodies(page?: number, size?: number, updatedFrom?: string, updatedTo?: string, status?: string, options?: any): AxiosPromise<PaginatedAntibodies> {
-            return localVarFp.getAntibodies(page, size, updatedFrom, updatedTo, status, options).then((request) => request(axios, basePath));
+        apiRoutersAntibodyGetAntibodiesExport(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.apiRoutersAntibodyGetAntibodiesExport(options).then((request) => request(axios, basePath));
         },
         /**
-         * Gets the details of a single instance of a `Antibody`.
-         * @summary Get a Antibody
-         * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
+         * Export all fields of all antibodies to a CSV file - Only for admin users
+         * @summary Get Antibodies Export Admin
+         * @param {AntibodyStatusEnum | null} [status] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAntibody(antibodyId: number, options?: any): AxiosPromise<Array<Antibody>> {
-            return localVarFp.getAntibody(antibodyId, options).then((request) => request(axios, basePath));
+        apiRoutersAntibodyGetAntibodiesExportAdmin(status?: AntibodyStatusEnum | null, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.apiRoutersAntibodyGetAntibodiesExportAdmin(status, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary Get antibody by the accession number
-         * @param {number} accessionNumber An unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
+         * Get a Antibody
+         * @summary Get Antibody
+         * @param {number} antibodyId 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getByAccession(accessionNumber: number, options?: any): AxiosPromise<Antibody> {
-            return localVarFp.getByAccession(accessionNumber, options).then((request) => request(axios, basePath));
+        apiRoutersAntibodyGetAntibody(antibodyId: number, options?: RawAxiosRequestConfig): AxiosPromise<Array<Antibody>> {
+            return localVarFp.apiRoutersAntibodyGetAntibody(antibodyId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Gets a list of `Antibody` entities.
-         * @summary List Antibodies
-         * @param {number} [page] Represents the page requested, considering the size parameter
-         * @param {number} [size] Corresponds to the cardinality of antibodies requested
+         * Get antibody by the accession number
+         * @summary Get By Accession
+         * @param {number} accessionNumber 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getUserAntibodies(page?: number, size?: number, options?: any): AxiosPromise<PaginatedAntibodies> {
-            return localVarFp.getUserAntibodies(page, size, options).then((request) => request(axios, basePath));
+        apiRoutersAntibodyGetByAccession(accessionNumber: number, options?: RawAxiosRequestConfig): AxiosPromise<Antibody> {
+            return localVarFp.apiRoutersAntibodyGetByAccession(accessionNumber, options).then((request) => request(axios, basePath));
         },
         /**
-         * Updates a submitted `Antibody`.
-         * @summary Update a submitted Antibody
-         * @param {number} accessionNumber An unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
-         * @param {UpdateAntibody} updateAntibody Updated &#x60;Antibody&#x60; information.
+         * List user\'s Antibodies
+         * @summary Get User Antibodies
+         * @param {number | null} [page] 
+         * @param {number | null} [size] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateUserAntibody(accessionNumber: number, updateAntibody: UpdateAntibody, options?: any): AxiosPromise<void> {
-            return localVarFp.updateUserAntibody(accessionNumber, updateAntibody, options).then((request) => request(axios, basePath));
+        apiRoutersAntibodyGetUserAntibodies(page?: number | null, size?: number | null, options?: RawAxiosRequestConfig): AxiosPromise<PaginatedAntibodies> {
+            return localVarFp.apiRoutersAntibodyGetUserAntibodies(page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Update a submitted Antibody
+         * @summary Update User Antibody
+         * @param {number} accessionNumber 
+         * @param {UpdateAntibody} updateAntibody 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiRoutersAntibodyUpdateUserAntibody(accessionNumber: number, updateAntibody: UpdateAntibody, options?: RawAxiosRequestConfig): AxiosPromise<Antibody> {
+            return localVarFp.apiRoutersAntibodyUpdateUserAntibody(accessionNumber, updateAntibody, options).then((request) => request(axios, basePath));
         },
     };
 };
 
 /**
  * AntibodyApi - object-oriented interface
- * @export
- * @class AntibodyApi
- * @extends {BaseAPI}
  */
 export class AntibodyApi extends BaseAPI {
     /**
-     * 
-     * @param {AntibodyStatusEnum} [status] Requests for Antibodies for a specific status - by default it returns All Antibodies
+     * Create a Antibody
+     * @summary Create Antibody
+     * @param {AddAntibody} addAntibody 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof AntibodyApi
      */
-    public antibodiesExportAdminGet(status?: AntibodyStatusEnum, options?: AxiosRequestConfig) {
-        return AntibodyApiFp(this.configuration).antibodiesExportAdminGet(status, options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersAntibodyCreateAntibody(addAntibody: AddAntibody, options?: RawAxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).apiRoutersAntibodyCreateAntibody(addAntibody, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * 
+     * Export antibodies as CSV
+     * @summary Export Antibodies Post
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof AntibodyApi
      */
-    public antibodiesExportGet(options?: AxiosRequestConfig) {
-        return AntibodyApiFp(this.configuration).antibodiesExportGet(options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersAntibodyExportAntibodiesPost(options?: RawAxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).apiRoutersAntibodyExportAntibodiesPost(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Creates a new instance of a `Antibody`.
-     * @summary Create a Antibody
-     * @param {AddAntibody} addAntibody A new &#x60;Antibody&#x60; to be created.
+     * List Antibodies
+     * @summary Get Antibodies
+     * @param {number | null} [page] 
+     * @param {number | null} [size] 
+     * @param {string | null} [updatedFrom] 
+     * @param {string | null} [updatedTo] 
+     * @param {string | null} [status] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof AntibodyApi
      */
-    public createAntibody(addAntibody: AddAntibody, options?: AxiosRequestConfig) {
-        return AntibodyApiFp(this.configuration).createAntibody(addAntibody, options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersAntibodyGetAntibodies(page?: number | null, size?: number | null, updatedFrom?: string | null, updatedTo?: string | null, status?: string | null, options?: RawAxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).apiRoutersAntibodyGetAntibodies(page, size, updatedFrom, updatedTo, status, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Gets a list of `Antibody` entities.
-     * @summary List Antibodies
-     * @param {number} [page] Represents the page requested, considering the size parameter
-     * @param {number} [size] Corresponds to the cardinality of antibodies requested
-     * @param {string} [updatedFrom] start date to include. ISO format
-     * @param {string} [updatedTo] end update date to include. ISO format
-     * @param {string} [status] Add a status to filter the query - CURATED, REJECTED, QUEUE, UNDER_REVIEW. 
+     * Export all antibodies in csv format
+     * @summary Get Antibodies Export
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof AntibodyApi
      */
-    public getAntibodies(page?: number, size?: number, updatedFrom?: string, updatedTo?: string, status?: string, options?: AxiosRequestConfig) {
-        return AntibodyApiFp(this.configuration).getAntibodies(page, size, updatedFrom, updatedTo, status, options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersAntibodyGetAntibodiesExport(options?: RawAxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).apiRoutersAntibodyGetAntibodiesExport(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Gets the details of a single instance of a `Antibody`.
-     * @summary Get a Antibody
-     * @param {number} antibodyId The unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
+     * Export all fields of all antibodies to a CSV file - Only for admin users
+     * @summary Get Antibodies Export Admin
+     * @param {AntibodyStatusEnum | null} [status] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof AntibodyApi
      */
-    public getAntibody(antibodyId: number, options?: AxiosRequestConfig) {
-        return AntibodyApiFp(this.configuration).getAntibody(antibodyId, options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersAntibodyGetAntibodiesExportAdmin(status?: AntibodyStatusEnum | null, options?: RawAxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).apiRoutersAntibodyGetAntibodiesExportAdmin(status, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * 
-     * @summary Get antibody by the accession number
-     * @param {number} accessionNumber An unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
+     * Get a Antibody
+     * @summary Get Antibody
+     * @param {number} antibodyId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof AntibodyApi
      */
-    public getByAccession(accessionNumber: number, options?: AxiosRequestConfig) {
-        return AntibodyApiFp(this.configuration).getByAccession(accessionNumber, options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersAntibodyGetAntibody(antibodyId: number, options?: RawAxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).apiRoutersAntibodyGetAntibody(antibodyId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Gets a list of `Antibody` entities.
-     * @summary List Antibodies
-     * @param {number} [page] Represents the page requested, considering the size parameter
-     * @param {number} [size] Corresponds to the cardinality of antibodies requested
+     * Get antibody by the accession number
+     * @summary Get By Accession
+     * @param {number} accessionNumber 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof AntibodyApi
      */
-    public getUserAntibodies(page?: number, size?: number, options?: AxiosRequestConfig) {
-        return AntibodyApiFp(this.configuration).getUserAntibodies(page, size, options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersAntibodyGetByAccession(accessionNumber: number, options?: RawAxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).apiRoutersAntibodyGetByAccession(accessionNumber, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Updates a submitted `Antibody`.
-     * @summary Update a submitted Antibody
-     * @param {number} accessionNumber An unique identifier for a &#x60;Antibody&#x60; -- stripped from \&quot;AB_\&quot;
-     * @param {UpdateAntibody} updateAntibody Updated &#x60;Antibody&#x60; information.
+     * List user\'s Antibodies
+     * @summary Get User Antibodies
+     * @param {number | null} [page] 
+     * @param {number | null} [size] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof AntibodyApi
      */
-    public updateUserAntibody(accessionNumber: number, updateAntibody: UpdateAntibody, options?: AxiosRequestConfig) {
-        return AntibodyApiFp(this.configuration).updateUserAntibody(accessionNumber, updateAntibody, options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersAntibodyGetUserAntibodies(page?: number | null, size?: number | null, options?: RawAxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).apiRoutersAntibodyGetUserAntibodies(page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Update a submitted Antibody
+     * @summary Update User Antibody
+     * @param {number} accessionNumber 
+     * @param {UpdateAntibody} updateAntibody 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public apiRoutersAntibodyUpdateUserAntibody(accessionNumber: number, updateAntibody: UpdateAntibody, options?: RawAxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).apiRoutersAntibodyUpdateUserAntibody(accessionNumber, updateAntibody, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
 
+
 /**
- * DefaultApi - axios parameter creator
- * @export
+ * GeneralApi - axios parameter creator
  */
-export const DefaultApiAxiosParamCreator = function (configuration?: Configuration) {
+export const GeneralApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * 
+         * Get data information
+         * @summary Get Datainfo
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        datainfoGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/datainfo`;
+        apiRoutersGeneralGetDatainfo: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/datainfo`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1861,13 +1017,13 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 
-         * @summary get the list of partners and related images
+         * Get the list of partners and related images
+         * @summary Get Partners
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getPartners: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/partners`;
+        apiRoutersGeneralGetPartners: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/partners`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1894,108 +1050,108 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
 };
 
 /**
- * DefaultApi - functional programming interface
- * @export
+ * GeneralApi - functional programming interface
  */
-export const DefaultApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = DefaultApiAxiosParamCreator(configuration)
+export const GeneralApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = GeneralApiAxiosParamCreator(configuration)
     return {
         /**
-         * 
+         * Get data information
+         * @summary Get Datainfo
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async datainfoGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DataInfo>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.datainfoGet(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersGeneralGetDatainfo(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DataInfo>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersGeneralGetDatainfo(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GeneralApi.apiRoutersGeneralGetDatainfo']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
-         * @summary get the list of partners and related images
+         * Get the list of partners and related images
+         * @summary Get Partners
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getPartners(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PartnerResponseObject>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getPartners(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersGeneralGetPartners(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PartnerResponseObject>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersGeneralGetPartners(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GeneralApi.apiRoutersGeneralGetPartners']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
 };
 
 /**
- * DefaultApi - factory interface
- * @export
+ * GeneralApi - factory interface
  */
-export const DefaultApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = DefaultApiFp(configuration)
+export const GeneralApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = GeneralApiFp(configuration)
     return {
         /**
-         * 
+         * Get data information
+         * @summary Get Datainfo
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        datainfoGet(options?: any): AxiosPromise<DataInfo> {
-            return localVarFp.datainfoGet(options).then((request) => request(axios, basePath));
+        apiRoutersGeneralGetDatainfo(options?: RawAxiosRequestConfig): AxiosPromise<DataInfo> {
+            return localVarFp.apiRoutersGeneralGetDatainfo(options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary get the list of partners and related images
+         * Get the list of partners and related images
+         * @summary Get Partners
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getPartners(options?: any): AxiosPromise<Array<PartnerResponseObject>> {
-            return localVarFp.getPartners(options).then((request) => request(axios, basePath));
+        apiRoutersGeneralGetPartners(options?: RawAxiosRequestConfig): AxiosPromise<Array<PartnerResponseObject>> {
+            return localVarFp.apiRoutersGeneralGetPartners(options).then((request) => request(axios, basePath));
         },
     };
 };
 
 /**
- * DefaultApi - object-oriented interface
- * @export
- * @class DefaultApi
- * @extends {BaseAPI}
+ * GeneralApi - object-oriented interface
  */
-export class DefaultApi extends BaseAPI {
+export class GeneralApi extends BaseAPI {
     /**
-     * 
+     * Get data information
+     * @summary Get Datainfo
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof DefaultApi
      */
-    public datainfoGet(options?: AxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).datainfoGet(options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersGeneralGetDatainfo(options?: RawAxiosRequestConfig) {
+        return GeneralApiFp(this.configuration).apiRoutersGeneralGetDatainfo(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * 
-     * @summary get the list of partners and related images
+     * Get the list of partners and related images
+     * @summary Get Partners
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof DefaultApi
      */
-    public getPartners(options?: AxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).getPartners(options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersGeneralGetPartners(options?: RawAxiosRequestConfig) {
+        return GeneralApiFp(this.configuration).apiRoutersGeneralGetPartners(options).then((request) => request(this.axios, this.basePath));
     }
 }
 
 
+
 /**
  * IngestApi - axios parameter creator
- * @export
  */
 export const IngestApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
          * Ingest antibody\'s csv data into the database
-         * @summary Ingest antibody\'s csv data into the database
-         * @param {IngestRequest} ingestRequest The google drive file id of the zipped data to ingest.
+         * @summary Ingest
+         * @param {IngestRequest} ingestRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        ingest: async (ingestRequest: IngestRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiRoutersIngestIngest: async (ingestRequest: IngestRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'ingestRequest' is not null or undefined
-            assertParamExists('ingest', 'ingestRequest', ingestRequest)
-            const localVarPath = `/ingest`;
+            assertParamExists('apiRoutersIngestIngest', 'ingestRequest', ingestRequest)
+            const localVarPath = `/api/ingest`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -2007,7 +1163,9 @@ export const IngestApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication cookieAuth required
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -2028,83 +1186,79 @@ export const IngestApiAxiosParamCreator = function (configuration?: Configuratio
 
 /**
  * IngestApi - functional programming interface
- * @export
  */
 export const IngestApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = IngestApiAxiosParamCreator(configuration)
     return {
         /**
          * Ingest antibody\'s csv data into the database
-         * @summary Ingest antibody\'s csv data into the database
-         * @param {IngestRequest} ingestRequest The google drive file id of the zipped data to ingest.
+         * @summary Ingest
+         * @param {IngestRequest} ingestRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async ingest(ingestRequest: IngestRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.ingest(ingestRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersIngestIngest(ingestRequest: IngestRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersIngestIngest(ingestRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['IngestApi.apiRoutersIngestIngest']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
 };
 
 /**
  * IngestApi - factory interface
- * @export
  */
 export const IngestApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = IngestApiFp(configuration)
     return {
         /**
          * Ingest antibody\'s csv data into the database
-         * @summary Ingest antibody\'s csv data into the database
-         * @param {IngestRequest} ingestRequest The google drive file id of the zipped data to ingest.
+         * @summary Ingest
+         * @param {IngestRequest} ingestRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        ingest(ingestRequest: IngestRequest, options?: any): AxiosPromise<void> {
-            return localVarFp.ingest(ingestRequest, options).then((request) => request(axios, basePath));
+        apiRoutersIngestIngest(ingestRequest: IngestRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+            return localVarFp.apiRoutersIngestIngest(ingestRequest, options).then((request) => request(axios, basePath));
         },
     };
 };
 
 /**
  * IngestApi - object-oriented interface
- * @export
- * @class IngestApi
- * @extends {BaseAPI}
  */
 export class IngestApi extends BaseAPI {
     /**
      * Ingest antibody\'s csv data into the database
-     * @summary Ingest antibody\'s csv data into the database
-     * @param {IngestRequest} ingestRequest The google drive file id of the zipped data to ingest.
+     * @summary Ingest
+     * @param {IngestRequest} ingestRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof IngestApi
      */
-    public ingest(ingestRequest: IngestRequest, options?: AxiosRequestConfig) {
-        return IngestApiFp(this.configuration).ingest(ingestRequest, options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersIngestIngest(ingestRequest: IngestRequest, options?: RawAxiosRequestConfig) {
+        return IngestApiFp(this.configuration).apiRoutersIngestIngest(ingestRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
 
+
 /**
  * SearchApi - axios parameter creator
- * @export
  */
 export const SearchApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Gets a list of `Antibody` entities related with the body parameters
-         * @summary Search on Antibodies with custom filters
-         * @param {FilterRequest} filterRequest A new &#x60;FilterRequest&#x60; to be used on the antibodies search.
+         * Search on Antibodies with custom filters
+         * @summary Filter Antibodies
+         * @param {FilterRequest} filterRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        filterAntibodies: async (filterRequest: FilterRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiRoutersSearchFilterAntibodies: async (filterRequest: FilterRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'filterRequest' is not null or undefined
-            assertParamExists('filterAntibodies', 'filterRequest', filterRequest)
-            const localVarPath = `/antibodies/search`;
+            assertParamExists('apiRoutersSearchFilterAntibodies', 'filterRequest', filterRequest)
+            const localVarPath = `/api/search/antibodies`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -2131,16 +1285,18 @@ export const SearchApiAxiosParamCreator = function (configuration?: Configuratio
             };
         },
         /**
-         * Gets a list of `Antibody` entities related with the search query
-         * @summary Full text search on Antibodies
-         * @param {number} [page] Represents the page requested, considering the size parameter
-         * @param {number} [size] Corresponds to the cardinality of antibodies requested
-         * @param {string} [search] The string to use for full text search on Antibodies
+         * Search antibodies (Full Text Search)
+         * @summary Fts Antibodies
+         * @param {string} q 
+         * @param {number | null} [page] 
+         * @param {number | null} [size] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        ftsAntibodies: async (page?: number, size?: number, search?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/antibodies/search`;
+        apiRoutersSearchFtsAntibodies: async (q: string, page?: number | null, size?: number | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'q' is not null or undefined
+            assertParamExists('apiRoutersSearchFtsAntibodies', 'q', q)
+            const localVarPath = `/api/fts-antibodies`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -2152,6 +1308,10 @@ export const SearchApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            if (q !== undefined) {
+                localVarQueryParameter['q'] = q;
+            }
+
             if (page !== undefined) {
                 localVarQueryParameter['page'] = page;
             }
@@ -2160,9 +1320,95 @@ export const SearchApiAxiosParamCreator = function (configuration?: Configuratio
                 localVarQueryParameter['size'] = size;
             }
 
-            if (search !== undefined) {
-                localVarQueryParameter['search'] = search;
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get all applications
+         * @summary Get Applications
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiRoutersSearchGetApplications: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/applications`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
             }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get all species
+         * @summary Get Species
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiRoutersSearchGetSpecies: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/species`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get all vendors
+         * @summary Get Vendors
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiRoutersSearchGetVendors: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/vendors`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
 
     
@@ -2180,119 +1426,209 @@ export const SearchApiAxiosParamCreator = function (configuration?: Configuratio
 
 /**
  * SearchApi - functional programming interface
- * @export
  */
 export const SearchApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = SearchApiAxiosParamCreator(configuration)
     return {
         /**
-         * Gets a list of `Antibody` entities related with the body parameters
-         * @summary Search on Antibodies with custom filters
-         * @param {FilterRequest} filterRequest A new &#x60;FilterRequest&#x60; to be used on the antibodies search.
+         * Search on Antibodies with custom filters
+         * @summary Filter Antibodies
+         * @param {FilterRequest} filterRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async filterAntibodies(filterRequest: FilterRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAntibodies>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.filterAntibodies(filterRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersSearchFilterAntibodies(filterRequest: FilterRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAntibodies>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersSearchFilterAntibodies(filterRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SearchApi.apiRoutersSearchFilterAntibodies']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Gets a list of `Antibody` entities related with the search query
-         * @summary Full text search on Antibodies
-         * @param {number} [page] Represents the page requested, considering the size parameter
-         * @param {number} [size] Corresponds to the cardinality of antibodies requested
-         * @param {string} [search] The string to use for full text search on Antibodies
+         * Search antibodies (Full Text Search)
+         * @summary Fts Antibodies
+         * @param {string} q 
+         * @param {number | null} [page] 
+         * @param {number | null} [size] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async ftsAntibodies(page?: number, size?: number, search?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAntibodies>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.ftsAntibodies(page, size, search, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersSearchFtsAntibodies(q: string, page?: number | null, size?: number | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAntibodies>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersSearchFtsAntibodies(q, page, size, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SearchApi.apiRoutersSearchFtsAntibodies']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get all applications
+         * @summary Get Applications
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiRoutersSearchGetApplications(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersSearchGetApplications(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SearchApi.apiRoutersSearchGetApplications']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get all species
+         * @summary Get Species
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiRoutersSearchGetSpecies(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersSearchGetSpecies(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SearchApi.apiRoutersSearchGetSpecies']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get all vendors
+         * @summary Get Vendors
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiRoutersSearchGetVendors(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<VendorSchema>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersSearchGetVendors(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SearchApi.apiRoutersSearchGetVendors']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
 };
 
 /**
  * SearchApi - factory interface
- * @export
  */
 export const SearchApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = SearchApiFp(configuration)
     return {
         /**
-         * Gets a list of `Antibody` entities related with the body parameters
-         * @summary Search on Antibodies with custom filters
-         * @param {FilterRequest} filterRequest A new &#x60;FilterRequest&#x60; to be used on the antibodies search.
+         * Search on Antibodies with custom filters
+         * @summary Filter Antibodies
+         * @param {FilterRequest} filterRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        filterAntibodies(filterRequest: FilterRequest, options?: any): AxiosPromise<PaginatedAntibodies> {
-            return localVarFp.filterAntibodies(filterRequest, options).then((request) => request(axios, basePath));
+        apiRoutersSearchFilterAntibodies(filterRequest: FilterRequest, options?: RawAxiosRequestConfig): AxiosPromise<PaginatedAntibodies> {
+            return localVarFp.apiRoutersSearchFilterAntibodies(filterRequest, options).then((request) => request(axios, basePath));
         },
         /**
-         * Gets a list of `Antibody` entities related with the search query
-         * @summary Full text search on Antibodies
-         * @param {number} [page] Represents the page requested, considering the size parameter
-         * @param {number} [size] Corresponds to the cardinality of antibodies requested
-         * @param {string} [search] The string to use for full text search on Antibodies
+         * Search antibodies (Full Text Search)
+         * @summary Fts Antibodies
+         * @param {string} q 
+         * @param {number | null} [page] 
+         * @param {number | null} [size] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        ftsAntibodies(page?: number, size?: number, search?: string, options?: any): AxiosPromise<PaginatedAntibodies> {
-            return localVarFp.ftsAntibodies(page, size, search, options).then((request) => request(axios, basePath));
+        apiRoutersSearchFtsAntibodies(q: string, page?: number | null, size?: number | null, options?: RawAxiosRequestConfig): AxiosPromise<PaginatedAntibodies> {
+            return localVarFp.apiRoutersSearchFtsAntibodies(q, page, size, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get all applications
+         * @summary Get Applications
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiRoutersSearchGetApplications(options?: RawAxiosRequestConfig): AxiosPromise<Array<string>> {
+            return localVarFp.apiRoutersSearchGetApplications(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get all species
+         * @summary Get Species
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiRoutersSearchGetSpecies(options?: RawAxiosRequestConfig): AxiosPromise<Array<string>> {
+            return localVarFp.apiRoutersSearchGetSpecies(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get all vendors
+         * @summary Get Vendors
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiRoutersSearchGetVendors(options?: RawAxiosRequestConfig): AxiosPromise<Array<VendorSchema>> {
+            return localVarFp.apiRoutersSearchGetVendors(options).then((request) => request(axios, basePath));
         },
     };
 };
 
 /**
  * SearchApi - object-oriented interface
- * @export
- * @class SearchApi
- * @extends {BaseAPI}
  */
 export class SearchApi extends BaseAPI {
     /**
-     * Gets a list of `Antibody` entities related with the body parameters
-     * @summary Search on Antibodies with custom filters
-     * @param {FilterRequest} filterRequest A new &#x60;FilterRequest&#x60; to be used on the antibodies search.
+     * Search on Antibodies with custom filters
+     * @summary Filter Antibodies
+     * @param {FilterRequest} filterRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SearchApi
      */
-    public filterAntibodies(filterRequest: FilterRequest, options?: AxiosRequestConfig) {
-        return SearchApiFp(this.configuration).filterAntibodies(filterRequest, options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersSearchFilterAntibodies(filterRequest: FilterRequest, options?: RawAxiosRequestConfig) {
+        return SearchApiFp(this.configuration).apiRoutersSearchFilterAntibodies(filterRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Gets a list of `Antibody` entities related with the search query
-     * @summary Full text search on Antibodies
-     * @param {number} [page] Represents the page requested, considering the size parameter
-     * @param {number} [size] Corresponds to the cardinality of antibodies requested
-     * @param {string} [search] The string to use for full text search on Antibodies
+     * Search antibodies (Full Text Search)
+     * @summary Fts Antibodies
+     * @param {string} q 
+     * @param {number | null} [page] 
+     * @param {number | null} [size] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SearchApi
      */
-    public ftsAntibodies(page?: number, size?: number, search?: string, options?: AxiosRequestConfig) {
-        return SearchApiFp(this.configuration).ftsAntibodies(page, size, search, options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersSearchFtsAntibodies(q: string, page?: number | null, size?: number | null, options?: RawAxiosRequestConfig) {
+        return SearchApiFp(this.configuration).apiRoutersSearchFtsAntibodies(q, page, size, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get all applications
+     * @summary Get Applications
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public apiRoutersSearchGetApplications(options?: RawAxiosRequestConfig) {
+        return SearchApiFp(this.configuration).apiRoutersSearchGetApplications(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get all species
+     * @summary Get Species
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public apiRoutersSearchGetSpecies(options?: RawAxiosRequestConfig) {
+        return SearchApiFp(this.configuration).apiRoutersSearchGetSpecies(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get all vendors
+     * @summary Get Vendors
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public apiRoutersSearchGetVendors(options?: RawAxiosRequestConfig) {
+        return SearchApiFp(this.configuration).apiRoutersSearchGetVendors(options).then((request) => request(this.axios, this.basePath));
     }
 }
 
 
+
 /**
  * TestApi - axios parameter creator
- * @export
  */
 export const TestApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
          * Checks if application is healthy
-         * @summary Checks if application is healthy
+         * @summary Live
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        live: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/live`;
+        apiRoutersTestLive: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/live`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -2317,12 +1653,12 @@ export const TestApiAxiosParamCreator = function (configuration?: Configuration)
         },
         /**
          * Checks if application is up
-         * @summary Checks if application is up
+         * @summary Ping
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        ping: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/ping`;
+        apiRoutersTestPing: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/ping`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -2347,12 +1683,12 @@ export const TestApiAxiosParamCreator = function (configuration?: Configuration)
         },
         /**
          * Checks if application is ready to take requests
-         * @summary Checks if application is ready to take requests
+         * @summary Ready
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        ready: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/ready`;
+        apiRoutersTestReady: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/ready`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -2380,120 +1716,119 @@ export const TestApiAxiosParamCreator = function (configuration?: Configuration)
 
 /**
  * TestApi - functional programming interface
- * @export
  */
 export const TestApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = TestApiAxiosParamCreator(configuration)
     return {
         /**
          * Checks if application is healthy
-         * @summary Checks if application is healthy
+         * @summary Live
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async live(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.live(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersTestLive(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersTestLive(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TestApi.apiRoutersTestLive']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * Checks if application is up
-         * @summary Checks if application is up
+         * @summary Ping
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async ping(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.ping(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersTestPing(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersTestPing(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TestApi.apiRoutersTestPing']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * Checks if application is ready to take requests
-         * @summary Checks if application is ready to take requests
+         * @summary Ready
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async ready(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.ready(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        async apiRoutersTestReady(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersTestReady(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TestApi.apiRoutersTestReady']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
 };
 
 /**
  * TestApi - factory interface
- * @export
  */
 export const TestApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = TestApiFp(configuration)
     return {
         /**
          * Checks if application is healthy
-         * @summary Checks if application is healthy
+         * @summary Live
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        live(options?: any): AxiosPromise<string> {
-            return localVarFp.live(options).then((request) => request(axios, basePath));
+        apiRoutersTestLive(options?: RawAxiosRequestConfig): AxiosPromise<string> {
+            return localVarFp.apiRoutersTestLive(options).then((request) => request(axios, basePath));
         },
         /**
          * Checks if application is up
-         * @summary Checks if application is up
+         * @summary Ping
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        ping(options?: any): AxiosPromise<string> {
-            return localVarFp.ping(options).then((request) => request(axios, basePath));
+        apiRoutersTestPing(options?: RawAxiosRequestConfig): AxiosPromise<string> {
+            return localVarFp.apiRoutersTestPing(options).then((request) => request(axios, basePath));
         },
         /**
          * Checks if application is ready to take requests
-         * @summary Checks if application is ready to take requests
+         * @summary Ready
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        ready(options?: any): AxiosPromise<string> {
-            return localVarFp.ready(options).then((request) => request(axios, basePath));
+        apiRoutersTestReady(options?: RawAxiosRequestConfig): AxiosPromise<string> {
+            return localVarFp.apiRoutersTestReady(options).then((request) => request(axios, basePath));
         },
     };
 };
 
 /**
  * TestApi - object-oriented interface
- * @export
- * @class TestApi
- * @extends {BaseAPI}
  */
 export class TestApi extends BaseAPI {
     /**
      * Checks if application is healthy
-     * @summary Checks if application is healthy
+     * @summary Live
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof TestApi
      */
-    public live(options?: AxiosRequestConfig) {
-        return TestApiFp(this.configuration).live(options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersTestLive(options?: RawAxiosRequestConfig) {
+        return TestApiFp(this.configuration).apiRoutersTestLive(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Checks if application is up
-     * @summary Checks if application is up
+     * @summary Ping
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof TestApi
      */
-    public ping(options?: AxiosRequestConfig) {
-        return TestApiFp(this.configuration).ping(options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersTestPing(options?: RawAxiosRequestConfig) {
+        return TestApiFp(this.configuration).apiRoutersTestPing(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Checks if application is ready to take requests
-     * @summary Checks if application is ready to take requests
+     * @summary Ready
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof TestApi
      */
-    public ready(options?: AxiosRequestConfig) {
-        return TestApiFp(this.configuration).ready(options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersTestReady(options?: RawAxiosRequestConfig) {
+        return TestApiFp(this.configuration).apiRoutersTestReady(options).then((request) => request(this.axios, this.basePath));
     }
 }
+
 
 

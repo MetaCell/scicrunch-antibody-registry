@@ -1,6 +1,9 @@
 import { Antibody } from "../rest";
 import { addAntibody } from "../services/AntibodiesService";
-import { FilterRequest, FilterRequestOperationEnum, KeyValueArrayPair, KeyValuePair, SearchCriteriaOptions } from '../rest';
+import { FilterRequest, OperationEnum, KeyValueArrayPair, KeyValuePair } from '../rest';
+
+import { SearchCriteriaOptions } from "../utils/antibody";
+
 
 export function postNewAntibody(
   a: Antibody,
@@ -34,7 +37,7 @@ export function postNewAntibody(
 
 
 export const structureFiltersAndSorting = (searchState, antibodyFilters, pagenumber, size, sortmodel, newsearch, isUserScope) => {
-  let body: FilterRequest = {
+  const body: FilterRequest = {
     search: newsearch,
     contains: [],
     equals: [],
@@ -46,7 +49,7 @@ export const structureFiltersAndSorting = (searchState, antibodyFilters, pagenum
     page: pagenumber,
     size: size,
     sortOn: [],
-    operation: FilterRequestOperationEnum.And,
+    operation: OperationEnum.And,
     isUserScope: isUserScope
   };
   // sort model to be added in the sort

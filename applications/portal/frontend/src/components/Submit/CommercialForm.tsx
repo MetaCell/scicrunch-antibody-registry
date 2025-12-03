@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { makeStyles } from "@mui/styles";
+import React from "react";
 import { vars } from "../../theme/variables";
 import {
   Box,
@@ -200,7 +199,7 @@ const FormLine = ({ children }) => {
 const CommercialForm = (props) => {
   const { setAntibodyId, setApiResponse, next } = props;
   const postAntibody = (antibody) => {
-    let ab = { ...antibody, type: "commercial" };
+    const ab = { ...antibody, type: "commercial" };
     postNewAntibody(ab, setAntibodyId, setApiResponse, next);
   };
   const formik = useFormik({
@@ -233,11 +232,11 @@ const CommercialForm = (props) => {
   const { errors, touched, handleSubmit, getFieldProps } = formik;
   return (
     (<Box component="form"
-        onSubmit={handleSubmit}
-        sx={styles.background}
-        autoComplete="off"
-        className="antibody-form type-commercial"
-      >
+      onSubmit={handleSubmit}
+      sx={styles.background}
+      autoComplete="off"
+      className="antibody-form type-commercial"
+    >
       <Container maxWidth="xl">
         <Grid container>
           <Grid size={{ lg: 6 }} sx={styles.leftContainer}>

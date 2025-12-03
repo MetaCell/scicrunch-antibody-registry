@@ -6,7 +6,7 @@ import {
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { getFilterOperators, getRandomId, shouldEmptyFilterValue } from "../../utils/antibody";
 import { BLANK_FILTER_MODEL } from "../../constants/constants";
-import { SearchCriteriaOptions } from "../../rest";
+import { SearchCriteriaOptions } from "../../utils/antibody";
 import searchContext from "../../context/search/SearchContext";
 
 
@@ -51,7 +51,7 @@ export const CustomFilterPanel = (
 
   const setEmptyFilterSet = () => {
     let newFilterModelItems = filterModel.items;
-    let newBlankFilter = { ...BLANK_FILTER_MODEL, id: getRandomId() };
+    const newBlankFilter = { ...BLANK_FILTER_MODEL, id: getRandomId() };
 
     newFilterModelItems = filterModel.items.concat(newBlankFilter);
     setFilterModel({ ...filterModel, items: newFilterModelItems });
@@ -125,13 +125,13 @@ const CustomFilterRow = ({ columns, filterSet, handleFilterSet, removeFilterSet 
   const operators = getFilterOperators();
   return (
     (<Stack
-          direction="row"
-          spacing={1}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            m: 1
-          }}>
+      direction="row"
+      spacing={1}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        m: 1
+      }}>
       {/* 3 parts of a filter */}
       {/* columns */}
       <IconButton onClick={() => removeFilterSet(filterSet)}>
@@ -211,7 +211,7 @@ const CustomMultiInputWithChip = ({ filterSet, handleFilterSet }) => {
 
   const handleKeyUp = (e) => {
     if (e.key === "Enter" && e.target.value) {
-      let arr = [...values]
+      const arr = [...values]
       arr.push(e.target.value)
       handleFilterSet({ ...filterSet, value: arr });
       setValues(arr);
@@ -219,7 +219,7 @@ const CustomMultiInputWithChip = ({ filterSet, handleFilterSet }) => {
     }
   };
   const handleDelete = (item, index) => {
-    let arr = [...values]
+    const arr = [...values]
     arr.splice(index, 1)
     setValues(arr)
     handleFilterSet({ ...filterSet, value: arr });

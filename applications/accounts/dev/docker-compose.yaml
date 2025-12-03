@@ -1,18 +1,16 @@
-version: '3.2'
-
 services:
   postgres:
-      image: postgres
+      image: postgres:17
       environment:
         POSTGRES_DB: keycloak
         POSTGRES_USER: keycloak
         POSTGRES_PASSWORD: password
         PGDATA: /var/lib/postgresql/data/pgdata
       volumes:
-        - pg_data:/var/lib/postgresql/data/pgdata
+        - ./data:/var/lib/postgresql/data/pgdata
 
   keycloak:
-      image: quay.io/keycloak/keycloak:16.1.0
+      image: quay.io/keycloak/keycloak:26.4.0
       environment:
         DB_VENDOR: POSTGRES
         DB_ADDR: postgres
@@ -20,20 +18,19 @@ services:
         DB_USER: keycloak
         DB_SCHEMA: public
         DB_PASSWORD: password
-        KEYCLOAK_USER: admin
-        KEYCLOAK_PASSWORD: pass
+        KC_BOOTSTRAP_ADMIN_USERNAME: admin
+        KC_BOOTSTRAP_ADMIN_PASSWORD: metacell
 
       ports:
         - 8080:8080
       depends_on:
         - postgres
+      command:
+      - start-dev
+      - --spi-theme-static-max-age=-1
+      - --spi-theme-cache-themes=false
+      - --spi-theme-cache-templates=false
       volumes:
         - type: bind
           source: ../themes/custom
-          target: /opt/jboss/keycloak/themes/custom
-        # disable cache
-        - type: bind
-          source: ./disable-theme-cache.cli
-          target: /opt/jboss/startup-scripts/disable-theme-cache.cli
-volumes:
-  pg_data:
+          target: /opt/keycloak/themes/custom

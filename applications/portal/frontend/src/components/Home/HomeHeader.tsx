@@ -7,6 +7,7 @@ import {
   Box,
   Button,
   Container,
+  Link,
   Stack,
   Typography,
 } from "@mui/material";
@@ -52,10 +53,10 @@ const TableHeader = (props: TableHeaderProps) => {
   const theme = useTheme();
  
   const { activeSearch, totalElements, lastUpdate, error } = useContext(searchContext)
-  const showAlert = warningMessage.length > 0;
+  const showAlert = !!warningMessage?.length;
   return (
     (<Box className="container-home-header">
-      <AppBar elevation={0} sx={{ top: "4.5rem" }}>
+      <AppBar elevation={0} >
         <Container maxWidth="xl">
           <Stack
             direction="column"
@@ -167,10 +168,22 @@ const TableHeader = (props: TableHeaderProps) => {
             {error && (
               <Alert className="error-alert" severity="error" sx={{ mt: 1, mb: 1 }}>
                 {
-                  error >= 500 ? 
-                    "An error occurred while fetching data. Please try again later. If the problem persists, please contact us at <pre>abr-help -at- scicrunch -dot- org</pre>."
-                    : error == 401 ? "This request is unauthorized. Please log in to access this data." : 
-                      "Bad request: please try fix your search and filter parameters. If the problem persists, please contact us at <pre>abr-help -at- scicrunch -dot- org</pre>."
+                  error == 500 ? 
+                    <>An error occurred while fetching data. Please try again later. If the problem persists, please contact us at  <Link
+                      target="_blank"
+                      href="mailto:rii-help@scicrunch.org"
+                      className="link-contact-us"
+                    >
+            rii-help@scicrunch.org
+                    </Link>.</>
+                    : error == 401 ? <>This request is unauthorized. Please log in to access this data.</> : 
+                      <>Bad request: please try fix your search and filter parameters. If the problem persists, please contact us at <Link 
+                        target="_blank"
+                        href="mailto:rii-help@scicrunch.org"
+                        className="link-contact-us"
+                      >
+                        rii-help@scicrunch.org
+                      </Link>.</>
                 }
 
               </Alert>)

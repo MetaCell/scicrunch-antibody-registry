@@ -1,15 +1,30 @@
 import { GridColumnVisibilityModel } from "@mui/x-data-grid";
-import { Antibody, SearchCriteriaOptions } from "../rest";
+import { Antibody } from "../rest";
 import { modelType } from "../constants/constants";
 import * as yup from "yup";
 
+export const SearchCriteriaOptions = {
+  Contains: 'contains',
+  Equals: 'equals',
+  EndsWith: 'endsWith',
+  StartsWith: 'startsWith',
+  SortOn: 'sortOn',
+  IsEmpty: 'isEmpty',
+  IsNotEmpty: 'isNotEmpty',
+  IsAnyOf: 'isAnyOf',
+  Operation: 'operation',
+  IsUserScope: 'isUserScope',
+  Page: 'page',
+  Size: 'size',
+  Search: 'search'
+} as const;
 
 export function getProperCitation(a: Antibody) {
   if(!a) {return "ERROR";}
   return a.catalogNum && a.vendorName ? `(${a.vendorName} Cat# ${a?.catalogNum?.split(" (")[0]}, RRID:AB_${a.abId})`: "ERROR";
 }
 
-function convertCamelCaseToSpaces(str) {
+function convertCamelCaseToSpaces(str: string) {
   return str.replace(/([A-Z])/g, ' $1').toLowerCase();
 }
 
@@ -94,7 +109,7 @@ export function mapColumnToBackendModel(columnItems, modeltype) {
 
 
 export const getColumnsToDisplay = (columns) => {
-  let showcolList: GridColumnVisibilityModel = {};
+  const showcolList: GridColumnVisibilityModel = {};
   columns.filter((column) => column?.hideable === true).map((column) => {
     showcolList[column.field] = false;
   });

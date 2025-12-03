@@ -11,11 +11,11 @@ import DoneIcon from "@mui/icons-material/Done";
 import Stepper from "./Stepper";
 
 interface NavigationProps {
-  hasPrevious?: Boolean;
+  hasPrevious?: boolean;
   previous: () => void;
   next: (e) => void;
-  isLastStep?: Boolean;
-  activeStep: Number;
+  isLastStep?: boolean;
+  activeStep: number;
   //totalSteps: Number;
   formik?;
 }
@@ -38,55 +38,55 @@ export const StepNavigation = (props: NavigationProps) => {
     },
   };
   return (<>{props.formik?.isSubmitting && <Backdrop sx={theme => ({
-      color: '#fff',
-      zIndex: theme.zIndex.drawer + 1
-    })} open={true} ><CircularProgress color="primary" /></Backdrop>}
-    <Toolbar sx={classes.toolbar}>
-      <Container maxWidth="xl">
-        <Box sx={classes.content} className="form-steps">
-          <Stepper
-            activeStep={props.activeStep}
-            //totalSteps={props.totalSteps}
-          />
-          <Stack direction="row" spacing={2}>
-            <Button
-              disabled={!props.hasPrevious}
-              variant="contained"
-              color="info"
-              onClick={props.previous}
-              startIcon={<ChevronLeftIcon fontSize="small" />}
-              className="previous-button"
-            >
+    color: '#fff',
+    zIndex: theme.zIndex.drawer + 1
+  })} open={true} ><CircularProgress color="primary" /></Backdrop>}
+  <Toolbar sx={classes.toolbar}>
+    <Container maxWidth="xl">
+      <Box sx={classes.content} className="form-steps">
+        <Stepper
+          activeStep={props.activeStep}
+          //totalSteps={props.totalSteps}
+        />
+        <Stack direction="row" spacing={2}>
+          <Button
+            disabled={!props.hasPrevious}
+            variant="contained"
+            color="info"
+            onClick={props.previous}
+            startIcon={<ChevronLeftIcon fontSize="small" />}
+            className="previous-button"
+          >
               Previous
-            </Button>
-            {props.isLastStep ? (
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<DoneIcon fontSize="small" />}
-                type="submit"
-                disabled={
-                  props.formik && !(props.formik.isValid && props.formik.dirty) || props.formik.isSubmitting
-                }
-                className="submit-button"
-              >
+          </Button>
+          {props.isLastStep ? (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<DoneIcon fontSize="small" />}
+              type="submit"
+              disabled={
+                props.formik && !(props.formik.isValid && props.formik.dirty) || props.formik.isSubmitting
+              }
+              className="submit-button"
+            >
                 Submit
-              </Button>
-            ) : (
-              <Button
-                variant="text"
-                color="secondary"
-                endIcon={<ChevronRightIcon fontSize="small" />}
-                onClick={(e) => props.next(e)}
-                className="next-button"
-              >
+            </Button>
+          ) : (
+            <Button
+              variant="text"
+              color="secondary"
+              endIcon={<ChevronRightIcon fontSize="small" />}
+              onClick={(e) => props.next(e)}
+              className="next-button"
+            >
                 Next
-              </Button>
-            )}
-          </Stack>
-        </Box>
-      </Container>
-    </Toolbar>
+            </Button>
+          )}
+        </Stack>
+      </Box>
+    </Container>
+  </Toolbar>
   </>);
 };
 export default StepNavigation;

@@ -159,7 +159,7 @@ const PersonalForm = (props) => {
   const { setAntibodyId, setApiResponse, next } = props;
 
   const postAntibody = (antibody) => {
-    let ab = { ...antibody, type: "personal" };
+    const ab = { ...antibody, type: "personal" };
     postNewAntibody(ab, setAntibodyId, setApiResponse, next);
   };
 

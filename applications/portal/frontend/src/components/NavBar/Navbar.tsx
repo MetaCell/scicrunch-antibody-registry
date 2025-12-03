@@ -20,7 +20,7 @@ import UserAccountMenu from "./UserAccountMenu";
 const Navbar = (props) => {
   const user: User = React.useContext(UserContext)[0];
   const login = () => {
-    window.location.href = "/login";
+    window.location.href = `/login?_=${Date.now()}`;
   };
   return (
     <Box className="container-navbar">

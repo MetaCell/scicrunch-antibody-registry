@@ -7,7 +7,9 @@ import {
   GridRenderCellParams,
   GridCsvExportOptions,
   GridNoRowsOverlay,
-  GridColumnVisibilityModel
+  GridColumnVisibilityModel,
+  GridFilterModel,
+  GridRowSelectionModel
 } from "@mui/x-data-grid";
 import {
   Typography,
@@ -17,7 +19,6 @@ import {
   Popover,
   Button
 } from "@mui/material";
-import { CopyToClipboard } from "react-copy-to-clipboard";
 
 //project imports
 import {
@@ -37,7 +38,7 @@ import { checkIfFilterSetExists, getColumnsToDisplay, getProperCitation, getRand
 import { UserContext } from "../../services/UserService";
 import ConnectAccount from "./ConnectAccount";
 import { ALLRESULTS, SEARCH_MODES, MYSUBMISSIONS, BLANK_FILTER_MODEL } from "../../constants/constants";
-import SearchContext from "../../context/search/SearchContext";
+import SearchContext, { SearchContextProps } from "../../context/search/SearchContext";
 import NotFoundMessage from "./NotFoundMessage";
 import Error500 from "../UI/Error500";
 import { PAGE_SIZE } from "../../constants/constants";
@@ -59,26 +60,34 @@ const StyledCheckBox = (props) => {
 
 const getRowId = (ab: Antibody) => `${ab.ix}`;
 
-const SortIcon = ({ sortingOrder, ...other }) => <SortingIcon {...other} />;
+const SortIcon = ({ ...other }) => <SortingIcon {...other} />;
 
-const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
-  const [activeSelection, setActiveSelection] = useState(true);
-  const {
-    warningMessage
-  } = useContext(SearchContext);
+interface CustomToolbarProps {
+  activeTab?: string;
+  searchedAntibodies?: Antibody[];
+  filterModel?: GridFilterModel;
+  rowSelectionModel?: GridRowSelectionModel;
+  [key: string]: any; // Allow additional props from DataGrid
+}
+
+const CustomToolbar = (props: CustomToolbarProps) => {
+  const { 
+    activeTab = ALLRESULTS, 
+    searchedAntibodies = [], 
+    filterModel = { items: [] },
+    rowSelectionModel = []
+  } = props;
+  
+  const searchContext = useContext(SearchContext);
+  const warningMessage = searchContext?.warningMessage;
   const apiRef = useGridApiContext();
-  const selectedRows = apiRef.current.getSelectedRows();
 
   const handleExport = (options: GridCsvExportOptions) =>
     apiRef.current.exportDataAsCsv(options);
 
   const showFilterMenu = () => apiRef.current.showFilterPanel();
 
-  useEffect(() => {
-    selectedRows.size === 0
-      ? setActiveSelection(false)
-      : setActiveSelection(true);
-  }, [selectedRows]);
+  const activeSelection = rowSelectionModel.length > 0;
 
   return (
     <><TableHeader
@@ -88,7 +97,7 @@ const CustomToolbar = ({ activeTab, searchedAntibodies, filterModel }) => {
       activeTab={activeTab}
       filterModel={filterModel}
       warningMessage={warningMessage}
-      shownResultsNum={searchedAntibodies?.length}
+      shownResultsNum={searchedAntibodies.length}
     />
 
     </>
@@ -200,7 +209,7 @@ const RenderClonality = (props) => (
 );
 
 
-const RenderHtml = (props: GridRenderCellParams<String>) => {
+const RenderHtml = (props: GridRenderCellParams<any>) => {
   return (
     <Typography
       variant="caption"
@@ -231,7 +240,7 @@ const citationStyles = {
   },
 };
 
-const RenderProperCitation = (props: GridRenderCellParams<String>) => {
+const RenderProperCitation = (props: GridRenderCellParams<any>) => {
 
   const [anchorCitationPopover, setAnchorCitationPopover] =
     useState<HTMLButtonElement | null>(null);
@@ -240,10 +249,16 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
     setAnchorCitationPopover(null);
   }, [setAnchorCitationPopover]);
 
-  const handleClickCitation = useCallback((event) => {
-    setAnchorCitationPopover(event.currentTarget);
-    setTimeout(handleCloseCitation, 1000);
-  }, [handleCloseCitation, setAnchorCitationPopover]);
+  const handleClickCitation = useCallback(async (event) => {
+    const target = event.currentTarget;
+    try {
+      await navigator.clipboard.writeText(props.value);
+      setAnchorCitationPopover(target);
+      setTimeout(handleCloseCitation, 1000);
+    } catch (err) {
+      console.error('Failed to copy citation:', err);
+    }
+  }, [handleCloseCitation, setAnchorCitationPopover, props.value]);
 
 
 
@@ -261,31 +276,30 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
       >
         {props.value}
       </Typography>
-      <CopyToClipboard text={props.value} >
-        <Button
-          onClick={handleClickCitation}
-          size="small"
-          sx={{ minWidth: 0 }}
-          startIcon={
-            <CopyIcon sx={theme => ({
-              stroke: theme.palette.grey[500]
-            })} fontSize="inherit" />
-          }
-          className="btn-citation-copy"
-        />
-      </CopyToClipboard>
+      <Button
+        onClick={handleClickCitation}
+        size="small"
+        sx={{ minWidth: 0 }}
+        startIcon={
+          <CopyIcon sx={theme => ({
+            stroke: theme.palette.grey[500]
+          })} fontSize="inherit" />
+        }
+        className="btn-citation-copy"
+      />
       {open && <Popover
         open={open}
         anchorEl={anchorCitationPopover}
         onClose={handleCloseCitation}
         anchorOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "center",
+          vertical: "bottom",
           horizontal: "center",
         }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+        disableRestoreFocus
       >
         <Typography className="msg-citation-copied" sx={citationStyles.popover}>Citation copied</Typography>
       </Popover>}
@@ -293,7 +307,7 @@ const RenderProperCitation = (props: GridRenderCellParams<String>) => {
   );
 };
 
-const RenderStatus = (props: GridRenderCellParams<String>) => {
+const RenderStatus = (props: GridRenderCellParams<any>) => {
   const statusesTag = {
     CURATED: ["Accepted", "success"],
     REJECTED: ["Rejected", "error"],
@@ -395,14 +409,15 @@ const dataGridStyles = {
   },
 };
 
-const AntibodiesTable = (props) => {
-  const user = useContext(UserContext)[0];
+const AntibodiesTable = (props: any) => {
+  const user = useContext(UserContext)?.[0];
   const searchParams = new URLSearchParams(window.location.search);
   const searchQuery = searchParams.get('q');
   const [paginationModel, setPaginationModel] = React.useState({
     pageSize: PAGE_SIZE,
     page: 0,
   });
+  const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
 
 
   const {
@@ -416,7 +431,7 @@ const AntibodiesTable = (props) => {
     setSortModel,
     totalElements
   } =
-    useContext(SearchContext);
+    useContext(SearchContext) as SearchContextProps;
 
   const applyFilterAndSortModels = useCallback((filtermodel, query, sortmodel = sortModel) => {
     // Also does the applyFilterAndSortModels from the CustomFilterPanel - when apply button is clicked
@@ -429,8 +444,12 @@ const AntibodiesTable = (props) => {
       filtermodel,
       sortmodel
     )
-    filtermodel !== filterModel ? setFilterModel(filtermodel) : null;
-    sortmodel !== sortModel ? setSortModel(sortmodel) : null;
+    if (filtermodel !== filterModel) {
+      setFilterModel(filtermodel);
+    }
+    if (sortmodel !== sortModel) {
+      setSortModel(sortmodel);
+    }
   }, [filterModel, sortModel, getAntibodyList, props.activeTab, setFilterModel, setSortModel]);
 
   const addSortingColumn = useCallback((sortmodel) => {
@@ -447,7 +466,7 @@ const AntibodiesTable = (props) => {
   }, [filterModel, searchQuery, activeSearch, getAntibodyList, props.activeTab, setSortModel]);
 
   const setNewFilterColumn = useCallback((model) => {
-    let newblankFilter = { ...BLANK_FILTER_MODEL, columnField: model.items[0].field, field: model.items[0].field, id: getRandomId() }
+    const newblankFilter = { ...BLANK_FILTER_MODEL, columnField: model.items[0].field, field: model.items[0].field, id: getRandomId() }
     filterModel.items.push(newblankFilter);
     setFilterModel(filterModel);
   }, [filterModel, setFilterModel]);
@@ -457,22 +476,32 @@ const AntibodiesTable = (props) => {
     }
   }, [filterModel, setNewFilterColumn]);
 
+
+  const activeSearchRef = React.useRef(activeSearch);
+  activeSearchRef.current = activeSearch;
+
+  const filterModelRef = React.useRef(filterModel);
+  filterModelRef.current = filterModel;
+
+  const sortModelRef = React.useRef(sortModel);
+  sortModelRef.current = sortModel;
+
   useEffect(() => {
-    const isSearchInMySubmission = (props.activeTab === MYSUBMISSIONS && activeSearch)
+    const isSearchInMySubmission = (props.activeTab === MYSUBMISSIONS && activeSearchRef.current)
     // NOTE: LOGIC below - if no filters/sortmodel exist or search query exists in my submission - don't proceed, 
     // since this is handled in separate useEffect
-    if (filterModel.items.length > 0 || sortModel.length > 0 || isSearchInMySubmission) {
+    if (filterModelRef.current.items.length > 0 || sortModelRef.current.length > 0 || isSearchInMySubmission) {
       return;
     }
 
-    if (searchQuery || activeSearch) {
-      getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, searchQuery || activeSearch);
+    if (searchQuery || activeSearchRef.current) {
+      getAntibodyList(SEARCH_MODES.SEARCHED_ANTIBODIES, searchQuery || activeSearchRef.current);
     } else if (props.activeTab === MYSUBMISSIONS) {
       getAntibodyList(SEARCH_MODES.MY_ANTIBODIES);
     } else {
       getAntibodyList(SEARCH_MODES.ALL_ANTIBODIES);
     }
-  }, [props.activeTab, user, searchQuery]);
+  }, [props.activeTab, user, searchQuery, getAntibodyList]);
 
   useEffect(() => {
     // NOTE: LOGIC below - whenever search query changes and filters exist, then 
@@ -680,7 +709,8 @@ const AntibodiesTable = (props) => {
     toolbar: {
       activeTab: props.activeTab,
       searchedAntibodies,
-      filterModel
+      filterModel,
+      rowSelectionModel
     },
     noRows: {
       activeSearch: activeSearch,
@@ -706,14 +736,14 @@ const AntibodiesTable = (props) => {
         }
       }
     }
-  }), [props.activeTab, searchedAntibodies, filterModel, activeSearch]);
+  }), [props.activeTab, searchedAntibodies, filterModel, activeSearch, rowSelectionModel]);
 
   const [showColumns, setShowColumns] = useState<GridColumnVisibilityModel>(getColumnsToDisplay(columns));
 
   const NoRowsOverlay = () =>
     typeof activeSearch === "string" &&
       activeSearch !== "" &&
-      searchedAntibodies.length === 0 ? (
+      searchedAntibodies?.length === 0 ? (
         <NotFoundMessage activeSearch={activeSearch} />
       ) : typeof activeSearch !== "string" ? (
         <Error500 />
@@ -749,6 +779,8 @@ const AntibodiesTable = (props) => {
             onSortModelChange={addSortingColumn}
             checkboxSelection
             disableRowSelectionOnClick
+            rowSelectionModel={rowSelectionModel}
+            onRowSelectionModelChange={setRowSelectionModel}
             columnVisibilityModel={showColumns || {}}
             onColumnVisibilityModelChange={setShowColumns}
             getRowHeight={() => "auto"}

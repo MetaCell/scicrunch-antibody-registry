@@ -5,9 +5,10 @@ import {
   PaginatedAntibodies,
   AntibodyApi,
   AddAntibody,
-  AntibodyCommercialTypeEnum,
+  CommercialTypeEnum as AntibodyCommercialTypeEnum,
   SearchApi,
-  FilterRequest
+  FilterRequest,
+  UpdateAntibody
 } from "../rest/api";
 
 import { getToken } from "./UserService";
@@ -19,7 +20,7 @@ export async function getAntibodies(
   page = 1,
   size = 10
 ): Promise<PaginatedAntibodies> {
-  const abs = (await api.getAntibodies(page, size)).data;
+  const abs = (await api.apiRoutersAntibodyGetAntibodies(page, size)).data;
   abs.items = abs.items.map(mapAntibody);
   return abs;
 }
@@ -37,21 +38,21 @@ function mapAntibody(antibody: Antibody): Antibody {
 
 
 export async function getAntibody(id: number): Promise<Antibody[]> {
-  const abs = await (await api.getAntibody(id)).data;
+  const abs = await (await api.apiRoutersAntibodyGetAntibody(id)).data;
   return abs.map(mapAntibody);
 }
 
-export async function addAntibody(antibodyObj): Promise<any> {
-  let ab = mapAntibodyFromForm(antibodyObj);
+export async function addAntibody(antibodyObj: AddAntibody): Promise<any> {
+  const ab = mapAntibodyFromForm(antibodyObj);
   return (
     await new AntibodyApi(
       new Configuration({ apiKey: getToken(), accessToken: getToken() })
-    ).createAntibody(ab)
+    ).apiRoutersAntibodyCreateAntibody(ab)
   ).data;
 }
 
-function mapAntibodyFromForm(antibody): AddAntibody {
-  let commercialAb = {
+function mapAntibodyFromForm(antibody: any): AddAntibody {
+  const commercialAb = {
     clonality: antibody.clonality,
     epitope: antibody.epitope,
     comments: antibody.comments,
@@ -87,7 +88,7 @@ export async function getUserAntibodies(
   return (
     await new AntibodyApi(
       new Configuration({ apiKey: getToken(), accessToken: getToken() })
-    ).getUserAntibodies(page, size)
+    ).apiRoutersAntibodyGetUserAntibodies(page, size)
   ).data;
 }
 
@@ -97,7 +98,7 @@ export async function getSearchAntibodies(
   query:string
 ):Promise<PaginatedAntibodies>{
   const abs = await (
-    await searchApi.ftsAntibodies(page, size, query)
+    await searchApi.apiRoutersSearchFtsAntibodies(query, page, size)
   ).data;
   abs.items = abs.items.map(mapAntibody);
   return abs;
@@ -108,23 +109,23 @@ export async function getFilteredAndSearchedAntibodies(
 ): Promise<PaginatedAntibodies> {
   filters.size = PAGE_SIZE;
   const abs = (
-    await searchApi.filterAntibodies(filters)
+    await searchApi.apiRoutersSearchFilterAntibodies(filters)
   ).data;
   abs.items = abs.items.map(mapAntibody);
   return abs;
 }
 
 export async function getAntibodyByAccessionNumber(accesionNumber:number){
-  return mapAntibody(await (await api.getByAccession(accesionNumber)).data);
+  return mapAntibody(await (await api.apiRoutersAntibodyGetByAccession(accesionNumber)).data);
 }
 
-export async function updateSubmittedAntibody(updatedAntibody, accesionNumber){
-  let ab = mapAntibodyFromForm(updatedAntibody);
+export async function updateSubmittedAntibody(updatedAntibody: UpdateAntibody, accesionNumber:number):Promise<Antibody>{
+  const ab = mapAntibodyFromForm(updatedAntibody);
   delete ab.vendorName 
   delete ab.catalogNum
   return (
     await new AntibodyApi(
       new Configuration({ apiKey: getToken(), accessToken: getToken() })
-    ).updateUserAntibody(accesionNumber, ab)
+    ).apiRoutersAntibodyUpdateUserAntibody(accesionNumber, ab)
   ).data;
 }

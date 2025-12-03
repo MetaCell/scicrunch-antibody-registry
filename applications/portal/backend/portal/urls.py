@@ -21,11 +21,13 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 
 from portal.views import index
+from api.api import api
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("django_prometheus.urls")),
+    path("api/", api.urls),  # Django Ninja API
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(
     settings.STATIC_URL, document_root=settings.STATIC_ROOT

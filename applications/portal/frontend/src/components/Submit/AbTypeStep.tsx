@@ -10,7 +10,6 @@ import {
   Link,
   Radio,
 } from "@mui/material";
-import { useTheme } from "@mui/system";
 import {
   CompanyIcon,
   UserWithBackgroundIcon,
@@ -80,7 +79,7 @@ const styles = {
   },
 };
 
-const AbTypeStep = ({ label, ...props }: AbTypeStepProps) => {
+const AbTypeStep = ({ ...props }: AbTypeStepProps) => {
   
 
   return (

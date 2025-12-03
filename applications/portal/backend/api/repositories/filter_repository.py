@@ -4,9 +4,9 @@ from .search_repository import apply_plain_sorting, pageitems_if_page_in_bound, 
 from django.core.paginator import Paginator
 
 
-def plain_filter_antibodies(page: int = 1, size: int = 10, filters=None):
+def plain_filter_antibodies(page: int = 1, size: int = 10, filters=None, user=None):
     filtered_antibodies = Antibody.objects.filter(
-        convert_filters_to_q(filters)
+        convert_filters_to_q(filters, user)
     ).select_related("vendor").prefetch_related("species").prefetch_related("applications").distinct()
 
     antibodies_count = filtered_antibodies.count()

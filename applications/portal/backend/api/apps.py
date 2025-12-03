@@ -6,5 +6,10 @@ class ApiConfig(AppConfig):
     name = 'api'
 
     def ready(self):
-        from api.signals import clear_antibody_cache 
+        from api.signals import clear_antibody_cache
+        # Register exception handlers after app is ready
+        # Temporarily commented out to test
+        # from api.api import api
+        # from api.helpers.response_helpers import add_exception_handlers
+        # add_exception_handlers(api)
         return super().ready()

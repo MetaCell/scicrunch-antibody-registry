@@ -7,12 +7,12 @@ import AccountDetailsForm from "./AccountDetailsForm";
 const AccountDetails = () => {
   const user: User = React.useContext(UserContext)[0];
   return (
-        <>
-            <SubHeader>Good morning, {user.preferredUsername}.</SubHeader>
-            <Container maxWidth="lg" disableGutters>
-              <AccountDetailsForm />
-            </Container>
-        </>
+    <>
+      <SubHeader>Good morning, {user.preferredUsername}.</SubHeader>
+      <Container maxWidth="lg" disableGutters>
+        <AccountDetailsForm />
+      </Container>
+    </>
   )
 
 }

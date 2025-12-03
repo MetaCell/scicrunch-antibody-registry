@@ -13,12 +13,9 @@ from django.core.paginator import Paginator
 from ..models import STATUS, Antibody, AntibodySearch
 from .filtering_utils import convert_filters_to_q, order_by_string, status_q
 from cloudharness import log
-from ..mappers.antibody_mapper import AntibodyMapper
 
 MIN_CATALOG_RANKING = 0.0  # TODO validate the proper ranking value
 MAX_SORTED = settings.LIMIT_NUM_RESULTS
-
-antibody_mapper = AntibodyMapper()
 
 
 def flat(l):
@@ -26,7 +23,8 @@ def flat(l):
 
 
 def pageitems_if_page_in_bound(page, p):
-    return [antibody_mapper.to_dto(ab) for ab in p.get_page(page)] if page <= p.num_pages else []
+    """Return Django model instances directly - Django Ninja handles serialization"""
+    return list(p.get_page(page)) if page <= p.num_pages else []
 
 
 def might_be_catalog_number(search: str):

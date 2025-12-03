@@ -18,14 +18,14 @@ export const faqsInfo = [
     answer: <>Yes, please download a CSV file (link to a CSV’s with examples),
       fill in the required information and email to abr-help -at- scicrunch -dot- org.
       If you are not able to download the file please create an Excel or CSV file with the following columns:<br />
-      <ul>
-        <li> <b>Commercial Antibody/Kit Data Fields</b>: *Catalog Number*, Vendor, *Vendor Product Page Link*, Antibody Name, Host Species,
+    <ul>
+      <li> <b>Commercial Antibody/Kit Data Fields</b>: *Catalog Number*, Vendor, *Vendor Product Page Link*, Antibody Name, Host Species,
           Target/Reactive Species, Antibody Target, Clonality, Clone ID, Isotype, Conjugate, Antibody Form/Format, Uniprot ID, Epitope, Applications, Comments,Kit Contents </li>
-        <li><b>Personal/Custom Antibody Data Fields</b>: *Identifier*, *Principal Investigator - Institution *, *Principal Investigator&apos;s or Institution&apos;s Website*,
+      <li><b>Personal/Custom Antibody Data Fields</b>: *Identifier*, *Principal Investigator - Institution *, *Principal Investigator&apos;s or Institution&apos;s Website*,
           *Antibody Name *, *Host Species *, *Target/Reactive Species *,
           *Antibody Target *, *Clonality *, Clone ID, Isotype, Conjugate, Antibody Form/Format, Uniprot ID, Epitope, Applications, Comments, Defining Citation
-        </li>
-      </ul>
+      </li>
+    </ul>
       Fields marked with * are required.
     </>
   },
@@ -41,11 +41,11 @@ export const faqsInfo = [
     question: "How can I cite the Antibody Registry?",
     answer: <>If you need to cite the AntibodyRegistry (as opposed to any antibody)<br /><br />
 
-    <b>In the body of your methods</b><br />
+      <b>In the body of your methods</b><br />
     
     antibodyregistry.org , [access date], RRID:SCR_006397
-    <br /><br />
-    <b>In your references section</b> <br />
+      <br /><br />
+      <b>In your references section</b> <br />
     Bandrowski A, Pairish M, Eckmann P, Grethe J, Martone ME. The Antibody Registry: ten years of registering antibodies. Nucleic Acids Res. 2023 Jan 6;51(D1):D358-D367. doi: 10.1093/nar/gkac927. PMID: 36370112; PMCID: PMC9825422.
     </>
   },
@@ -74,9 +74,9 @@ export const faqsInfo = [
   },
   {
     question: "How can I download data?",
-    answer: <> <b>Humans: </b> Selecting a handful of antibodies and downloading the list is accomplished by clicking the box icon on the left of each antibody.<br />
-      <b>Humans Bulk: </b>Downloading all data in bulk requires API access via <a href="https://scicrunch.org/">scicrunch.org</a> (see above). 
-      We currently do not have a method to access the data via the AntibodyRegistry website. 
+    answer: <><b>Humans: </b> Selecting a handful of antibodies and downloading the list is accomplished by clicking the box icon on the left of each antibody.<br />
+      <b>Humans Bulk: </b>Please go to the <a href="/download">Download</a> section and get the csv file, the file is CC-0 but the fields are limited. 
+      Downloading data in bulk can also be done via the <a href="https://scicrunch.org/">scicrunch.org</a> website which requires API access. 
     </>
   },
   {

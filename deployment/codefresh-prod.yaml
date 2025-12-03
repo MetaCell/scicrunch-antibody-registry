@@ -31,7 +31,8 @@ steps:
     commands:
     - bash cloud-harness/install.sh
     - harness-deployment cloud-harness . -t ${{DEPLOYMENT_TAG}} -d ${{DOMAIN}} -r
-      ${{REGISTRY}} -rs ${{REGISTRY_SECRET}} -n ${{NAMESPACE}} -e prod -i portal
+      ${{REGISTRY}} -rs '${{REGISTRY_SECRET}}' -n ${{NAMESPACE}} -e prod --no-cd -i
+      portal
   prepare_deployment_view:
     commands:
     - helm template ./deployment/helm --debug -n ${{NAMESPACE}}
