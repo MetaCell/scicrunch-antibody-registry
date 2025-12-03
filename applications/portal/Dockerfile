@@ -17,8 +17,8 @@ RUN yarn build
 FROM $CLOUDHARNESS_DJANGO
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    postgresql-client \
-    && rm -rf /var/lib/apt/lists/*
+    postgresql-client nginx supervisor \
+    && apt-get clean
 
 WORKDIR ${APP_DIR}
 RUN mkdir -p ${APP_DIR}/static/www
@@ -32,6 +32,12 @@ RUN python3 -m pip install -e .
 COPY backend ${APP_DIR}
 RUN python3 manage.py collectstatic --noinput
 
-COPY --from=frontend /app/dist ${APP_DIR}/static/www
+COPY --from=frontend /app/dist ${APP_DIR}/www
 ENV DJANGO_SETTINGS_MODULE=portal.settings
-ENTRYPOINT uvicorn --workers ${WORKERS} --host 0.0.0.0 --port ${PORT} main:app
+# COPY default nginx configuration
+COPY deploy/resources/nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80 8000
+COPY deploy/resources/supervisord.properties /etc/supervisor/conf.d/supervisord.properties
+
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.properties"]

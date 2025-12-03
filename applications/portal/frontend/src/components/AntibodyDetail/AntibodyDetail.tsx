@@ -23,6 +23,7 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import { CopyIcon, ExternalLinkIcon } from "../icons";
 import { Antibody, AntibodyStatusEnum } from "../../rest";
 import { getProperCitation } from "../../utils/antibody";
+import { trackVendorClick } from "../../utils/tracking";
 
 export const AntibodyDetail = () => {
   const theme = useTheme();
@@ -294,6 +295,11 @@ export const AntibodyDetail = () => {
                     <ExternalLinkIcon stroke={theme.palette.primary.dark} />
                   }
                   href={antibody.url}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    trackVendorClick(antibody.vendorName, antibody.vendorId);
+                    window.open(antibody.url, "_blank");
+                  }}
                   className="open-vendor-website-button"
                 >
                   Open in vendor website

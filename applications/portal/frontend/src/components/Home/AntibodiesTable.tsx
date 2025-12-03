@@ -43,6 +43,8 @@ import Error500 from "../UI/Error500";
 import { PAGE_SIZE } from "../../constants/constants";
 import { TablePaginatedFooter } from "./TablePaginatedFooter";
 import { CustomFilterPanel } from "./CustomFilterPanel";
+import { trackVendorClick } from "../../utils/tracking";
+
 
 
 const StyledCheckBox = (props) => {
@@ -148,13 +150,14 @@ const RenderCellContent = (props: GridRenderCellParams) => {
   );
 };
 
-const RenderVendor = (props) => (
-
-  <Typography
+const RenderVendor = (props) => {
+  const handleClick = useCallback(() => trackVendorClick(props.row.vendorName, props.row.vendorId), [props.row.vendorName, props.row.vendorId]);
+  return <Typography
     variant="caption"
     align="left"
     component="div"
     className="col-vendor"
+    onClick={handleClick}
     sx={{
       color: "grey.500",
       width: "fit-content"
@@ -175,7 +178,7 @@ const RenderVendor = (props) => (
       {props.value}
     </Link> : props.value}
   </Typography>
-)
+}
 
 const RenderClonality = (props) => (
   <Typography
@@ -782,6 +785,7 @@ const AntibodiesTable = (props) => {
 };
 
 export default AntibodiesTable;
+
 
 
 

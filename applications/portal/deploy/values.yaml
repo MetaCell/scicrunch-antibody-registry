@@ -5,17 +5,24 @@ harness:
   service:
     port: 8080
     auto: true
+  resources:
+    - name: nginx-config
+      src: "nginx.conf"
+      dst: "/etc/nginx/nginx.conf"
+    - name: supervisord-config
+      src: "supervisord.properties"
+      dst: "/etc/supervisor/conf.d/supervisord.properties"
   deployment:
     auto: true
-    replicas: 2
-    port: 8080
+    replicas: 1
+    port: 80
     resources:
       requests:
-        memory: 0.9Gi
+        memory: 1.5Gi
         cpu: 50m
       limits:
         cpu: 4
-        memory: 2Gi
+        memory: 4Gi
     volume:
       name: areg-persistent-files
       mountpath: /usr/src/app/persistent
@@ -76,9 +83,10 @@ harness:
       initialdb: antibody_registry
     resources:
       requests:
-        memory: 1Gi
-        cpu: 50m
+        memory: 3Gi
+        cpu: 1
       limits:
+        cpu: 4
         memory: 4Gi
   accounts:
     roles:
