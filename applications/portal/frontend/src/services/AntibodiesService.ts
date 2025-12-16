@@ -66,10 +66,10 @@ function mapAntibodyFromForm(antibody: any): AddAntibody {
     productForm: antibody.format,
     productIsotype: antibody.isotype,
     sourceOrganism: antibody.host,
-    targetSpecies: antibody.targetSpecies.split(/;,/),
+    targetSpecies: antibody.targetSpecies.split(/[,;]/).map((app: string) => app.trim()),
     uniprotId: antibody.uniprotID,
     vendorName: antibody.vendor,
-    applications: antibody.applications?.split(/\W/),
+    applications: antibody.applications?.split(/[,;]/).map((app: string) => app.trim()),
   };
   if (antibody.type === AntibodyCommercialTypeEnum.Commercial) {
     return commercialAb;
