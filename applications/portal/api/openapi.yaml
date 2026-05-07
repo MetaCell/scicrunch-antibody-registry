@@ -1,0 +1,1176 @@
+components:
+  schemas:
+    AddAntibody:
+      description: The data type associated with the POST method of the antibody resource
+      properties:
+        abName:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Abname
+        abTarget:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Abtarget
+        abTargetEntrezId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Abtargetentrezid
+        abTargetUniprotId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Abtargetuniprotid
+        applications:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Applications
+        catalogNum:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Catalognum
+        clonality:
+          anyOf:
+          - $ref: '#/components/schemas/ClonalityEnum'
+          - type: 'null'
+        cloneId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cloneid
+        comments:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Comments
+        commercialType:
+          anyOf:
+          - $ref: '#/components/schemas/CommercialTypeEnum'
+          - type: 'null'
+        definingCitation:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Definingcitation
+        epitope:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Epitope
+        kitContents:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Kitcontents
+        numOfCitation:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Numofcitation
+        productConjugate:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Productconjugate
+        productForm:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Productform
+        productIsotype:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Productisotype
+        sourceOrganism:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourceorganism
+        targetSpecies:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Targetspecies
+        uniprotId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniprotid
+        url:
+          title: Url
+          type: string
+        vendorName:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Vendorname
+      required:
+      - url
+      title: AddAntibody
+      type: object
+    Antibody:
+      description: The data type associated with the antibody resource
+      properties:
+        abId:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Abid
+        abName:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Abname
+        abTarget:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Abtarget
+        abTargetEntrezId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Abtargetentrezid
+        abTargetUniprotId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Abtargetuniprotid
+        accession:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Accession
+        applications:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Applications
+        catAlt:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Catalt
+        catalogNum:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Catalognum
+        clonality:
+          anyOf:
+          - $ref: '#/components/schemas/ClonalityEnum'
+          - type: 'null'
+        cloneId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cloneid
+        comments:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Comments
+        commercialType:
+          anyOf:
+          - $ref: '#/components/schemas/CommercialTypeEnum'
+          - type: 'null'
+        curateTime:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Curatetime
+        curatorComment:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Curatorcomment
+        definingCitation:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Definingcitation
+        discDate:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Discdate
+        epitope:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Epitope
+        feedback:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Feedback
+        insertTime:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Inserttime
+        ix:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Ix
+        kitContents:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Kitcontents
+        lastEditTime:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Lastedittime
+        numOfCitation:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Numofcitation
+        productConjugate:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Productconjugate
+        productForm:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Productform
+        productIsotype:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Productisotype
+        showLink:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Showlink
+        sourceOrganism:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourceorganism
+        status:
+          anyOf:
+          - $ref: '#/components/schemas/AntibodyStatusEnum'
+          - type: 'null'
+        targetModification:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Targetmodification
+        targetSpecies:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Targetspecies
+        targetSubregion:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Targetsubregion
+        uniprotId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniprotid
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+        vendorId:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Vendorid
+        vendorName:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Vendorname
+        vendorUrl:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Vendorurl
+      title: Antibody
+      type: object
+    AntibodyStatusEnum:
+      enum:
+      - CURATED
+      - REJECTED
+      - QUEUE
+      - UNDER_REVIEW
+      title: AntibodyStatusEnum
+      type: string
+    ClonalityEnum:
+      enum:
+      - unknown
+      - cocktail
+      - control
+      - isotype control
+      - monoclonal
+      - monoclonal secondary
+      - polyclonal
+      - polyclonal secondary
+      - oligoclonal
+      - recombinant
+      - recombinant monoclonal
+      - recombinant monoclonal secondary
+      - recombinant polyclonal
+      - recombinant polyclonal secondary
+      title: ClonalityEnum
+      type: string
+    CommercialTypeEnum:
+      enum:
+      - commercial
+      - non-profit
+      - personal
+      - other
+      title: CommercialTypeEnum
+      type: string
+    DataInfo:
+      description: Information about the data in the system
+      properties:
+        lastupdate:
+          format: date
+          title: Lastupdate
+          type: string
+        total:
+          title: Total
+          type: integer
+      required:
+      - total
+      - lastupdate
+      title: DataInfo
+      type: object
+    FilterRequest:
+      description: The search request body that allows filtering combinations over
+        multiple columns
+      properties:
+        contains:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/KeyValuePair'
+            type: array
+          - type: 'null'
+          title: Contains
+        endsWith:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/KeyValuePair'
+            type: array
+          - type: 'null'
+          title: Endswith
+        equals:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/KeyValuePair'
+            type: array
+          - type: 'null'
+          title: Equals
+        isAnyOf:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/KeyValueArrayPair'
+            type: array
+          - type: 'null'
+          title: Isanyof
+        isEmpty:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Isempty
+        isNotEmpty:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Isnotempty
+        isUserScope:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Isuserscope
+        operation:
+          anyOf:
+          - $ref: '#/components/schemas/OperationEnum'
+          - type: 'null'
+        page:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          default: 1
+          title: Page
+        search:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Search
+        size:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          default: 10
+          title: Size
+        sortOn:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/KeyValueSortOrderPair'
+            type: array
+          - type: 'null'
+          title: Sorton
+        startsWith:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/KeyValuePair'
+            type: array
+          - type: 'null'
+          title: Startswith
+      title: FilterRequest
+      type: object
+    IngestRequest:
+      description: Request body for data ingestion
+      properties:
+        driveLinkOrId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Drivelinkorid
+        hot:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: false
+          title: Hot
+      title: IngestRequest
+      type: object
+    KeyValueArrayPair:
+      description: Utility type to represent a key-value object where value is an
+        array
+      properties:
+        key:
+          title: Key
+          type: string
+        value:
+          items:
+            type: string
+          title: Value
+          type: array
+      required:
+      - key
+      - value
+      title: KeyValueArrayPair
+      type: object
+    KeyValuePair:
+      description: Utility type to represent a key-value object
+      properties:
+        key:
+          title: Key
+          type: string
+        value:
+          title: Value
+          type: string
+      required:
+      - key
+      - value
+      title: KeyValuePair
+      type: object
+    KeyValueSortOrderPair:
+      description: Utility type to represent a key-value object with sort order
+      properties:
+        key:
+          title: Key
+          type: string
+        sortorder:
+          $ref: '#/components/schemas/SortOrderEnum'
+      required:
+      - key
+      - sortorder
+      title: KeyValueSortOrderPair
+      type: object
+    OperationEnum:
+      enum:
+      - and
+      - or
+      title: OperationEnum
+      type: string
+    PaginatedAntibodies:
+      description: Paginated response for antibodies
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Antibody'
+          title: Items
+          type: array
+        page:
+          title: Page
+          type: integer
+        totalElements:
+          title: Totalelements
+          type: integer
+      required:
+      - page
+      - totalElements
+      - items
+      title: PaginatedAntibodies
+      type: object
+    PartnerResponseObject:
+      description: Response of the list of partners and related images
+      properties:
+        image:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Image
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Name
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+      title: PartnerResponseObject
+      type: object
+    SortOrderEnum:
+      enum:
+      - asc
+      - desc
+      title: SortOrderEnum
+      type: string
+    UpdateAntibody:
+      description: The data type associated with the PUT method of the antibody resource
+      properties:
+        abName:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Abname
+        abTarget:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Abtarget
+        abTargetEntrezId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Abtargetentrezid
+        abTargetUniprotId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Abtargetuniprotid
+        applications:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Applications
+        clonality:
+          anyOf:
+          - $ref: '#/components/schemas/ClonalityEnum'
+          - type: 'null'
+        cloneId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cloneid
+        comments:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Comments
+        commercialType:
+          anyOf:
+          - $ref: '#/components/schemas/CommercialTypeEnum'
+          - type: 'null'
+        definingCitation:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Definingcitation
+        epitope:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Epitope
+        kitContents:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Kitcontents
+        numOfCitation:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Numofcitation
+        productConjugate:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Productconjugate
+        productForm:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Productform
+        productIsotype:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Productisotype
+        sourceOrganism:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourceorganism
+        targetSpecies:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Targetspecies
+        uniprotId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniprotid
+        url:
+          title: Url
+          type: string
+      required:
+      - url
+      title: UpdateAntibody
+      type: object
+    VendorSchema:
+      description: Vendor information
+      properties:
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Id
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Name
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+      title: VendorSchema
+      type: object
+  securitySchemes:
+    BearerAuth:
+      scheme: bearer
+      type: http
+info:
+  description: Antibody Registry API
+  title: SciCrunch Antibody Registry API
+  version: 1.0.0
+openapi: 3.1.0
+paths:
+  /api/antibodies:
+    get:
+      description: List Antibodies
+      operationId: api_routers_antibody_get_antibodies
+      parameters:
+      - in: query
+        name: page
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Page
+      - in: query
+        name: size
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Size
+      - in: query
+        name: updated_from
+        required: false
+        schema:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Updated From
+      - in: query
+        name: updated_to
+        required: false
+        schema:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Updated To
+      - in: query
+        name: status
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Status
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAntibodies'
+          description: OK
+      summary: Get Antibodies
+      tags:
+      - antibody
+    post:
+      description: Create a Antibody
+      operationId: api_routers_antibody_create_antibody
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddAntibody'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Antibody'
+          description: Created
+      security:
+      - BearerAuth: []
+      summary: Create Antibody
+      tags:
+      - antibody
+  /api/antibodies/export:
+    get:
+      description: Export all antibodies in csv format
+      operationId: api_routers_antibody_get_antibodies_export
+      parameters: []
+      responses:
+        '200':
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Get Antibodies Export
+      tags:
+      - antibody
+    post:
+      description: Export antibodies as CSV
+      operationId: api_routers_antibody_export_antibodies_post
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                title: Response
+                type: string
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Export Antibodies Post
+      tags:
+      - antibody
+  /api/antibodies/export/admin:
+    get:
+      description: Export all fields of all antibodies to a CSV file - Only for admin
+        users
+      operationId: api_routers_antibody_get_antibodies_export_admin
+      parameters:
+      - in: query
+        name: status
+        required: false
+        schema:
+          anyOf:
+          - $ref: '#/components/schemas/AntibodyStatusEnum'
+          - type: 'null'
+      - in: query
+        name: lastedit_time
+        required: false
+        schema:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Lastedit Time
+      responses:
+        '200':
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Get Antibodies Export Admin
+      tags:
+      - antibody
+  /api/antibodies/user:
+    get:
+      description: List user's Antibodies
+      operationId: api_routers_antibody_get_user_antibodies
+      parameters:
+      - in: query
+        name: page
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Page
+      - in: query
+        name: size
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Size
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAntibodies'
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Get User Antibodies
+      tags:
+      - antibody
+  /api/antibodies/user/{accession_number}:
+    get:
+      description: Get antibody by the accession number
+      operationId: api_routers_antibody_get_by_accession
+      parameters:
+      - in: path
+        name: accession_number
+        required: true
+        schema:
+          title: Accession Number
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Antibody'
+          description: OK
+      summary: Get By Accession
+      tags:
+      - antibody
+    put:
+      description: Update a submitted Antibody
+      operationId: api_routers_antibody_update_user_antibody
+      parameters:
+      - in: path
+        name: accession_number
+        required: true
+        schema:
+          title: Accession Number
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAntibody'
+        required: true
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Antibody'
+          description: Accepted
+      security:
+      - BearerAuth: []
+      summary: Update User Antibody
+      tags:
+      - antibody
+  /api/antibodies/{antibody_id}:
+    get:
+      description: Get a Antibody
+      operationId: api_routers_antibody_get_antibody
+      parameters:
+      - in: path
+        name: antibody_id
+        required: true
+        schema:
+          title: Antibody Id
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Antibody'
+                title: Response
+                type: array
+          description: OK
+      summary: Get Antibody
+      tags:
+      - antibody
+  /api/applications:
+    get:
+      description: Get all applications
+      operationId: api_routers_search_get_applications
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  type: string
+                title: Response
+                type: array
+          description: OK
+      summary: Get Applications
+      tags:
+      - search
+  /api/datainfo:
+    get:
+      description: Get data information
+      operationId: api_routers_general_get_datainfo
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataInfo'
+          description: OK
+      summary: Get Datainfo
+      tags:
+      - general
+  /api/fts-antibodies:
+    get:
+      description: Search antibodies (Full Text Search)
+      operationId: api_routers_search_fts_antibodies
+      parameters:
+      - in: query
+        name: q
+        required: true
+        schema:
+          title: Q
+          type: string
+      - in: query
+        name: page
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Page
+      - in: query
+        name: size
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Size
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAntibodies'
+          description: OK
+      summary: Fts Antibodies
+      tags:
+      - search
+  /api/ingest:
+    post:
+      description: Ingest antibody's csv data into the database
+      operationId: api_routers_ingest_ingest
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response
+                type: object
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Ingest
+      tags:
+      - ingest
+  /api/live:
+    get:
+      description: Checks if application is healthy
+      operationId: api_routers_test_live
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                title: Response
+                type: string
+          description: OK
+      summary: Live
+      tags:
+      - test
+  /api/partners:
+    get:
+      description: Get the list of partners and related images
+      operationId: api_routers_general_get_partners
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/PartnerResponseObject'
+                title: Response
+                type: array
+          description: OK
+      summary: Get Partners
+      tags:
+      - general
+  /api/ping:
+    get:
+      description: Checks if application is up
+      operationId: api_routers_test_ping
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                title: Response
+                type: string
+          description: OK
+      summary: Ping
+      tags:
+      - test
+  /api/ready:
+    get:
+      description: Checks if application is ready to take requests
+      operationId: api_routers_test_ready
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                title: Response
+                type: string
+          description: OK
+      summary: Ready
+      tags:
+      - test
+  /api/search/antibodies:
+    post:
+      description: Search on Antibodies with custom filters
+      operationId: api_routers_search_filter_antibodies
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAntibodies'
+          description: OK
+      summary: Filter Antibodies
+      tags:
+      - search
+  /api/species:
+    get:
+      description: Get all species
+      operationId: api_routers_search_get_species
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  type: string
+                title: Response
+                type: array
+          description: OK
+      summary: Get Species
+      tags:
+      - search
+  /api/vendors:
+    get:
+      description: Get all vendors
+      operationId: api_routers_search_get_vendors
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/VendorSchema'
+                title: Response
+                type: array
+          description: OK
+      summary: Get Vendors
+      tags:
+      - search
+servers: []
+

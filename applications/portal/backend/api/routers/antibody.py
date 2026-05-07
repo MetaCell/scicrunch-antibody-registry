@@ -168,7 +168,7 @@ def get_antibodies_export(request: HttpRequest):
 
 @router.get("/antibodies/export/admin", tags=["antibody"], auth=auth)
 def get_antibodies_export_admin(
-    request: HttpRequest, status: Optional[AntibodyStatusEnum] = None
+    request: HttpRequest, status: Optional[AntibodyStatusEnum] = None, lastedit_time: Optional[datetime] = None
 ):
     """Export all fields of all antibodies to a CSV file - Only for admin users"""
     try:
@@ -188,7 +188,7 @@ def get_antibodies_export_admin(
         else "static/www/antibodies_admin_export.csv"
 
     if check_if_file_does_not_exist_and_recent(fname):
-        generate_antibodies_fields_by_status_to_csv(fname, status.value if status else '')    
+        generate_antibodies_fields_by_status_to_csv(fname, status.value if status else '', lastedit_time)    
     return redirect("/" + fname)
 
 
