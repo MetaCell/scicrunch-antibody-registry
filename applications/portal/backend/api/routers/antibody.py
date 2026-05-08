@@ -1,7 +1,7 @@
 """
 Antibody Router - Handles all antibody-related endpoints
 """
-from datetime import datetime
+from datetime import date
 from typing import List, Optional
 
 from ninja import Router
@@ -41,8 +41,8 @@ def get_antibodies(
     request: HttpRequest,
     page: Optional[int] = None,
     size: Optional[int] = None,
-    updated_from: Optional[datetime] = None,
-    updated_to: Optional[datetime] = None,
+    updated_from: Optional[date] = None,
+    updated_to: Optional[date] = None,
     status: Optional[str] = None,
 ):
     """List Antibodies"""
@@ -168,7 +168,7 @@ def get_antibodies_export(request: HttpRequest):
 
 @router.get("/antibodies/export/admin", tags=["antibody"], auth=auth)
 def get_antibodies_export_admin(
-    request: HttpRequest, status: Optional[AntibodyStatusEnum] = None, lastedit_time: Optional[datetime.date] = None
+    request: HttpRequest, status: Optional[AntibodyStatusEnum] = None, lastedit_time: Optional[date] = None
 ):
     """Export all fields of all antibodies to a CSV file - Only for admin users"""
     try:
