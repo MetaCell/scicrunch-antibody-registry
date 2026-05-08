@@ -168,7 +168,7 @@ def get_antibodies_export(request: HttpRequest):
 
 @router.get("/antibodies/export/admin", tags=["antibody"], auth=auth)
 def get_antibodies_export_admin(
-    request: HttpRequest, status: Optional[AntibodyStatusEnum] = None, lastedit_time: Optional[datetime] = None
+    request: HttpRequest, status: Optional[AntibodyStatusEnum] = None, lastedit_time: Optional[datetime.date] = None
 ):
     """Export all fields of all antibodies to a CSV file - Only for admin users"""
     try:

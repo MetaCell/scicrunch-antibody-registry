@@ -35,7 +35,7 @@ def generate_antibodies_fields_by_status_to_csv(fname, status:str='', lastedit_t
     if status:
         query += f" AND status='{status}'"
     if lastedit_time:
-        query += f" AND lastedit_time <= '{lastedit_time.isoformat()}'"
+        query += f" AND lastedit_time::date <= '{lastedit_time}'"
     # execute shell command
     proc = subprocess.run([
         "psql", "-h",
