@@ -1,4 +1,4 @@
-FROM quay.io/keycloak/keycloak:26.4.7
+FROM quay.io/keycloak/keycloak:26.6
 
 EXPOSE 9000
 EXPOSE 8080
