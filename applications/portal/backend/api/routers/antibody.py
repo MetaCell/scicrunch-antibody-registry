@@ -184,8 +184,7 @@ def get_antibodies_export_admin(
     from api.services.export_service import generate_antibodies_fields_by_status_to_csv
     from api.services.filesystem_service import check_if_file_does_not_exist_and_recent
     
-    fname = f"static/www/antibodies_admin_export_{status.value}.csv" if status is not None \
-        else "static/www/antibodies_admin_export.csv"
+    fname = f"static/www/antibodies_admin_export_{status.value if status else "all"}_{lastedit_time or "all"}.csv" 
 
     if check_if_file_does_not_exist_and_recent(fname):
         generate_antibodies_fields_by_status_to_csv(fname, status.value if status else '', lastedit_time)    
