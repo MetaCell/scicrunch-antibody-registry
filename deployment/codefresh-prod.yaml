@@ -7,8 +7,8 @@ steps:
     title: Clone main repository
     type: git-clone
     stage: prepare
-    repo: '${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}'
-    revision: '${{CF_BRANCH}}'
+    repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
+    revision: ${{CF_BRANCH}}
     git: github
   post_main_clone:
     title: Post main clone
@@ -20,7 +20,7 @@ steps:
         type: git-clone
         stage: prepare
         repo: https://github.com/MetaCell/cloud-harness.git
-        revision: '${{CLOUDHARNESS_BRANCH}}'
+        revision: ${{CLOUDHARNESS_BRANCH}}
         working_directory: .
         git: github
   prepare_deployment:
@@ -30,9 +30,19 @@ steps:
     working_directory: .
     commands:
     - bash cloud-harness/install.sh
-    - harness-deployment cloud-harness . -t ${{DEPLOYMENT_TAG}} -d ${{DOMAIN}} -r
-      ${{REGISTRY}} -rs '${{REGISTRY_SECRET}}' -n ${{NAMESPACE}} -e prod --no-cd -i
-      portal
+    - export HELM_NAME_ARG="$( [ -n "${{CHART_NAME}}" ] && printf -- "--name %s"
+      "${{CHART_NAME}}" )"
+    - export HELM_CHART_VERSION_ARG="$( [ -n "${{CHART_VERSION}}" ] && printf --
+      "--chart-version %s" "${{CHART_VERSION}}" )"
+    - export HELM_APP_VERSION_ARG="$( APP_VERSION_RESOLVED="${{APP_VERSION}}"; [
+      -z "$APP_VERSION_RESOLVED" ] && 
+      APP_VERSION_RESOLVED="${{DEPLOYMENT_TAG}}"; [ -n "$APP_VERSION_RESOLVED" ]
+      && printf -- "--app-version %s" "$APP_VERSION_RESOLVED" )"
+    - export HELM_META_ARGS="$HELM_NAME_ARG $HELM_CHART_VERSION_ARG 
+      $HELM_APP_VERSION_ARG"
+    - harness-deployment cloud-harness . -t ${{DEPLOYMENT_TAG}} -d ${{DOMAIN}} 
+      -r ${{REGISTRY}} -rsn '${{REGISTRY_SECRET}}' -n ${{NAMESPACE}} -e prod 
+      --no-cd $HELM_META_ARGS -i portal
   prepare_deployment_view:
     commands:
     - helm template ./deployment/helm --debug -n ${{NAMESPACE}}
@@ -50,12 +60,12 @@ steps:
     arguments:
       helm_version: 3.6.2
       chart_name: deployment/helm
-      release_name: '${{NAMESPACE}}'
-      kube_context: '${{CLUSTER_NAME}}'
-      namespace: '${{NAMESPACE}}'
-      chart_version: '${{DEPLOYMENT_TAG}}'
+      release_name: ${{NAMESPACE}}
+      kube_context: ${{CLUSTER_NAME}}
+      namespace: ${{NAMESPACE}}
+      chart_version: ${{DEPLOYMENT_TAG}}
       cmd_ps: --wait --timeout 600s --create-namespace
       custom_value_files:
       - ./deployment/helm/values.yaml
       custom_values:
-      - apps_portal_harness_secrets_scicrunch-api-key=${{SCICRUNCH-API-KEY}}
+      - 'apps_portal_harness_secrets_scicrunch-api-key="${{SCICRUNCH-API-KEY}}"'

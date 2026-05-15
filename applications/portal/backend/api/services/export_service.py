@@ -1,3 +1,4 @@
+from datetime import date
 import os
 import subprocess
 import sys
@@ -26,13 +27,15 @@ def generate_antibodies_csv_file(fname, status="CURATED"):
         raise Exception("Error during csv export: %s", proc.stdout)
 
 
-def generate_antibodies_fields_by_status_to_csv(fname, status:str=''):
+def generate_antibodies_fields_by_status_to_csv(fname, status:str='', lastedit_time: date=None):
     app = get_current_configuration()
     my_env = os.environ
     os.environ["PGPASSWORD"] = app.harness.database['pass']
     query = app['export_all_fields_query']
     if status:
         query += f" AND status='{status}'"
+    if lastedit_time:
+        query += f" AND lastedit_time::date >= '{lastedit_time}'"
     # execute shell command
     proc = subprocess.run([
         "psql", "-h",

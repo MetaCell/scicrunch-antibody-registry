@@ -444,10 +444,11 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
          * Export all fields of all antibodies to a CSV file - Only for admin users
          * @summary Get Antibodies Export Admin
          * @param {AntibodyStatusEnum | null} [status] 
+         * @param {string | null} [lasteditTime] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiRoutersAntibodyGetAntibodiesExportAdmin: async (status?: AntibodyStatusEnum | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiRoutersAntibodyGetAntibodiesExportAdmin: async (status?: AntibodyStatusEnum | null, lasteditTime?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/antibodies/export/admin`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -466,6 +467,12 @@ export const AntibodyApiAxiosParamCreator = function (configuration?: Configurat
 
             if (status !== undefined) {
                 localVarQueryParameter['status'] = status;
+            }
+
+            if (lasteditTime !== undefined) {
+                localVarQueryParameter['lastedit_time'] = (lasteditTime as any instanceof Date) ?
+                    (lasteditTime as any).toISOString() :
+                    lasteditTime;
             }
 
 
@@ -702,11 +709,12 @@ export const AntibodyApiFp = function(configuration?: Configuration) {
          * Export all fields of all antibodies to a CSV file - Only for admin users
          * @summary Get Antibodies Export Admin
          * @param {AntibodyStatusEnum | null} [status] 
+         * @param {string | null} [lasteditTime] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiRoutersAntibodyGetAntibodiesExportAdmin(status?: AntibodyStatusEnum | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersAntibodyGetAntibodiesExportAdmin(status, options);
+        async apiRoutersAntibodyGetAntibodiesExportAdmin(status?: AntibodyStatusEnum | null, lasteditTime?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiRoutersAntibodyGetAntibodiesExportAdmin(status, lasteditTime, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AntibodyApi.apiRoutersAntibodyGetAntibodiesExportAdmin']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -820,11 +828,12 @@ export const AntibodyApiFactory = function (configuration?: Configuration, baseP
          * Export all fields of all antibodies to a CSV file - Only for admin users
          * @summary Get Antibodies Export Admin
          * @param {AntibodyStatusEnum | null} [status] 
+         * @param {string | null} [lasteditTime] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiRoutersAntibodyGetAntibodiesExportAdmin(status?: AntibodyStatusEnum | null, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.apiRoutersAntibodyGetAntibodiesExportAdmin(status, options).then((request) => request(axios, basePath));
+        apiRoutersAntibodyGetAntibodiesExportAdmin(status?: AntibodyStatusEnum | null, lasteditTime?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.apiRoutersAntibodyGetAntibodiesExportAdmin(status, lasteditTime, options).then((request) => request(axios, basePath));
         },
         /**
          * Get a Antibody
@@ -925,11 +934,12 @@ export class AntibodyApi extends BaseAPI {
      * Export all fields of all antibodies to a CSV file - Only for admin users
      * @summary Get Antibodies Export Admin
      * @param {AntibodyStatusEnum | null} [status] 
+     * @param {string | null} [lasteditTime] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public apiRoutersAntibodyGetAntibodiesExportAdmin(status?: AntibodyStatusEnum | null, options?: RawAxiosRequestConfig) {
-        return AntibodyApiFp(this.configuration).apiRoutersAntibodyGetAntibodiesExportAdmin(status, options).then((request) => request(this.axios, this.basePath));
+    public apiRoutersAntibodyGetAntibodiesExportAdmin(status?: AntibodyStatusEnum | null, lasteditTime?: string | null, options?: RawAxiosRequestConfig) {
+        return AntibodyApiFp(this.configuration).apiRoutersAntibodyGetAntibodiesExportAdmin(status, lasteditTime, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

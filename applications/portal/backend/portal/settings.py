@@ -148,6 +148,12 @@ MEDIA_ROOT = PERSISTENT_ROOT
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_URL = "/media/"
 STATIC_URL = "/static/"
+
+# Ensure portal app static files are collected first (override Django defaults)
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "portal/static"),
+]
+
 if not os.path.exists(MEDIA_ROOT):
     os.makedirs(MEDIA_ROOT)
 if not os.path.exists(STATIC_ROOT):

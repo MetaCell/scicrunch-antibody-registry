@@ -1,0 +1,2151 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SciCrunch Antibody Registry API",
+    "version": "1.0.0",
+    "description": "Antibody Registry API"
+  },
+  "paths": {
+    "/api/antibodies": {
+      "get": {
+        "operationId": "api_routers_antibody_get_antibodies",
+        "summary": "Get Antibodies",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Size"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "updated_from",
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Updated From"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "updated_to",
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Updated To"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAntibodies"
+                }
+              }
+            }
+          }
+        },
+        "description": "List Antibodies",
+        "tags": [
+          "antibody"
+        ]
+      },
+      "post": {
+        "operationId": "api_routers_antibody_create_antibody",
+        "summary": "Create Antibody",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Antibody"
+                }
+              }
+            }
+          }
+        },
+        "description": "Create a Antibody",
+        "tags": [
+          "antibody"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddAntibody"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/antibodies/export": {
+      "get": {
+        "operationId": "api_routers_antibody_get_antibodies_export",
+        "summary": "Get Antibodies Export",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "description": "Export all antibodies in csv format",
+        "tags": [
+          "antibody"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "api_routers_antibody_export_antibodies_post",
+        "summary": "Export Antibodies Post",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "description": "Export antibodies as CSV",
+        "tags": [
+          "antibody"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/antibodies/export/admin": {
+      "get": {
+        "operationId": "api_routers_antibody_get_antibodies_export_admin",
+        "summary": "Get Antibodies Export Admin",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AntibodyStatusEnum"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "lastedit_time",
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Lastedit Time"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "description": "Export all fields of all antibodies to a CSV file - Only for admin users",
+        "tags": [
+          "antibody"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/antibodies/user": {
+      "get": {
+        "operationId": "api_routers_antibody_get_user_antibodies",
+        "summary": "Get User Antibodies",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Size"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAntibodies"
+                }
+              }
+            }
+          }
+        },
+        "description": "List user's Antibodies",
+        "tags": [
+          "antibody"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/antibodies/user/{accession_number}": {
+      "get": {
+        "operationId": "api_routers_antibody_get_by_accession",
+        "summary": "Get By Accession",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "accession_number",
+            "schema": {
+              "title": "Accession Number",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Antibody"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get antibody by the accession number",
+        "tags": [
+          "antibody"
+        ]
+      },
+      "put": {
+        "operationId": "api_routers_antibody_update_user_antibody",
+        "summary": "Update User Antibody",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "accession_number",
+            "schema": {
+              "title": "Accession Number",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Antibody"
+                }
+              }
+            }
+          }
+        },
+        "description": "Update a submitted Antibody",
+        "tags": [
+          "antibody"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAntibody"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/antibodies/{antibody_id}": {
+      "get": {
+        "operationId": "api_routers_antibody_get_antibody",
+        "summary": "Get Antibody",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "antibody_id",
+            "schema": {
+              "title": "Antibody Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Antibody"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get a Antibody",
+        "tags": [
+          "antibody"
+        ]
+      }
+    },
+    "/api/fts-antibodies": {
+      "get": {
+        "operationId": "api_routers_search_fts_antibodies",
+        "summary": "Fts Antibodies",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "title": "Q",
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Size"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAntibodies"
+                }
+              }
+            }
+          }
+        },
+        "description": "Search antibodies (Full Text Search)",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/api/search/antibodies": {
+      "post": {
+        "operationId": "api_routers_search_filter_antibodies",
+        "summary": "Filter Antibodies",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAntibodies"
+                }
+              }
+            }
+          }
+        },
+        "description": "Search on Antibodies with custom filters",
+        "tags": [
+          "search"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterRequest"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/species": {
+      "get": {
+        "operationId": "api_routers_search_get_species",
+        "summary": "Get Species",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get all species",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/api/applications": {
+      "get": {
+        "operationId": "api_routers_search_get_applications",
+        "summary": "Get Applications",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get all applications",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/api/vendors": {
+      "get": {
+        "operationId": "api_routers_search_get_vendors",
+        "summary": "Get Vendors",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VendorSchema"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get all vendors",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/api/live": {
+      "get": {
+        "operationId": "api_routers_test_live",
+        "summary": "Live",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "description": "Checks if application is healthy",
+        "tags": [
+          "test"
+        ]
+      }
+    },
+    "/api/ping": {
+      "get": {
+        "operationId": "api_routers_test_ping",
+        "summary": "Ping",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "description": "Checks if application is up",
+        "tags": [
+          "test"
+        ]
+      }
+    },
+    "/api/ready": {
+      "get": {
+        "operationId": "api_routers_test_ready",
+        "summary": "Ready",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "description": "Checks if application is ready to take requests",
+        "tags": [
+          "test"
+        ]
+      }
+    },
+    "/api/ingest": {
+      "post": {
+        "operationId": "api_routers_ingest_ingest",
+        "summary": "Ingest",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "description": "Ingest antibody's csv data into the database",
+        "tags": [
+          "ingest"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/datainfo": {
+      "get": {
+        "operationId": "api_routers_general_get_datainfo",
+        "summary": "Get Datainfo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataInfo"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get data information",
+        "tags": [
+          "general"
+        ]
+      }
+    },
+    "/api/partners": {
+      "get": {
+        "operationId": "api_routers_general_get_partners",
+        "summary": "Get Partners",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PartnerResponseObject"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get the list of partners and related images",
+        "tags": [
+          "general"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Antibody": {
+        "description": "The data type associated with the antibody resource",
+        "properties": {
+          "catalogNum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalognum"
+          },
+          "vendorName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vendorname"
+          },
+          "clonality": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClonalityEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "epitope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Epitope"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "abName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abname"
+          },
+          "abTarget": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abtarget"
+          },
+          "cloneId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cloneid"
+          },
+          "commercialType": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CommercialTypeEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "definingCitation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definingcitation"
+          },
+          "productConjugate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Productconjugate"
+          },
+          "productForm": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Productform"
+          },
+          "productIsotype": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Productisotype"
+          },
+          "sourceOrganism": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourceorganism"
+          },
+          "targetSpecies": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetspecies"
+          },
+          "uniprotId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uniprotid"
+          },
+          "applications": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applications"
+          },
+          "kitContents": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kitcontents"
+          },
+          "abTargetEntrezId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abtargetentrezid"
+          },
+          "abTargetUniprotId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abtargetuniprotid"
+          },
+          "numOfCitation": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numofcitation"
+          },
+          "accession": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accession"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AntibodyStatusEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "feedback": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback"
+          },
+          "abId": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abid"
+          },
+          "catAlt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalt"
+          },
+          "curateTime": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Curatetime"
+          },
+          "curatorComment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Curatorcomment"
+          },
+          "discDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discdate"
+          },
+          "insertTime": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inserttime"
+          },
+          "targetModification": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetmodification"
+          },
+          "targetSubregion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetsubregion"
+          },
+          "vendorId": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vendorid"
+          },
+          "lastEditTime": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lastedittime"
+          },
+          "ix": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ix"
+          },
+          "showLink": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Showlink"
+          },
+          "vendorUrl": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vendorurl"
+          }
+        },
+        "title": "Antibody",
+        "type": "object"
+      },
+      "AntibodyStatusEnum": {
+        "enum": [
+          "CURATED",
+          "REJECTED",
+          "QUEUE",
+          "UNDER_REVIEW"
+        ],
+        "title": "AntibodyStatusEnum",
+        "type": "string"
+      },
+      "ClonalityEnum": {
+        "enum": [
+          "unknown",
+          "cocktail",
+          "control",
+          "isotype control",
+          "monoclonal",
+          "monoclonal secondary",
+          "polyclonal",
+          "polyclonal secondary",
+          "oligoclonal",
+          "recombinant",
+          "recombinant monoclonal",
+          "recombinant monoclonal secondary",
+          "recombinant polyclonal",
+          "recombinant polyclonal secondary"
+        ],
+        "title": "ClonalityEnum",
+        "type": "string"
+      },
+      "CommercialTypeEnum": {
+        "enum": [
+          "commercial",
+          "non-profit",
+          "personal",
+          "other"
+        ],
+        "title": "CommercialTypeEnum",
+        "type": "string"
+      },
+      "PaginatedAntibodies": {
+        "description": "Paginated response for antibodies",
+        "properties": {
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "totalElements": {
+            "title": "Totalelements",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Antibody"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "page",
+          "totalElements",
+          "items"
+        ],
+        "title": "PaginatedAntibodies",
+        "type": "object"
+      },
+      "AddAntibody": {
+        "description": "The data type associated with the POST method of the antibody resource",
+        "properties": {
+          "catalogNum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalognum"
+          },
+          "vendorName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vendorname"
+          },
+          "clonality": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClonalityEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "epitope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Epitope"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "abName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abname"
+          },
+          "abTarget": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abtarget"
+          },
+          "cloneId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cloneid"
+          },
+          "commercialType": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CommercialTypeEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "definingCitation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definingcitation"
+          },
+          "productConjugate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Productconjugate"
+          },
+          "productForm": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Productform"
+          },
+          "productIsotype": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Productisotype"
+          },
+          "sourceOrganism": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourceorganism"
+          },
+          "targetSpecies": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetspecies"
+          },
+          "uniprotId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uniprotid"
+          },
+          "applications": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applications"
+          },
+          "kitContents": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kitcontents"
+          },
+          "abTargetEntrezId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abtargetentrezid"
+          },
+          "abTargetUniprotId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abtargetuniprotid"
+          },
+          "numOfCitation": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numofcitation"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "AddAntibody",
+        "type": "object"
+      },
+      "UpdateAntibody": {
+        "description": "The data type associated with the PUT method of the antibody resource",
+        "properties": {
+          "clonality": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClonalityEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "epitope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Epitope"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "abName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abname"
+          },
+          "abTarget": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abtarget"
+          },
+          "cloneId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cloneid"
+          },
+          "commercialType": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CommercialTypeEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "definingCitation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definingcitation"
+          },
+          "productConjugate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Productconjugate"
+          },
+          "productForm": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Productform"
+          },
+          "productIsotype": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Productisotype"
+          },
+          "sourceOrganism": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourceorganism"
+          },
+          "targetSpecies": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetspecies"
+          },
+          "uniprotId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uniprotid"
+          },
+          "applications": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applications"
+          },
+          "kitContents": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kitcontents"
+          },
+          "abTargetEntrezId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abtargetentrezid"
+          },
+          "abTargetUniprotId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abtargetuniprotid"
+          },
+          "numOfCitation": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numofcitation"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "UpdateAntibody",
+        "type": "object"
+      },
+      "FilterRequest": {
+        "description": "The search request body that allows filtering combinations over multiple columns",
+        "properties": {
+          "contains": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/KeyValuePair"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contains"
+          },
+          "equals": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/KeyValuePair"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Equals"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 1,
+            "title": "Page"
+          },
+          "size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 10,
+            "title": "Size"
+          },
+          "search": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Search"
+          },
+          "endsWith": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/KeyValuePair"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endswith"
+          },
+          "sortOn": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/KeyValueSortOrderPair"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sorton"
+          },
+          "startsWith": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/KeyValuePair"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startswith"
+          },
+          "isEmpty": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isempty"
+          },
+          "isNotEmpty": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isnotempty"
+          },
+          "isAnyOf": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/KeyValueArrayPair"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isanyof"
+          },
+          "operation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OperationEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "isUserScope": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isuserscope"
+          }
+        },
+        "title": "FilterRequest",
+        "type": "object"
+      },
+      "KeyValueArrayPair": {
+        "description": "Utility type to represent a key-value object where value is an array",
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Value",
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "title": "KeyValueArrayPair",
+        "type": "object"
+      },
+      "KeyValuePair": {
+        "description": "Utility type to represent a key-value object",
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "title": "KeyValuePair",
+        "type": "object"
+      },
+      "KeyValueSortOrderPair": {
+        "description": "Utility type to represent a key-value object with sort order",
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "sortorder": {
+            "$ref": "#/components/schemas/SortOrderEnum"
+          }
+        },
+        "required": [
+          "key",
+          "sortorder"
+        ],
+        "title": "KeyValueSortOrderPair",
+        "type": "object"
+      },
+      "OperationEnum": {
+        "enum": [
+          "and",
+          "or"
+        ],
+        "title": "OperationEnum",
+        "type": "string"
+      },
+      "SortOrderEnum": {
+        "enum": [
+          "asc",
+          "desc"
+        ],
+        "title": "SortOrderEnum",
+        "type": "string"
+      },
+      "VendorSchema": {
+        "description": "Vendor information",
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "title": "VendorSchema",
+        "type": "object"
+      },
+      "IngestRequest": {
+        "description": "Request body for data ingestion",
+        "properties": {
+          "driveLinkOrId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drivelinkorid"
+          },
+          "hot": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": false,
+            "title": "Hot"
+          }
+        },
+        "title": "IngestRequest",
+        "type": "object"
+      },
+      "DataInfo": {
+        "description": "Information about the data in the system",
+        "properties": {
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "lastupdate": {
+            "format": "date",
+            "title": "Lastupdate",
+            "type": "string"
+          }
+        },
+        "required": [
+          "total",
+          "lastupdate"
+        ],
+        "title": "DataInfo",
+        "type": "object"
+      },
+      "PartnerResponseObject": {
+        "description": "Response of the list of partners and related images",
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image"
+          }
+        },
+        "title": "PartnerResponseObject",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "servers": []
+}

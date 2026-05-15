@@ -23,24 +23,5 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Antibody Statistics',
                 'db_table': 'api_antibody_stats',
             },
-        ),
-        migrations.RemoveField(
-            model_name='antibodysearch',
-            name='citations',
-        ),
-        migrations.AddField(
-            model_name='antibodysearch',
-            name='defining_citation',
-            field=models.IntegerField(default=0),
-        ),
-        migrations.AlterField(
-            model_name='antibodysearch',
-            name='ix',
-            field=models.OneToOneField(db_column='ix', on_delete=django.db.models.deletion.DO_NOTHING, primary_key=True, serialize=False, to='api.antibody'),
-        ),
-        migrations.AlterField(
-            model_name='antibodysearch',
-            name='status',
-            field=models.CharField(db_index=True, max_length=12, null=True),
-        ),
+        )
     ]

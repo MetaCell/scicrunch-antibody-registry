@@ -1,6 +1,6 @@
 connexion[swagger-ui,flask,uvicorn]>=3.0.0,<4.0.0
-swagger-ui-bundle>=1.1.0
-python_dateutil>=2.9.0
-setuptools>=21.0.0
-uvicorn
+swagger-ui-bundle==1.1.0
+python_dateutil==2.9.0.post0
+setuptools==82.0.1
+uvicorn==0.46.0
 cloudharness

@@ -13,12 +13,12 @@ class Migration(migrations.Migration):
         # Add composite index for optimizing last_update queries
         migrations.RunSQL(
             sql="""
-            CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_antibody_curated_curate_time 
+            CREATE INDEX IF NOT EXISTS idx_antibody_curated_curate_time 
             ON api_antibody(status, curate_time DESC) 
             WHERE status = 'CURATED' AND curate_time IS NOT NULL;
             """,
             reverse_sql="""
-            DROP INDEX CONCURRENTLY IF EXISTS idx_antibody_curated_curate_time;
+            DROP INDEX IF EXISTS idx_antibody_curated_curate_time;
             """
         ),
     ]

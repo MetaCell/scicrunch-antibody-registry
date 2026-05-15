@@ -121,10 +121,20 @@ def count():
 def last_update(last_date: datetime = None):
     """
     Get the most recent curate_time for CURATED antibodies.
-    Uses optimized query with composite index (status, curate_time DESC).
+    Uses cached statistics table first, falls back to direct query.
     """
     if last_date is None:
         last_date = now() - dateutil.relativedelta.relativedelta(months=6)
+    
+    # Try to get from AntibodyStats first
+    try:
+        stats_last_update = AntibodyStats.objects.filter(status=STATUS.CURATED).values_list('last_update', flat=True).first()
+        if stats_last_update is not None and stats_last_update >= last_date:
+            return stats_last_update
+    except Exception as e:
+        log.warning(f"Failed to get last_update from AntibodyStats, falling back to direct query: {e}")
+    
+    # Fallback to direct query
     try:
         # Use order_by with first() instead of latest() for better index usage
         result = Antibody.objects.filter(
