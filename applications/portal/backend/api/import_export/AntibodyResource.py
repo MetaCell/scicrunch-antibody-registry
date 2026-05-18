@@ -94,9 +94,8 @@ class AntibodyResource(ModelResource):
     accession = Field(attribute='accession', column_name='ab_id_old')
     ix = Field(attribute='ix', column_name='ix')
 
-    def __init__(self, request=None):
-        super()
-        super().__init__()
+    def __init__(self, request=None, **kwargs):
+        super().__init__(**kwargs)
         self.antibody_identifiers = [
             AntibodyIdentifier(
                 [self.fields['ix']],
