@@ -15,7 +15,14 @@ import sys
 import os
 import logging
 
-scicrunch_api_key = os.getenv("SCICRUNCH_API_SECRET", get_secret("scicrunch-api-key")).strip()
+def get_scicrunch_api_key():
+    """Resolve the scicrunch API key, preferring the environment override.
+
+    Resolved on use rather than at import: get_secret reads a mounted secret
+    file that only exists in a deployed environment, and passing it as
+    os.getenv's default would evaluate it even when the variable is set.
+    """
+    return (os.getenv("SCICRUNCH_API_SECRET") or get_secret("scicrunch-api-key")).strip()
 
 
 class Command(BaseCommand):
@@ -59,7 +66,7 @@ class Command(BaseCommand):
     def process_antibody_ingestion(self, ab_id):
 
         number_of_citations = fetch_scicrunch_citation_metric(
-            ab_id, scicrunch_api_key
+            ab_id, get_scicrunch_api_key()
         )
         if number_of_citations is not None:
             ingested = set_citation_metric(

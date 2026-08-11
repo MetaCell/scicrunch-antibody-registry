@@ -53,7 +53,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
         self.client = LoggedinTestClient(combined_api, self.test_user)
         self.admin_client = LoggedinTestClient(combined_api, self.admin_user)
         self.other_client = LoggedinTestClient(combined_api, self.other_user)
-        self.anon_client = AnonymousTestClient(combined_api, User.objects.create_user(username='anon'))
+        self.anon_client = AnonymousTestClient(combined_api)
         
         # Create members
         self.user_id = "test-user-id-123"
@@ -169,7 +169,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
         data = response.json()
         
         self.assertEqual(data['totalElements'], 1)
-        self.assertEqual(data['items'][0]['abId'], str(ab1.ab_id))
+        self.assertEqual(data['items'][0]['abId'], int(ab1.ab_id))
 
     def test_user_can_only_update_own_antibodies(self):
         """Test that users can only update their own antibodies"""
@@ -227,7 +227,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
         response = self.client.get("/antibodies?page=6&size=100")
         self.assertEqual(response.status_code, 200)
 
-    @patch('api.services.user_service.check_if_user_is_admin')
+    @patch('api.routers.antibody.check_if_user_is_admin')
     def test_admin_export_requires_admin_role(self, mock_check_admin):
         """Test that admin export requires admin role"""
         # Regular user should be denied
@@ -334,7 +334,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
         
         # Should only return test user's antibodies
         self.assertEqual(data['totalElements'], 1)
-        self.assertEqual(data['items'][0]['abId'], str(ab1.ab_id))
+        self.assertEqual(data['items'][0]['abId'], int(ab1.ab_id))
 
     def test_get_by_accession_requires_ownership(self):
         """Test that accession lookup requires ownership for non-curated antibodies"""
@@ -370,4 +370,4 @@ class AuthenticationAuthorizationTestCase(TestCase):
         response = self.client.get(f"/antibodies/user/{ab.accession}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data['abId'], str(ab.ab_id))
+        self.assertEqual(data['abId'], int(ab.ab_id))

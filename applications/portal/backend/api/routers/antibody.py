@@ -22,14 +22,14 @@ from api.schemas import (
 )
 from api.helpers import CamelCaseRouter
 from api.models import Antibody, STATUS
-from api.repositories.search_repository import PrecomputedCountPaginator
+from api.repositories.search_repository import PrecomputedCountPaginator, pageitems_if_page_in_bound
 from api.services import antibody_service
 from api.services.user_service import check_if_user_is_admin
 from api.services.specie_service import get_or_create_specie
 from api.services.application_service import get_or_create_application
 from api.services.export_service import generate_antibodies_csv_file
 from api.utilities.exceptions import AntibodyDataException, DuplicatedAntibody
-from api.utilities.functions import check_if_status_exists_or_curated
+from api.utilities.functions import check_if_status_exists_or_curated, validate_field_lengths
 
 
 router = CamelCaseRouter()
@@ -81,7 +81,8 @@ def get_antibodies(
             p = PrecomputedCountPaginator(query, size, antibody_service.count())
         else:
             p = Paginator(query, size)
-        items = list(p.get_page(page))
+        # out-of-range pages yield no items, matching the search/filter endpoints
+        items = pageitems_if_page_in_bound(page, p)
         return {"page": int(page), "total_elements": p.count, "items": items}
     except Antibody.DoesNotExist:
         return {"page": int(page), "total_elements": 0, "items": []}
@@ -144,6 +145,7 @@ def create_antibody(request: HttpRequest, body: AddAntibody):
             antibody.target_species_raw = ','.join(body.target_species)
         
         antibody.uid = user_id
+        validate_field_lengths(antibody)
         antibody.save()
         
         # Handle applications many-to-many relation
@@ -163,7 +165,9 @@ def create_antibody(request: HttpRequest, body: AddAntibody):
         # returns a 409 with the antibody payload for the frontend to display
         raise
     except AntibodyDataException as e:
-        raise HttpError(400, {"name": e.field_name, "value": e.field_value})
+        # HttpError's message is rendered with str(): a dict here raises
+        # "__str__ returned non-string" and turns the 400 into a 500
+        raise HttpError(400, f"{e} (field: {e.field_name}, value: {e.field_value})")
     except Exception as e:
         log.error("Error creating antibody: %s", e, exc_info=True)
         raise e
@@ -172,8 +176,11 @@ def create_antibody(request: HttpRequest, body: AddAntibody):
 @router.get("/antibodies/export", tags=["antibody"], auth=auth)
 def get_antibodies_export(request: HttpRequest):
     """Export all antibodies in csv format"""
+    if request.user.is_anonymous:
+        raise HttpError(401, "Unrecognized user")
+
     from api.services.filesystem_service import check_if_file_does_not_exist_and_recent
-    
+
     fname = "static/www/antibodies_export.csv"
     if check_if_file_does_not_exist_and_recent(fname):
         generate_antibodies_csv_file(fname)
@@ -233,10 +240,17 @@ def get_user_antibodies(
 @router.get("/antibodies/user/{accession_number}", response=AntibodySchema, tags=["antibody"])
 def get_by_accession(request: HttpRequest, accession_number: int):
     """Get antibody by the accession number"""
+    user = request.user
+    # non-curated records stay visible only to the user who submitted them
+    if user.is_anonymous:
+        visible = Q(status=STATUS.CURATED)
+    else:
+        visible = Q(status=STATUS.CURATED) | Q(uid=user.member.kc_id)
+
     try:
         antibody = Antibody.objects.select_related("vendor", "source_organism") \
             .prefetch_related("species", "applications") \
-            .get(accession=accession_number)
+            .get(visible, accession=accession_number)
         return antibody
     except Antibody.DoesNotExist:
         raise HttpError(404, "Antibody not found")
@@ -304,7 +318,9 @@ def update_user_antibody(
         
         return 202, current_antibody
     except AntibodyDataException as e:
-        raise HttpError(400, {"name": e.field_name, "value": e.field_value})
+        # HttpError's message is rendered with str(): a dict here raises
+        # "__str__ returned non-string" and turns the 400 into a 500
+        raise HttpError(400, f"{e} (field: {e.field_name}, value: {e.field_value})")
     except Antibody.DoesNotExist:
         raise HttpError(404, "Antibody not found")
 

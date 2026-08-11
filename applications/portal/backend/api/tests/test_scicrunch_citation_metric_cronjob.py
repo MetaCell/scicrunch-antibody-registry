@@ -1,6 +1,8 @@
+import unittest
+
 from django.test import TestCase
 from api.models import Antibody, STATUS
-from api.management.commands.scicrunch_citation import Command
+from api.management.commands.scicrunch_citation import Command, get_scicrunch_api_key
 from unittest.mock import patch
 from api.utilities.exceptions import FetchCitationMetricFailed
 from api.utilities.rate_limiter import RateLimiter
@@ -8,6 +10,18 @@ import time
 from api.tests.data.test_data import TEST_ANTIBODIES_FOR_SCICRUNCH_CITATION
 
 
+def scicrunch_api_key_available():
+    try:
+        return bool(get_scicrunch_api_key())
+    except Exception:
+        return False
+
+
+@unittest.skipUnless(
+    scicrunch_api_key_available(),
+    "needs a scicrunch API key (SCICRUNCH_API_SECRET) and live access to "
+    "scicrunch.org: these assert on citation counts served by the real API",
+)
 class ScicrunchCitationMetricCronJobTests(TestCase):
     def setUp(self):
         pass

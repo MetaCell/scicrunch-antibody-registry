@@ -19,7 +19,7 @@ class HealthCheckEndpointsTestCase(TestCase):
         
         # Create test clients for both authenticated and anonymous users
         self.client = LoggedinTestClient(test_router.router, self.test_user)
-        self.anon_client = AnonymousTestClient(test_router.router, User.objects.create_user(username='anon'))
+        self.anon_client = AnonymousTestClient(test_router.router)
 
     def test_ping_endpoint(self):
         """Test GET /ping endpoint"""

@@ -21,7 +21,7 @@ class SearchEndpointsTestCase(TestCase):
         
         # Create test clients
         self.client = LoggedinTestClient(search.router, self.test_user)
-        self.anon_client = AnonymousTestClient(search.router, User.objects.create_user(username='anon'))
+        self.anon_client = AnonymousTestClient(search.router)
         
         self.user_id = "test-user-id-123"
         Member.objects.create(kc_id=self.user_id, user=self.test_user)
@@ -116,36 +116,35 @@ class SearchEndpointsTestCase(TestCase):
         """Test GET /vendors endpoint"""
         # Create test vendors
         vendor1 = Vendor.objects.create(
-            vendor="Abcam",
+            name="Abcam",
             commercial_type="commercial"
         )
         vendor2 = Vendor.objects.create(
-            vendor="Cell Signaling Technology",
+            name="Cell Signaling Technology",
             commercial_type="commercial"
         )
         vendor3 = Vendor.objects.create(
-            vendor="Santa Cruz Biotechnology",
+            name="Santa Cruz Biotechnology",
             commercial_type="commercial"
         )
-        
+
         # Test with authenticated user
         response = self.client.get("/vendors")
         self.assertEqual(response.status_code, 200)
         vendors = response.json()
-        
+
         self.assertEqual(len(vendors), 3)
-        
+
         # Check vendor structure
-        vendor_names = [v['vendor'] for v in vendors]
+        vendor_names = [v['name'] for v in vendors]
         self.assertIn("Abcam", vendor_names)
         self.assertIn("Cell Signaling Technology", vendor_names)
-        
+
         # Verify all vendors have required fields
         for vendor in vendors:
             self.assertIn('id', vendor)
-            self.assertIn('vendor', vendor)
-            self.assertIn('commercialType', vendor)
-        
+            self.assertIn('name', vendor)
+
         # Test with anonymous user
         response = self.anon_client.get("/vendors")
         self.assertEqual(response.status_code, 200)
@@ -163,40 +162,44 @@ class SearchEndpointsTestCase(TestCase):
         # Create vendors in random order
         vendor_names = ["Zymed", "Abcam", "Millipore", "BD Biosciences"]
         for name in vendor_names:
-            Vendor.objects.create(vendor=name, commercial_type="commercial")
+            Vendor.objects.create(name=name, commercial_type="commercial")
         
         response = self.client.get("/vendors")
         vendors = response.json()
         
         # Check ordering
-        vendor_names_result = [v['vendor'] for v in vendors]
+        vendor_names_result = [v['name'] for v in vendors]
         for i in range(len(vendor_names_result) - 1):
             self.assertLessEqual(vendor_names_result[i].lower(), vendor_names_result[i + 1].lower())
 
     def test_get_vendors_different_commercial_types(self):
         """Test GET /vendors with different commercial types"""
-        Vendor.objects.create(vendor="Commercial Vendor", commercial_type="commercial")
-        Vendor.objects.create(vendor="Non-Commercial Vendor", commercial_type="noncommercial")
-        Vendor.objects.create(vendor="Addgene", commercial_type="commercial")
+        Vendor.objects.create(name="Commercial Vendor", commercial_type="commercial")
+        Vendor.objects.create(name="Non-Commercial Vendor", commercial_type="noncommercial")
+        Vendor.objects.create(name="Addgene", commercial_type="commercial")
         
         response = self.client.get("/vendors")
         vendors = response.json()
         
         self.assertEqual(len(vendors), 3)
-        
-        # Check that commercial types are properly set
-        commercial_vendor = next(v for v in vendors if v['vendor'] == 'Commercial Vendor')
-        self.assertEqual(commercial_vendor['commercialType'], 'commercial')
-        
-        noncommercial_vendor = next(v for v in vendors if v['vendor'] == 'Non-Commercial Vendor')
-        self.assertEqual(noncommercial_vendor['commercialType'], 'noncommercial')
+
+        # VendorSchema exposes id/name/url/description only, so the endpoint must
+        # list vendors of every commercial type without discriminating between them
+        self.assertEqual(
+            sorted(v['name'] for v in vendors),
+            ["Addgene", "Commercial Vendor", "Non-Commercial Vendor"],
+        )
+        self.assertEqual(
+            Vendor.objects.get(name="Non-Commercial Vendor").commercial_type,
+            "noncommercial",
+        )
 
     def test_all_search_endpoints_accessible_without_auth(self):
         """Verify all search endpoints are accessible without authentication"""
         # Populate some test data
         Specie.objects.create(name="test_species")
         Application.objects.create(name="test_application")
-        Vendor.objects.create(vendor="test_vendor", commercial_type="commercial")
+        Vendor.objects.create(name="test_vendor", commercial_type="commercial")
         
         endpoints = ["/species", "/applications", "/vendors"]
         

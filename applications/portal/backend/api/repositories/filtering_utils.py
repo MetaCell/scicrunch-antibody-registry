@@ -6,14 +6,29 @@ from api.models import STATUS
 from api.services.user_service import get_current_user_id
 
 
+def filter_and_sort_keys(filters):
+    """Every antibody field name referenced by a filter request."""
+    keys = []
+    for key_value_filters in (filters.contains, filters.equals, filters.starts_with,
+                              filters.ends_with, filters.is_any_of):
+        if key_value_filters:
+            keys.extend(f.key for f in key_value_filters)
+    keys.extend(filters.is_empty or [])
+    keys.extend(filters.is_not_empty or [])
+    if filters.sort_on:
+        keys.extend(column.key for column in filters.sort_on)
+    return keys
+
+
 def check_filters_are_valid(filters):
-    # Django Ninja FilterRequest schema validation - simplified version
-    # Since Django Ninja already handles field validation via Pydantic, we just need basic checks
+    # Django Ninja/Pydantic validates types and structure, but not the field
+    # names: an unknown key would reach the ORM and raise a FieldError, which
+    # surfaces as a 500 rather than a bad request
     if not isinstance(filters, FilterRequest):
         return False
-    
-    # Basic validation - Django Ninja schema ensures correct types and structure
-    return True
+
+    return all(key in FILTERABLE_AND_SORTABLE_FIELDS
+               for key in filter_and_sort_keys(filters))
 
 
 def lookup_spanning_relationships_string(fieldname):
@@ -37,16 +52,7 @@ def filters_require_distinct(filters):
     """
     if not filters or not isinstance(filters, FilterRequest):
         return False
-    keys = []
-    for key_value_filters in (filters.contains, filters.equals, filters.starts_with,
-                              filters.ends_with, filters.is_any_of):
-        if key_value_filters:
-            keys.extend(f.key for f in key_value_filters)
-    keys.extend(filters.is_empty or [])
-    keys.extend(filters.is_not_empty or [])
-    if filters.sort_on:
-        keys.extend(column.key for column in filters.sort_on)
-    return any(key in M2M_FIELDS for key in keys)
+    return any(key in M2M_FIELDS for key in filter_and_sort_keys(filters))
 
 
 def convert_filters_to_q(filters, user=None):

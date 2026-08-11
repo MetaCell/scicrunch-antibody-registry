@@ -23,10 +23,14 @@ class GeneralEndpointsTestCase(TestCase):
         
         # Create test clients for both authenticated and anonymous users
         self.client = LoggedinTestClient(general.router, self.test_user)
-        self.anon_client = AnonymousTestClient(general.router, User.objects.create_user(username='anon'))
+        self.anon_client = AnonymousTestClient(general.router)
         
         self.user_id = "test-user-id-123"
         Member.objects.create(kc_id=self.user_id, user=self.test_user)
+
+        # migration 0016_auto_20250103_0311 seeds the production partner list;
+        # the partner tests assert on their own fixtures only
+        Partner.objects.all().delete()
 
     def test_get_datainfo(self):
         """Test GET /datainfo endpoint"""

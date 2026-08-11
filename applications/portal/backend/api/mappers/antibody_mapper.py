@@ -9,6 +9,7 @@ from pydantic import ValidationError
 from api.mappers.imapper import IDAOMapper
 from api.models import STATUS, Antibody, Antigen, Vendor, VendorDomain
 from api.utilities.exceptions import AntibodyDataException
+from api.utilities.functions import validate_field_lengths
 from cloudharness import log
 from openapi.models import Antibody as AntibodyDTO
 from openapi.models import AbstractAntibody as AbstractAntibodyDTO
@@ -64,9 +65,9 @@ class AntibodyMapper(IDAOMapper):
         for k, v in ab_dict.items():
             if v is None:
                 continue
+            if isinstance(v, str):
+                v = v.strip()
             try:
-                if isinstance(v, str):
-                    v = v.strip()
                 if isinstance(v, enum.Enum):
                     setattr(ab, k, v.value)
                 elif not isinstance(v, (list, tuple))\
@@ -80,6 +81,7 @@ class AntibodyMapper(IDAOMapper):
             # the logic to create species and fill the field is in the model save automations
             ab.target_species_raw = ','.join(dto.targetSpecies)
 
+        validate_field_lengths(ab)
         ab.save()  # Need to save to set the manytomany
 
         return ab

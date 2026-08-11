@@ -33,7 +33,7 @@ class PaginationAndEdgeCasesTestCase(TestCase):
         add_exception_handlers(combined_api)
         
         self.client = LoggedinTestClient(combined_api, self.test_user)
-        self.anon_client = AnonymousTestClient(combined_api, User.objects.create_user(username='anon'))
+        self.anon_client = AnonymousTestClient(combined_api)
         
         self.user_id = "test-user-id-123"
         Member.objects.create(kc_id=self.user_id, user=self.test_user)
@@ -192,7 +192,7 @@ class PaginationAndEdgeCasesTestCase(TestCase):
     def test_filter_with_multiple_conditions(self):
         """Test complex filtering with multiple conditions"""
         # Create vendor and species
-        vendor = Vendor.objects.create(vendor="Test Vendor", commercial_type="commercial")
+        vendor = Vendor.objects.create(name="Test Vendor", commercial_type="commercial")
         species1 = Specie.objects.create(name="human")
         species2 = Specie.objects.create(name="mouse")
         
@@ -238,7 +238,7 @@ class PaginationAndEdgeCasesTestCase(TestCase):
 
     def test_filter_with_sorting(self):
         """Test filtering combined with sorting"""
-        vendor = Vendor.objects.create(vendor="Sort Vendor", commercial_type="commercial")
+        vendor = Vendor.objects.create(name="Sort Vendor", commercial_type="commercial")
         
         # Create antibodies with specific catalog numbers for sorting
         catalog_nums = ["ZZZ", "AAA", "MMM", "DDD"]
@@ -330,25 +330,26 @@ class PaginationAndEdgeCasesTestCase(TestCase):
             ab_name="Old Antibody",
             status=STATUS.CURATED
         )
-        ab1.lastedit_time = past
-        ab1.save()
-        
         ab2 = Antibody.objects.create(
             ab_id="10002",
             ab_name="Recent Antibody",
             status=STATUS.CURATED
         )
-        ab2.lastedit_time = now
-        ab2.save()
-        
-        # Test filtering by updated_from
-        response = self.client.get(f"/antibodies?updatedFrom={past.isoformat()}")
+        # lastedit_time is auto_now, so save() would stamp it with the current
+        # time: an UPDATE is the only way to backdate it
+        Antibody.objects.filter(pk=ab1.pk).update(lastedit_time=past)
+        Antibody.objects.filter(pk=ab2.pk).update(lastedit_time=now)
+
+        # Test filtering by updated_from: covers both records
+        response = self.client.get(f"/antibodies?updated_from={past.date().isoformat()}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data['totalElements'], 2)
-        
-        # Test filtering by updated_to
-        response = self.client.get(f"/antibodies?updatedTo={past.isoformat()}")
+
+        # Test filtering by updated_to: cutting off the day after the backdated
+        # record leaves only that one
+        cutoff = (past + timedelta(days=1)).date().isoformat()
+        response = self.client.get(f"/antibodies?updated_to={cutoff}")
         data = response.json()
         self.assertEqual(data['totalElements'], 1)
 
@@ -365,8 +366,8 @@ class PaginationAndEdgeCasesTestCase(TestCase):
         response = self.client.get(f"/antibodies/user/{ab.accession}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data['abId'], str(ab.ab_id))
-        self.assertEqual(data['accession'], str(ab.accession))
+        self.assertEqual(data['abId'], int(ab.ab_id))
+        self.assertEqual(data['accession'], int(ab.accession))
         
         # Test lookup of non-existent accession
         response = self.client.get("/antibodies/user/99999999")
@@ -387,5 +388,5 @@ class PaginationAndEdgeCasesTestCase(TestCase):
         data = response.json()
         
         self.assertGreater(data['totalElements'], 0)
-        found = any(item['abId'] == '12001' for item in data['items'])
+        found = any(item['abId'] == 12001 for item in data['items'])
         self.assertTrue(found)
