@@ -312,6 +312,8 @@ steps:
         - ${{CF_REPO_NAME}}/applications/portal/test/e2e:/home/test/__tests__/portal
         environment:
         - APP_URL=https://www.${{DOMAIN}}
+        - USERNAME=metacell-qa@testuser.com
+        - PASSWORD=test
         - SKIP_SMOKETEST=true
     when:
       condition:

@@ -9,16 +9,19 @@ const antibody_type = require("./submissions.json");
 //PAGE INFO:
 const baseURL = process.env.APP_URL || "https://www.areg.dev.metacell.us";
 const PAGE_WAIT = 3000;
-const TIMEOUT = 10000;
+// Keycloak has to redirect back and the app has to boot before the user menu
+// shows up, so this covers a full round trip rather than a single render.
+const LOGIN_TIMEOUT = 60000;
 
 
 //USERS:
-const USERNAME = "metacell-qa";
-const PASSWORD = "test";
+// Injected by the pipeline from harness.accounts.users - uppercase names are the
+// cloud-harness convention, see cloudharness_utils.testing.util.
+const USERNAME = process.env.USERNAME || "metacell-qa";
+const PASSWORD = process.env.PASSWORD || "test";
 
-function range(size, startAt = 0) {
-  return Array.from({ length: size }, (_, i) => i + startAt);
-}
+// page.waitForTimeout was removed in puppeteer 22.
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 //TESTS:
 
@@ -26,8 +29,22 @@ jest.setTimeout(300000);
 
 let page;
 let browser;
+let httpErrors = [];
+let loggedIn = false;
+
+// Everything after the login step acts as a signed-in user. Without this each of
+// them waits out its own 30s timeout on a selector that cannot appear, which
+// buries the one failure that actually matters.
+function requireLogin() {
+  if (!loggedIn) {
+    throw new Error("Skipped: the login step did not succeed, see its failure above");
+  }
+}
 
 async function click(selector) {
+  // Waiting here keeps a missing element reported as the selector it is, rather
+  // than as "cannot read properties of null" further down.
+  await page.waitForSelector(selector);
   const element = await page.$(selector);
   const value = await element.evaluate((el) => el.click());
   return value;
@@ -48,18 +65,24 @@ async function getValues(selector) {
   return values;
 }
 
-async function waitLoaderToDisappear() {
-  try {
-    await page.waitForSelector(s.PROGRESS_LOADER, { timeout: TIMEOUT });
-  } catch(e) {
-    console.log("No loader found");
-  }
-  try {
-    await page.waitForSelector(s.CATALOG_NUMBER_FIELD, { timeout: TIMEOUT });
-  } catch(e) {
-    console.log("No table results found");
-  }
-  
+// Resolves with null once the app is reached, or with a description of what went
+// wrong instead. Without this a rejected login just times out on every app
+// selector further down, which hides the actual cause.
+async function waitForLoginOutcome() {
+  const never = () => new Promise(() => {});
+  const reachedApp = page
+    .waitForSelector(selectors.USER_MENU, { timeout: LOGIN_TIMEOUT })
+    .then(() => null)
+    .catch(never);
+  const rejected = page
+    .waitForSelector(selectors.KC_LOGIN_ERROR, { timeout: LOGIN_TIMEOUT })
+    .then((el) => el.evaluate((e) => e.innerText))
+    .catch(never);
+  return Promise.race([
+    reachedApp,
+    rejected,
+    sleep(LOGIN_TIMEOUT).then(() => "timed out before the app loaded"),
+  ]);
 }
 
 describe("E2E Flow for AntiBody Registry", () => {
@@ -83,48 +106,54 @@ describe("E2E Flow for AntiBody Registry", () => {
 
     await page.waitForSelector(selectors.NAME_ID_FIELD);
 
+    // Only collected here: asserting inside the listener attributes the failure
+    // to whichever test happens to be running when the response arrives.
     page.on("response", (response) => {
-      const client_server_errors = range(90, 400);
-      for (let i = 0; i < client_server_errors.length; i++) {
-        expect(response.status()).not.toBe(client_server_errors[i]);
+      if (response.status() >= 400) {
+        httpErrors.push(`${response.status()} ${response.url()}`);
       }
     });
   });
 
-  afterAll(() => {
-    browser.close();
+  afterEach(() => {
+    const errors = httpErrors;
+    httpErrors = [];
+    expect(errors).toEqual([]);
+  });
+
+  afterAll(async () => {
+    await browser.close();
   });
 
 
   it("Log In", async () => {
     console.log("Logging in ...");
 
-    click(selectors.LOGIN_BUTTON)
+    await click(selectors.LOGIN_BUTTON)
 
     await page.waitForSelector(selectors.KC_USERNAME, { hidden: false });
     expect(page.url()).toContain("accounts");
 
-    await page.type(
-      selectors.KC_USERNAME,
-      process.env.username || USERNAME
-    );
+    await page.type(selectors.KC_USERNAME, USERNAME);
 
-    await page.type(
-      selectors.KC_PASSWORD,
-      process.env.password || PASSWORD
-    );
+    await page.type(selectors.KC_PASSWORD, PASSWORD);
 
 
     await page.click(selectors.KC_LOGIN_BUTTON);
 
+    const failure = await waitForLoginOutcome();
+    if (failure) {
+      throw new Error(`Login as "${USERNAME}" did not reach the app: ${failure}`);
+    }
+
     await page.waitForSelector(selectors.MY_SUBMISSIONS);
 
-    await page.waitForSelector(selectors.USER_MENU);
-
+    loggedIn = true;
     console.log("User logged in");
   });
 
   it("Submit a Commercial AntiBody", async () => {
+    requireLogin();
     console.log("Submitting Commercial Antibody ...");
 
     await page.waitForSelector(selectors.ADD_SUBMISSION);
@@ -254,6 +283,7 @@ describe("E2E Flow for AntiBody Registry", () => {
   });
 
   it("Submit a Personal AntiBody", async () => {
+    requireLogin();
     console.log("Submitting Personal Antibody ...");
 
     await page.waitForSelector(selectors.ADD_SUBMISSION);
@@ -393,6 +423,7 @@ describe("E2E Flow for AntiBody Registry", () => {
   });
 
   it("Submit a Custom/Other AntiBody", async () => {
+    requireLogin();
     console.log("Submitting Custom Antibody ...");
 
     await page.waitForSelector(selectors.ADD_SUBMISSION);
@@ -548,6 +579,7 @@ describe("E2E Flow for AntiBody Registry", () => {
   // });
 
   it("Edit AntiBody submission", async () => {
+    requireLogin();
     await click(selectors.MY_SUBMISSIONS);
     await page.waitForSelector(selectors.ANTIBODY_NAME_ID_FIELD);
   
@@ -575,6 +607,7 @@ describe("E2E Flow for AntiBody Registry", () => {
   });
 
   it("Log out", async () => {
+    requireLogin();
     console.log("Logging out...");
 
     await page.waitForSelector(selectors.TOP_BUTTONS);

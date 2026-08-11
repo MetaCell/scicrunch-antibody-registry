@@ -15,6 +15,9 @@ export const ANTIBODY_COMMENTS_FIELD= 'div[data-field="comments"]'
 export const KC_USERNAME = 'input#username'
 export const KC_PASSWORD = 'input#password'
 export const KC_LOGIN_BUTTON = '#kc-login'
+// Keycloak renders the "invalid credentials" feedback differently depending on
+// theme and version, so match any of the shapes it uses.
+export const KC_LOGIN_ERROR = '#input-error, .kc-feedback-text, .alert-error, [class*="pf-c-alert"]'
 export const LOGIN_BUTTON = '.btn-login'
 export const USER_MENU = '.user-menu'
 
