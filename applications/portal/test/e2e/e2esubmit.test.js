@@ -8,16 +8,25 @@ const antibody_type = require("./submissions.json");
 
 //PAGE INFO:
 const baseURL = process.env.APP_URL || "https://www.areg.dev.metacell.us";
+// Third-party calls the page happens to make are not this suite's business: an
+// enrichment or analytics service returning 429 says nothing about the app. The
+// login step asserts its own outcome, so skipping the accounts host is fine too.
+const appOrigin = new URL(baseURL).origin;
 const PAGE_WAIT = 3000;
 // Keycloak has to redirect back and the app has to boot before the user menu
 // shows up, so this covers a full round trip rather than a single render.
 const LOGIN_TIMEOUT = 60000;
+// An update is a write plus a redirect plus a grid reload, so it needs more room
+// than the 30s puppeteer default.
+const UPDATE_TIMEOUT = 60000;
 
 
 //USERS:
 // Injected by the pipeline from harness.accounts.users - uppercase names are the
 // cloud-harness convention, see cloudharness_utils.testing.util.
-const USERNAME = process.env.USERNAME || "metacell-qa";
+// Fallbacks match harness.accounts.users in applications/portal/deploy/values-dev.yaml
+// so a local run against dev works without setting anything.
+const USERNAME = process.env.USERNAME || "metacell-qa@testuser.com";
 const PASSWORD = process.env.PASSWORD || "test";
 
 // page.waitForTimeout was removed in puppeteer 22.
@@ -30,6 +39,7 @@ jest.setTimeout(300000);
 let page;
 let browser;
 let httpErrors = [];
+let alerts = [];
 let loggedIn = false;
 
 // Everything after the login step acts as a signed-in user. Without this each of
@@ -109,15 +119,23 @@ describe("E2E Flow for AntiBody Registry", () => {
     // Only collected here: asserting inside the listener attributes the failure
     // to whichever test happens to be running when the response arrives.
     page.on("response", (response) => {
-      if (response.status() >= 400) {
+      if (response.status() >= 400 && response.url().startsWith(appOrigin)) {
         httpErrors.push(`${response.status()} ${response.url()}`);
       }
+    });
+
+    // Registering a handler stops the browser dismissing dialogs for us, so
+    // dismiss explicitly - the point is to keep the message for the failure text.
+    page.on("dialog", async (dialog) => {
+      alerts.push(`${dialog.type()}: ${dialog.message()}`);
+      await dialog.dismiss();
     });
   });
 
   afterEach(() => {
     const errors = httpErrors;
     httpErrors = [];
+    alerts = [];
     expect(errors).toEqual([]);
   });
 
@@ -597,6 +615,22 @@ describe("E2E Flow for AntiBody Registry", () => {
 
     await page.waitForSelector(selectors.SUBMIT);
     await page.click(selectors.SUBMIT);
+
+    // UpdateForm pushes /submissions on success and reports failure with a native
+    // alert(), which the browser dismisses without the test ever seeing it. Wait
+    // on the navigation rather than the grid so a failed update reports the app's
+    // own error instead of an unexplained selector timeout.
+    await page
+      .waitForFunction(() => location.pathname === "/submissions", {
+        timeout: UPDATE_TIMEOUT,
+      })
+      .catch(() => {
+        throw new Error(
+          `The update did not complete: ${
+            alerts.length ? alerts.join("; ") : "the app reported no error"
+          }`
+        );
+      });
 
     await page.waitForSelector(selectors.ANTIBODY_NAME_ID_FIELD);
 

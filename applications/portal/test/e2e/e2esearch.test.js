@@ -7,6 +7,9 @@ const s = require("./selectors");
 
 //PAGE INFO:
 const baseURL = process.env.APP_URL || "https://www.areg.dev.metacell.us/";
+// Third-party calls the page happens to make are not this suite's business: an
+// enrichment or analytics service returning 429 says nothing about the app.
+const appOrigin = new URL(baseURL).origin;
 const PAGE_WAIT = 3000;
 const TIMEOUT = 1000;
 // The grid only re-renders once the search response is in, so give the spinner
@@ -104,7 +107,7 @@ describe("E2E Flow for AntiBody Registry", () => {
     // Only collected here: asserting inside the listener attributes the failure
     // to whichever test happens to be running when the response arrives.
     page.on("response", (response) => {
-      if (response.status() >= 400) {
+      if (response.status() >= 400 && response.url().startsWith(appOrigin)) {
         httpErrors.push(`${response.status()} ${response.url()}`);
       }
     });
