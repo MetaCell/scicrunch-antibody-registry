@@ -148,6 +148,10 @@ def create_antibody(request: HttpRequest, body: AddAntibody):
             raise DuplicatedAntibody(antibody)
 
         return 201, antibody
+    except DuplicatedAntibody:
+        # Expected outcome, not an error: the DuplicatedAntibody exception handler
+        # returns a 409 with the antibody payload for the frontend to display
+        raise
     except AntibodyDataException as e:
         raise HttpError(400, {"name": e.field_name, "value": e.field_value})
     except Exception as e:
