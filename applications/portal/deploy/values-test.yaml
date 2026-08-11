@@ -24,3 +24,5 @@ harness:
         clientRoles:
           - manager
           - portal:manager
+sentry:
+  dsn: 
