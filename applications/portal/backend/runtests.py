@@ -11,6 +11,13 @@ os.environ["CH_VALUES_PATH"] = os.path.join(HERE, "api/tests/resources", "values
 os.environ["DJANGO_SETTINGS_MODULE"] = "portal.settings"
 os.environ["CH_CURRENT_APP_NAME"] = "portal"
 os.environ["NINJA_SKIP_REGISTRY"] = "1"
+# No Kafka broker is available for local test runs, so skip starting the
+# background event listener (it would otherwise crash-loop on NoBrokersAvailable).
+os.environ["CLOUDHARNESS_DISABLE_EVENT_LISTENER"] = "true"
+# api.repositories.maintainance runs stats/search-view refreshes on a
+# background thread with its own DB connection unless TEST is set; those
+# connections outlive the test and block dropping the test database.
+os.environ["TEST"] = "1"
 
 
 def path_to_module(p):

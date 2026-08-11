@@ -22,6 +22,8 @@ from api.schemas import (
 )
 from api.helpers import CamelCaseRouter
 from api.models import Antibody, STATUS
+from api.repositories.search_repository import PrecomputedCountPaginator
+from api.services import antibody_service
 from api.services.user_service import check_if_user_is_admin
 from api.services.specie_service import get_or_create_specie
 from api.services.application_service import get_or_create_application
@@ -59,18 +61,26 @@ def get_antibodies(
             raise HttpError(401, "Request not allowed")
     
     try:
-        query = Antibody.objects.filter(status=check_if_status_exists_or_curated(status))
+        resolved_status = check_if_status_exists_or_curated(status)
+        query = Antibody.objects.filter(status=resolved_status)
         if updated_from:
             query = query.filter(lastedit_time__gte=updated_from)
         if updated_to:
             query = query.filter(lastedit_time__lte=updated_to)
 
-        p = Paginator(
+        query = (
             query.select_related("vendor", "source_organism")
             .prefetch_related("species", "applications")
-            .order_by("-ix"),
-            size
+            .order_by("-ix")
         )
+
+        if updated_from is None and updated_to is None and resolved_status == STATUS.CURATED:
+            # COUNT(*) over all CURATED rows takes seconds on a cold cache;
+            # antibody_service.count() reads the stats table kept up to date
+            # on every antibody save (falls back to a direct count)
+            p = PrecomputedCountPaginator(query, size, antibody_service.count())
+        else:
+            p = Paginator(query, size)
         items = list(p.get_page(page))
         return {"page": int(page), "total_elements": p.count, "items": items}
     except Antibody.DoesNotExist:
