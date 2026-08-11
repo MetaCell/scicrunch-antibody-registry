@@ -1,6 +1,6 @@
 from django.db.models import Q
 from ninja.errors import HttpError
-from portal.constants import FILTERABLE_AND_SORTABLE_FIELDS, FOREIGN_OR_M2M_FIELDS
+from portal.constants import FILTERABLE_AND_SORTABLE_FIELDS, FOREIGN_OR_M2M_FIELDS, M2M_FIELDS
 from api.schemas import FilterRequest, SortOrderEnum
 from api.models import STATUS
 from api.services.user_service import get_current_user_id
@@ -26,6 +26,27 @@ def lookup_spanning_relationships_string(fieldname):
         return f"{fieldname}__name"
     else:
         return fieldname
+
+
+def filters_require_distinct(filters):
+    """
+    DISTINCT is only needed when a filter or sort key spans a many-to-many
+    relationship, whose join duplicates antibody rows. Applying it
+    unconditionally forces COUNT/SELECT queries to deduplicate over every
+    column, which is very expensive (see ANTIBODY-REGISTRY-5F).
+    """
+    if not filters or not isinstance(filters, FilterRequest):
+        return False
+    keys = []
+    for key_value_filters in (filters.contains, filters.equals, filters.starts_with,
+                              filters.ends_with, filters.is_any_of):
+        if key_value_filters:
+            keys.extend(f.key for f in key_value_filters)
+    keys.extend(filters.is_empty or [])
+    keys.extend(filters.is_not_empty or [])
+    if filters.sort_on:
+        keys.extend(column.key for column in filters.sort_on)
+    return any(key in M2M_FIELDS for key in keys)
 
 
 def convert_filters_to_q(filters, user=None):
