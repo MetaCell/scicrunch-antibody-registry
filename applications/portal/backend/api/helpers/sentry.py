@@ -4,6 +4,16 @@ from cloudharness.applications import get_current_configuration
 from sentry_sdk.integrations.django import DjangoIntegration
 import re
 from cloudharness import log
+from django.db.utils import OperationalError
+
+
+def _before_send(event, hint):
+    exc_info = hint.get("exc_info")
+    if exc_info:
+        exc_value = exc_info[1]
+        if isinstance(exc_value, OperationalError) and "Connection refused" in str(exc_value):
+            return None
+    return event
 
 
 def init_sentry():
@@ -38,6 +48,7 @@ def init_sentry():
             send_default_pii=True,
             sample_rate=sentry_cfg.get("sample_rate", 1.0),
             traces_sampler=traces_sampler,
+            before_send=_before_send,
             environment=CloudharnessConfig.get_domain()
 
         )
