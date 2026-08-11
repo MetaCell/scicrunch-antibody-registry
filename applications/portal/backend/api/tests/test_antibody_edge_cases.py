@@ -38,9 +38,9 @@ class AntibodyEdgeCasesTestCase(TestCase):
         Member.objects.create(kc_id=self.user_id, user=self.test_user)
         
         # Mock user ID
-        self.get_user_id_patcher = patch('api.mappers.mapping_utils.get_current_user_id')
+        self.get_user_id_patcher = patch('api.mappers.mapping_utils.get_current_user_pk')
         self.mock_get_user_id = self.get_user_id_patcher.start()
-        self.mock_get_user_id.return_value = self.user_id
+        self.mock_get_user_id.return_value = self.test_user.pk
 
     def tearDown(self):
         """Clean up patches"""

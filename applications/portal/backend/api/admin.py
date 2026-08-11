@@ -15,7 +15,6 @@ from django.utils.text import format_lazy
 from import_export.admin import ImportExportModelAdmin
 from simple_history.admin import SimpleHistoryAdmin
 from keycloak.exceptions import KeycloakGetError
-from cloudharness_django.models import Member
 
 from api.forms.AntibodyImportForm import AntibodyImportForm
 from api.models import (
@@ -30,7 +29,6 @@ from api.models import (
     Partner,
 )
 from api.import_export import AntibodyResource
-from api.services.keycloak_service import KeycloakService
 from cloudharness import log
 from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 
@@ -38,14 +36,6 @@ from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 @admin.display(description="ab_id")
 def id_with_ab(obj: Antibody):
     return f"AB_{obj.ab_id}"
-
-
-@cache
-def get_user_by_kc_id(kc_id) -> User:
-    try:
-        return Member.objects.get(kc_id=kc_id).user
-    except Member.DoesNotExist:
-        return None
 
 
 class VerboseManyToManyRawIdWidget(ManyToManyRawIdWidget):
@@ -100,7 +90,7 @@ class TargetSpeciesInlineAdmin(admin.TabularInline):
 class AntibodyFilesAdmin(admin.TabularInline):
     model = AntibodyFiles
     fields = ("file", "type", "antibody")
-    exclude = ("uploader_uid", 'filehash', 'timestamp', 'display_name')
+    exclude = ("uploader_uid", "uploader", 'filehash', 'timestamp', 'display_name')
     extra = 1
 
 
@@ -111,6 +101,7 @@ antibody_fields_shown = (
     "modifications", "epitope", "source_organism", "clonality", "clone_id", "product_isotype",
     "product_conjugate", "defining_citation", "product_form", "comments",
     "kit_contents", "feedback", "curator_comment", "disc_date", "status", "show_link",
+    "owner",
     # also in the read-only fields
     "uid", "uid_legacy", "insert_time", "lastedit_time", "curate_time",
 )
@@ -147,6 +138,8 @@ class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
         "uid_legacy"
     )
     autocomplete_fields = ("vendor", "source_organism")
+    raw_id_fields = ("owner",)
+    list_select_related = ("owner", "vendor")
     save_on_top = True
     show_save = False
 
@@ -166,12 +159,11 @@ class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
 
     @admin.display(description="Submitter name")
     def submitter_name(self, obj: Antibody):
+        if obj.owner:
+            return f"{obj.owner.get_full_name()} ({obj.owner.username})"
         if not obj.uid:
             return "Unknown"
-
-        dj_user: User = get_user_by_kc_id(obj.uid)
-        if dj_user:
-            return f"{dj_user.get_full_name()} ({dj_user.username})"
+        # pre-FK rows whose submitter never synced to a Django user
         try:
             submitter = self.get_user(user_id=obj.uid)
             return f"{submitter.get('firstName', '')} {submitter.get('lastName', '')} ({submitter['email']})"
@@ -184,13 +176,11 @@ class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
 
     @admin.display(description="Submitter email")
     def submitter_email(self, obj: Antibody):
+        if obj.owner:
+            return obj.owner.email
         if not obj.uid:
             return "Unknown"
-
-        dj_user: User = get_user_by_kc_id(obj.uid)
-        if dj_user:
-            return dj_user.email
-
+        # pre-FK rows whose submitter never synced to a Django user
         try:
             submitter = self.get_user(user_id=obj.uid)
             return f"{submitter['email']}"
@@ -250,11 +240,7 @@ class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
             obj.delete()
         for instance in instances:
             if formset.fk.model == AntibodyFiles:
-                keycloak_service = KeycloakService()
-                uid = keycloak_service.get_user_id_from_django_user(request.user)
-                if not uid:
-                    raise Exception("User not found")
-                instance.uploader_uid = uid
+                instance.uploader = request.user
             instance.save()
         formset.save_m2m()
 

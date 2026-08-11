@@ -95,9 +95,7 @@ def create_antibody(request: HttpRequest, body: AddAntibody):
     """Create a Antibody"""
     if request.user.is_anonymous:
         raise HttpError(401, "Unrecognized user")
-    
-    user_id = request.user.member.kc_id
-    
+
     try:
         antibody = Antibody()
         antibody.ab_id = 0
@@ -144,7 +142,7 @@ def create_antibody(request: HttpRequest, body: AddAntibody):
         if body.target_species:
             antibody.target_species_raw = ','.join(body.target_species)
         
-        antibody.uid = user_id
+        antibody.owner = request.user
         validate_field_lengths(antibody)
         antibody.save()
         
@@ -231,8 +229,7 @@ def get_user_antibodies(
     if request.user.is_anonymous:
         raise HttpError(401, "Unrecognized user")
     
-    user_id = request.user.member.kc_id
-    p = Paginator(Antibody.objects.filter(uid=user_id).order_by("-ix"), size)
+    p = Paginator(Antibody.objects.filter(owner=request.user).order_by("-ix"), size)
     items = list(p.get_page(page))
     return {"page": int(page), "total_elements": p.count, "items": items}
 
@@ -245,7 +242,7 @@ def get_by_accession(request: HttpRequest, accession_number: int):
     if user.is_anonymous:
         visible = Q(status=STATUS.CURATED)
     else:
-        visible = Q(status=STATUS.CURATED) | Q(uid=user.member.kc_id)
+        visible = Q(status=STATUS.CURATED) | Q(owner=user)
 
     try:
         antibody = Antibody.objects.select_related("vendor", "source_organism") \
@@ -267,10 +264,8 @@ def update_user_antibody(
     if request.user.is_anonymous:
         raise HttpError(401, "Unrecognized user")
     
-    user_id = request.user.member.kc_id
-    
     try:
-        current_antibody = Antibody.objects.get(accession=accession_number, uid=user_id)
+        current_antibody = Antibody.objects.get(accession=accession_number, owner=request.user)
         
         # Update fields from body
         if body.ab_target:
@@ -338,7 +333,7 @@ def get_antibody(request: HttpRequest, antibody_id: int):
         antibodies = Antibody.objects.filter(
             Q(ab_id=antibody_id) | Q(accession=antibody_id)
         ).filter(
-            Q(status=STATUS.CURATED) | Q(uid=user.member.kc_id)
+            Q(status=STATUS.CURATED) | Q(owner=user)
         )
             
     return list(antibodies.select_related("vendor", "source_organism") \

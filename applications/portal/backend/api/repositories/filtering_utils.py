@@ -91,15 +91,18 @@ def convert_filters_to_q(filters, user=None):
         for filter_value in filters.is_any_of:
             query[f"{lookup_spanning_relationships_string(filter_value.key)}__in"] = filter_value.value
     
-    # if is_user_scope is true, then we filter by userid
+    # if is_user_scope is true, then we filter by the owning user
     if filters.is_user_scope:
-        if user and hasattr(user, 'member'):
-            user_id = user.member.kc_id
-            query["uid"] = user_id
+        if user is not None and not user.is_anonymous:
+            query["owner"] = user
         else:
             # Fallback to JWT decoding if user context is not available
-            user_id = get_current_user_id()
-            query["uid"] = user_id
+            from cloudharness_django.services.user import get_user_by_kc_id
+            resolved = get_user_by_kc_id(get_current_user_id())
+            if resolved is None:
+                # never filter owner=None: it would leak all ownerless rows
+                raise HttpError(401, "Unrecognized user")
+            query["owner"] = resolved
 
     return Q(**query) if query else Q()
 

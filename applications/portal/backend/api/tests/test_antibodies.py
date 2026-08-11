@@ -47,9 +47,9 @@ class AntibodiesTestCase(TestCase):
         
         # Mock the function in mapping_utils which is used by schema serialization
         print("DEBUG: Setting up mocks")
-        self.get_user_id_mapping_patcher = patch('api.mappers.mapping_utils.get_current_user_id')
+        self.get_user_id_mapping_patcher = patch('api.mappers.mapping_utils.get_current_user_pk')
         self.mock_get_user_id_mapping = self.get_user_id_mapping_patcher.start()
-        self.mock_get_user_id_mapping.return_value = self.user_id
+        self.mock_get_user_id_mapping.return_value = self.test_user.pk
         print("DEBUG: setUp complete")
     
     def tearDown(self):

@@ -4,6 +4,7 @@ from random import randint
 from typing import Optional, Tuple
 from api.repositories.maintainance import refresh_search_view, refresh_antibody_stats
 
+from django.contrib.auth.models import User
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector, SearchVectorField
 from django.db import models, transaction
@@ -199,11 +200,14 @@ class Antibody(models.Model):
         blank=True,
         db_index=True,
     )
-    # This user id maps the users in keycloak
+    # Deprecated/frozen keycloak user id -- kept for audit; use `owner`
     uid = models.CharField(
         max_length=ANTIBODY_UID_MAX_LEN, null=True, db_index=True, blank=True)
     # Maps to old users -- used only for migration purpose
     uid_legacy = models.IntegerField(null=True, blank=True, db_index=True)
+    owner = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='antibodies')
     catalog_num = models.CharField(
         max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN, null=True, db_index=True, blank=True)
     catalog_num_search = models.CharField(
@@ -358,11 +362,14 @@ class Antibody(models.Model):
             self.accession = int(float(self.accession.replace('AB_', '')))
         if self.status is None:
             self.status = STATUS.QUEUE
-        if not self.uid:
+        if not self.owner_id:
             try:
-                self.uid = get_current_user_id()
-            except:
-                log.exception("Could not set user")
+                from cloudharness_django.services.user import get_user_by_kc_id
+                self.owner = get_user_by_kc_id(get_current_user_id())
+            except UnrecognizedUser:
+                pass  # anonymous/system save
+            except Exception:
+                log.exception("Could not resolve antibody owner")
 
     def _handle_status_changes(self, first_save=False):
         """
@@ -590,7 +597,11 @@ class AntibodyFiles(models.Model):
     display_name = models.CharField(
         max_length=ANTIBODY_FILE_DISPLAY_NAME_MAX_LEN)
     timestamp = models.DateTimeField(auto_now_add=True)
-    uploader_uid = models.CharField(max_length=ANTIBODY_UID_MAX_LEN)
+    # Deprecated/frozen keycloak user id -- kept for audit; use `uploader`
+    uploader_uid = models.CharField(max_length=ANTIBODY_UID_MAX_LEN, blank=True)
+    uploader = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='uploaded_antibody_files')
     filehash = models.CharField(max_length=ANTIBODY_FILES_HASH_MAX_LEN)
 
     def __str__(self):

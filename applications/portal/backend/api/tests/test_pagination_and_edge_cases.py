@@ -39,9 +39,9 @@ class PaginationAndEdgeCasesTestCase(TestCase):
         Member.objects.create(kc_id=self.user_id, user=self.test_user)
         
         # Mock user ID for serialization
-        self.get_user_id_patcher = patch('api.mappers.mapping_utils.get_current_user_id')
+        self.get_user_id_patcher = patch('api.mappers.mapping_utils.get_current_user_pk')
         self.mock_get_user_id = self.get_user_id_patcher.start()
-        self.mock_get_user_id.return_value = self.user_id
+        self.mock_get_user_id.return_value = self.test_user.pk
 
     def tearDown(self):
         """Clean up patches"""
@@ -144,7 +144,7 @@ class PaginationAndEdgeCasesTestCase(TestCase):
             Antibody.objects.create(
                 ab_id=f"{5000 + i}",
                 ab_name=f"User Antibody {i}",
-                uid=self.user_id,
+                owner=self.test_user,
                 status=STATUS.QUEUE  # User's own antibodies, not curated
             )
         

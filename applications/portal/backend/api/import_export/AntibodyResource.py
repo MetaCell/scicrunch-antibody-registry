@@ -8,15 +8,12 @@ from import_export.resources import ModelResource
 from api.models import Antibody, AntibodyClonality, CommercialType, Vendor, Specie, STATUS
 from api.services.gene_service import get_or_create_gene
 from api.import_export.import_antibody_helpers import filter_dataset_by_accession, filter_dataset_by_catnum_vendor, filter_dataset_by_ix, get_antibody_q1, get_antibody_q2
-from api.services.keycloak_service import KeycloakService
 from api.services.specie_service import get_or_create_specie
 from api.services.vendor_service import get_or_create_vendor
 from .widgets.foreign_key_widget import ForeignKeyWidgetWithCreation
 from .widgets.many_to_many_widget import ManyToManyWidgetWithCreation
 from portal.settings import FOR_NEW_KEY, IGNORE_KEY, FOR_EXTANT_KEY, METHOD_KEY, FILL_KEY, UPDATE_KEY, \
-    DUPLICATE_KEY, KC_USER_ID_KEY, USER_KEY, REMOVE_KEYWORD
-
-from cloudharness import log
+    DUPLICATE_KEY, USER_KEY, REMOVE_KEYWORD
 
 CLONALITIES = {c[0] for c in AntibodyClonality.choices}
 COMMERCIAL_TYPES = {c[0] for c in CommercialType.choices}
@@ -197,8 +194,8 @@ class AntibodyResource(ModelResource):
                     del row[self.fields['ix'].column_name]
         instance = self.init_instance(row)
         instance.status = STATUS.CURATED
-        if 'uid' in row:
-            instance.uid = row['uid']
+        if row.get('owner'):
+            instance.owner_id = row['owner']
         return instance, True
 
     def get_instance(self, instance_loader, row):
@@ -212,17 +209,10 @@ class AntibodyResource(ModelResource):
         # https://stackoverflow.com/questions/52335510/extend-django-import-exports-import-form-to-specify-fixed-value-for-each-import
 
         # if we are in the confirmation import request we read the values from session
-        # and get the keycloak user id from the keycloak_service
         if kwargs[FOR_NEW_KEY] is None:
             kwargs[FOR_NEW_KEY] = self.request.session[FOR_NEW_KEY]
             kwargs[FOR_EXTANT_KEY] = self.request.session[FOR_EXTANT_KEY]
             kwargs[METHOD_KEY] = self.request.session[METHOD_KEY]
-            try:
-                kwargs[KC_USER_ID_KEY] = KeycloakService(
-                ).get_user_id_from_django_user(kwargs[USER_KEY])
-            except Exception as e:
-                log.exception("Cannot set user id for import")
-                kwargs[KC_USER_ID_KEY] = None
 
         else:  # if we are in the import form request we set the values in session using the request values
             self.request.session[FOR_NEW_KEY] = kwargs[FOR_NEW_KEY]
@@ -295,8 +285,8 @@ class AntibodyResource(ModelResource):
         if row.get('host_organism', None):
             row['host_organism'] = row['host_organism'].lower()
 
-        if KC_USER_ID_KEY in kwargs:
-            row['uid'] = kwargs[KC_USER_ID_KEY]
+        # imported antibodies are owned by the importing admin
+        row['owner'] = kwargs[USER_KEY].pk if kwargs.get(USER_KEY) else None
 
     def import_field(self, field, obj, data, is_m2m=False, **kwargs):
         is_fill = kwargs.get(METHOD_KEY, FILL_KEY) == FILL_KEY

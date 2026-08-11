@@ -35,16 +35,16 @@ def get_antibodies(page: int = 1, size: int = 10, date_from: datetime = None, da
         return PaginatedAntibodies(page=int(page), totalElements=0, items=[])
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
 
-def get_user_antibodies(userid: str, page: int = 1, size: int = 10) -> PaginatedAntibodies:
+def get_user_antibodies(user, page: int = 1, size: int = 10) -> PaginatedAntibodies:
     p = Paginator(Antibody.objects.filter(
-        uid=userid).order_by("-ix"), size)
+        owner=user).order_by("-ix"), size)
     items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
     return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
 
 
-def create_antibody(body: AddAntibodyDTO, userid: str) -> AntibodyDTO:
+def create_antibody(body: AddAntibodyDTO, user) -> AntibodyDTO:
     antibody = antibody_mapper.from_dto(body)
-    antibody.uid = userid
+    antibody.owner = user
     antibody.save()
 
     if antibody.accession != antibody.ab_id:
@@ -79,7 +79,7 @@ def get_antibody_by_accession(accession: int) -> List[AntibodyDTO]:
         raise
 
 
-def update_antibody(user_id: str, antibody_accession_number: str, body: UpdateAntibodyDTO) -> AntibodyDTO:
+def update_antibody(user, antibody_accession_number: str, body: UpdateAntibodyDTO) -> AntibodyDTO:
     if getattr(body, 'vendorName', None) is not None:
         raise AntibodyDataException(
             "Vendor name cannot be updated", 'vendorName', None)
@@ -87,7 +87,7 @@ def update_antibody(user_id: str, antibody_accession_number: str, body: UpdateAn
         raise AntibodyDataException(
             "Catalog number cannot be updated", 'catalogNum', None)
     current_antibody = Antibody.objects.get(
-        accession=antibody_accession_number, uid=user_id)
+        accession=antibody_accession_number, owner=user)
     updated_antibody = antibody_mapper.from_dto(AntibodyDTO(**body.__dict__, abId=current_antibody.ab_id,
                                                             ix=current_antibody.ix,
                                                             catalogNum=current_antibody.catalog_num,
