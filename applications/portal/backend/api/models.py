@@ -551,11 +551,11 @@ class Antibody(models.Model):
     class Meta:
         verbose_name_plural = "antibodies"
         constraints = [
-            models.CheckConstraint(check=~Q(status='curated') | (Q(status='curated') &
-                                                                 Q(catalog_num__isnull=False) &
-                                                                 Q(ab_name__isnull=False) &
-                                                                 Q(ab_name__exact='') &
-                                                                 Q(vendor__isnull=False)),
+            models.CheckConstraint(condition=~Q(status='curated') | (Q(status='curated') &
+                                                                     Q(catalog_num__isnull=False) &
+                                                                     Q(ab_name__isnull=False) &
+                                                                     Q(ab_name__exact='') &
+                                                                     Q(vendor__isnull=False)),
                                    name='curated_constraints'),
         ]
         indexes = [

@@ -152,3 +152,11 @@ scicrunch:
   cronjob:
     schedule: "0 1 * * 6" # for weekend
     max_requests_per_second: 10
+
+# Per-client API rate limits applied by nginx (see resources/nginx.conf).
+# Keyed on the bearer token, or on an nginx-issued cookie when anonymous.
+rate_limiting:
+  read_rate: 120r/m
+  read_burst: 30
+  write_rate: 20r/m
+  write_burst: 10

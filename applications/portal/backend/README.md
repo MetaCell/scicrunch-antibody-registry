@@ -21,6 +21,10 @@ pip install -r applications/portal/backend/requirements.txt
 pip install -e applications/portal/backend
 ```
 
+`requirements.txt` is a generated lockfile — the dependency list lives in `REQUIRES` in
+[setup.py](setup.py). See
+[Backend dependencies](../README.md#backend-dependencies) before changing either.
+
 ## Local backend development
 ```
 # store the accounts api admin password on the local disk

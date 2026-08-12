@@ -10,7 +10,7 @@ from django.db import models
 from django.db.models.functions import Length
 from django.urls import reverse
 from django.utils.encoding import smart_str
-from django.utils.html import escape, format_html, format_html_join, mark_safe
+from django.utils.html import escape, format_html_join, mark_safe
 from django.utils.text import format_lazy
 from import_export.admin import ImportExportModelAdmin
 from simple_history.admin import SimpleHistoryAdmin
@@ -368,7 +368,7 @@ class VendorAdmin(SimpleHistoryAdmin):
     def nb_antibodies(self, obj):
         return Antibody.objects.filter(vendor=obj).count()
 
-    @admin.display(description=format_html("Recent antibodies<br/>(in queue)"))
+    @admin.display(description=mark_safe("Recent antibodies<br/>(in queue)"))
     def recent_antibodies(self, obj, limit=10):
         antibodies = Antibody.objects.filter(vendor=obj, status=STATUS.QUEUE)
         # size = len(antibodies)

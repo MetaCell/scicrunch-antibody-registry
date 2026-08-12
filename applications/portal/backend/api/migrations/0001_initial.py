@@ -611,7 +611,7 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="antibody",
             constraint=models.CheckConstraint(
-                check=models.Q(
+                condition=models.Q(
                     models.Q(("status", "curated"), _negated=True),
                     models.Q(
                         ("status", "curated"),
