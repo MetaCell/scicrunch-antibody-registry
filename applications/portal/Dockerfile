@@ -1,6 +1,6 @@
 ARG CLOUDHARNESS_DJANGO
 
-FROM node:20.20.2 AS frontend
+FROM node:24.19.0 AS frontend
 
 ENV APP_DIR=/app
 
