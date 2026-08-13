@@ -601,9 +601,17 @@ describe("E2E Flow for AntiBody Registry", () => {
     await click(selectors.MY_SUBMISSIONS);
     await page.waitForSelector(selectors.ANTIBODY_NAME_ID_FIELD);
   
+    // Grid position isn't stable enough to index into (other submissions - manual
+    // testing, prior runs - can sit above ours), so target the antibody this run
+    // just created (the last of the three Submit tests above) by name instead.
     const idNames = await getValues(selectors.ANTIBODY_NAME_ID_FIELD);
-    console.log(idNames[0]);
-    await page.goto(`${baseURL}/update/${idNames[1].split("AB_")[1]}`);
+    const target = idNames.find((n) => n.includes(antibody_type.custom.antibody_name));
+    if (!target) {
+      throw new Error(
+        `Could not find the just-submitted antibody ("${antibody_type.custom.antibody_name}") in the submissions grid`
+      );
+    }
+    await page.goto(`${baseURL}/update/${target.split("AB_")[1]}`);
 
     await page.waitForSelector(selectors.INPUT_NAME, {
       timeout: 15000,
