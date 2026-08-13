@@ -15,7 +15,7 @@ backup:
   volumesize: 40Gi
 proxy:
   timeout:
-    read: 600s
-    send: 600s
-    keepalive: 600s
+    read: 60
+    send: 60
+    keepalive: 60
   
