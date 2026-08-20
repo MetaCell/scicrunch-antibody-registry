@@ -4,7 +4,10 @@ from django.db import connection
 # Resolve the frozen keycloak-id columns (uid / uploader_uid) to Django users
 # through cloudharness_django.Member (kc_id <-> user). Rows whose keycloak id
 # has no synced Member stay NULL -- the frozen columns retain the original id,
-# so this is safe to re-run any time (also used by migration 0022).
+# so this is safe to re-run any time. This is the only backfill path: it runs
+# out-of-band (not in a migration) so pod startup is not held by the bulk
+# UPDATEs -- run it once per environment after rollout, after
+# `manage.py cloudharness sync`.
 BACKFILL_SQL = [
     """
     UPDATE api_antibody a SET owner_id = m.user_id

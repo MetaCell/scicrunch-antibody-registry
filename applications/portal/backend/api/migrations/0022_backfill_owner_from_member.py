@@ -1,20 +1,17 @@
 from django.db import migrations
 
-from api.management.commands.backfill_antibody_owner import BACKFILL_SQL
-
-# Rows whose keycloak id has no synced Member stay NULL -- the frozen
-# uid/uploader_uid columns retain the original id, so the backfill can be
-# re-run later with `manage.py backfill_antibody_owner`.
+# The owner/uploader backfill originally ran here, but the bulk UPDATEs over
+# api_antibody / api_historicalantibody held the run-migrations init container
+# (and thus pod startup) for minutes. It is idempotent and reads from the
+# frozen uid/uploader_uid columns, so it now runs out-of-band instead:
+# run `manage.py backfill_antibody_owner` once per environment after rollout
+# (kept as an empty migration for environments that already applied it).
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
         ("api", "0021_antibody_owner_antibodyfiles_uploader"),
-        ("cloudharness_django", "0001_initial"),
     ]
 
-    operations = [
-        migrations.RunSQL(sql=sql, reverse_sql=migrations.RunSQL.noop)
-        for sql in BACKFILL_SQL
-    ]
+    operations = []
