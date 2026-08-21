@@ -67,3 +67,22 @@ def catalog_number_chunked(catalog_number: str, catalog_alt_number: str = None, 
 def check_if_status_exists_or_curated(status: str) -> bool:
     from api.models import STATUS
     return status.upper() if (status and (status.upper() in STATUS.__members__)) else STATUS.CURATED
+
+
+def validate_field_lengths(instance) -> None:
+    """Reject over-long string values before they reach the database.
+
+    Without this the write fails with a truncation error from the driver,
+    which the caller only ever sees as a 500.
+    """
+    from api.utilities.exceptions import AntibodyDataException
+
+    for field in instance._meta.get_fields():
+        max_length = getattr(field, "max_length", None)
+        if not max_length or not hasattr(field, "attname"):
+            continue
+        value = getattr(instance, field.attname, None)
+        if isinstance(value, str) and len(value) > max_length:
+            raise AntibodyDataException(
+                f"Value exceeds the maximum length of {max_length}",
+                field.name, value)

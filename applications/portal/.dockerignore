@@ -1,5 +1,10 @@
-node_modules
-dist
-__pycache__
+# A bare pattern only matches at the top of the context, so these need the
+# leading **/ to catch frontend/node_modules (426M), frontend/vite-tmp (113M)
+# and the dangling test/e2e/node_modules symlink. Without it they all ship to
+# the builder, and `COPY frontend` overwrites the node_modules that
+# `yarn install` just produced in the image.
+**/node_modules
+**/dist
+**/__pycache__
 deploy/*.yaml
 backend/static

@@ -23,6 +23,18 @@ harness:
       limits:
         cpu: 4
         memory: 2.5Gi
+    extraContainers:
+      run-migrations:
+        auto: true
+        initContainer: true
+        # shareVolume mounts the allvalues configmap + secrets, which the
+        # Django settings need to resolve the postgres connection
+        shareVolume: true
+        command:
+          - python
+          - manage.py
+          - migrate
+          - --noinput
     volume:
       name: areg-persistent-files
       mountpath: /usr/src/app/persistent
@@ -88,10 +100,21 @@ harness:
     postgres:
       image: postgres:17
       initialdb: antibody_registry
+      args:
+        - "-c"
+        - "max_connections=200"
+        - "-c"
+        - "shared_buffers=768MB"
+        - "-c"
+        - "work_mem=4MB"
+        - "-c"
+        - "maintenance_work_mem=128MB"
+        - "-c"
+        - "effective_cache_size=2GB"
     resources:
       requests:
         memory: 4Gi
-        cpu: 0.1
+        cpu: 0.5
       limits:
         cpu: 4
         memory: 4Gi
@@ -114,7 +137,7 @@ harness:
       read: 99999
       send: 99999
 export_query: "SELECT 'AB_' || ab_id as rrid, ab_name, catalog_num, cat_alt, api_vendor.vendor as vendor_name, api_vendor.vendor || ' Cat# ' || catalog_num || ', RRID:AB_' || ab_id AS proper_citation from api_antibody LEFT JOIN api_vendor on api_vendor.id = vendor_id WHERE true"
-export_all_fields_query: "WITH applications_subquery AS (SELECT ix, string_agg(api_application.name, ', ') as applications FROM api_antibody LEFT JOIN api_antibodyapplications on api_antibodyapplications.antibody_id = api_antibody.ix LEFT JOIN api_application on api_application.id = api_antibodyapplications.application_id GROUP BY ix) SELECT api_antibody.ix, 'AB_' || ab_id as rrid, ab_name, accession, api_antibody.commercial_type, uid, uid_legacy, catalog_num, catalog_num_search, cat_alt, api_vendor.vendor as vendor_name, api_vendor.vendor || ' Cat# ' || catalog_num || ', RRID:AB_' || ab_id AS proper_citation, url, ab_target, ab_target_entrez_gid, uniprot_id, target_species_raw, target_subregion, target_modification, applications_subquery.applications, epitope, api_specie.name as source_organism, clonality, clone_id, product_isotype, product_conjugate, defining_citation, product_form, comments, kit_contents, feedback, curator_comment, disc_date, status, insert_time, lastedit_time, curate_time, api_antibody.show_link FROM api_antibody LEFT JOIN api_vendor on api_vendor.id = vendor_id LEFT JOIN api_specie on api_specie.id = api_antibody.source_organism_id LEFT JOIN applications_subquery on applications_subquery.ix = api_antibody.ix WHERE true"
+export_all_fields_query: "WITH applications_subquery AS (SELECT ix, string_agg(api_application.name, ', ') as applications FROM api_antibody LEFT JOIN api_antibodyapplications on api_antibodyapplications.antibody_id = api_antibody.ix LEFT JOIN api_application on api_application.id = api_antibodyapplications.application_id GROUP BY ix) SELECT api_antibody.ix, 'AB_' || ab_id as rrid, ab_name, accession, api_antibody.commercial_type, uid, uid_legacy, api_antibody.owner_id, auth_user.username as owner_username, auth_user.email as owner_email, catalog_num, catalog_num_search, cat_alt, api_vendor.vendor as vendor_name, api_vendor.vendor || ' Cat# ' || catalog_num || ', RRID:AB_' || ab_id AS proper_citation, url, ab_target, ab_target_entrez_gid, uniprot_id, target_species_raw, target_subregion, target_modification, applications_subquery.applications, epitope, api_specie.name as source_organism, clonality, clone_id, product_isotype, product_conjugate, defining_citation, product_form, comments, kit_contents, feedback, curator_comment, disc_date, status, insert_time, lastedit_time, curate_time, api_antibody.show_link FROM api_antibody LEFT JOIN api_vendor on api_vendor.id = vendor_id LEFT JOIN api_specie on api_specie.id = api_antibody.source_organism_id LEFT JOIN auth_user on auth_user.id = api_antibody.owner_id LEFT JOIN applications_subquery on applications_subquery.ix = api_antibody.ix WHERE true"
 
 sentry:
   dsn: https://57b1ca8a70634782bd6c90dd119eeab5@o4506739169951744.ingest.sentry.io/4506758817382404
@@ -129,3 +152,11 @@ scicrunch:
   cronjob:
     schedule: "0 1 * * 6" # for weekend
     max_requests_per_second: 10
+
+# Per-client API rate limits applied by nginx (see resources/nginx.conf).
+# Keyed on the bearer token, or on an nginx-issued cookie when anonymous.
+rate_limiting:
+  read_rate: 120r/m
+  read_burst: 30
+  write_rate: 20r/m
+  write_burst: 10

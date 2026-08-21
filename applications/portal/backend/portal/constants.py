@@ -109,7 +109,13 @@ FILTERABLE_AND_SORTABLE_FIELDS = [
     'vendor', 'source_organism', 'catalog_num', 'citation'
 ]
 
-FOREIGN_OR_M2M_FIELDS = ["vendor", "applications", "species", "source_organism"]
+# Only many-to-many joins can duplicate antibody rows and thus require DISTINCT;
+# vendor and source_organism are forward foreign keys and never duplicate.
+M2M_FIELDS = ["applications", "species"]
+
+FOREIGN_OR_M2M_FIELDS = M2M_FIELDS + ["vendor", "source_organism"]
+
+
 
 FOR_NEW_KEY = 'for_new'
 FOR_EXTANT_KEY = 'for_extant'
@@ -123,7 +129,6 @@ FILL_KEY = 'fill'
 SKIP_KEY = 'skip'
 ID_KEY = 'id'
 IX_KEY = 'ix'
-KC_USER_ID_KEY = 'keycloak_user'
 USER_KEY = 'user'
 REMOVE_KEYWORD = 'remove'
 

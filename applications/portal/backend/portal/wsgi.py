@@ -13,7 +13,8 @@ import logging
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_baseapp.settings")
-os.system("python manage.py migrate")
+# migrations run in the run-migrations init container (see deploy/values.yaml),
+# so the app container starts serving immediately and probes are unaffected
 application = get_wsgi_application()
 
 from cloudharness_django.services import init_services  # noqa E402

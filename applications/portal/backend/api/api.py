@@ -11,6 +11,8 @@ from ninja.security import HttpBearer
 from django.http import HttpRequest
 from cloudharness.middleware import get_authentication_token
 from cloudharness.auth import decode_token
+from api.helpers.sentry import init_sentry
+
 
 
 # Authentication
@@ -62,3 +64,5 @@ api.add_router("", general.router)
 # Register exception handlers
 from api.helpers.response_helpers import add_exception_handlers
 add_exception_handlers(api)
+# Initialize Sentry
+init_sentry()

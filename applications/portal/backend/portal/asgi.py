@@ -14,9 +14,8 @@ from django.core.asgi import get_asgi_application
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_baseapp.settings")
 
-# migrate the Django models
-os.system("python manage.py migrate")
-
+# migrations run in the run-migrations init container (see deploy/values.yaml),
+# so the app container starts serving immediately and probes are unaffected
 
 application = get_asgi_application()
 

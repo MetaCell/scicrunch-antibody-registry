@@ -15,6 +15,9 @@ export const ANTIBODY_COMMENTS_FIELD= 'div[data-field="comments"]'
 export const KC_USERNAME = 'input#username'
 export const KC_PASSWORD = 'input#password'
 export const KC_LOGIN_BUTTON = '#kc-login'
+// Keycloak renders the "invalid credentials" feedback differently depending on
+// theme and version, so match any of the shapes it uses.
+export const KC_LOGIN_ERROR = '#input-error, .kc-feedback-text, .alert-error, [class*="pf-c-alert"]'
 export const LOGIN_BUTTON = '.btn-login'
 export const USER_MENU = '.user-menu'
 
@@ -45,7 +48,7 @@ export const INPUT_CITATION = 'input[name = "citation"]'
 export const SUCCESSFUL_SUBMISSION= 'h1.MuiTypography-h1'
 export const CLOSE_SUBMISSION= '.btn-go-to-submissions'
 export const ANTIBODY_TYPE= 'button.MuiCardActionArea-root'
-export const MY_SUBMISSIONS = 'button.MuiTab-labelIcon'
+export const MY_SUBMISSIONS = 'button.btn-submissions'
 export const FILTER= 'button[aria-label="Select columns"]'
 export const FILTER_TABLE= 'input[placeholder="Column title"]'
 export const FILTER_ELEMENTS = '.MuiTypography-body1'

@@ -2,7 +2,7 @@ import mimetypes
 from pathlib import Path
 
 from django.conf import settings
-from django.http import FileResponse, HttpResponseRedirect
+from django.http import FileResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
 from django.utils._os import safe_join
 
@@ -14,11 +14,13 @@ def view_404(request, exception=None):
 def index(request, path=""):
     if path == "":
         path = "index.html"
-    fullpath = Path(safe_join(settings.STATIC_ROOT, "www", path))
+    fullpath = Path(safe_join(settings.BASE_DIR, "www", path))
     content_type, encoding = mimetypes.guess_type(str(fullpath))
     content_type = content_type or "application/octet-stream"
     try:
         fullpath.open("rb")
     except FileNotFoundError:
+        if path == "index.html":
+            return HttpResponseNotFound("index.html not found")
         return index(request, "")  # index.html
     return FileResponse(fullpath.open("rb"), content_type=content_type)

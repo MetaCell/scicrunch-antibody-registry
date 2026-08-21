@@ -11,11 +11,23 @@ from django.contrib.postgres.search import SearchVectorField, SearchRank, Search
 from django.core.paginator import Paginator
 
 from ..models import STATUS, Antibody, AntibodySearch
-from .filtering_utils import convert_filters_to_q, order_by_string, status_q
+from .filtering_utils import convert_filters_to_q, filters_require_distinct, order_by_string, status_q
 from cloudharness import log
 
 MIN_CATALOG_RANKING = 0.0  # TODO validate the proper ranking value
 MAX_SORTED = settings.LIMIT_NUM_RESULTS
+
+
+class PrecomputedCountPaginator(Paginator):
+    """
+    Paginator that reuses a count the caller already computed: the default
+    Paginator issues its own COUNT query via `num_pages`, which duplicates
+    the (potentially expensive) count query on every request.
+    """
+
+    def __init__(self, object_list, per_page, count):
+        super().__init__(object_list, per_page)
+        self.count = count
 
 
 def flat(l):
@@ -60,7 +72,7 @@ def fts_by_catalog_number(search: str, page, size, filters=None):
         catalog_num_match_filtered = apply_fts_sorting(
             catalog_num_match_filtered, filters)
 
-    p = Paginator(catalog_num_match_filtered, size)
+    p = PrecomputedCountPaginator(catalog_num_match_filtered, size, count)
     items = pageitems_if_page_in_bound(page, p)
     return items, count
 
@@ -129,19 +141,31 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
 
     if not search:
         base_query = Antibody.objects.filter(status=STATUS.CURATED)
+        count_base = base_query
     else:
         search_query = SearchQuery(search)
         ranking = SearchRank(F("antibodysearch__search_vector"), search_query)
         base_query = Antibody.objects.annotate(ranking=ranking)\
             .filter(antibodysearch__search_vector=search_query, status=STATUS.CURATED)
+        # count on a queryset without the ranking annotation: combined with
+        # DISTINCT, the annotation forces ts_rank() to be computed per row
+        # inside the COUNT subquery
+        count_base = Antibody.objects.filter(
+            antibodysearch__search_vector=search_query, status=STATUS.CURATED)
 
+    filters_q = convert_filters_to_q(filters)
     filtered_antibodies = (
         base_query
-        .filter(convert_filters_to_q(filters))
+        .filter(filters_q)
         .select_related("vendor").prefetch_related("species").prefetch_related("applications")
-    ).distinct()
+    )
+    count_query = count_base.filter(filters_q)
 
-    antibodies_count = filtered_antibodies.count()
+    if filters_require_distinct(filters):
+        filtered_antibodies = filtered_antibodies.distinct()
+        count_query = count_query.values("pk").distinct()
+
+    antibodies_count = count_query.count()
     if antibodies_count == 0:
         return [], 0
 
@@ -154,6 +178,6 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
             filtered_antibodies = apply_plain_sorting(
                 filtered_antibodies, filters)
 
-    p = Paginator(filtered_antibodies, size)
+    p = PrecomputedCountPaginator(filtered_antibodies, size, antibodies_count)
     items = pageitems_if_page_in_bound(page, p)
     return items, antibodies_count

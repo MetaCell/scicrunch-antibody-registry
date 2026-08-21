@@ -1,5 +1,5 @@
 import re
-from api.services.user_service import get_current_user_id
+from api.services.user_service import get_current_user_pk
 
 
 def to_snake(camel_str: str):
@@ -69,12 +69,7 @@ def get_url_if_permitted(dao):
         1. If user is creator of the antibody, return the URL.
         2. Else return only if show_link is True.
     """
-    try:
-        user_id = get_current_user_id()
-    except Exception as e:
-        return dao.url if dao.show_link else None
-
-    if user_id == dao.uid:
+    user_pk = get_current_user_pk()
+    if user_pk is not None and user_pk == dao.owner_id:
         return dao.url if dao.url else None
-    else:
-        return dao.url if dao.show_link else None
+    return dao.url if dao.show_link else None

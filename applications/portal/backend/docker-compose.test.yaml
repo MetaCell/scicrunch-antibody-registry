@@ -1,0 +1,20 @@
+# Local Postgres for running `runtests.py` without needing a port-forward to
+# the shared dev cluster. Credentials match the portal db config in
+# api/tests/resources/values.yaml. Requires "portal-db" to resolve to
+# 127.0.0.1 (see applications/portal/README.md).
+#
+# Usage: docker compose -f docker-compose.test.yaml up -d
+services:
+  portal-db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: antibody_registry
+      POSTGRES_USER: mnp
+      POSTGRES_PASSWORD: metacell
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mnp -d antibody_registry"]
+      interval: 2s
+      timeout: 3s
+      retries: 10

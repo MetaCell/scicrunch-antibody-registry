@@ -7,12 +7,22 @@ const s = require("./selectors");
 
 //PAGE INFO:
 const baseURL = process.env.APP_URL || "https://www.areg.dev.metacell.us/";
+// Third-party calls the page happens to make are not this suite's business: an
+// enrichment or analytics service returning 429 says nothing about the app.
+const appOrigin = new URL(baseURL).origin;
 const PAGE_WAIT = 3000;
 const TIMEOUT = 1000;
+// The grid only re-renders once the search response is in, so give the spinner
+// room to clear on a cold query instead of racing it.
+const LOADER_TIMEOUT = 60000;
 
+// page.waitForTimeout was removed in puppeteer 22.
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-function range(size, startAt = 0) {
-  return Array.from({ length: size }, (_, i) => i + startAt);
+// The record count is rendered with locale thousands separators ("2,803"), and
+// parseFloat stops at the comma: it would read that as 2.
+function parseCount(text) {
+  return parseInt(String(text).replace(/[^\d]/g, ""), 10);
 }
 
 //TESTS:
@@ -21,21 +31,32 @@ jest.setTimeout(300000);
 
 let page;
 let browser;
+let httpErrors = [];
 
 
 
 async function waitLoaderToDisappear() {
+  // The spinner takes a moment to show up, and for a warm response it may not
+  // show up at all, so its appearance is best effort...
   try {
     await page.waitForSelector(s.PROGRESS_LOADER, { timeout: TIMEOUT });
   } catch(e) {
     console.log("No loader found");
   }
+  // ...but it has to be gone before the table can be read back: the row cells
+  // and the record count are rewritten only when loading completes, so reading
+  // them while the spinner is still up mixes the new count with the previous
+  // search's rows.
+  await page.waitForSelector(s.PROGRESS_LOADER, {
+    hidden: true,
+    timeout: LOADER_TIMEOUT,
+  });
   try {
     await page.waitForSelector(s.CATALOG_NUMBER_FIELD, { timeout: TIMEOUT });
   } catch(e) {
     console.log("No table results found");
   }
-  
+
 }
 
 async function getValue(selector) {
@@ -83,16 +104,23 @@ describe("E2E Flow for AntiBody Registry", () => {
 
     await page.waitForSelector(s.NAME_ID_FIELD);
 
+    // Only collected here: asserting inside the listener attributes the failure
+    // to whichever test happens to be running when the response arrives.
     page.on("response", (response) => {
-      const client_server_errors = range(90, 400);
-      for (let i = 0; i < client_server_errors.length; i++) {
-        expect(response.status()).not.toBe(client_server_errors[i]);
+      if (response.status() >= 400 && response.url().startsWith(appOrigin)) {
+        httpErrors.push(`${response.status()} ${response.url()}`);
       }
     });
   });
 
-  afterAll(() => {
-    browser.close();
+  afterEach(() => {
+    const errors = httpErrors;
+    httpErrors = [];
+    expect(errors).toEqual([]);
+  });
+
+  afterAll(async () => {
+    await browser.close();
   });
 
   it("HomePage check", async () => {
@@ -105,7 +133,7 @@ describe("E2E Flow for AntiBody Registry", () => {
     await page.waitForSelector(s.TABLE);
     const rec_num_str = await getRecordNumber();
 
-    expect(parseFloat(rec_num_str)).not.toBe(0);
+    expect(parseCount(rec_num_str)).not.toBe(0);
 
     const update_date = await getValue(s.UPDATE_DATE);
 
@@ -139,7 +167,8 @@ describe("E2E Flow for AntiBody Registry", () => {
 
     const rec_num_str = await getRecordNumber();
 
-    expect(parseFloat(rec_num_str)).toBeGreaterThanOrEqual(search_result.length - 1);
+    // search_result counts the header cell on top of one cell per row.
+    expect(parseCount(rec_num_str)).toBeGreaterThanOrEqual(search_result.length - 1);
 
     console.log("Search successful");
   });
@@ -168,7 +197,11 @@ describe("E2E Flow for AntiBody Registry", () => {
     await page.type(s.SEARCH_INPUT, targAntigens[1]);
 
     await page.keyboard.press('Enter')
-    await page.waitForTimeout(5000);
+
+    // Clearing the search box above fires a query of its own: let that one start
+    // and finish before waiting on the spinner for this search, or the wait can
+    // return in the gap between the two.
+    await sleep(PAGE_WAIT);
 
     await waitLoaderToDisappear();
 

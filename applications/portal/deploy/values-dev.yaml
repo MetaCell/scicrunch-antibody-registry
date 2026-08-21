@@ -1,5 +1,17 @@
 harness:
-  
+
+  # The e2e submission tests need an account to log in with: declaring it here
+  # seeds it into the dev realm and makes harness-deployment emit USERNAME and
+  # PASSWORD into the e2e step of codefresh-dev.yaml. Dev only - values-dev.yaml
+  # is merged just for `harness-deployment -e dev`, so this never reaches prod.
+  # The password defaults to "test" (cloudharness_utils.testing.util).
+  accounts:
+    users:
+      - username: metacell-qa@testuser.com
+        email: metacell-qa@testuser.com
+        clientRoles:
+          - user
+
   deployment:
     replicas: 1
     resources:

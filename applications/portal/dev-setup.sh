@@ -42,7 +42,6 @@ pip install -e "$CH_DIRECTORY/libraries/client/cloudharness_cli" || install_erro
 
 # Install pip dependencies from cloudharness-django image
 
-pip install -r "$CH_DIRECTORY/infrastructure/common-images/cloudharness-django/libraries/fastapi/requirements.txt" || install_error "cloudharness-django fastapi requirements"
 pip install -e "$CH_DIRECTORY/infrastructure/common-images/cloudharness-django/libraries/cloudharness-django" || install_error cloudharness-django
 
 # Install application

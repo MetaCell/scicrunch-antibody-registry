@@ -73,21 +73,6 @@ class AnonymousTestClient(LoggedinTestClient):
         super().__init__(api_or_router, AnonymousUser(), headers)
 
 
-class LoggedinWithOrganizationTestClient(LoggedinTestClient):
-    def __init__(self, api_or_router: Union[NinjaAPI, Router], user: User, organization_subdomain: str, headers=None):
-        self.organization_subdomain = organization_subdomain
-        self.user = user
-        if headers is None:
-            headers = {}
-        headers['HTTP_HOST'] = organization_subdomain + '.neuroglass.io'
-        super().__init__(api_or_router, user, headers)
-
-    def _call(self, func: Callable, request: Mock, kwargs: Dict) -> "NinjaResponse":
-        request.get_host = lambda: self.headers['HTTP_HOST']
-        request.user = self.user
-
-        return NinjaResponse(func(request, **kwargs))
-
 
 
 

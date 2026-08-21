@@ -1,0 +1,34 @@
+steps:
+  tests_unit:
+    stage: unittest
+    type: parallel
+    steps:
+      portal_unit:
+        stage: unittest
+        title: Portal django tests
+        image: ${{REGISTRY}}/areg/portal:${{PORTAL_TAG}}
+        working_directory: /usr/src/app
+        commands:
+          # runtests.py sets CH_VALUES_PATH, DJANGO_SETTINGS_MODULE and the
+          # flags that keep Kafka and the maintainance threads out of the run
+          - python runtests.py
+        services:
+          composition:
+            # The db config the tests run against lives in
+            # backend/api/tests/resources/values.yaml (harness.database of the
+            # portal app): the service name doubles as the host name, so these
+            # must be kept in sync with it.
+            portal-db:
+              image: postgres:17
+              ports:
+                - 5432
+              environment:
+                - POSTGRES_DB=antibody_registry
+                - POSTGRES_USER=mnp
+                - POSTGRES_PASSWORD=metacell
+          readiness:
+            image: postgres:17
+            timeoutSeconds: 60
+            periodSeconds: 5
+            commands:
+              - pg_isready -h portal-db -U mnp -d antibody_registry

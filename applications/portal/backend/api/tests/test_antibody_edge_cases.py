@@ -38,9 +38,9 @@ class AntibodyEdgeCasesTestCase(TestCase):
         Member.objects.create(kc_id=self.user_id, user=self.test_user)
         
         # Mock user ID
-        self.get_user_id_patcher = patch('api.mappers.mapping_utils.get_current_user_id')
+        self.get_user_id_patcher = patch('api.mappers.mapping_utils.get_current_user_pk')
         self.mock_get_user_id = self.get_user_id_patcher.start()
-        self.mock_get_user_id.return_value = self.user_id
+        self.mock_get_user_id.return_value = self.test_user.pk
 
     def tearDown(self):
         """Clean up patches"""
@@ -51,8 +51,9 @@ class AntibodyEdgeCasesTestCase(TestCase):
         minimal_ab = {
             "vendorName": "Minimal Vendor",
             "abTarget": "Target",
+            "url": "https://vendor.example.com/minimal",  # required by AddAntibody
         }
-        
+
         response = self.client.post("/antibodies", json=minimal_ab)
         self.assertEqual(response.status_code, 201)
         data = response.json()
@@ -60,10 +61,12 @@ class AntibodyEdgeCasesTestCase(TestCase):
 
     def test_create_antibody_without_vendor_name_or_url(self):
         """Test that creating antibody without vendor name or URL fails"""
+        # url is declared on AddAntibody, so it has to be sent to reach the
+        # "either vendor url or name is mandatory" rule; an empty one is blank
         invalid_ab = dict(example_ab)
         invalid_ab.pop('vendorName', None)
-        invalid_ab.pop('url', None)
-        
+        invalid_ab['url'] = ""
+
         response = self.client.post("/antibodies", json=invalid_ab)
         self.assertEqual(response.status_code, 400)
 
@@ -119,8 +122,9 @@ class AntibodyEdgeCasesTestCase(TestCase):
         update_data = {
             "abName": "New Name Only",
             "abTarget": example_ab['abTarget'],  # Required field
+            "url": example_ab['url'],  # required by UpdateAntibody
         }
-        
+
         response = self.client.put(f"/antibodies/user/{ab['accession']}", json=update_data)
         self.assertEqual(response.status_code, 202)
         updated = response.json()

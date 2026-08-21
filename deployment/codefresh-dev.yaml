@@ -55,7 +55,7 @@ steps:
     environment:
     - ACTION=auth
     - KUBE_CONTEXT=${{NAMESPACE}}
-    image: codefresh/cfstep-helm:3.6.2
+    image: codefresh/cfstep-helm:3.14.4
     stage: prepare
     title: View helm chart
   build_application_images_0:
@@ -106,6 +106,29 @@ steps:
                 '{{CLOUDHARNESS_BASE_TAG_EXISTS}}') == true
               forceNoCache: includes('${{CLOUDHARNESS_BASE_TAG_FORCE_BUILD}}', 
                 '{{CLOUDHARNESS_BASE_TAG_FORCE_BUILD}}') == false
+      test-e2e:
+        type: build
+        stage: build
+        dockerfile: Dockerfile
+        registry: ${{CODEFRESH_REGISTRY}}
+        buildkit: true
+        build_arguments:
+        - NOCACHE=${{CF_BUILD_ID}}
+        image_name: areg/test-e2e
+        title: Test e2e
+        working_directory: ./cloud-harness/test/test-e2e
+        tags:
+        - ${{TEST_E2E_TAG}}
+        - ${{DEPLOYMENT_PUBLISH_TAG}}-dev
+        - ${{CF_BRANCH_TAG_NORMALIZED_LOWER_CASE}}
+        - latest
+        when:
+          condition:
+            any:
+              buildDoesNotExist: includes('${{TEST_E2E_TAG_EXISTS}}', 
+                '{{TEST_E2E_TAG_EXISTS}}') == true
+              forceNoCache: includes('${{TEST_E2E_TAG_FORCE_BUILD}}', 
+                '{{TEST_E2E_TAG_FORCE_BUILD}}') == false
     title: Build parallel step 1
   build_application_images_1:
     type: parallel
@@ -211,13 +234,40 @@ steps:
               forceNoCache: includes('${{PORTAL_TAG_FORCE_BUILD}}', 
                 '{{PORTAL_TAG_FORCE_BUILD}}') == false
     title: Build parallel step 3
+  tests_unit:
+    stage: unittest
+    type: parallel
+    steps:
+      portal_unit:
+        stage: unittest
+        title: Portal django tests
+        image: ${{REGISTRY}}/areg/portal:${{PORTAL_TAG}}
+        working_directory: /usr/src/app
+        commands:
+        - python runtests.py
+        services:
+          composition:
+            portal-db:
+              image: postgres:17
+              ports:
+              - 5432
+              environment:
+              - POSTGRES_DB=antibody_registry
+              - POSTGRES_USER=mnp
+              - POSTGRES_PASSWORD=metacell
+          readiness:
+            image: postgres:17
+            timeoutSeconds: 60
+            periodSeconds: 5
+            commands:
+            - pg_isready -h portal-db -U mnp -d antibody_registry
   deployment:
     stage: deploy
     type: helm
     working_directory: ./${{CF_REPO_NAME}}
     title: Installing chart
     arguments:
-      helm_version: 3.6.2
+      helm_version: 3.14.4
       chart_name: deployment/helm
       release_name: ${{NAMESPACE}}
       kube_context: ${{CLUSTER_NAME}}
@@ -235,12 +285,12 @@ steps:
     commands:
     - kubectl config use-context ${{CLUSTER_NAME}}
     - kubectl config set-context --current --namespace=${{NAMESPACE}}
+    - kubectl rollout status deployment/accounts
+    - kubectl rollout status deployment/accounts-api
+    - kubectl rollout status deployment/argo-gk
     - kubectl rollout status deployment/portal
     - kubectl rollout status deployment/www-gk
-    - kubectl rollout status deployment/accounts-api
     - kubectl rollout status deployment/events-gk
-    - kubectl rollout status deployment/argo-gk
-    - kubectl rollout status deployment/accounts
     - sleep 60
     when:
       condition:
@@ -250,7 +300,7 @@ steps:
     stage: qa
     title: End to end tests
     working_directory: /home/test
-    image: ${{test-e2e}}
+    image: ${{REGISTRY}}/areg/test-e2e:${{TEST_E2E_TAG}}
     fail_fast: false
     commands:
     - npx puppeteer browsers install chrome
@@ -262,6 +312,8 @@ steps:
         - ${{CF_REPO_NAME}}/applications/portal/test/e2e:/home/test/__tests__/portal
         environment:
         - APP_URL=https://www.${{DOMAIN}}
+        - USERNAME=metacell-qa@testuser.com
+        - PASSWORD=test
         - SKIP_SMOKETEST=true
     when:
       condition:

@@ -1,6 +1,7 @@
 """
 Tests for export endpoints and CSV generation
 """
+import csv
 import os
 import tempfile
 from django.test import TestCase
@@ -11,6 +12,27 @@ from api.models import Antibody, STATUS, Vendor
 from api.routers import antibody
 from .utils import LoggedinTestClient
 from cloudharness_django.models import Member
+
+
+def fake_generate_csv(fname, status=STATUS.CURATED):
+    """Stand-in for the psql-backed exporter.
+
+    generate_antibodies_csv_file shells out to psql against the deployed
+    database host, which no test environment can reach. This writes the same
+    columns the configured export_query produces, sourced from the ORM, so the
+    endpoint's generate/cache/read behaviour stays under test.
+    """
+    with open(fname, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["rrid", "ab_name", "catalog_num", "cat_alt",
+                         "vendor_name", "proper_citation"])
+        for ab in Antibody.objects.filter(status=status).select_related("vendor"):
+            vendor_name = ab.vendor.name if ab.vendor else ""
+            writer.writerow([
+                f"AB_{ab.ab_id}", ab.ab_name, ab.catalog_num, ab.cat_alt or "",
+                vendor_name,
+                f"{vendor_name} Cat# {ab.catalog_num}, RRID:AB_{ab.ab_id}",
+            ])
 
 
 class ExportEndpointsTestCase(TestCase):
@@ -40,9 +62,9 @@ class ExportEndpointsTestCase(TestCase):
         Member.objects.create(kc_id=self.admin_id, user=self.admin_user)
         
         # Mock user ID for serialization
-        self.get_user_id_patcher = patch('api.mappers.mapping_utils.get_current_user_id')
+        self.get_user_id_patcher = patch('api.mappers.mapping_utils.get_current_user_pk')
         self.mock_get_user_id = self.get_user_id_patcher.start()
-        self.mock_get_user_id.return_value = self.user_id
+        self.mock_get_user_id.return_value = self.test_user.pk
 
     def tearDown(self):
         """Clean up patches"""
@@ -51,7 +73,7 @@ class ExportEndpointsTestCase(TestCase):
     def test_export_antibodies_post(self):
         """Test POST /antibodies/export endpoint"""
         # Create some curated antibodies
-        vendor = Vendor.objects.create(vendor="Export Vendor", commercial_type="commercial")
+        vendor = Vendor.objects.create(name="Export Vendor", commercial_type="commercial")
         for i in range(5):
             Antibody.objects.create(
                 ab_id=f"{1000 + i}",
@@ -61,23 +83,27 @@ class ExportEndpointsTestCase(TestCase):
                 status=STATUS.CURATED
             )
         
-        # Test export
-        response = self.client.post("/antibodies/export")
+        # Test export (force regeneration so a stale cached file is not read)
+        with patch('api.services.filesystem_service.check_if_file_does_not_exist_and_recent',
+                   return_value=True), \
+             patch('api.routers.antibody.generate_antibodies_csv_file',
+                   side_effect=fake_generate_csv):
+            response = self.client.post("/antibodies/export")
         self.assertEqual(response.status_code, 200)
-        
+
         # Response should be CSV content
         csv_content = response.json()
         self.assertIsInstance(csv_content, str)
-        
+
         # Check CSV contains expected headers and data
-        lines = csv_content.split('\n')
+        lines = csv_content.strip().split('\n')
         self.assertGreater(len(lines), 1)  # At least header + data
-        
+
         # Header should contain expected columns
         header = lines[0]
         self.assertIn('rrid', header.lower())
 
-    @patch('api.services.user_service.check_if_user_is_admin')
+    @patch('api.routers.antibody.check_if_user_is_admin')
     def test_export_admin_unauthorized(self, mock_check_admin):
         """Test that non-admin users cannot access admin export"""
         mock_check_admin.return_value = False
@@ -85,13 +111,13 @@ class ExportEndpointsTestCase(TestCase):
         response = self.client.get("/antibodies/export/admin")
         self.assertEqual(response.status_code, 401)
 
-    @patch('api.services.user_service.check_if_user_is_admin')
+    @patch('api.routers.antibody.check_if_user_is_admin')
     def test_export_admin_authorized(self, mock_check_admin):
         """Test that admin users can access admin export"""
         mock_check_admin.return_value = True
         
         # Create test antibodies
-        vendor = Vendor.objects.create(vendor="Admin Export Vendor", commercial_type="commercial")
+        vendor = Vendor.objects.create(name="Admin Export Vendor", commercial_type="commercial")
         for i in range(3):
             Antibody.objects.create(
                 ab_id=f"{2000 + i}",
@@ -108,13 +134,13 @@ class ExportEndpointsTestCase(TestCase):
                 # Should redirect to the CSV file
                 self.assertEqual(response.status_code, 302)
 
-    @patch('api.services.user_service.check_if_user_is_admin')
+    @patch('api.routers.antibody.check_if_user_is_admin')
     def test_export_admin_with_status_filter(self, mock_check_admin):
         """Test admin export with status filtering"""
         mock_check_admin.return_value = True
         
         # Create antibodies with different statuses
-        vendor = Vendor.objects.create(vendor="Status Export Vendor", commercial_type="commercial")
+        vendor = Vendor.objects.create(name="Status Export Vendor", commercial_type="commercial")
         
         for i in range(3):
             Antibody.objects.create(
@@ -135,7 +161,7 @@ class ExportEndpointsTestCase(TestCase):
         with patch('api.services.filesystem_service.check_if_file_does_not_exist_and_recent') as mock_file_check:
             mock_file_check.return_value = True
             with patch('api.services.export_service.generate_antibodies_fields_by_status_to_csv') as mock_export:
-                response = self.admin_client.get("/antibodies/export/admin?status=curated")
+                response = self.admin_client.get("/antibodies/export/admin?status=CURATED")
                 self.assertEqual(response.status_code, 302)
                 # Verify the export function was called with correct status
                 mock_export.assert_called_once()
@@ -143,7 +169,7 @@ class ExportEndpointsTestCase(TestCase):
     def test_export_regular_endpoint(self):
         """Test GET /antibodies/export endpoint"""
         # Create test antibodies
-        vendor = Vendor.objects.create(vendor="Regular Export Vendor", commercial_type="commercial")
+        vendor = Vendor.objects.create(name="Regular Export Vendor", commercial_type="commercial")
         for i in range(3):
             Antibody.objects.create(
                 ab_id=f"{4000 + i}",
@@ -155,7 +181,7 @@ class ExportEndpointsTestCase(TestCase):
         
         with patch('api.services.filesystem_service.check_if_file_does_not_exist_and_recent') as mock_file_check:
             mock_file_check.return_value = True
-            with patch('api.services.export_service.generate_antibodies_csv_file'):
+            with patch('api.routers.antibody.generate_antibodies_csv_file'):
                 response = self.client.get("/antibodies/export")
                 # Should redirect to static file
                 self.assertEqual(response.status_code, 302)
@@ -163,7 +189,7 @@ class ExportEndpointsTestCase(TestCase):
 
     def test_export_generates_valid_csv(self):
         """Test that export generates valid CSV content"""
-        vendor = Vendor.objects.create(vendor="CSV Vendor", commercial_type="commercial")
+        vendor = Vendor.objects.create(name="CSV Vendor", commercial_type="commercial")
         ab = Antibody.objects.create(
             ab_id="5001",
             ab_name="CSV Test Antibody",
@@ -173,9 +199,13 @@ class ExportEndpointsTestCase(TestCase):
         )
         
         # Test POST endpoint which returns CSV content
-        response = self.client.post("/antibodies/export")
+        with patch('api.services.filesystem_service.check_if_file_does_not_exist_and_recent',
+                   return_value=True), \
+             patch('api.routers.antibody.generate_antibodies_csv_file',
+                   side_effect=fake_generate_csv):
+            response = self.client.post("/antibodies/export")
         csv_content = response.json()
-        
+
         # Verify CSV structure
         lines = csv_content.strip().split('\n')
         self.assertGreater(len(lines), 1)
@@ -190,7 +220,7 @@ class ExportEndpointsTestCase(TestCase):
 
     def test_export_with_special_characters(self):
         """Test export handles special characters correctly"""
-        vendor = Vendor.objects.create(vendor="Special Vendor", commercial_type="commercial")
+        vendor = Vendor.objects.create(name="Special Vendor", commercial_type="commercial")
         ab = Antibody.objects.create(
             ab_id="6001",
             ab_name='Anti-IL-8 "Special" (Clone: #123)',
@@ -200,26 +230,35 @@ class ExportEndpointsTestCase(TestCase):
             status=STATUS.CURATED
         )
         
-        response = self.client.post("/antibodies/export")
+        with patch('api.services.filesystem_service.check_if_file_does_not_exist_and_recent',
+                   return_value=True), \
+             patch('api.routers.antibody.generate_antibodies_csv_file',
+                   side_effect=fake_generate_csv):
+            response = self.client.post("/antibodies/export")
         csv_content = response.json()
-        
+
         # CSV should properly escape special characters
         self.assertIsInstance(csv_content, str)
         self.assertGreater(len(csv_content), 0)
+        # the quoted/comma-laden name must survive as one field
+        row = next(r for r in csv.reader(csv_content.strip().split('\n'))
+                   if r[0] == 'AB_6001')
+        self.assertEqual(row[1], 'Anti-IL-8 "Special" (Clone: #123)')
 
-    @patch('api.services.user_service.check_if_user_is_admin')
+    @patch('api.routers.antibody.check_if_user_is_admin')
     def test_export_admin_invalid_status(self, mock_check_admin):
         """Test admin export with invalid status parameter"""
         mock_check_admin.return_value = True
         
+        # status is typed as AntibodyStatusEnum, so an unknown value is rejected
+        # by request validation before the handler runs
         response = self.admin_client.get("/antibodies/export/admin?status=invalid_status")
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 422)
 
     def test_export_requires_authentication(self):
         """Test that export endpoints require authentication"""
         from .utils import AnonymousTestClient
-        anon_user = User.objects.create_user(username='anon')
-        anon_client = AnonymousTestClient(antibody.router, anon_user)
+        anon_client = AnonymousTestClient(antibody.router)
         
         # GET export should require auth
         response = anon_client.get("/antibodies/export")
@@ -231,7 +270,7 @@ class ExportEndpointsTestCase(TestCase):
 
     def test_export_caching(self):
         """Test that export uses file caching appropriately"""
-        vendor = Vendor.objects.create(vendor="Cache Vendor", commercial_type="commercial")
+        vendor = Vendor.objects.create(name="Cache Vendor", commercial_type="commercial")
         Antibody.objects.create(
             ab_id="7001",
             ab_name="Cache Test",
@@ -242,7 +281,7 @@ class ExportEndpointsTestCase(TestCase):
         with patch('api.services.filesystem_service.check_if_file_does_not_exist_and_recent') as mock_file_check:
             # First call - file doesn't exist
             mock_file_check.return_value = True
-            with patch('api.services.export_service.generate_antibodies_csv_file') as mock_generate:
+            with patch('api.routers.antibody.generate_antibodies_csv_file') as mock_generate:
                 response = self.client.get("/antibodies/export")
                 self.assertEqual(response.status_code, 302)
                 # Should call generate function
@@ -250,7 +289,7 @@ class ExportEndpointsTestCase(TestCase):
             
             # Second call - file exists and is recent
             mock_file_check.return_value = False
-            with patch('api.services.export_service.generate_antibodies_csv_file') as mock_generate:
+            with patch('api.routers.antibody.generate_antibodies_csv_file') as mock_generate:
                 response = self.client.get("/antibodies/export")
                 self.assertEqual(response.status_code, 302)
                 # Should NOT call generate function

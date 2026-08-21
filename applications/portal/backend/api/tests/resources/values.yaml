@@ -424,7 +424,8 @@ apps:
       api_antibodyapplications.antibody_id = api_antibody.ix LEFT JOIN api_application
       on api_application.id = api_antibodyapplications.application_id GROUP BY ix)
       SELECT api_antibody.ix, 'AB_' || ab_id as rrid, ab_name, accession, api_antibody.commercial_type,
-      uid, uid_legacy, catalog_num, catalog_num_search, cat_alt, api_vendor.vendor
+      uid, uid_legacy, api_antibody.owner_id, auth_user.username as owner_username,
+      auth_user.email as owner_email, catalog_num, catalog_num_search, cat_alt, api_vendor.vendor
       as vendor_name, api_vendor.vendor || ' Cat# ' || catalog_num || ', RRID:AB_'
       || ab_id AS proper_citation, url, ab_target, ab_target_entrez_gid, uniprot_id,
       target_species_raw, target_subregion, target_modification, applications_subquery.applications,
@@ -433,6 +434,7 @@ apps:
       feedback, curator_comment, disc_date, status, insert_time, lastedit_time, curate_time,
       api_antibody.show_link FROM api_antibody LEFT JOIN api_vendor on api_vendor.id
       = vendor_id LEFT JOIN api_specie on api_specie.id = api_antibody.source_organism_id
+      LEFT JOIN auth_user on auth_user.id = api_antibody.owner_id
       LEFT JOIN applications_subquery on applications_subquery.ix = api_antibody.ix
       WHERE true
     export_query: SELECT 'AB_' || ab_id as rrid, ab_name, catalog_num, cat_alt, api_vendor.vendor

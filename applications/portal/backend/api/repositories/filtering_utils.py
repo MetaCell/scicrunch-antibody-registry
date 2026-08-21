@@ -1,19 +1,34 @@
 from django.db.models import Q
 from ninja.errors import HttpError
-from portal.constants import FILTERABLE_AND_SORTABLE_FIELDS, FOREIGN_OR_M2M_FIELDS
+from portal.constants import FILTERABLE_AND_SORTABLE_FIELDS, FOREIGN_OR_M2M_FIELDS, M2M_FIELDS
 from api.schemas import FilterRequest, SortOrderEnum
 from api.models import STATUS
 from api.services.user_service import get_current_user_id
 
 
+def filter_and_sort_keys(filters):
+    """Every antibody field name referenced by a filter request."""
+    keys = []
+    for key_value_filters in (filters.contains, filters.equals, filters.starts_with,
+                              filters.ends_with, filters.is_any_of):
+        if key_value_filters:
+            keys.extend(f.key for f in key_value_filters)
+    keys.extend(filters.is_empty or [])
+    keys.extend(filters.is_not_empty or [])
+    if filters.sort_on:
+        keys.extend(column.key for column in filters.sort_on)
+    return keys
+
+
 def check_filters_are_valid(filters):
-    # Django Ninja FilterRequest schema validation - simplified version
-    # Since Django Ninja already handles field validation via Pydantic, we just need basic checks
+    # Django Ninja/Pydantic validates types and structure, but not the field
+    # names: an unknown key would reach the ORM and raise a FieldError, which
+    # surfaces as a 500 rather than a bad request
     if not isinstance(filters, FilterRequest):
         return False
-    
-    # Basic validation - Django Ninja schema ensures correct types and structure
-    return True
+
+    return all(key in FILTERABLE_AND_SORTABLE_FIELDS
+               for key in filter_and_sort_keys(filters))
 
 
 def lookup_spanning_relationships_string(fieldname):
@@ -26,6 +41,18 @@ def lookup_spanning_relationships_string(fieldname):
         return f"{fieldname}__name"
     else:
         return fieldname
+
+
+def filters_require_distinct(filters):
+    """
+    DISTINCT is only needed when a filter or sort key spans a many-to-many
+    relationship, whose join duplicates antibody rows. Applying it
+    unconditionally forces COUNT/SELECT queries to deduplicate over every
+    column, which is very expensive (see ANTIBODY-REGISTRY-5F).
+    """
+    if not filters or not isinstance(filters, FilterRequest):
+        return False
+    return any(key in M2M_FIELDS for key in filter_and_sort_keys(filters))
 
 
 def convert_filters_to_q(filters, user=None):
@@ -64,15 +91,18 @@ def convert_filters_to_q(filters, user=None):
         for filter_value in filters.is_any_of:
             query[f"{lookup_spanning_relationships_string(filter_value.key)}__in"] = filter_value.value
     
-    # if is_user_scope is true, then we filter by userid
+    # if is_user_scope is true, then we filter by the owning user
     if filters.is_user_scope:
-        if user and hasattr(user, 'member'):
-            user_id = user.member.kc_id
-            query["uid"] = user_id
+        if user is not None and not user.is_anonymous:
+            query["owner"] = user
         else:
             # Fallback to JWT decoding if user context is not available
-            user_id = get_current_user_id()
-            query["uid"] = user_id
+            from cloudharness_django.services.user import get_user_by_kc_id
+            resolved = get_user_by_kc_id(get_current_user_id())
+            if resolved is None:
+                # never filter owner=None: it would leak all ownerless rows
+                raise HttpError(401, "Unrecognized user")
+            query["owner"] = resolved
 
     return Q(**query) if query else Q()
 

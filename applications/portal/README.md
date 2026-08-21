@@ -29,6 +29,50 @@ This application is composed of a FastAPI Django backend and a React frontend.
 Backend code is inside the *backend* directory.
 See [here](backend/README.md#Develop)
 
+### Backend dependencies
+
+`REQUIRES` in [backend/setup.py](backend/setup.py) is the **single source of truth**.
+[backend/requirements.txt](backend/requirements.txt) is compiled from it and must never be
+edited by hand: it is a lockfile pinning the whole resolved tree (direct *and* transitive)
+with SHA256 hashes, so an image built today installs exactly what was tested.
+
+To add, remove or bump a dependency:
+
+1. Edit `REQUIRES` in `backend/setup.py`.
+2. Regenerate the lockfile from the `backend` directory:
+   ```bash
+   uv pip compile setup.py -o requirements.txt \
+       --generate-hashes --universal --python-version 3.12
+   ```
+   `pip-compile` from [pip-tools](https://pip-tools.readthedocs.io/) accepts the same
+   arguments apart from `--universal`.
+3. Reinstall (`pip install -r requirements.txt && pip install -e .`) and run the tests.
+4. Commit `setup.py` and `requirements.txt` together.
+
+Notes:
+
+* Direct dependencies are pinned exactly (`==`). The portal is a deployed application, not
+  a redistributable library, so there is no reason to run against anything other than the
+  versions it was tested with.
+* `REQUIRES` also carries `>=` floors for a handful of packages the portal never imports
+  itself, only to keep the resolver away from releases with known advisories. They are
+  grouped and commented in `setup.py`; drop one once its parent requires a patched release
+  on its own.
+* Recompiling reuses the versions already pinned in `requirements.txt` wherever they still
+  satisfy the constraints, so a bump stays a small diff instead of dragging every
+  transitive forward. To deliberately move one, add
+  `--upgrade-package <name>` (or `--upgrade` for all of them).
+* Because the lockfile carries hashes, pip switches to `--require-hashes` automatically —
+  no extra flags in the [Dockerfile](Dockerfile) or [dev-setup.sh](dev-setup.sh).
+* To check the result for known vulnerabilities:
+  ```bash
+  pip-audit -r requirements.txt --no-deps
+  ```
+  Auditing the *environment* instead (plain `pip-audit`) also reports packages that come
+  from the cloudharness base images — connexion/flask, fastapi, python-keycloak and their
+  dependencies. Those are not portal's to fix; they belong to the
+  [cloud-harness](../../cloud-harness) requirements files.
+
 ### Frontend
 
 Frontend code is inside the *frontend* directory.

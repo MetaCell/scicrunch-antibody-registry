@@ -88,6 +88,13 @@ class Ingestor:
                 self.users_map = user_ingestor.ingest_users()
             except Exception as e:
                 log.error(f"Cannot ingest users: {str(e)}", exc_info=True)
+        # sync keycloak users into Django User/Member rows so the owner/uploader
+        # foreign keys can be resolved from keycloak ids during the swap
+        try:
+            from cloudharness_django.services import get_user_service
+            get_user_service().sync_kc_users_groups()
+        except Exception:
+            log.exception("Cannot sync keycloak users to Django")
 
     def _execute(self, statement, params):
         if len(params) > 0:
@@ -275,13 +282,13 @@ class Ingestor:
     @timed_class_method('Antibodies added')
     def _swap_antibodies(self, from_table, to_table):
 
-        antibody_stm = f"INSERT INTO {to_table} (ix, ab_name, ab_id, accession, commercial_type, uid, catalog_num, catalog_num_search, cat_alt,  \
+        antibody_stm = f"INSERT INTO {to_table} (ix, ab_name, ab_id, accession, commercial_type, uid, owner_id, catalog_num, catalog_num_search, cat_alt,  \
                        vendor_id, url, show_link, ab_target, ab_target_entrez_gid, uniprot_id, target_subregion, target_modification, \
                        epitope, clonality, clone_id, product_isotype, target_species_raw, \
                        product_conjugate, defining_citation, product_form, comments, feedback, \
                        curator_comment, disc_date, status, insert_time, curate_time, source_organism_id)\
                        SELECT DISTINCT ix, ab_name, ab_id, ab_id_old, TMP.commercial_type, \
-                       uid, catalog_num, catalog_num_search, cat_alt, vendor_id, url, \
+                       uid, M.user_id, catalog_num, catalog_num_search, cat_alt, vendor_id, url, \
                        (CASE WHEN link='yes' THEN true ELSE false END) show_link, \
                        ab_target, ab_target_entrez_gid, uniprot_id, \
                        target_subregion, target_modification, epitope, clonality, \
@@ -293,7 +300,10 @@ class Ingestor:
                        LEFT JOIN {self.VENDOR_TABLE} as vendor \
                        ON TMP.vendor_id = vendor.id \
                        LEFT JOIN {self.SPECIE_TABLE} as SP \
-                       ON TMP.source_organism = SP.name "
+                       ON TMP.source_organism = SP.name \
+                       LEFT JOIN (SELECT DISTINCT ON (kc_id) kc_id, user_id \
+                       FROM cloudharness_django_member) as M \
+                       ON TMP.uid = M.kc_id "
         with self.connection.cursor() as cursor:
             cursor.execute(antibody_stm)
 
@@ -330,22 +340,26 @@ class Ingestor:
         logging.info("Inserting antibody files from %s", csv_file)
         df_antibody_files = pd.read_csv(csv_file)
 
+        from cloudharness_django.models import Member
+        kc_to_pk = dict(Member.objects.values_list('kc_id', 'user_id'))
+
         # insert antibody files
         antibody_files_params = []
         count = 0
         for index, row in df_antibody_files.iterrows():
-            uploader_id = self._get_keycloak_id(row['uploader_uid'])
-            if not uploader_id:
+            uploader_kc_id = self._get_keycloak_id(row['uploader_uid'])
+            if not uploader_kc_id:
                 logging.warning(f"No user found for uploader_uid: {row['uploader_uid']}")
                 continue
             count += 1
             antibody_files_params.extend(
                 [row['id'], row['ab_ix'], row['type'], row['filename'], row['displayname'], row['timestamp'],
-                 uploader_id, row['filehash']]
+                 uploader_kc_id, kc_to_pk.get(uploader_kc_id), row['filehash']]
             )
         antibody_files_insert_stm = get_insert_values_into_table_stm(self.ANTIBODY_FILES_TABLE,
                                                                      ['id', 'ab_ix', 'type', 'file', 'display_name',
-                                                                      'timestamp', 'uploader_uid', 'filehash'],
+                                                                      'timestamp', 'uploader_uid', 'uploader_id',
+                                                                      'filehash'],
                                                                      count)
         self._execute(antibody_files_insert_stm, antibody_files_params)
 

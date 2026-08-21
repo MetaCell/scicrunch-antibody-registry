@@ -53,7 +53,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
         self.client = LoggedinTestClient(combined_api, self.test_user)
         self.admin_client = LoggedinTestClient(combined_api, self.admin_user)
         self.other_client = LoggedinTestClient(combined_api, self.other_user)
-        self.anon_client = AnonymousTestClient(combined_api, User.objects.create_user(username='anon'))
+        self.anon_client = AnonymousTestClient(combined_api)
         
         # Create members
         self.user_id = "test-user-id-123"
@@ -64,9 +64,9 @@ class AuthenticationAuthorizationTestCase(TestCase):
         Member.objects.create(kc_id=self.other_user_id, user=self.other_user)
         
         # Mock user ID
-        self.get_user_id_patcher = patch('api.mappers.mapping_utils.get_current_user_id')
+        self.get_user_id_patcher = patch('api.mappers.mapping_utils.get_current_user_pk')
         self.mock_get_user_id = self.get_user_id_patcher.start()
-        self.mock_get_user_id.return_value = self.user_id
+        self.mock_get_user_id.return_value = self.test_user.pk
 
     def tearDown(self):
         """Clean up patches"""
@@ -92,7 +92,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
         ab = Antibody.objects.create(
             ab_id="1002",
             ab_name="Queue Antibody",
-            uid=self.user_id,
+            owner=self.test_user,
             status=STATUS.QUEUE
         )
         
@@ -117,7 +117,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
         ab = Antibody.objects.create(
             ab_id="2001",
             ab_name="My Queue Antibody",
-            uid=self.user_id,
+            owner=self.test_user,
             status=STATUS.QUEUE
         )
         
@@ -133,7 +133,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
         ab = Antibody.objects.create(
             ab_id="2002",
             ab_name="Other User Queue Antibody",
-            uid=self.other_user_id,
+            owner=self.other_user,
             status=STATUS.QUEUE
         )
         
@@ -154,14 +154,14 @@ class AuthenticationAuthorizationTestCase(TestCase):
         ab1 = Antibody.objects.create(
             ab_id="3001",
             ab_name="My Antibody",
-            uid=self.user_id,
+            owner=self.test_user,
             status=STATUS.QUEUE
         )
         
         ab2 = Antibody.objects.create(
             ab_id="3002",
             ab_name="Other User Antibody",
-            uid=self.other_user_id,
+            owner=self.other_user,
             status=STATUS.QUEUE
         )
         
@@ -169,7 +169,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
         data = response.json()
         
         self.assertEqual(data['totalElements'], 1)
-        self.assertEqual(data['items'][0]['abId'], str(ab1.ab_id))
+        self.assertEqual(data['items'][0]['abId'], int(ab1.ab_id))
 
     def test_user_can_only_update_own_antibodies(self):
         """Test that users can only update their own antibodies"""
@@ -178,7 +178,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
             ab_id="4001",
             ab_name="Other User Antibody",
             accession="4001",
-            uid=self.other_user_id,
+            owner=self.other_user,
             status=STATUS.QUEUE
         )
         
@@ -196,7 +196,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
             ab_id="4002",
             ab_name="My Antibody",
             accession="4002",
-            uid=self.user_id,
+            owner=self.test_user,
             status=STATUS.QUEUE
         )
         
@@ -227,7 +227,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
         response = self.client.get("/antibodies?page=6&size=100")
         self.assertEqual(response.status_code, 200)
 
-    @patch('api.services.user_service.check_if_user_is_admin')
+    @patch('api.routers.antibody.check_if_user_is_admin')
     def test_admin_export_requires_admin_role(self, mock_check_admin):
         """Test that admin export requires admin role"""
         # Regular user should be denied
@@ -301,14 +301,14 @@ class AuthenticationAuthorizationTestCase(TestCase):
         ab1 = Antibody.objects.create(
             ab_id="8001",
             ab_name="User 1 Antibody",
-            uid=self.user_id,
+            owner=self.test_user,
             status=STATUS.QUEUE
         )
         
         ab2 = Antibody.objects.create(
             ab_id="8002",
             ab_name="User 2 Antibody",
-            uid=self.other_user_id,
+            owner=self.other_user,
             status=STATUS.QUEUE
         )
         
@@ -334,7 +334,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
         
         # Should only return test user's antibodies
         self.assertEqual(data['totalElements'], 1)
-        self.assertEqual(data['items'][0]['abId'], str(ab1.ab_id))
+        self.assertEqual(data['items'][0]['abId'], int(ab1.ab_id))
 
     def test_get_by_accession_requires_ownership(self):
         """Test that accession lookup requires ownership for non-curated antibodies"""
@@ -343,7 +343,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
             ab_id="9001",
             ab_name="Other User Antibody",
             accession="9001",
-            uid=self.other_user_id,
+            owner=self.other_user,
             status=STATUS.QUEUE
         )
         
@@ -352,7 +352,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
         self.assertEqual(response.status_code, 404)
         
         # Other user should be able to access it
-        self.mock_get_user_id.return_value = self.other_user_id
+        self.mock_get_user_id.return_value = self.other_user.pk
         response = self.other_client.get(f"/antibodies/user/{ab.accession}")
         self.assertEqual(response.status_code, 200)
 
@@ -362,12 +362,35 @@ class AuthenticationAuthorizationTestCase(TestCase):
             ab_id="10001",
             ab_name="Curated Antibody",
             accession="10001",
-            uid=self.other_user_id,
+            owner=self.other_user,
             status=STATUS.CURATED
         )
-        
+
         # Any authenticated user can access curated antibodies
         response = self.client.get(f"/antibodies/user/{ab.accession}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data['abId'], str(ab.ab_id))
+        self.assertEqual(data['abId'], int(ab.ab_id))
+
+    def test_create_antibody_sets_owner(self):
+        """Creating via the API sets owner to the request user and leaves the frozen uid empty"""
+        response = self.client.post("/antibodies", json=example_ab)
+        self.assertEqual(response.status_code, 201)
+        ab = Antibody.objects.get(ab_id=response.json()['abId'])
+        self.assertEqual(ab.owner, self.test_user)
+        self.assertIsNone(ab.uid)
+
+    def test_url_visible_only_to_owner_when_show_link_disabled(self):
+        """The antibody URL is returned to its owner even when show_link is False"""
+        from api.mappers.mapping_utils import get_url_if_permitted
+        ab = Antibody.objects.create(
+            ab_id="11001",
+            ab_name="Link Test",
+            url="https://example.com/ab",
+            show_link=False,
+            owner=self.test_user,
+            status=STATUS.QUEUE
+        )
+        self.assertEqual(get_url_if_permitted(ab), "https://example.com/ab")
+        self.mock_get_user_id.return_value = self.other_user.pk
+        self.assertIsNone(get_url_if_permitted(ab))
