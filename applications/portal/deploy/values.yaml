@@ -153,6 +153,12 @@ scicrunch:
     schedule: "0 1 * * 6" # for weekend
     max_requests_per_second: 10
 
+# nightly full recompute of the trigger-maintained antibody_search table,
+# safety net against any drift (see api/migrations/0023_antibody_search_table.py)
+search_reconcile:
+  cronjob:
+    schedule: "45 2 * * *"
+
 # Per-client API rate limits applied by nginx (see resources/nginx.conf).
 # Keyed on the bearer token, or on an nginx-issued cookie when anonymous.
 rate_limiting:

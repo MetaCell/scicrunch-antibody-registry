@@ -11,6 +11,7 @@ from django.db import connection
 
 from api.management.ingestion.preprocessor import AntibodyDataPaths
 from api.management.ingestion.users_ingestor import UsersIngestor
+from api.repositories.maintainance import SEARCH_UPSERT_SQL
 from api.models import Antibody, Vendor, VendorDomain, Specie, \
     VendorSynonym, AntibodySpecies, AntibodyFiles
 from api.services.keycloak_service import KeycloakService
@@ -305,7 +306,16 @@ class Ingestor:
                        FROM cloudharness_django_member) as M \
                        ON TMP.uid = M.kc_id "
         with self.connection.cursor() as cursor:
+            if not self.hot:
+                # cold load: the per-row antibody_search sync trigger would fire
+                # once per inserted antibody; suspend it for this transaction
+                # (SET LOCAL reverts on commit/rollback) and fill the search
+                # table with one set-based statement instead
+                cursor.execute("SET LOCAL antibody_search.skip_sync = 'on'")
             cursor.execute(antibody_stm)
+            if not self.hot:
+                cursor.execute("SET LOCAL antibody_search.skip_sync = 'off'")
+                cursor.execute(SEARCH_UPSERT_SQL.format(where=""))
 
     @timed_class_method('AntibodySpecies added')
     def _insert_antibody_species(self, species_map):

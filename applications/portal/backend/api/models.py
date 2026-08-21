@@ -2,7 +2,7 @@ import os
 import re
 from random import randint
 from typing import Optional, Tuple
-from api.repositories.maintainance import refresh_search_view, refresh_antibody_stats
+from api.repositories.maintainance import refresh_antibody_stats
 
 from django.contrib.auth.models import User
 from django.contrib.postgres.indexes import GinIndex
@@ -90,6 +90,9 @@ class STATUS(models.TextChoices):
 
 
 class Vendor(models.Model):
+    # NOTE: the vendor name is baked into antibody_search.search_vector; a
+    # database trigger (antibody_search_vendor_sync, migration 0023) recomputes
+    # the search rows of all this vendor's antibodies when the name changes.
     name = models.CharField(max_length=VENDOR_MAX_LEN,
                             db_column='vendor', db_index=True, unique=False)
     nif_id = models.CharField(
@@ -126,6 +129,10 @@ class VendorSynonym(models.Model):
 
 
 class Specie(models.Model):
+    # NOTE: the specie name is baked into antibody_search.search_vector; a
+    # database trigger (antibody_search_specie_sync, migration 0023) recomputes
+    # the search rows of the antibodies whose source organism it is when the
+    # name changes.
     name = models.CharField(
         max_length=ANTIBODY_TARGET_SPECIES_MAX_LEN, unique=True, db_index=True)
 
@@ -185,6 +192,10 @@ class Antigen(models.Model):
 
 
 class Antibody(models.Model):
+    # NOTE: a database trigger (antibody_search_sync, migration 0023) fires on
+    # every INSERT/UPDATE of this table -- through the ORM or not -- and upserts
+    # the matching full-text row in antibody_search. Deletes propagate through
+    # the FK ON DELETE CASCADE. See AntibodySearch for the full picture.
     ix = models.AutoField(primary_key=True, unique=True, null=False)
     ab_name = models.CharField(
         max_length=ANTIBODY_NAME_MAX_LEN, null=True, db_index=True, blank=True)
@@ -327,13 +338,11 @@ class Antibody(models.Model):
         if int(self.ab_id) == 0:
             raise Exception(f"Error during antibody id assignment: {self.ix}")
         
-        # Refresh search view and stats when status is CURATED
-        if update_search and self.status == STATUS.CURATED:
-            refresh_search_view()
-            refresh_antibody_stats()
-        
-        # Refresh stats when status changes from or to CURATED (to keep counts accurate)
-        elif (status_changed or first_save) and (self.status == STATUS.CURATED or old_status == STATUS.CURATED):
+        # antibody_search is kept up to date by database triggers (migration 0023);
+        # only the stats cache needs an explicit refresh.
+        # Refresh stats when the antibody is CURATED or the status changes from or to CURATED
+        if (update_search and self.status == STATUS.CURATED) or \
+                ((status_changed or first_save) and (self.status == STATUS.CURATED or old_status == STATUS.CURATED)):
             refresh_antibody_stats()
 
     def _has_target_species_raw_changed(self, old_instance):
@@ -345,7 +354,6 @@ class Antibody(models.Model):
         status_before_delete = self.status
         super(Antibody, self).delete(*args, **kwargs)
         if status_before_delete == STATUS.CURATED:
-            refresh_search_view()
             refresh_antibody_stats()
 
     def _generate_automatic_attributes(self, *args, **kwargs):
@@ -652,7 +660,31 @@ class AntibodyApplications(models.Model):
 
 
 class AntibodySearch(models.Model):
-    # This model is a materialized view: have to remove all migrations related to it when generated
+    """One full-text-search row per antibody, maintained entirely by the database.
+
+    This table is NOT written by Django. Migration 0023 (which replaced the
+    former materialized view) defines:
+
+    - ``antibody_search_row_compute(api_antibody)``: SQL function holding the
+      search-vector expression -- the single source of truth for what a row
+      contains.
+    - ``antibody_search_sync`` trigger on api_antibody: upserts the row on
+      every INSERT/UPDATE, whatever the write path (ORM, raw SQL, bulk import).
+    - ``antibody_search_vendor_sync`` / ``antibody_search_specie_sync``
+      triggers: fan out when a vendor/specie name changes, since those names
+      are part of the search vector.
+    - FK to api_antibody with ON DELETE CASCADE: deletes need no trigger
+      (hence on_delete=DO_NOTHING here -- the database does it).
+
+    Bulk loaders can suspend the sync for one transaction with
+    ``SET LOCAL antibody_search.skip_sync = 'on'`` and fill set-based instead
+    (see Ingestor._swap_antibodies). Any drift is repaired by the nightly
+    ``manage.py reconcile_search`` cronjob
+    (api.repositories.maintainance.reconcile_search_table).
+
+    Migration-state caveat: kept out of Django migrations state on purpose --
+    remove any auto-generated operations for this model from new migrations.
+    """
     ix = models.OneToOneField(Antibody, on_delete=models.DO_NOTHING, db_column='ix', primary_key=True)
     search_vector = SearchVectorField(null=True)
     defining_citation = models.IntegerField(null=False, default=0)
