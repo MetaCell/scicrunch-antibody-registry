@@ -37,5 +37,9 @@ sentry:
   traces_sample_rate_patterns:
     "/api/": 0
     "/admin/": 0
-
-    
+  ignore_errors:
+    - kafka.errors.NoBrokersAvailable
+    - kafka.errors.UnknownTopicOrPartitionError
+    - django.db.utils.OperationalError
+  ignore_log_message_substrings:
+    - "DNS lookup failed for"

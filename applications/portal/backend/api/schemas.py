@@ -9,6 +9,14 @@ from enum import Enum
 from ninja import Schema
 from pydantic import Field, field_serializer, ConfigDict
 
+from portal.settings import (
+    ANTIBODY_NAME_MAX_LEN, ANTIBODY_TARGET_MAX_LEN, ANTIBODY_CATALOG_NUMBER_MAX_LEN,
+    ANTIBODY_CLONE_ID_MAX_LEN, ANTIGEN_UNIPROT_ID_MAX_LEN,
+    ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN, ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN,
+    ANTIBODY_PRODUCT_FORM_MAX_LEN, ANTIBODY_DEFINING_CITATION_MAX_LEN,
+    ANTIBODY_TARGET_EPITOPE_MAX_LEN, URL_MAX_LEN, VENDOR_MAX_LEN,
+)
+
 
 def to_camel(string: str) -> str:
     """Convert snake_case to camelCase"""
@@ -99,20 +107,20 @@ class KeyValueSortOrderPair(Schema):
 class AbstractAntibody(CamelModelSchema):
     """The common fields between all REST operations for the antibody resource"""
     clonality: Optional[ClonalityEnum] = None
-    epitope: Optional[str] = None
+    epitope: Optional[str] = Field(None, max_length=ANTIBODY_TARGET_EPITOPE_MAX_LEN)
     comments: Optional[str] = None
-    url: Optional[str] = None
-    ab_name: Optional[str] = Field(None)
-    ab_target: Optional[str] = Field(None)
-    clone_id: Optional[str] = Field(None)
+    url: Optional[str] = Field(None, max_length=URL_MAX_LEN)
+    ab_name: Optional[str] = Field(None, max_length=ANTIBODY_NAME_MAX_LEN)
+    ab_target: Optional[str] = Field(None, max_length=ANTIBODY_TARGET_MAX_LEN)
+    clone_id: Optional[str] = Field(None, max_length=ANTIBODY_CLONE_ID_MAX_LEN)
     commercial_type: Optional[CommercialTypeEnum] = Field(None)
-    defining_citation: Optional[str] = Field(None)
-    product_conjugate: Optional[str] = Field(None)
-    product_form: Optional[str] = Field(None)
-    product_isotype: Optional[str] = Field(None)
+    defining_citation: Optional[str] = Field(None, max_length=ANTIBODY_DEFINING_CITATION_MAX_LEN)
+    product_conjugate: Optional[str] = Field(None, max_length=ANTIBODY_PRODUCT_CONJUGATE_MAX_LEN)
+    product_form: Optional[str] = Field(None, max_length=ANTIBODY_PRODUCT_FORM_MAX_LEN)
+    product_isotype: Optional[str] = Field(None, max_length=ANTIBODY_PRODUCT_ISOTYPE_MAX_LEN)
     source_organism: Optional[str] = Field(None)
     target_species: Optional[List[str]] = Field(None)
-    uniprot_id: Optional[str] = Field(None)
+    uniprot_id: Optional[str] = Field(None, max_length=ANTIGEN_UNIPROT_ID_MAX_LEN)
     applications: Optional[List[str]] = None
     kit_contents: Optional[str] = Field(None)
     ab_target_entrez_id: Optional[str] = Field(None)
@@ -122,8 +130,8 @@ class AbstractAntibody(CamelModelSchema):
 
 class AntibodyCoreId(CamelModelSchema):
     """Related attributes used to uniquely identify antibodies"""
-    catalog_num: Optional[str] = Field(None)
-    vendor_name: Optional[str] = Field(None)
+    catalog_num: Optional[str] = Field(None, max_length=ANTIBODY_CATALOG_NUMBER_MAX_LEN)
+    vendor_name: Optional[str] = Field(None, max_length=VENDOR_MAX_LEN)
 
 
 # Request schemas

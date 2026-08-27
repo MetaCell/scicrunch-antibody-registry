@@ -25,6 +25,7 @@ def filter_antibodies(filter_request, user=None) -> Tuple[List[Antibody], int]:
 
 def fts_and_filter_antibodies(page: int = 1, size: int = 10, search: str = '', filters=None) -> Tuple[List[Antibody], int]:
     """Return (antibodies, total_count) tuple for Django Ninja to handle serialization"""
+    search = search or ''
     if "AB_" in search:
         if search.startswith("RRID:"):
             search = search.replace("RRID:", "").strip()

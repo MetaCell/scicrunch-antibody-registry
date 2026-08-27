@@ -40,7 +40,7 @@ def pageitems_if_page_in_bound(page, p):
 
 
 def might_be_catalog_number(search: str):
-    return any(c for c in search if c.isdigit())
+    return bool(search) and any(c for c in search if c.isdigit())
 
 
 def fts_by_catalog_number(search: str, page, size, filters=None):

@@ -77,8 +77,9 @@ class AntibodyEdgeCasesTestCase(TestCase):
         long_ab['comments'] = "B" * 5000  # Very long comments
         
         response = self.client.post("/antibodies", json=long_ab)
-        # Should either succeed or fail gracefully
-        self.assertIn(response.status_code, [201, 400])
+        # Should either succeed or fail gracefully (422 = Ninja/Pydantic field
+        # length validation, matching the DB column's max_length)
+        self.assertIn(response.status_code, [201, 400, 422])
 
     def test_create_antibody_with_unicode_characters(self):
         """Test creating antibody with Unicode characters"""
