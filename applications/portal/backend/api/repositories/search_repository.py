@@ -58,7 +58,11 @@ def fts_by_catalog_number(search: str, page, size, filters=None):
             search=vector,
             ranking=SearchRank(vector, search_query, normalization=Value(1)))
         .filter(search=search_query, ranking__gte=MIN_CATALOG_RANKING, status=STATUS.CURATED)
-    ).select_related("vendor").prefetch_related("species").prefetch_related("applications")
+    )
+    catalog_num_match = (
+        catalog_num_match.select_related("vendor").prefetch_related("species").prefetch_related("applications")
+        .with_curated_vendor_domains()
+    )
 
     # if we match catalog_num or cat_alt, we return those results without looking for other fields
     # as the match is a perfect match or a prefix match depending on the search word,
@@ -158,6 +162,7 @@ def fts_and_filter_search(page: int = 0, size: int = 10, search: str = '', filte
         base_query
         .filter(filters_q)
         .select_related("vendor").prefetch_related("species").prefetch_related("applications")
+        .with_curated_vendor_domains()
     )
     count_query = count_base.filter(filters_q)
 

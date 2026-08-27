@@ -188,11 +188,17 @@ class Antibody(AbstractAntibody, AntibodyCoreId):
     @staticmethod
     def resolve_vendor_url(obj):
         """Get vendor URLs from vendor domains"""
-        if obj.vendor:
-            from api.models import VendorDomain, STATUS
-            domains = VendorDomain.objects.filter(vendor_id=obj.vendor.id, status=STATUS.CURATED)
-            return [vd.base_url for vd in domains]
-        return None
+        if not obj.vendor:
+            return None
+        # List endpoints prefetch this (Antibody.objects.with_curated_vendor_domains())
+        # to avoid one VendorDomain query per antibody when serializing a page (see
+        # ANTIBODY-REGISTRY-5D). Falls back to a direct query if not prefetched.
+        prefetched = getattr(obj.vendor, "curated_domains", None)
+        if prefetched is not None:
+            return [vd.base_url for vd in prefetched]
+        from api.models import VendorDomain, STATUS
+        domains = VendorDomain.objects.filter(vendor_id=obj.vendor.id, status=STATUS.CURATED)
+        return [vd.base_url for vd in domains]
 
     @staticmethod
     def resolve_ab_target_entrez_id(obj):

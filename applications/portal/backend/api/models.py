@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector, SearchVectorField
 from django.db import models, transaction
-from django.db.models import Transform, CharField, Index, Q, Func
+from django.db.models import Transform, CharField, Index, Q, Func, Prefetch
 from django.db.models.functions import Length, Coalesce
 from django.utils import timezone
 
@@ -191,7 +191,28 @@ class Antigen(models.Model):
         return self.symbol
 
 
+class AntibodyQuerySet(models.QuerySet):
+    def with_curated_vendor_domains(self):
+        """
+        Prefetch each antibody's curated VendorDomain rows in one extra query, via
+        Vendor's reverse FK (vendor__vendordomain_set), storing them as
+        `vendor.curated_domains`. AntibodySchema.resolve_vendor_url reads this if
+        present instead of querying per-antibody - without it, serializing a page
+        of N antibodies issues N individual VendorDomain queries (see
+        ANTIBODY-REGISTRY-5D). Chain onto any queryset that gets serialized as a list.
+        """
+        return self.prefetch_related(
+            Prefetch(
+                "vendor__vendordomain_set",
+                queryset=VendorDomain.objects.filter(status=STATUS.CURATED),
+                to_attr="curated_domains",
+            )
+        )
+
+
 class Antibody(models.Model):
+    objects = AntibodyQuerySet.as_manager()
+
     # NOTE: a database trigger (antibody_search_sync, migration 0023) fires on
     # every INSERT/UPDATE of this table -- through the ORM or not -- and upserts
     # the matching full-text row in antibody_search. Deletes propagate through
