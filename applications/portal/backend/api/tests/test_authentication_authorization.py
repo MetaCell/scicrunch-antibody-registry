@@ -394,3 +394,63 @@ class AuthenticationAuthorizationTestCase(TestCase):
         self.assertEqual(get_url_if_permitted(ab), "https://example.com/ab")
         self.mock_get_user_id.return_value = self.other_user.pk
         self.assertIsNone(get_url_if_permitted(ab))
+
+    def test_url_inherits_vendor_show_link_when_unset(self):
+        """An unset show_link falls back to the vendor default, for both url and showLink"""
+        from api.mappers.mapping_utils import get_url_if_permitted
+
+        linking_vendor = Vendor.objects.create(name="Linking Vendor", show_link=True)
+        hiding_vendor = Vendor.objects.create(name="Hiding Vendor", show_link=False)
+        self.mock_get_user_id.return_value = self.other_user.pk
+
+        shown = Antibody.objects.create(
+            ab_id="11002",
+            ab_name="Vendor Default Shown",
+            url="https://example.com/shown",
+            show_link=None,
+            vendor=linking_vendor,
+            owner=self.test_user,
+            status=STATUS.CURATED
+        )
+        self.assertTrue(shown.is_link_shown)
+        self.assertEqual(get_url_if_permitted(shown), "https://example.com/shown")
+
+        hidden = Antibody.objects.create(
+            ab_id="11003",
+            ab_name="Vendor Default Hidden",
+            url="https://example.com/hidden",
+            show_link=None,
+            vendor=hiding_vendor,
+            owner=self.test_user,
+            status=STATUS.CURATED
+        )
+        self.assertFalse(hidden.is_link_shown)
+        self.assertIsNone(get_url_if_permitted(hidden))
+
+        # An explicit value on the antibody always wins over the vendor default
+        hidden.show_link = True
+        self.assertTrue(hidden.is_link_shown)
+        self.assertEqual(get_url_if_permitted(hidden), "https://example.com/hidden")
+        shown.show_link = False
+        self.assertFalse(shown.is_link_shown)
+        self.assertIsNone(get_url_if_permitted(shown))
+
+    def test_antibody_endpoint_url_matches_show_link(self):
+        """The API never reports showLink true while withholding the url"""
+        vendor = Vendor.objects.create(name="Endpoint Vendor", show_link=True)
+        ab = Antibody.objects.create(
+            ab_id="11004",
+            ab_name="Endpoint Link Test",
+            url="https://example.com/endpoint",
+            show_link=None,
+            vendor=vendor,
+            owner=self.other_user,
+            status=STATUS.CURATED
+        )
+
+        response = self.client.get(f"/antibodies/{ab.ab_id}")
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        data = payload[0] if isinstance(payload, list) else payload
+        self.assertTrue(data['showLink'])
+        self.assertEqual(data['url'], "https://example.com/endpoint")

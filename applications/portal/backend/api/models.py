@@ -295,6 +295,16 @@ class Antibody(models.Model):
     show_link = models.BooleanField(null=True, blank=True, db_index=True)
     history = HistoricalRecords()
 
+    @property
+    def is_link_shown(self) -> bool:
+        """
+        Whether the antibody's own link is shown, resolving the vendor default
+        when show_link is not set on the antibody itself.
+        """
+        if self.show_link is not None:
+            return self.show_link
+        return bool(self.vendor and self.vendor.show_link)
+
     def import_save(self):
         first_save = self.ix is None
         logging.info("0 Saving antibody - cat num %s", self.catalog_num)

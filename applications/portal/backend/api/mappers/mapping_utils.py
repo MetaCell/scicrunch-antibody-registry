@@ -67,9 +67,10 @@ def get_url_if_permitted(dao):
     """
         Get antibody URL only if permitted. RULES:
         1. If user is creator of the antibody, return the URL.
-        2. Else return only if show_link is True.
+        2. Else return only if the link is shown, i.e. show_link is True or it
+           is unset on the antibody and the vendor shows links by default.
     """
     user_pk = get_current_user_pk()
     if user_pk is not None and user_pk == dao.owner_id:
         return dao.url if dao.url else None
-    return dao.url if dao.show_link else None
+    return dao.url if dao.is_link_shown else None

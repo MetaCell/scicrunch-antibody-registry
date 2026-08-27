@@ -218,7 +218,7 @@ class Antibody(AbstractAntibody, AntibodyCoreId):
     @staticmethod
     def resolve_show_link(obj):
         """Handle show_link logic"""
-        return obj.show_link if obj.show_link is not None else (obj.vendor and obj.vendor.show_link)
+        return obj.is_link_shown
 
     @staticmethod
     def resolve_catalog_num(obj):

@@ -138,7 +138,7 @@ class AntibodyMapper(IDAOMapper):
         ab.numOfCitation = dao.citation
         ab.url = get_url_if_permitted(dao)
 
-        ab.showLink = dao.show_link if dao.show_link is not None else (dao.vendor and dao.vendor.show_link)
+        ab.showLink = dao.is_link_shown
 
         if dao.cat_alt:
             ab.catalogNum = ab.catalogNum + " (also " + dao.cat_alt + ")"
