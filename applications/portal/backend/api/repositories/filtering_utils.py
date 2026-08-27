@@ -110,8 +110,17 @@ def convert_filters_to_q(filters, user=None):
 def order_by_string(filters):
     if (not filters) or (not filters.sort_on):
         return []
+    # Validated here too, not just in convert_filters_to_q: sorting is applied on a
+    # separate code path (search_repository.apply_fts_sorting/apply_plain_sorting), so
+    # an unknown sort key would otherwise reach the ORM and raise a FieldError (500).
+    if not check_filters_are_valid(filters):
+        raise HttpError(400, "Invalid filters")
     order_by = []
     for column in filters.sort_on:
+        # column.key used as-is - no FK/M2M "__name" traversal here (unlike filtering):
+        # Vendor/Specie/Application declare Meta.ordering = ('name',), so Django already
+        # sorts order_by("vendor") correctly, and forcing "vendor__name" breaks once
+        # combined with .distinct() in search_repository.fts_and_filter_search.
         order_by.append(f"{'-' if column.sortorder == SortOrderEnum.desc else ''}{column.key}")
     return order_by
 
