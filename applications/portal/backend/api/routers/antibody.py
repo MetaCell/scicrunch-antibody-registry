@@ -71,6 +71,7 @@ def get_antibodies(
         query = (
             query.select_related("vendor", "source_organism")
             .prefetch_related("species", "applications")
+            .with_curated_vendor_domains()
             .order_by("-ix")
         )
 
@@ -229,7 +230,7 @@ def get_user_antibodies(
     if request.user.is_anonymous:
         raise HttpError(401, "Unrecognized user")
     
-    p = Paginator(Antibody.objects.filter(owner=request.user).order_by("-ix"), size)
+    p = Paginator(Antibody.objects.filter(owner=request.user).order_by("-ix").with_curated_vendor_domains(), size)
     items = list(p.get_page(page))
     return {"page": int(page), "total_elements": p.count, "items": items}
 
@@ -247,6 +248,7 @@ def get_by_accession(request: HttpRequest, accession_number: int):
     try:
         antibody = Antibody.objects.select_related("vendor", "source_organism") \
             .prefetch_related("species", "applications") \
+            .with_curated_vendor_domains() \
             .get(visible, accession=accession_number)
         return antibody
     except Antibody.DoesNotExist:
@@ -337,7 +339,8 @@ def get_antibody(request: HttpRequest, antibody_id: int):
         )
             
     return list(antibodies.select_related("vendor", "source_organism") \
-            .prefetch_related("species", "applications"))
+            .prefetch_related("species", "applications") \
+            .with_curated_vendor_domains())
 
 @router.post("/antibodies/export", response=str, tags=["antibody"], auth=auth)
 def export_antibodies_post(request: HttpRequest):

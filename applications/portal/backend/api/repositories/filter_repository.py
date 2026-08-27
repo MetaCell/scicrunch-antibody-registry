@@ -4,9 +4,12 @@ from .search_repository import apply_plain_sorting, pageitems_if_page_in_bound, 
 
 
 def plain_filter_antibodies(page: int = 1, size: int = 10, filters=None, user=None):
-    filtered_antibodies = Antibody.objects.filter(
-        convert_filters_to_q(filters, user)
-    ).select_related("vendor").prefetch_related("species").prefetch_related("applications")
+    filtered_antibodies = (
+        Antibody.objects.filter(
+            convert_filters_to_q(filters, user)
+        ).select_related("vendor").prefetch_related("species").prefetch_related("applications")
+        .with_curated_vendor_domains()
+    )
 
     if filters_require_distinct(filters):
         filtered_antibodies = filtered_antibodies.distinct()
