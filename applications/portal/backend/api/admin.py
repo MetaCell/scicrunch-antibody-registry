@@ -1,7 +1,9 @@
 from functools import cache
 
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin.widgets import ManyToManyRawIdWidget, FilteredSelectMultiple
+from django.contrib.postgres.search import SearchQuery
 from django.forms import CheckboxSelectMultiple
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -36,6 +38,55 @@ from portal.settings import FOR_NEW_KEY, FOR_EXTANT_KEY, METHOD_KEY
 @admin.display(description="ab_id")
 def id_with_ab(obj: Antibody):
     return f"AB_{obj.ab_id}"
+
+
+def _strip_antibody_id_prefixes(term: str) -> str:
+    """
+    "RRID:AB_1234", "AB_1234" and "1234" all name antibody 1234.
+
+    Unlike utilities.strip_ab_from_id this is case-insensitive and also drops
+    the RRID prefix, because the value being pasted in was copied out of a
+    paper or out of the changelist's own AB_ column.
+    """
+    candidate = term.strip()
+    for prefix in ("RRID:", "AB_"):
+        if candidate.upper().startswith(prefix):
+            candidate = candidate[len(prefix):].strip()
+    return candidate
+
+
+class ResultLimitFilter(admin.SimpleListFilter):
+    """
+    Sidebar control for how many rows a changelist search may return.
+
+    Not a filter in the usual sense -- queryset() hands the rows straight back
+    and AntibodyAdmin.bound_to_result_limit does the work. SimpleListFilter is
+    what earns it a place in the admin sidebar without a custom changelist
+    template, and it also stops the admin rejecting `result_limit` in the query
+    string as an unrecognised lookup.
+    """
+    title = "result limit"
+    parameter_name = "result_limit"
+    NO_LIMIT = "all"
+
+    def lookups(self, request, model_admin):
+        return [(str(n), f"{n:,}") for n in model_admin.result_limit_choices(request)] \
+            + [(self.NO_LIMIT, "No limit (slow)")]
+
+    def choices(self, changelist):
+        # deliberately not django's default "All" first entry: an unset filter
+        # means the configured default, which is a limit, not the absence of one
+        default = changelist.model_admin.result_limit(self.request)
+        selected = self.value() or (self.NO_LIMIT if default is None else str(default))
+        for value, title in self.lookup_choices:
+            yield {
+                "selected": value == selected,
+                "query_string": changelist.get_query_string({self.parameter_name: value}),
+                "display": title,
+            }
+
+    def queryset(self, request, queryset):
+        return queryset
 
 
 class VerboseManyToManyRawIdWidget(ManyToManyRawIdWidget):
@@ -118,9 +169,19 @@ class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
     resource_classes = [AntibodyResource]
 
     # list display settings
-    list_filter = ("status",)
+    list_filter = ("status", ResultLimitFilter)
     list_display = (id_with_ab, "accession", "ab_name", "submitter_name", "citation", "status", "vendor", "catalog_num", "insert_time")
-    search_fields = ("ab_id", "ab_name", "catalog_num")
+    # only turns the search box on and documents what is searched: the matching
+    # itself is routed by get_search_results below, not by django's default
+    # __icontains over these names
+    search_fields = ("ab_id", "accession", "catalog_num", "owner__email", "vendor__name")
+    search_help_text = (
+        "Exact match on AB id, accession, catalog number, submitter email or vendor name. "
+        "Anything else falls back to a full-text search of the antibody record."
+    )
+    # drops the "(N total)" figure next to the result count, and with it a
+    # COUNT(*) over all 3.5M rows issued on every changelist view
+    show_full_result_count = False
 
     # the following - maintains the order of the fields
     fields = antibody_fields_shown
@@ -188,6 +249,107 @@ class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
             log.error(f"User {obj.uid} lookup error", exc_info=True)
             return "Error"
 
+    def get_search_results(self, request, queryset, search_term):
+        """
+        Try the identifying fields by exact match first, in order, and only
+        fall back to full text when none of them hits.
+
+        Django's default search runs __icontains over every entry in
+        search_fields, which PostgreSQL renders as
+        UPPER(col::text) LIKE UPPER('%term%'). The leading wildcard rules out
+        every btree, so each search sequentially scanned all 6GB of
+        api_antibody -- twice, since the paginator counts as well (5.3s per
+        scan on production-sized data). Nearly every admin lookup is for one
+        antibody the curator can already name, so an exact hit on an indexed
+        identifier answers it in about 2ms, and the fallback rides the same
+        antibody_search GIN index the public search uses.
+        """
+        term = search_term.strip()
+        if not term:
+            return queryset, False
+
+        for candidate in self._exact_match_searches(queryset, term):
+            if candidate.exists():
+                return self.bound_to_result_limit(request, candidate), False
+
+        return self.bound_to_result_limit(
+            request, queryset.filter(antibodysearch__search_vector=SearchQuery(term))), False
+
+    def result_limit_choices(self, request):
+        """Row limits offered in the changelist sidebar."""
+        return settings.ADMIN_SEARCH_RESULT_LIMIT_CHOICES
+
+    def result_limit(self, request):
+        """
+        Rows this search may return: the curator's sidebar choice, else the
+        configured default, or None for an uncapped (slow, exact) search.
+        """
+        default = (settings.ADMIN_SEARCH_RESULT_LIMIT
+                   if settings.ADMIN_SEARCH_RESULT_LIMIT_ENABLED else None)
+        chosen = request.GET.get(ResultLimitFilter.parameter_name)
+        if chosen is None:
+            return default
+        if chosen == ResultLimitFilter.NO_LIMIT:
+            return None
+        try:
+            chosen = int(chosen)
+        except ValueError:
+            return default
+        # only honour values actually offered: anything else is an arbitrarily
+        # expensive query asked for through the query string
+        return chosen if chosen in self.result_limit_choices(request) else default
+
+    def bound_to_result_limit(self, request, queryset):
+        """
+        Restrict a search to at most result_limit() rows.
+
+        Bounding the queryset rather than only the paginator's count keeps the
+        reported total, the page links and the "select all N" bulk action
+        agreeing on one set. Capping just the count would leave select-across
+        running over every match while the page claimed there were `limit` --
+        with delete_selected registered, that is not a cosmetic difference.
+
+        The LIMIT inside the subquery also stops Postgres flattening it into a
+        semi-join, so a term matching ~1.6M antibodies costs about 220ms
+        instead of the 18s an exact count of them takes.
+        """
+        limit = self.result_limit(request)
+        if limit is None:
+            return queryset
+        return queryset.filter(pk__in=queryset.values("pk")[:limit])
+
+    def _exact_match_searches(self, queryset, term):
+        """
+        The exact-match routes, in priority order, each an equality on an
+        indexed column of api_antibody.
+
+        ab_id and accession hold digits, so a plain __exact rides their btrees;
+        __iexact would wrap them in UPPER() and miss. catalog_num does use
+        __iexact, which matches the existing antibody_catalog_num_upper_idx.
+
+        Vendor and submitter are resolved against their own (small) tables
+        first and passed in as ids. Handing the ORM a join or a subquery
+        instead lets Postgres drive it from api_antibody, which degenerates
+        into a scan of all 3.5M rows precisely when the name matches nothing
+        -- 13s measured, on the miss that precedes every fallback to full text.
+        """
+        ab_id = _strip_antibody_id_prefixes(term)
+        if ab_id.isdigit():
+            yield queryset.filter(ab_id=ab_id)
+            yield queryset.filter(accession=ab_id)
+
+        yield queryset.filter(catalog_num__iexact=term)
+
+        owner_ids = list(User.objects.filter(email__iexact=term)
+                         .values_list("pk", flat=True))
+        if owner_ids:
+            yield queryset.filter(owner_id__in=owner_ids)
+
+        vendor_ids = list(Vendor.objects.filter(name__iexact=term)
+                          .values_list("pk", flat=True))
+        if vendor_ids:
+            yield queryset.filter(vendor_id__in=vendor_ids)
+
     def get_resource_kwargs(self, request, *args, **kwargs):
         rk = super().get_resource_kwargs(request, *args, **kwargs)
         rk["request"] = request
@@ -198,17 +360,6 @@ class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
         kwargs[FOR_EXTANT_KEY] = request.POST.get(FOR_EXTANT_KEY, None)
         kwargs[METHOD_KEY] = request.POST.get(METHOD_KEY, None)
         return super().get_import_data_kwargs(request, *args, **kwargs)
-
-    def get_search_results(self, request, queryset, search_term):
-        queryset, may_have_duplicates = super().get_search_results(
-            request,
-            queryset,
-            search_term,
-        )
-        search_term = search_term.strip()
-        if search_term.lower().startswith("ab_"):
-            queryset |= self.model.objects.filter(ab_id=search_term[3:])
-        return queryset, may_have_duplicates
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         if db_field.name not in ("species", "applications"):

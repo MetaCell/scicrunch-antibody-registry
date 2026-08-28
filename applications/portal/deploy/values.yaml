@@ -159,6 +159,29 @@ search_reconcile:
   cronjob:
     schedule: "45 2 * * *"
 
+# Counting search matches is what makes a search slow: an exact total means
+# Postgres visits every matching row, and a term matching ~1.6M antibodies took
+# 18s to count against ~3ms for the page of results itself. Both surfaces limit
+# that, differently, because they need different things from the number.
+search_count_limit:
+  # Public search API. The count stops at `limit` and the API reports one row
+  # past it, which the frontend renders as "10,000+"; the results themselves
+  # stay reachable by paging. `limit` must stay in step with LIMIT_NUM_RESULTS
+  # in the frontend constants, which is what decides when a total is rendered
+  # as "N+" rather than verbatim. Disable to always report exact totals.
+  portal:
+    enabled: true
+    limit: 10000
+  # Django admin changelist. Here the search is restricted to `limit` rows
+  # outright rather than only having its count capped, so the total, the page
+  # links and the "select all N" bulk action all agree on one bounded set.
+  # Curators pick a different value per search from `choices` in the changelist
+  # sidebar ("Result limit"), including "No limit" for an exact, slow answer.
+  admin:
+    enabled: true
+    limit: 1000
+    choices: [100, 1000, 10000]
+
 # Per-client API rate limits applied by nginx (see resources/nginx.conf).
 # Keyed on the bearer token, or on an nginx-issued cookie when anonymous.
 rate_limiting:

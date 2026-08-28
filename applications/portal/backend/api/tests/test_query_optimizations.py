@@ -3,14 +3,17 @@ Tests for the slow-query optimizations (ANTIBODY-REGISTRY-5F, ANTIBODY-REGISTRY-
 - conditional DISTINCT on search/filter querysets (only when an M2M relation is spanned)
 - PrecomputedCountPaginator avoiding duplicate COUNT queries
 - /api/antibodies serving the total from the AntibodyStats cache
+- the configurable search result count limit (apps.portal.search_count_limit)
 """
 from django.contrib.auth.models import User
 from django.db import connection
-from django.test import SimpleTestCase, TestCase
+from django.conf import settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.test.utils import CaptureQueriesContext
 
 from api.api import api
-from api.models import Antibody, AntibodyStats, STATUS
+from api.models import Antibody, AntibodyStats, STATUS, Vendor
+from api.repositories import search_repository
 from api.repositories.filtering_utils import filters_require_distinct
 from api.repositories.search_repository import PrecomputedCountPaginator
 from api.schemas import (
@@ -212,3 +215,68 @@ class SearchDistinctTestCase(TestCase):
         result = response.json()
         self.assertEqual(result['totalElements'], 1)
         self.assertEqual(len(result['items']), 1)
+
+
+class SearchCountLimitTests(TestCase):
+    """
+    The search result count stops at apps.portal.search_count_limit.limit
+    (values.yaml -> settings.SEARCH_COUNT_LIMIT), unless the limit is switched
+    off, in which case totals go back to being exact.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        vendor = Vendor.objects.create(name="Count vendor")
+        for n in range(6):
+            Antibody.objects.create(
+                vendor=vendor, ab_id=f"90{n}", accession=f"90{n}",
+                catalog_num=f"CNT{n}", ab_name="countable widget antibody",
+                status=STATUS.CURATED, url="https://example.com")
+
+    def total_for(self, search="countable"):
+        _, count = search_repository.fts_and_filter_antibodies(
+            page=1, size=2, search=search)
+        return count
+
+    @override_settings(SEARCH_COUNT_LIMIT_ENABLED=True, SEARCH_COUNT_LIMIT=3)
+    def test_count_stops_one_past_the_limit(self):
+        # 6 match, but counting stops at 3 and reports one past it
+        self.assertEqual(self.total_for(), 4)
+        self.assertEqual(search_repository.search_count_cap(), 4)
+        self.assertTrue(search_repository.count_is_capped(4))
+
+    @override_settings(SEARCH_COUNT_LIMIT_ENABLED=True, SEARCH_COUNT_LIMIT=100)
+    def test_total_is_exact_below_the_limit(self):
+        self.assertEqual(self.total_for(), 6)
+        self.assertFalse(search_repository.count_is_capped(6))
+
+    @override_settings(SEARCH_COUNT_LIMIT_ENABLED=False, SEARCH_COUNT_LIMIT=3)
+    def test_disabling_the_limit_restores_exact_totals(self):
+        self.assertEqual(self.total_for(), 6)
+        self.assertIsNone(search_repository.search_count_cap())
+        self.assertFalse(search_repository.count_is_capped(10 ** 9))
+
+    @override_settings(SEARCH_COUNT_LIMIT_ENABLED=True, SEARCH_COUNT_LIMIT=3)
+    def test_paging_past_a_capped_count_still_returns_rows(self):
+        # num_pages is only a floor once the count is capped, so it must not be
+        # used to reject a page the query can actually serve
+        items, count = search_repository.fts_and_filter_antibodies(
+            page=3, size=2, search="countable")
+        self.assertEqual(count, 4)
+        self.assertEqual(len(items), 2)
+
+    def test_settings_are_wired_from_the_deployment_config(self):
+        # the test resources deliberately configure limits that are not the
+        # fallbacks, so reading them back proves values.yaml reached settings
+        # rather than the defaults having been used
+        self.assertTrue(settings.SEARCH_COUNT_LIMIT_ENABLED)
+        self.assertNotEqual(settings.LIMIT_NUM_RESULTS, 2500)
+        self.assertEqual(settings.SEARCH_COUNT_LIMIT, 2500)
+
+    def test_admin_and_portal_limits_are_configured_separately(self):
+        self.assertTrue(settings.ADMIN_SEARCH_RESULT_LIMIT_ENABLED)
+        self.assertEqual(settings.ADMIN_SEARCH_RESULT_LIMIT, 250)
+        self.assertNotEqual(settings.ADMIN_SEARCH_RESULT_LIMIT,
+                            settings.SEARCH_COUNT_LIMIT)
+        # the configured default is always offered in the sidebar
+        self.assertEqual(settings.ADMIN_SEARCH_RESULT_LIMIT_CHOICES, [50, 250, 2500])

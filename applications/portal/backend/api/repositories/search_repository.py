@@ -16,9 +16,6 @@ from cloudharness import log
 
 MIN_CATALOG_RANKING = 0.0  # TODO validate the proper ranking value
 MAX_SORTED = settings.LIMIT_NUM_RESULTS
-# One row past MAX_SORTED: enough to tell "exactly MAX_SORTED matches" from
-# "more than MAX_SORTED matches", which is all any caller needs. See capped_count.
-COUNT_CAP = MAX_SORTED + 1
 
 
 class PrecomputedCountPaginator(Paginator):
@@ -37,9 +34,9 @@ def flat(l):
     return [item for sublist in l for item in sublist]
 
 
-def capped_count(queryset):
+def search_count_cap():
     """
-    Number of rows in `queryset`, stopping the scan at COUNT_CAP.
+    Row count at which a search stops counting, or None when counting is exact.
 
     An exact count is the whole cost of a search: to count a full-text match
     Postgres has to visit every matching heap row, and a common term matches
@@ -47,14 +44,32 @@ def capped_count(queryset):
     against 40ms for the page of results itself). Nothing downstream can use a
     number larger than the cap -- past MAX_SORTED the results come back
     unranked and the UI renders the total as "10,000+" -- so the count stops
-    one row past it and the planner turns it into an early-exit scan.
+    one row past the limit and the planner turns it into an early-exit scan.
+
+    One row *past* the limit, so a caller can still tell "exactly the limit"
+    from "more than the limit".
+
+    Both the switch and the limit come from apps.portal.search_count_limit in
+    values.yaml. Read per call rather than at import so a deployment (or a
+    test) can change them without the module having been reloaded.
     """
-    return queryset.values("pk")[:COUNT_CAP].count()
+    if not settings.SEARCH_COUNT_LIMIT_ENABLED:
+        return None
+    return settings.SEARCH_COUNT_LIMIT + 1
+
+
+def capped_count(queryset):
+    """Number of rows in `queryset`, stopping the scan at search_count_cap()."""
+    cap = search_count_cap()
+    if cap is None:
+        return queryset.count()
+    return queryset.values("pk")[:cap].count()
 
 
 def count_is_capped(count):
     """True when `count` hit the cap, i.e. the real total is unknown but larger."""
-    return count >= COUNT_CAP
+    cap = search_count_cap()
+    return cap is not None and count >= cap
 
 
 def curated_antibodies_count():

@@ -127,13 +127,18 @@ export const checkIfRequestBodyIsSame = (newRequestBody, prevRequestBody) => {
   return JSON.stringify(newRequestBody) === JSON.stringify(prevRequestBody)
 }
 /**
- * The backend stops counting search matches at LIMIT_NUM_RESULTS, so a total
- * beyond it means "at least this many" rather than an exact figure: an exact
- * count forces Postgres to visit every matching row, which took over a minute
- * on common terms. Render those as "10,000+".
+ * The backend stops counting search matches once it has seen LIMIT_NUM_RESULTS
+ * of them and reports exactly one past that, because counting the rest forces
+ * Postgres to visit every matching row -- over a minute on common terms. That
+ * one value therefore means "at least this many" and is shown as "10,000+".
+ *
+ * Tested for equality rather than as a threshold on purpose: the limit is
+ * switchable from values.yaml (apps.portal.search_count_limit), and when it is
+ * off the backend sends real totals well above LIMIT_NUM_RESULTS that must be
+ * shown verbatim. Keep this constant equal to the configured `limit`.
  */
 export const isTotalCapped = (totalElements: number) =>
-  totalElements > LIMIT_NUM_RESULTS;
+  totalElements === LIMIT_NUM_RESULTS + 1;
 
 export const formatTotalElements = (totalElements: number) =>
   isTotalCapped(totalElements)

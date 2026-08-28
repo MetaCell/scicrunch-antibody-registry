@@ -437,6 +437,9 @@ apps:
       LEFT JOIN auth_user on auth_user.id = api_antibody.owner_id
       LEFT JOIN applications_subquery on applications_subquery.ix = api_antibody.ix
       WHERE true
+    search_count_limit:
+      portal: {enabled: true, limit: 2500}
+      admin: {enabled: true, limit: 250, choices: [50, 250, 2500]}
     export_query: SELECT 'AB_' || ab_id as rrid, ab_name, catalog_num, cat_alt, api_vendor.vendor
       as vendor_name, api_vendor.vendor || ' Cat# ' || catalog_num || ', RRID:AB_'
       || ab_id AS proper_citation from api_antibody LEFT JOIN api_vendor on api_vendor.id

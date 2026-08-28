@@ -167,6 +167,30 @@ KC_CLIENT_NAME = PROJECT_NAME.lower()
 from .constants import * # noqa: E402
 
 # ***********************************************************************
+# * Search result limits
+# ***********************************************************************
+# Configured under apps.portal.search_count_limit in values.yaml, separately
+# per surface: the public API caps how far it counts
+# (api.repositories.search_repository.search_count_cap) while the admin
+# changelist bounds the result set itself (api.admin.AntibodyAdmin).
+# current_app comes from cloudharness_django.settings and falls back to a stub
+# when the deployment config is absent, so every getattr() below has to hold.
+_search_count_limit = getattr(current_app, "search_count_limit", None)
+
+_portal_search_limit = getattr(_search_count_limit, "portal", None)
+SEARCH_COUNT_LIMIT_ENABLED = bool(getattr(_portal_search_limit, "enabled", True))
+SEARCH_COUNT_LIMIT = int(getattr(_portal_search_limit, "limit", LIMIT_NUM_RESULTS))
+
+_admin_search_limit = getattr(_search_count_limit, "admin", None)
+ADMIN_SEARCH_RESULT_LIMIT_ENABLED = bool(getattr(_admin_search_limit, "enabled", True))
+ADMIN_SEARCH_RESULT_LIMIT = int(getattr(_admin_search_limit, "limit", 1000))
+# offered in the changelist sidebar; the configured default is always included
+ADMIN_SEARCH_RESULT_LIMIT_CHOICES = sorted({
+    int(choice) for choice in
+    (getattr(_admin_search_limit, "choices", None) or [100, 1000, 10000])
+} | {ADMIN_SEARCH_RESULT_LIMIT})
+
+# ***********************************************************************
 # * Django Ninja Configuration
 # ***********************************************************************
 
