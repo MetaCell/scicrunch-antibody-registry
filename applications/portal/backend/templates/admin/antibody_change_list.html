@@ -1,0 +1,47 @@
+{% extends "admin/change_list.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  {# after block.super so its rules override the stock changelists.css #}
+  <link rel="stylesheet" href="{% static 'portal/css/admin_changelist.css' %}">
+{% endblock %}
+
+{% comment %}
+The result limit bounds the search, it does not filter the data, so it is not a
+ListFilter: in the sidebar it rendered as "By result limit", which reads as a
+facet over a field the antibodies do not have. It belongs with the search box
+it applies to. See api.admin.AntibodyAdmin.result_limit.
+{% endcomment %}
+{% block search %}
+  {{ block.super }}
+  {% if result_limit_options %}
+    <div id="changelist-result-limit" style="padding: 8px 10px;">
+      <form method="get">
+        {% comment %}
+        Carry the rest of the query string, so changing the limit keeps the
+        search term and the status filter. cl.params has already dropped the
+        page, which is what we want: a new limit starts at page one.
+        {% endcomment %}
+        {% for pair in cl.params.items %}
+          {% if pair.0 != result_limit_var %}
+            <input type="hidden" name="{{ pair.0 }}" value="{{ pair.1 }}">
+          {% endif %}
+        {% endfor %}
+        <label for="result-limit-select">{% translate "Limit results to" %}</label>
+        <select name="{{ result_limit_var }}" id="result-limit-select">
+          {% for option in result_limit_options %}
+            <option value="{{ option.value }}"{% if option.selected %} selected{% endif %}>{{ option.label }}</option>
+          {% endfor %}
+        </select>
+        {# the select submits itself; the button is the no-javascript path #}
+        <noscript><input type="submit" value="{% translate 'Apply' %}"></noscript>
+      </form>
+    </div>
+    <script>
+      document.getElementById("result-limit-select").addEventListener("change", function () {
+        this.form.submit();
+      });
+    </script>
+  {% endif %}
+{% endblock %}

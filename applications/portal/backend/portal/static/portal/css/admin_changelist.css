@@ -1,0 +1,28 @@
+/*
+    Changelist tweaks on top of Django's stock admin theme, linked by
+    templates/admin/antibody_change_list.html after the stock stylesheets.
+
+    The antibody changelist packs many dense columns; Django's default nowrap
+    headers and cells force the table wider than the screen and cut data off.
+    Capping cell width and letting text wrap keeps every column readable.
+
+    Keep this file to small overrides. Full copies of Django's admin CSS
+    shadowing the stock files (the pre-2026-08 approach) freeze the admin's
+    markup assumptions at one Django version and break the layout on upgrade.
+*/
+
+#changelist table td,
+#changelist table th {
+    max-width: 5em;
+    overflow: hidden;
+    word-wrap: break-word;
+}
+
+#changelist table .nowrap {
+    white-space: normal;
+}
+
+/* same selector as the stock rule; this file loads later, so it wins */
+#changelist table thead th {
+    white-space: normal;
+}

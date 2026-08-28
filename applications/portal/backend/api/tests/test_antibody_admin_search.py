@@ -10,7 +10,9 @@ from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase, override_settings
 
-from ..admin import AntibodyAdmin, ResultLimitFilter
+from cloudharness.middleware import _authentication_token
+
+from ..admin import AntibodyAdmin
 from ..models import STATUS, Antibody, Vendor
 
 
@@ -185,23 +187,73 @@ class AdminResultLimitTests(TestCase):
     @override_settings(ADMIN_SEARCH_RESULT_LIMIT_ENABLED=True,
                        ADMIN_SEARCH_RESULT_LIMIT=3,
                        ADMIN_SEARCH_RESULT_LIMIT_CHOICES=[3, 5])
-    def test_sidebar_offers_the_choices_and_marks_the_default(self):
-        changelist = self.admin.get_changelist_instance(self.request())
-        limit_filter = next(f for f in changelist.get_filters(self.request())[0]
-                            if isinstance(f, ResultLimitFilter))
-        rendered = list(limit_filter.choices(changelist))
-        self.assertEqual([c["display"] for c in rendered],
+    def test_dropdown_offers_the_choices_and_marks_the_default(self):
+        options = self.admin.result_limit_options(self.request())
+        self.assertEqual([o["label"] for o in options],
                          ["3", "5", "No limit (slow)"])
-        self.assertEqual([c["display"] for c in rendered if c["selected"]], ["3"])
+        self.assertEqual([o["label"] for o in options if o["selected"]], ["3"])
 
     @override_settings(ADMIN_SEARCH_RESULT_LIMIT_ENABLED=True,
                        ADMIN_SEARCH_RESULT_LIMIT=3,
                        ADMIN_SEARCH_RESULT_LIMIT_CHOICES=[3, 5])
-    def test_sidebar_marks_the_selected_choice(self):
-        request = self.request(result_limit="5")
-        changelist = self.admin.get_changelist_instance(request)
-        limit_filter = next(f for f in changelist.get_filters(request)[0]
-                            if isinstance(f, ResultLimitFilter))
-        self.assertEqual(
-            [c["display"] for c in limit_filter.choices(changelist) if c["selected"]],
-            ["5"])
+    def test_dropdown_marks_the_chosen_value(self):
+        options = self.admin.result_limit_options(self.request(result_limit="5"))
+        self.assertEqual([o["label"] for o in options if o["selected"]], ["5"])
+
+    @override_settings(ADMIN_SEARCH_RESULT_LIMIT_ENABLED=False,
+                       ADMIN_SEARCH_RESULT_LIMIT=3)
+    def test_dropdown_marks_no_limit_when_limiting_is_disabled(self):
+        options = self.admin.result_limit_options(self.request())
+        self.assertEqual([o["label"] for o in options if o["selected"]],
+                         ["No limit (slow)"])
+
+    def test_result_limit_is_not_a_sidebar_filter(self):
+        # it bounds the search rather than filtering the data; as a
+        # SimpleListFilter it showed up as a bogus "By result limit" facet
+        changelist = self.admin.get_changelist_instance(self.request())
+        titles = [f.title for f in changelist.get_filters(self.request())[0]]
+        self.assertNotIn("result limit", titles)
+
+    def test_changelist_accepts_the_result_limit_parameter(self):
+        # nothing claims `result_limit` as a lookup any more, so the changelist
+        # would treat it as an invalid filter and bounce to ?e=1
+        changelist = self.admin.get_changelist_instance(self.request(result_limit="all"))
+        self.assertNotIn("result_limit", changelist.get_filters_params())
+
+
+class AdminChangeListRenderTests(TestCase):
+    """The dropdown has to actually reach the rendered changelist page."""
+
+    def setUp(self):
+        # earlier tests in the suite leave a bearer token in this ContextVar,
+        # and set_authentication_token() ignores falsy values so it cannot be
+        # cleared through the public helper. Left set, BearerTokenMiddleware
+        # tries to fetch keycloak's public key to decode it and the request dies
+        _authentication_token.set(None)
+        self.client.force_login(
+            User.objects.create_superuser("admin", "a@example.com", "pw"))
+
+    @override_settings(ADMIN_SEARCH_RESULT_LIMIT_ENABLED=True,
+                       ADMIN_SEARCH_RESULT_LIMIT=1000,
+                       ADMIN_SEARCH_RESULT_LIMIT_CHOICES=[100, 1000])
+    def test_changelist_renders_the_dropdown_and_keeps_import_export(self):
+        response = self.client.get("/admin/api/antibody/")
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn('id="result-limit-select"', body)
+        self.assertIn('<option value="1000" selected>1,000</option>', body)
+        self.assertIn('<option value="all">No limit (slow)</option>', body)
+        # the sidebar facet is gone
+        self.assertNotIn("By result limit", body)
+        # import_export still wraps our template, so its buttons survive
+        self.assertIn("import", body.lower())
+
+    @override_settings(ADMIN_SEARCH_RESULT_LIMIT_ENABLED=True,
+                       ADMIN_SEARCH_RESULT_LIMIT=1000,
+                       ADMIN_SEARCH_RESULT_LIMIT_CHOICES=[100, 1000])
+    def test_choosing_a_limit_is_not_rejected_as_a_bad_filter(self):
+        response = self.client.get(
+            "/admin/api/antibody/", {"result_limit": "100", "q": "anything"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('<option value="100" selected>100</option>',
+                      response.content.decode())

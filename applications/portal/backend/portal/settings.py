@@ -139,8 +139,7 @@ DATABASES["default"]["TEST"] = {
 # Remove any duplicates that might come from cloudharness_django.settings
 INSTALLED_APPS = list(dict.fromkeys(INSTALLED_APPS + ["api", "portal"]))
 
-# override django admin base template with a local template
-# to add some custom styling
+# local overrides of admin templates (change form buttons, import form)
 TEMPLATES[0]["DIRS"] = [BASE_DIR / "templates"]
 
 # Static files (CSS, JavaScript, Images)
@@ -148,11 +147,6 @@ MEDIA_ROOT = PERSISTENT_ROOT
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_URL = "/media/"
 STATIC_URL = "/static/"
-
-# Ensure portal app static files are collected first (override Django defaults)
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "portal/static"),
-]
 
 if not os.path.exists(MEDIA_ROOT):
     os.makedirs(MEDIA_ROOT)

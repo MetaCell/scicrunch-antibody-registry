@@ -2,6 +2,7 @@ from functools import cache
 
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.admin.views.main import ChangeList
 from django.contrib.admin.widgets import ManyToManyRawIdWidget, FilteredSelectMultiple
 from django.contrib.postgres.search import SearchQuery
 from django.forms import CheckboxSelectMultiple
@@ -55,38 +56,28 @@ def _strip_antibody_id_prefixes(term: str) -> str:
     return candidate
 
 
-class ResultLimitFilter(admin.SimpleListFilter):
+RESULT_LIMIT_VAR = "result_limit"
+NO_RESULT_LIMIT = "all"
+
+
+class ResultLimitChangeList(ChangeList):
     """
-    Sidebar control for how many rows a changelist search may return.
+    ChangeList that tolerates the result-limit control in the query string.
 
-    Not a filter in the usual sense -- queryset() hands the rows straight back
-    and AntibodyAdmin.bound_to_result_limit does the work. SimpleListFilter is
-    what earns it a place in the admin sidebar without a custom changelist
-    template, and it also stops the admin rejecting `result_limit` in the query
-    string as an unrecognised lookup.
+    The limit bounds the search, it does not filter the data, so it is not a
+    ListFilter: in the sidebar it renders as "By result limit", which reads as
+    a facet over a field the antibodies do not have. It is a dropdown by the
+    search box instead (templates/admin/antibody_change_list.html).
+
+    A changelist rejects query-string parameters that no filter claims and
+    bounces to ?e=1, so the parameter is dropped from the lookups here;
+    AntibodyAdmin.result_limit reads it straight off the request.
     """
-    title = "result limit"
-    parameter_name = "result_limit"
-    NO_LIMIT = "all"
 
-    def lookups(self, request, model_admin):
-        return [(str(n), f"{n:,}") for n in model_admin.result_limit_choices(request)] \
-            + [(self.NO_LIMIT, "No limit (slow)")]
-
-    def choices(self, changelist):
-        # deliberately not django's default "All" first entry: an unset filter
-        # means the configured default, which is a limit, not the absence of one
-        default = changelist.model_admin.result_limit(self.request)
-        selected = self.value() or (self.NO_LIMIT if default is None else str(default))
-        for value, title in self.lookup_choices:
-            yield {
-                "selected": value == selected,
-                "query_string": changelist.get_query_string({self.parameter_name: value}),
-                "display": title,
-            }
-
-    def queryset(self, request, queryset):
-        return queryset
+    def get_filters_params(self, params=None):
+        lookup_params = super().get_filters_params(params)
+        lookup_params.pop(RESULT_LIMIT_VAR, None)
+        return lookup_params
 
 
 class VerboseManyToManyRawIdWidget(ManyToManyRawIdWidget):
@@ -162,6 +153,9 @@ antibody_fields_shown = (
 class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
 
     change_form_template = "admin/antibody_change_form.html"
+    # adds the result-limit dropdown to the search toolbar; import_export
+    # picks this up as its base template, so IMPORT/EXPORT survive
+    change_list_template = "admin/antibody_change_list.html"
 
     # Import/Export module settings
     import_template_name = "admin/import_export/custom_import_form.html"
@@ -169,7 +163,7 @@ class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
     resource_classes = [AntibodyResource]
 
     # list display settings
-    list_filter = ("status", ResultLimitFilter)
+    list_filter = ("status",)
     list_display = (id_with_ab, "accession", "ab_name", "submitter_name", "citation", "status", "vendor", "catalog_num", "insert_time")
     # only turns the search box on and documents what is searched: the matching
     # itself is routed by get_search_results below, not by django's default
@@ -275,21 +269,40 @@ class AntibodyAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
         return self.bound_to_result_limit(
             request, queryset.filter(antibodysearch__search_vector=SearchQuery(term))), False
 
+    def get_changelist(self, request, **kwargs):
+        return ResultLimitChangeList
+
+    def changelist_view(self, request, extra_context=None):
+        return super().changelist_view(request, {
+            **(extra_context or {}),
+            "result_limit_var": RESULT_LIMIT_VAR,
+            "result_limit_options": self.result_limit_options(request),
+        })
+
+    def result_limit_options(self, request):
+        """The result-limit dropdown, rendered next to the search box."""
+        current = self.result_limit(request)
+        selected = NO_RESULT_LIMIT if current is None else str(current)
+        options = [(str(n), f"{n:,}") for n in self.result_limit_choices(request)]
+        options.append((NO_RESULT_LIMIT, "No limit (slow)"))
+        return [{"value": value, "label": label, "selected": value == selected}
+                for value, label in options]
+
     def result_limit_choices(self, request):
-        """Row limits offered in the changelist sidebar."""
+        """Row limits offered in the dropdown."""
         return settings.ADMIN_SEARCH_RESULT_LIMIT_CHOICES
 
     def result_limit(self, request):
         """
-        Rows this search may return: the curator's sidebar choice, else the
-        configured default, or None for an uncapped (slow, exact) search.
+        Rows this search may return: the curator's choice, else the configured
+        default, or None for an unbounded (slow, exact) search.
         """
         default = (settings.ADMIN_SEARCH_RESULT_LIMIT
                    if settings.ADMIN_SEARCH_RESULT_LIMIT_ENABLED else None)
-        chosen = request.GET.get(ResultLimitFilter.parameter_name)
+        chosen = request.GET.get(RESULT_LIMIT_VAR)
         if chosen is None:
             return default
-        if chosen == ResultLimitFilter.NO_LIMIT:
+        if chosen == NO_RESULT_LIMIT:
             return None
         try:
             chosen = int(chosen)
