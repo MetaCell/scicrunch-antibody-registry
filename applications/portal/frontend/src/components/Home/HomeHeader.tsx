@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 import Pluralize from "pluralize";
+import { formatTotalElements } from "../../utils/antibody";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import {
   Alert,
@@ -101,7 +102,7 @@ const TableHeader = (props: TableHeaderProps) => {
                             color: "common.white"
                           }}
                         >
-                          <span className="total-elements">{totalElements && totalElements?.toLocaleString('en-US')}</span> {Pluralize("antibody",totalElements)}
+                          <span className="total-elements">{totalElements && formatTotalElements(totalElements)}</span> {Pluralize("antibody",totalElements)}
                           <span className="active-search">{activeSearch && ` for "${activeSearch}"` }</span>
                         </Typography>
                       </Box>

@@ -64,7 +64,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
         Member.objects.create(kc_id=self.other_user_id, user=self.other_user)
         
         # Mock user ID
-        self.get_user_id_patcher = patch('api.mappers.mapping_utils.get_current_user_pk')
+        self.get_user_id_patcher = patch('api.helpers.data_filtering.get_current_user_pk')
         self.mock_get_user_id = self.get_user_id_patcher.start()
         self.mock_get_user_id.return_value = self.test_user.pk
 
@@ -382,7 +382,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
 
     def test_url_visible_only_to_owner_when_show_link_disabled(self):
         """The antibody URL is returned to its owner even when show_link is False"""
-        from api.mappers.mapping_utils import get_url_if_permitted
+        from api.helpers.data_filtering import get_url_if_permitted
         ab = Antibody.objects.create(
             ab_id="11001",
             ab_name="Link Test",
@@ -397,7 +397,7 @@ class AuthenticationAuthorizationTestCase(TestCase):
 
     def test_url_inherits_vendor_show_link_when_unset(self):
         """An unset show_link falls back to the vendor default, for both url and showLink"""
-        from api.mappers.mapping_utils import get_url_if_permitted
+        from api.helpers.data_filtering import get_url_if_permitted
 
         linking_vendor = Vendor.objects.create(name="Linking Vendor", show_link=True)
         hiding_vendor = Vendor.objects.create(name="Hiding Vendor", show_link=False)

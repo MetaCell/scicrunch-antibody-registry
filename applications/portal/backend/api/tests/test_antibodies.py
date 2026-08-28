@@ -45,9 +45,9 @@ class AntibodiesTestCase(TestCase):
         self.user_id = "66a9dd54-2214-4ed7-b4f8-daa5bf3c9a79"
         Member.objects.create(kc_id=self.user_id, user=self.test_user)
         
-        # Mock the function in mapping_utils which is used by schema serialization
+        # Mock the function in api.helpers.data_filtering which schema serialization uses
         print("DEBUG: Setting up mocks")
-        self.get_user_id_mapping_patcher = patch('api.mappers.mapping_utils.get_current_user_pk')
+        self.get_user_id_mapping_patcher = patch('api.helpers.data_filtering.get_current_user_pk')
         self.mock_get_user_id_mapping = self.get_user_id_mapping_patcher.start()
         self.mock_get_user_id_mapping.return_value = self.test_user.pk
         print("DEBUG: setUp complete")

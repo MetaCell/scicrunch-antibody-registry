@@ -1,6 +1,6 @@
 import { GridColumnVisibilityModel } from "@mui/x-data-grid";
 import { Antibody } from "../rest";
-import { modelType } from "../constants/constants";
+import { LIMIT_NUM_RESULTS, modelType } from "../constants/constants";
 import * as yup from "yup";
 
 export const SearchCriteriaOptions = {
@@ -126,3 +126,16 @@ export const checkIfRequestBodyIsSame = (newRequestBody, prevRequestBody) => {
   if (prevRequestBody === null) { return false }
   return JSON.stringify(newRequestBody) === JSON.stringify(prevRequestBody)
 }
+/**
+ * The backend stops counting search matches at LIMIT_NUM_RESULTS, so a total
+ * beyond it means "at least this many" rather than an exact figure: an exact
+ * count forces Postgres to visit every matching row, which took over a minute
+ * on common terms. Render those as "10,000+".
+ */
+export const isTotalCapped = (totalElements: number) =>
+  totalElements > LIMIT_NUM_RESULTS;
+
+export const formatTotalElements = (totalElements: number) =>
+  isTotalCapped(totalElements)
+    ? `${LIMIT_NUM_RESULTS.toLocaleString("en-US")}+`
+    : totalElements.toLocaleString("en-US");

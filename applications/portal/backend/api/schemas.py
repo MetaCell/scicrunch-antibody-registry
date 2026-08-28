@@ -212,7 +212,7 @@ class Antibody(AbstractAntibody, AntibodyCoreId):
     @staticmethod
     def resolve_url(obj):
         """Handle URL with permission checking"""
-        from api.mappers.mapping_utils import get_url_if_permitted
+        from api.helpers.data_filtering import get_url_if_permitted
         return get_url_if_permitted(obj)
 
     @staticmethod

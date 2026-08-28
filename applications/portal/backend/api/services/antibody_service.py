@@ -1,101 +1,39 @@
-
 from functools import lru_cache
-from typing import List
+from typing import List, Tuple
 
 import dateutil
-from django.core.paginator import Paginator
 from django.utils.timezone import now, datetime
-from django.db.models import F
-from api.mappers.antibody_mapper import AntibodyMapper
-from api.models import STATUS, Antibody, AntibodyStats, CommercialType
-from api.utilities.exceptions import DuplicatedAntibody, AntibodyDataException
+from api.models import STATUS, Antibody, AntibodyStats
 from cloudharness import log
-from openapi.models import AddAntibody as AddAntibodyDTO
-from openapi.models import UpdateAntibody as UpdateAntibodyDTO, AntibodyStatusEnum
-from openapi.models import Antibody as AntibodyDTO, PaginatedAntibodies
-from api.utilities.functions import check_if_status_exists_or_curated
 from api.repositories.filtering_utils import convert_filters_to_q
-from api.utilities.cache import ttl_cache
+from api.utilities.functions import strip_ab_from_id
 
-antibody_mapper = AntibodyMapper()
 
-@lru_cache
-def get_antibodies(page: int = 1, size: int = 10, date_from: datetime = None, date_to: datetime = None, status: str = None) -> PaginatedAntibodies:
+def get_antibody_queryset(antibody_id: int, status=STATUS.CURATED, filters=None, accession=None):
+    """
+    Antibody model instances for an AB id, with the related objects the API
+    response schema needs. Endpoints must serialize model instances: the schema
+    resolves `url` and `showLink` off the model, and silently returns null for
+    both when handed anything else.
+    """
+    antibody = Antibody.objects.filter(ab_id=antibody_id, status=status).filter(convert_filters_to_q(filters))
+    if not antibody.exists() and accession:
+        antibody = Antibody.objects.filter(accession=accession, status=status).filter(convert_filters_to_q(filters))
+    return antibody.select_related("vendor", "source_organism").prefetch_related("species").prefetch_related("applications")
+
+
+def antibodies_by_ab_id(ab_id_query: str, page: int = 1, size: int = 10, filters=None) -> Tuple[List[Antibody], int]:
+    """
+    Antibodies for an "AB_<id>" query, resolved by exact lookup on
+    ab_id/accession. Returns (the requested page of matches, total matches).
+    """
     try:
-        query = Antibody.objects.filter(status=check_if_status_exists_or_curated(status))
-        if date_from:
-            query = query.filter(lastedit_time__gte=date_from)
-        if date_to:
-            query = query.filter(lastedit_time__lte=date_to)
-
-        p = Paginator(query.select_related("vendor", "source_organism").prefetch_related("species").prefetch_related("applications").order_by("-ix"), size)
-        items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
-
-    except Antibody.DoesNotExist:
-        return PaginatedAntibodies(page=int(page), totalElements=0, items=[])
-    return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
-
-def get_user_antibodies(user, page: int = 1, size: int = 10) -> PaginatedAntibodies:
-    p = Paginator(Antibody.objects.filter(
-        owner=user).order_by("-ix"), size)
-    items = [antibody_mapper.to_dto(ab) for ab in p.get_page(page)]
-    return PaginatedAntibodies(page=int(page), totalElements=p.count, items=items)
-
-
-def create_antibody(body: AddAntibodyDTO, user) -> AntibodyDTO:
-    antibody = antibody_mapper.from_dto(body)
-    antibody.owner = user
-    antibody.save()
-
-    if antibody.accession != antibody.ab_id:
-        raise DuplicatedAntibody(antibody_mapper.to_dto(antibody))
-
-    return antibody_mapper.to_dto(antibody)
-
-
-def get_antibody(antibody_id: int, status=STATUS.CURATED, filters=None, accession=None) -> List[AntibodyDTO]:
-    try:
-        antibody = Antibody.objects.filter(ab_id=antibody_id, status=status).filter(convert_filters_to_q(filters))
-        if not antibody.exists() and accession:
-            antibody = Antibody.objects.filter(accession=accession, status=status).filter(convert_filters_to_q(filters))
-        antibody = antibody.select_related("vendor", "source_organism").prefetch_related("species").prefetch_related("applications")
-        return [antibody_mapper.to_dto(a) for a in antibody]
-    except Antibody.DoesNotExist:
-        return None
-
-
-def get_antibody_by_accession(accession: int) -> List[AntibodyDTO]:
-    try:
-        return antibody_mapper.to_dto(
-            Antibody.objects.select_related("vendor", "source_organism")
-            .prefetch_related("species")
-            .prefetch_related("applications")
-            .get(accession=accession)
-        )
-    except Antibody.DoesNotExist:
-        raise
-    except Antibody.MultipleObjectsReturned:
-        log.warning(f"Multiple antibodies with accession {accession}")
-        raise
-
-
-def update_antibody(user, antibody_accession_number: str, body: UpdateAntibodyDTO) -> AntibodyDTO:
-    if getattr(body, 'vendorName', None) is not None:
-        raise AntibodyDataException(
-            "Vendor name cannot be updated", 'vendorName', None)
-    if getattr(body, 'catalogNum', None) is not None:
-        raise AntibodyDataException(
-            "Catalog number cannot be updated", 'catalogNum', None)
-    current_antibody = Antibody.objects.get(
-        accession=antibody_accession_number, owner=user)
-    updated_antibody = antibody_mapper.from_dto(AntibodyDTO(**body.__dict__, abId=current_antibody.ab_id,
-                                                            ix=current_antibody.ix,
-                                                            catalogNum=current_antibody.catalog_num,
-                                                            vendorName=current_antibody.vendor.name,
-                                                            insertTime=current_antibody.insert_time))
-    updated_antibody.status = STATUS.QUEUE
-    updated_antibody.save()
-    return antibody_mapper.to_dto(updated_antibody)
+        ab_id = int(strip_ab_from_id(ab_id_query))
+    except ValueError:  # "AB_" followed by something that is not an id
+        return [], 0
+    antibodies = list(get_antibody_queryset(ab_id, filters=filters, accession=ab_id))
+    first = max(page - 1, 0) * size  # page < 1 is treated as the first page
+    return antibodies[first:first + size], len(antibodies)
 
 
 def delete_antibody(antibody_id: str) -> None:

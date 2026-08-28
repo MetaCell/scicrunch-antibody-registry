@@ -62,7 +62,7 @@ class ExportEndpointsTestCase(TestCase):
         Member.objects.create(kc_id=self.admin_id, user=self.admin_user)
         
         # Mock user ID for serialization
-        self.get_user_id_patcher = patch('api.mappers.mapping_utils.get_current_user_pk')
+        self.get_user_id_patcher = patch('api.helpers.data_filtering.get_current_user_pk')
         self.mock_get_user_id = self.get_user_id_patcher.start()
         self.mock_get_user_id.return_value = self.test_user.pk
 

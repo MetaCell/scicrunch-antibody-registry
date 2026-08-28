@@ -17,7 +17,6 @@ from api.helpers import CamelCaseRouter
 from api.models import Application, Specie, Vendor
 from api.repositories import search_repository, filter_repository
 from api.repositories.filtering_utils import is_user_scoped
-from api.services import antibody_service
 
 router = CamelCaseRouter()
 
@@ -42,16 +41,8 @@ def fts_antibodies(
         if request.user.is_anonymous:
             if request.user.is_anonymous:
                 raise HttpError(401, "Request not allowed")
-    if q.startswith("AB_"):
-        try:
-            ab_id = int(q.replace("AB_", ""))
-            antibodies = antibody_service.get_antibody(ab_id, accession=ab_id)
-            return dict(page=int(page), totalElements=len(antibodies), items=antibodies)
-        except Exception as e:
-            return dict(page=int(page), totalElements=0, items=[])
-    
-    from api.services.search_service import fts_antibodies
-    antibodies, count = fts_antibodies(page, size, q)
+    from api.services.search_service import search_antibodies
+    antibodies, count = search_antibodies(page, size, q)
     return dict(page=int(page), totalElements=count, items=antibodies)
 
 

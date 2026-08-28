@@ -60,7 +60,7 @@ def test_url_visibility():
     Member.objects.create(kc_id=user_id, user=test_user)
     
     # Mock the mapping utils function for schema serialization
-    with patch('api.mappers.mapping_utils.get_current_user_pk') as mock_get_user_id:
+    with patch('api.helpers.data_filtering.get_current_user_pk') as mock_get_user_id:
         mock_get_user_id.return_value = test_user.pk
         
         # Create antibody

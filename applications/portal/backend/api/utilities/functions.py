@@ -24,7 +24,9 @@ def remove_empty_string(str_list) -> List[str]:
 
 
 def strip_ab_from_id(ab_id: str) -> str:
-    return ab_id if not ab_id.startswith(prefix) else ab_id.strip(prefix)
+    # removeprefix, not strip: strip() takes a character set and would also eat
+    # a trailing "A", "B" or "_"
+    return ab_id.removeprefix(prefix)
 
 
 def extract_base_url(url: Union[str, URLField]) -> str:
