@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { getSearchAntibodies, getAntibodies, getUserAntibodies, getFilteredAndSearchedAntibodies } from '../../services/AntibodiesService'
 import SearchContext from './SearchContext'
 import { getDataInfo } from "../../services/InfoService";
-import { SEARCH_MODES, PAGE_SIZE, LIMIT_NUM_RESULTS, modelType } from '../../constants/constants';
+import { SEARCH_MODES, PAGE_SIZE, modelType } from '../../constants/constants';
 
 // MUI
 import {
@@ -10,7 +10,7 @@ import {
 } from "@mui/x-data-grid";
 import { structureFiltersAndSorting } from '../../helpers/antibody';
 import { Antibody } from '../../rest';
-import { checkIfRequestBodyIsSame, isFilterAndSortModelEmpty, mapColumnToBackendModel } from '../../utils/antibody';
+import { checkIfRequestBodyIsSame, isFilterAndSortModelEmpty, mapColumnToBackendModel, searchWarningMessage } from '../../utils/antibody';
 
 export interface SearchResult {
   loader: boolean;
@@ -36,7 +36,6 @@ const SearchState = (props) => {
   const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
   const [filterRequestBody, setFilterRequestBody] = useState<any>(null)
-  const [warningMessage, setWarningMessage] = useState('')
 
   const [searchState, setSearch] = useState<SearchResult>({
     loader: false,
@@ -78,7 +77,7 @@ const SearchState = (props) => {
   
 
 
-  const fetchFilteredAndSearchedAntibodies = useCallback(async (antibodyFilters, pageNumber = 1, query: string, sortmodel) => {
+  const fetchFilteredAndSearchedAntibodies = useCallback(async (antibodyFilters, pageNumber = 1, query: string) => {
     setSearch((prev) => ({
       ...prev,
       loader: true
@@ -95,15 +94,6 @@ const SearchState = (props) => {
         searchedAntibodies: filteredAntibodies.items,
         error: false
       })
-
-      // if the totalElement is more than the limit, then sorting is not applied in the Backend. 
-      // Hence we show the warning message - saying to narrow down the search to apply sorting. 
-      // Show warning only if the user has applied sorting.
-      if (filteredAntibodies.totalElements > LIMIT_NUM_RESULTS && sortmodel.length > 0) {
-        setWarningMessage("Please narrow down the search or filter to apply sorting.")
-      } else {
-        setWarningMessage('')
-      }
     } catch (error: any) {
       setSearch({
         ...searchStateRef.current,
@@ -115,7 +105,7 @@ const SearchState = (props) => {
       })
       console.error(error)
     }
-  }, [setWarningMessage]);
+  }, []);
 
   const fetchSearchedAntibodies = useCallback(async (pageNumber = 1, query: string) => {
     setSearch((prev) => ({
@@ -250,7 +240,7 @@ const SearchState = (props) => {
       );
 
       if (!checkIfRequestBodyIsSame(requestBody, filterRequestBody)) {
-        fetchFilteredAndSearchedAntibodies(requestBody, pageNumber, query, sortmodel || sortModelRef.current);
+        fetchFilteredAndSearchedAntibodies(requestBody, pageNumber, query);
         setFilterRequestBody(requestBody);
       }
     } else {
@@ -290,6 +280,12 @@ const SearchState = (props) => {
         console.error(err)
       })
   }
+  // derived rather than set inside each fetch: totalElements is written from
+  // five different paths, and any one of them forgetting to refresh -- or to
+  // clear -- the banner would leave a stale warning on screen
+  const warningMessage = searchWarningMessage(
+    searchState.totalElements, sortModel.length > 0)
+
   return (
     <SearchContext.Provider value={{
       loader: searchState.loader,
@@ -307,8 +303,7 @@ const SearchState = (props) => {
       setFilterModel,
       sortModel,
       setSortModel,
-      warningMessage,
-      setWarningMessage
+      warningMessage
     }}>
       {props.children}
     </SearchContext.Provider>

@@ -4,9 +4,10 @@ import { ChevronLeft, ChevronRight } from '@mui/icons-material'
 import { PAGE_SIZE } from "../../constants/constants";
 import { debounce } from 'lodash';
 import SearchContext from "../../context/search/SearchContext";
+import { formatTotalElements } from "../../utils/antibody";
 
 export const TablePaginatedFooter = () => {
-  const { totalElements, currentPage, setCurrentPage } = useContext(SearchContext);
+  const { totalElements, currentPage=0, setCurrentPage=() => {} } = useContext(SearchContext);
 
   const handleNextPage = debounce(() => {
     setCurrentPage(currentPage + 1)
@@ -18,12 +19,12 @@ export const TablePaginatedFooter = () => {
 
   const startPageCount = totalElements ? (currentPage - 1) * PAGE_SIZE + 1 : 0;
   const endPageCount = totalElements ? (currentPage * PAGE_SIZE > totalElements ? totalElements : currentPage * PAGE_SIZE) : 0;
-  return (
+  return currentPage && totalElements ? (
     <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", padding: '0.75rem 1.5rem 1rem 1.5rem' }}>
       <div>
         {startPageCount}-
         {endPageCount} {' '}
-        of {totalElements} results
+        of {formatTotalElements(totalElements)} results
       </div>
       <div>
         <IconButton style={{ cursor: 'pointer' }} onClick={() => handlePrevPage()} disabled={currentPage <= 1}>
@@ -35,5 +36,5 @@ export const TablePaginatedFooter = () => {
 
       </div>
     </div>
-  )
+  ) : null;
 }

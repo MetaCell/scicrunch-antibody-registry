@@ -144,3 +144,36 @@ export const formatTotalElements = (totalElements: number) =>
   isTotalCapped(totalElements)
     ? `${LIMIT_NUM_RESULTS.toLocaleString("en-US")}+`
     : totalElements.toLocaleString("en-US");
+
+/**
+ * The banner shown above the results when the search hit one of the backend's
+ * two large-result-set behaviours.
+ *
+ * They are separate conditions and can both apply at once, so the sentences
+ * compose: the cap is an equality on the sentinel total, while sorting is
+ * skipped for any result set over LIMIT_NUM_RESULTS whether or not the count
+ * itself was capped. Returns "" when neither applies.
+ */
+export const searchWarningMessage = (
+  totalElements: number,
+  isSorted: boolean
+): string => {
+  const sentences: string[] = [];
+  if (isTotalCapped(totalElements)) {
+    sentences.push(
+      `To keep this search fast, we're showing the first ${LIMIT_NUM_RESULTS.toLocaleString(
+        "en-US"
+      )} matches.`
+    );
+  }
+  if (totalElements > LIMIT_NUM_RESULTS && isSorted) {
+    sentences.push("Sorting isn't applied to result sets this large.");
+  }
+  if (!sentences.length) {
+    return "";
+  }
+  sentences.push(
+    "If you don't see what you're looking for, try a more specific search term or add a filter to narrow things down."
+  );
+  return sentences.join(" ");
+};
